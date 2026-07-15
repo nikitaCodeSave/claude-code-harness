@@ -174,12 +174,14 @@ model release → re-test every "under Opus <version>" invariant. Single anecdot
 updates (principle 6). On every version bump that touches `references/project-docs/*`, update
 their `shipped-by:` headers to the new version — Audit's re-sync check keys on them.
 
-**Release mechanics are scripted, not manual** — run `~/.claude/scripts/kit-release.sh <version>`
-(syncs `plugin.json` + `marketplace.json`, verifies shipped-by stamps, stages, prints the
+**Release mechanics are scripted, not manual** — run `scripts/release.sh <version>` from the
+repo root (writes `plugin.json`'s `version` — the sole source of truth and update cache key,
+never duplicated in the marketplace entry — verifies shipped-by stamps, stages, prints the
 commit/tag/push finish). Two manual releases in a row shipped desynced manifests and
 uncommitted content (external audit 2026-07-15), so the ritual is mechanical now. A release
-exists only when committed, tagged **and pushed**: consumers install from origin/main, and
-`plugin.json`'s `version` is the update cache key — without a bump users never receive changes.
+exists only when committed, tagged **and pushed**: consumers install from origin/main via
+`/plugin marketplace add nikitaCodeSave/claude-code-harness`, and without a `version` bump
+users never receive changes.
 When the operator's global baseline (`~/.claude/CLAUDE.md` §1–8) gains a rule, re-distill
 `references/practice-baseline.md` in the same release — it is a snapshot and drifts silently otherwise.
 

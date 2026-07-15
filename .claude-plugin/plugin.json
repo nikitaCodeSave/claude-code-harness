@@ -1,12 +1,22 @@
 {
-  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "claude-code-harness",
-  "version": "1.12.2",
+  "version": "1.13.0",
   "description": "Designs, bootstraps, audits, and extends a Claude Code harness — the .claude/ directory and root CLAUDE.md. Opinion: under a capable model, less harness yields more productivity.",
   "author": {
     "name": "nikitaCodeSave",
     "email": "nickbalakirev@gmail.com"
   },
+  "homepage": "https://github.com/nikitaCodeSave/claude-code-harness",
   "repository": "https://github.com/nikitaCodeSave/claude-code-harness",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "harness",
+    "plugin-development",
+    "skills",
+    "subagents",
+    "bootstrap",
+    "audit"
+  ]
 }

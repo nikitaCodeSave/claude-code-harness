@@ -9,10 +9,11 @@
 !/commands/
 !/references/
 
-# --- Distribution ---
+# --- Distribution / maintenance tooling ---
 !/README.md
 !/LICENSE
 !/.gitignore
+!/scripts/
 
 # --- Dev harness for developing THIS plugin (curated only) ---
 !/.claude/

@@ -36,8 +36,8 @@ argument-hint: "<scope: фича/milestone + где спека; опционал
 `general-purpose` и заставляй его загрузить роль с диска первой строкой prompt'а.
 Определи `ROLE_DIR` — первый путь, в котором **есть все 3 role-файла** (проверяй файлы,
 не существование каталога — каталог `agents/` с посторонними файлами не считается):
-1. `${CLAUDE_PLUGIN_ROOT}/agents/` — если команда доставлена плагином;
-2. `~/.claude/skills/claude-code-harness/agents/` — git-clone глобального слоя (дефолт);
+1. `${CLAUDE_PLUGIN_ROOT}/agents/` — если команда доставлена плагином (дефолт);
+2. `~/.claude/skills/claude-code-harness/agents/` — @skills-dir разработка/symlink мейнтейнера;
 3. `.claude/agents/` в корне проверяемого проекта — если роли вкопированы локально.
 
 Запусти ТРЕМЯ параллельными вызовами Agent (один блок). В fallback-режиме первой

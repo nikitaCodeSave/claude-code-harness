@@ -12,6 +12,7 @@
 # --- Distribution / maintenance tooling ---
 !/README.md
 !/LICENSE
+!/CHANGELOG.md
 !/.gitignore
 !/scripts/
 

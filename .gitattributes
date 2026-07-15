@@ -1,0 +1,6 @@
+# Ship shell + python with LF line endings so they run under bash on any OS
+# checkout. A CRLF shebang (`#!/usr/bin/env bash\r`) breaks execution on
+# Windows / Git Bash — force LF on the executable launcher and all scripts.
+plugins/devlog/bin/devlog-reindex text eol=lf
+*.py text eol=lf
+*.sh text eol=lf

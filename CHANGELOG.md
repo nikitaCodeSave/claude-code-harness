@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.14.0] — 2026-07-15
+
+Multi-plugin marketplace: the harness kit gains a `devlog` companion so the continuity
+guidance it already ships becomes runnable for the public, without a second copy of the
+maintainer's global skill.
+
+### Added
+- **`devlog` companion plugin** (`plugins/devlog/`) — a `/devlog:devlog` skill plus a
+  `devlog-reindex` command (shipped in `bin/`, on the Bash tool's `PATH` when enabled) that
+  regenerates `.claude/devlog/{index.json,tldr.md}` from markdown entries. Install with
+  `/plugin install devlog@claude-code-harness`. Verified against Claude Code 2.1.210
+  (`claude plugin validate` + `--plugin-dir` load + the script's own pytest suite).
+
+### Changed
+- **Repository restructured into the idiomatic multi-plugin layout** — the harness plugin
+  moved from the repo root to `plugins/harness/`; the marketplace manifest stays at the root
+  and now lists both plugins with explicit `./plugins/<name>` sources (the `metadata.pluginRoot`
+  shorthand is rejected by `claude plugin validate`, so paths are spelled out). The install
+  command is unchanged — `claude-code-harness@claude-code-harness` resolves by name, not path.
+- `scripts/release.sh` and the dogfood symlink re-pointed to the new `plugins/harness/` paths;
+  `.gitignore` whitelist updated for the `plugins/` tree.
+
 ## [1.13.0] — 2026-07-15
 
 First release from the standalone repository.

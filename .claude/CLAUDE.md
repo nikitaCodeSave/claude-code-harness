@@ -6,22 +6,29 @@
 ## Топология (не сломать)
 
 - Этот checkout — **source of truth**. Публичный marketplace-репо.
-- `~/.claude/skills/claude-code-harness` — **symlink сюда**; так kit догфудится
-  живьём в операторском окружении. Правки здесь видны Claude Code сразу.
+- `~/.claude/skills/claude-code-harness` — **symlink на `plugins/harness/`**; так kit
+  догфудится живьём в операторском окружении. Правки здесь видны Claude Code сразу.
+  (Симлинк указывает на подпапку плагина, а не на корень репо — топология marketplace.)
 - Лаборатория `~/PROJECTS/Harnesses-Claude` — R&D/провенанс; выводы экспериментов
   вносятся сюда как изменения плагина.
 
 ## Два разных `.claude`-неймспейса — не путать
 
-- `.claude-plugin/` — манифест **плагина** (`plugin.json`, `marketplace.json`). Это то,
-  что публикуется и ставится.
-- `.claude/` — dev-harness **этого проекта** (этот файл + `devlog/`). НЕ входит в плагин.
+- `.claude-plugin/marketplace.json` (корень) — **каталог marketplace**; манифест
+  каждого плагина — `plugins/<name>/.claude-plugin/plugin.json`. Это то, что публикуется.
+- Плагинов **два**: `plugins/harness/` (kit) и `plugins/devlog/` (continuity-компаньон;
+  автоматизация devlog'а, на которую kit ссылается). Раскладка — как в официальном
+  multi-plugin walkthrough; `source` в marketplace.json — явные `./plugins/<name>`.
+- `.claude/` — dev-harness **этого репо** (этот файл + `devlog/`). НЕ входит в плагины.
 
 ## Release
 
-1. Bump версии синхронно в `.claude-plugin/plugin.json` **и** `.claude-plugin/marketplace.json`.
-2. Devlog-запись в `.claude/devlog/`.
-3. Commit + push → подписчики получают через `/plugin update`.
+1. Bump версии в `plugins/harness/.claude-plugin/plugin.json` — **единственный** источник
+   (marketplace-запись версию НЕ несёт; `scripts/release.sh` это стережёт). devlog-плагин
+   версионируется независимо в `plugins/devlog/.claude-plugin/plugin.json`.
+2. `plugins/harness/scripts/release.sh <version>` — стейджит surface, печатает commit/tag/push.
+3. Devlog-запись в `.claude/devlog/`.
+4. Commit + push → подписчики получают через `/plugin update`.
 
 ## Инвариант
 

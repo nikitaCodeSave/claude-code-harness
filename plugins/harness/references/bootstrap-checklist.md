@@ -286,7 +286,10 @@ apps* (T1). Set up:
    at session start. **Also keep an episodic record** — a project devlog
    (`.claude/devlog/entries/`, one entry per feature/decision) or, where the project already
    keeps "what changed and why" in disciplined commit messages, lean on that: the layer is the
-   requirement, the carrier is a default, not a mandate. The episodic layer is separate from
+   requirement, the carrier is a default, not a mandate. For the runnable devlog carrier
+   (a `/devlog:devlog` skill + a `devlog-reindex` index/digest regenerator), install the
+   companion plugin from this same marketplace: `/plugin install devlog@claude-code-harness`.
+   It's optional — the layer, not the tool, is what's required. The episodic layer is separate from
    in-flight progress and is what makes state legible to the human operator, not only to the
    agent. Number sessions sequentially. **Git commit per feature** with a descriptive message. Files are the authoritative
    handoff state — they survive compaction and a fresh-session reset (which the long-running-apps

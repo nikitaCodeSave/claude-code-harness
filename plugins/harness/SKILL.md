@@ -91,8 +91,10 @@ already knows the kit):
 >   (minimal via "set up a minimal harness")
 > - "set up the long-running build kit (Phase 5)" — oracle / feature-ledger / progress for a
 >   multi-session product build
-> - `/claude-code-harness:external-audit <scope>` — in a **fresh** session: an independent
->   3-role audit of the deliverable
+> - Independent verification (fresh context, not self-recheck) — by default a **single
+>   `code-refuter`** on each silent-wrong-prone change; escalate to the full 3-role
+>   `/claude-code-harness:external-audit <scope>` in a **fresh** session only at a
+>   milestone / irreversible delivery
 > - Full lifecycle map — `references/operator-playbook.md`
 
 ## Reference map (load on demand — never preload all)

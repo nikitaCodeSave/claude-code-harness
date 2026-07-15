@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-15T20:49:35Z",
-  "entry_count": 2,
+  "generated_at": "2026-07-15T21:11:50Z",
+  "entry_count": 4,
   "entries": [
     {
       "id": 1,
@@ -41,6 +41,34 @@
       "supersedes": null,
       "path": "entries/0002-lokali-kita-harness-na-angliyskiy-devlog-yazyko-nezavisim.md",
       "preview": "Кит был локале-сплит: harness-промпты частично по-русски (/external-audit, operator-playbook, harness-evolution, footer SKILL.md), а devlog-машинерия хардкодила ## Контекст в извлечении preview — плюс path-рассинхрон audits/ (мн.ч. в команде) vs audit/ (ед.ч. в playbook). Для…"
+    },
+    {
+      "id": 3,
+      "date": "2026-07-16",
+      "title": "Reposition независимой верификации: лёгкий refute = воркхорс, 3-ролевой аудит = редкая эскалация",
+      "tags": [
+        "canon",
+        "d-cycle",
+        "verification"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0003-reposition-nezavisimoy-verifikatsii-legkiy-refute-vorkkhors.md",
+      "preview": "D-cycle-фолд из доказанной находки. Дисциплинарный текст (harness-discipline.md, лестница верификации) уже ставил лёгкий fresh-context вариант первым, но операторские поверхности переусиливали тяжёлый инструмент: operator-playbook.md §5 был целиком про 3-ролевой /external-audit…"
+    },
+    {
+      "id": 4,
+      "date": "2026-07-16",
+      "title": "Фолд «эмпирика > спека»: посылка ТЗ — тоже claim, измерь её до постройки",
+      "tags": [
+        "canon",
+        "d-cycle",
+        "verification"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0004-fold-empirika-speka-posylka-tz-tozhe-claim-izmer-ee-do-postr.md",
+      "preview": "Watch-item из того же анализа Greenplun, что и reposition (#3). Повторяющийся паттерн: измерение опровергает не только переданный факт, но и саму посылку ТЗ. Две инстанции: (1) ложный «потолок модели» — Q4/Q23 числились ceiling'ом Qwen3, детерминированный intent-guard…"
     }
   ]
 }

@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.14.2] — 2026-07-16
+
+Canon evolution — two D-cycle folds distilled from a real consumer project's usage, each verified
+against that project's on-disk evidence before folding. Prose only; no code changes. Project name
+kept out of the shipped surface (anonymized as in `evidence-base` / `practice-baseline`).
+
+### Changed
+- **Independent verification repositioned into two tiers** — the operator surfaces
+  (`operator-playbook §5` + Layer map, the `SKILL.md` handoff footer) and the discipline ladder
+  (`harness-discipline.md`) now lead with the lightweight per-change fresh-context refute (the
+  `code-refuter` role solo) as the workhorse, and frame the full 3-role `/external-audit` as the
+  rare milestone/irreversible escalation. This matches observed usage: the heavy audit ran once at
+  a milestone while the refuter role alone carried per-change verification. No new command or
+  agent — the workhorse reuses the already-shipped `code-refuter` role.
+
+### Added
+- **"The spec's own premise is a claim, not a fact"** — a new rule in `operator-playbook §3`
+  (the "claim, not fact" cluster): measure whether a requirement's assumption holds before building
+  to it; an oracle sweep can refute the requirement itself, and when it does, trust the measurement
+  over the spec.
+
 ## [1.14.1] — 2026-07-15
 
 Locale standardization and unified versioning. The kit's shipped **prompts** are now

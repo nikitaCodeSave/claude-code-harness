@@ -14,7 +14,7 @@ Each step below adds exactly what has proven its worth — and not before its tr
 |---|---|---|
 | Behavioral baseline | `~/.claude/CLAUDE.md` (or project-embed `.claude/rules/practice-baseline.md`) | §1–§8 for every project (Bootstrap Phase 2b) |
 | Kit (this plugin) | source of truth — repo `nikitaCodeSave/claude-code-harness`; on the machine — the installed plugin in `~/.claude/plugins/` | Bootstrap / Audit / Extend / Explain |
-| External audit | inside the plugin: `commands/external-audit.md` + `agents/{evidence-executor,process-auditor,code-refuter}.md` — travel with the plugin | the independent-verification ritual |
+| Independent verification | inside the plugin: `commands/external-audit.md` + `agents/{evidence-executor,process-auditor,code-refuter}.md` — travel with the plugin | fresh-context refute — the `code-refuter` role solo is the per-change workhorse; the full 3-role `/external-audit` is the rare escalation |
 | Workflow distillation | `<repo>/.claude/docs/{workflow,testing,docs-discipline}.md` | shipped by bootstrap verbatim from the kit (`references/project-docs/`); refreshed by a re-sync at audit time keyed on the `shipped-by` version |
 | Project layer | `<repo>/CLAUDE.md` + `<repo>/.claude/` + `<repo>/docs/` | created by step 1, grows by triggers |
 
@@ -78,6 +78,10 @@ If the project is a product built feature-by-feature (not a library/script/one-o
   `passes: true` set only for features with completed verify steps.
 - **A handoff note is a claim, not a fact**: if the previous session wrote "verified" — the next
   one must re-execute before relying on it.
+- **The spec's own premise is a claim, not a fact**: before building to a requirement's assumption
+  ("the model can't do X", "we need a blanket abstain here"), measure whether the assumption holds
+  — an oracle sweep can refute the requirement itself; when it does, trust the measurement over the
+  spec and record why.
 - **Contract/docs vs disk**: on a mismatch (a path doesn't exist, a file isn't where expected) the
   truth is the disk: detect-then-prescribe, fix by the facts and record an observation in
   journal/progress, don't follow the contract blindly. Resolve commands per-tool (`.venv` first,
@@ -95,13 +99,23 @@ If the project is a product built feature-by-feature (not a library/script/one-o
    with the version of the installed plugin and offers a re-sync if the plugin is newer — so the
    factory distillation in projects doesn't fall behind the canon.
 
-## 5. External audit — `/external-audit`
+## 5. Independent verification — two tiers (fresh context, not self-recheck)
 
-When to commission: a milestone closed · a security/correctness-critical feature · an expensive
-irreversible delivery that "looks done". It's periodically useful even on *accepted* features — a
-fresh-context audit has caught HIGH defects in code that was already green.
+The lever is an independent *fresh context* that judges the deliverable — not a second pass in the
+authoring one, which anchors on its own solution (baseline §8). It comes in two weights; reach for
+the light one by default and the heavy one rarely. Both beat a self-orchestrated Evaluator (one the
+author commissions inherits the author's framing). A fresh-context check earns its keep even on
+*accepted* code — it has caught HIGH defects in features that were already green.
 
-How (the independence rule — external beats self-orchestrated):
+**Tier 1 — the per-change refute (the workhorse).** For a silent-wrong-prone change (a
+parser/rewriter of untrusted input, a guard/validator, an invariant-preserving refactor), spawn a
+**single fresh-context refuter** prompted to *refute*, not confirm — the `code-refuter` role alone
+(`claude-code-harness:code-refuter`), no orchestration, its verdict to
+`.claude/audits/<slug>/AUDIT-REFUTER.json`. Cheap enough to run per-change — which is exactly where
+it earns its place, because that class passes the author's own tests while being wrong.
+
+**Tier 2 — the full 3-role `/external-audit` (rare escalation).** Reserve for a closed milestone ·
+a security/correctness-critical feature · an expensive irreversible delivery that "looks done".
 1. Open a **new session** (not the authoring one) at the root of the audited project.
 2. Say: **`/external-audit <scope>`** (feature/milestone + where the spec lives); if the command
    was delivered by the plugin, the name in the list is `claude-code-harness:external-audit`.
@@ -109,6 +123,10 @@ How (the independence rule — external beats self-orchestrated):
    process-auditor (git/scope/red→green), code-refuter (refutes the code) — and combines the
    verdicts by the rule "executed evidence beats read evidence".
 4. Result: `.claude/audits/<slug>/AUDIT-VERDICT.json` + actionable items in progress.
+
+Empirically the two tiers settle this way: in a sustained real-product build the full 3-role audit
+ran **once**, at a milestone; per-change verification used the `code-refuter` role alone. Ship the
+light tier as the default, the heavy tier as the exception.
 
 ## 6. D-cycle — evolving the canon (role: canon maintainer)
 

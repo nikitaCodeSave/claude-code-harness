@@ -117,8 +117,9 @@ signal, and you become the verification loop." (*Best practices*, T1.) Enforceme
 cheapest first: in-prompt check → `/goal` condition (re-checked every turn) → **Stop hook**
 (deterministic gate) → **`/code-review`** (built-in, local, free — run it on substantive
 changes; it reviews the working diff, while `/review` is PR-review — surfaces catalogued in
-`native-capabilities.md`) → fresh-context second opinion (subagent,
-new session, or `/external-audit`) or workflow. This top rung is opt-in for most work but
+`native-capabilities.md`) → fresh-context second opinion — a **single refuter** (the
+`code-refuter` role or a new session) by default, the full 3-role `/external-audit` (or a
+workflow) only as a rare milestone/irreversible escalation. This top rung is opt-in for most work but
 **per-change, not occasional, for silent-wrong-prone components** — output that looks plausible
 and passes the author's own tests yet is wrong under edge/adversarial input (parsers,
 guards/validators, invariant-preserving refactors); in-context self-check systematically misses

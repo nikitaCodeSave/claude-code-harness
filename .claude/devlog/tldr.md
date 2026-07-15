@@ -8,6 +8,26 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #4 · 2026-07-16 · Фолд «эмпирика > спека»: посылка ТЗ — тоже claim, измерь её до постройки
+
+**Tags:** canon, d-cycle, verification
+
+Watch-item из того же анализа Greenplun, что и reposition (#3). Повторяющийся паттерн: измерение опровергает не только переданный факт, но и саму посылку ТЗ. Две инстанции: (1) ложный «потолок модели» — Q4/Q23 числились ceiling'ом Qwen3, детерминированный intent-guard…
+
+[→ entries/0004-fold-empirika-speka-posylka-tz-tozhe-claim-izmer-ee-do-postr.md](entries/0004-fold-empirika-speka-posylka-tz-tozhe-claim-izmer-ee-do-postr.md)
+
+---
+
+## #3 · 2026-07-16 · Reposition независимой верификации: лёгкий refute = воркхорс, 3-ролевой аудит = редкая эскалация
+
+**Tags:** canon, d-cycle, verification
+
+D-cycle-фолд из доказанной находки. Дисциплинарный текст (harness-discipline.md, лестница верификации) уже ставил лёгкий fresh-context вариант первым, но операторские поверхности переусиливали тяжёлый инструмент: operator-playbook.md §5 был целиком про 3-ролевой /external-audit…
+
+[→ entries/0003-reposition-nezavisimoy-verifikatsii-legkiy-refute-vorkkhors.md](entries/0003-reposition-nezavisimoy-verifikatsii-legkiy-refute-vorkkhors.md)
+
+---
+
 ## #2 · 2026-07-15 · Локали кита: harness на английский, devlog языко-независим
 
 **Tags:** refactor, i18n

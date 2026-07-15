@@ -6,15 +6,22 @@
     "email": "nickbalakirev@gmail.com"
   },
   "metadata": {
-    "description": "The claude-code-harness kit — designs, bootstraps, audits, and extends a Claude Code harness (.claude/ + root CLAUDE.md). Opinion: under a capable model, less harness yields more productivity."
+    "description": "The claude-code-harness kit — designs, bootstraps, audits, and extends a Claude Code harness (.claude/ + root CLAUDE.md), plus the devlog continuity companion. Opinion: under a capable model, less harness yields more productivity."
   },
   "plugins": [
     {
       "name": "claude-code-harness",
-      "source": "./",
+      "source": "./plugins/harness",
       "description": "Designs, bootstraps, audits, and extends a Claude Code harness (.claude/ + root CLAUDE.md). Bootstrap / Audit / Extend / Explain modes + long-running build kit.",
       "category": "workflow",
       "keywords": ["claude-code", "harness", "plugin-development", "bootstrap", "audit"]
+    },
+    {
+      "name": "devlog",
+      "source": "./plugins/devlog",
+      "description": "Records significant changes to .claude/devlog/ — the episodic 'what changed and why' continuity layer, one markdown entry per feature/fix/decision, with index+digest regeneration. The harness kit recommends this; installing it makes that guidance runnable.",
+      "category": "workflow",
+      "keywords": ["claude-code", "devlog", "changelog", "continuity", "session-handoff"]
     }
   ]
 }

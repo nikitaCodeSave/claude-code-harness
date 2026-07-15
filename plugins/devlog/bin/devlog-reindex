@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# `devlog-reindex` — on the Bash tool's PATH whenever the devlog plugin is enabled.
+# Regenerates <project>/.claude/devlog/{index.json,tldr.md} from the markdown entries.
+#
+# Portability notes (works on Linux, macOS, and Git Bash on Windows):
+#   - No `readlink -f`: that flag differs on macOS/BSD. Claude Code invokes this by an
+#     absolute path and the plugin cache stores it as a real file (not a symlink), so
+#     plain `dirname` is enough to locate the bundled script.
+#   - CLAUDE_PLUGIN_ROOT is NOT exported into the Bash tool env, so we self-resolve.
+#   - Accepts either `python3` or a py3 `python`, and fails loudly if neither exists.
+# Forwards all args: `devlog-reindex [devlog_root]`
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+script="$here/../skills/devlog/rebuild-index.py"
+
+py="$(command -v python3 || command -v python || true)"
+if [ -z "$py" ]; then
+  echo "devlog-reindex: needs Python 3, but neither 'python3' nor 'python' is on PATH." >&2
+  echo "  Install Python 3, then re-run. (The script only uses the standard library.)" >&2
+  exit 127
+fi
+exec "$py" "$script" "$@"

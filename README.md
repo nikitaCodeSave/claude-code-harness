@@ -18,7 +18,18 @@ OpenAI/Codex/other frameworks.
 ```
 /plugin marketplace add nikitaCodeSave/claude-code-harness
 /plugin install claude-code-harness@claude-code-harness
+/plugin install devlog@claude-code-harness          # optional companion — see below
 ```
+
+The marketplace ships **two plugins**: the `claude-code-harness` design kit and a
+`devlog` continuity companion. The kit recommends keeping an episodic "what changed and
+why" record; installing `devlog` makes that guidance runnable (a `/devlog:devlog` skill
+plus a `devlog-reindex` command that regenerates `index.json` + `tldr.md`). Install it if
+you want the automation; skip it if you keep your changelog by hand.
+
+`devlog-reindex` needs **Python 3** on `PATH` (standard library only — no pip installs) and
+runs on Linux, macOS, and Windows/Git Bash. It joins `PATH` when the plugin loads, so right
+after installing run `/reload-plugins` (or restart the session) before first use.
 
 ## Four modes
 
@@ -35,9 +46,10 @@ OpenAI/Codex/other frameworks.
 
 | Path | Role |
 |---|---|
-| `SKILL.md` | The skill entry point — the four modes + routing |
-| `references/` | On-demand knowledge (bootstrap/audit checklists, native-capabilities, evidence base, operator playbook, harness discipline/evolution, shippable project-docs) |
-| `agents/` + `commands/external-audit.md` | The 3-role external-audit pass (evidence-executor ∥ process-auditor ∥ code-refuter → adjudication) |
+| `plugins/harness/SKILL.md` | The skill entry point — the four modes + routing |
+| `plugins/harness/references/` | On-demand knowledge (bootstrap/audit checklists, native-capabilities, evidence base, operator playbook, harness discipline/evolution, shippable project-docs) |
+| `plugins/harness/agents/` + `plugins/harness/commands/external-audit.md` | The 3-role external-audit pass (evidence-executor ∥ process-auditor ∥ code-refuter → adjudication) |
+| `plugins/devlog/skills/devlog/` + `plugins/devlog/bin/devlog-reindex` | The devlog companion plugin — the `/devlog:devlog` skill and the index/digest regenerator on `PATH` |
 
 ## Provenance
 

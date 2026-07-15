@@ -16,9 +16,12 @@
 # It deliberately does NOT auto-commit: the summary line is the maintainer's.
 set -euo pipefail
 
-V="${1:?usage: scripts/release.sh <version, e.g. 1.13.0>}"
+V="${1:?usage: scripts/release.sh <version, e.g. 1.14.0>}"
 cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
-PLUGIN=.claude-plugin/plugin.json
+# Multi-plugin marketplace: harness plugin lives under plugins/harness/; the
+# marketplace manifest stays at the repo root. The devlog companion plugin
+# (plugins/devlog/) is versioned independently — bump its plugin.json by hand.
+PLUGIN=plugins/harness/.claude-plugin/plugin.json
 MARKET=.claude-plugin/marketplace.json
 
 command -v jq >/dev/null || { echo "jq required"; exit 1; }
@@ -34,7 +37,7 @@ echo "version: plugin.json=$(jq -r .version "$PLUGIN")  (marketplace entry carri
 
 # 2. shipped-by stamp check: modified project-docs must be stamped with THIS version.
 fail=0
-for f in references/project-docs/*.md; do
+for f in plugins/harness/references/project-docs/*.md; do
   if ! git diff --quiet HEAD -- "$f" 2>/dev/null || ! git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
     head -1 "$f" | grep -q "shipped-by: claude-code-harness v$V" || {
       echo "STAMP MISMATCH: $f is modified but its header is not 'shipped-by: claude-code-harness v$V'"
@@ -49,7 +52,8 @@ git rev-parse -q --verify "refs/tags/v$V" >/dev/null && {
   echo "tag v$V already exists"; exit 1; }
 
 # 4. Stage the release surface and hand off the conscious step.
-git add "$PLUGIN" "$MARKET" SKILL.md references/ agents/ commands/ README.md
+git add "$PLUGIN" "$MARKET" plugins/harness/SKILL.md plugins/harness/references/ \
+  plugins/harness/agents/ plugins/harness/commands/ README.md CHANGELOG.md
 echo
 git status --short
 cat <<EOF

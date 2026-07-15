@@ -1,0 +1,29 @@
+# Whitelist mode: keep the repo to the shipped plugin + its distribution/dev scaffolding.
+# Nothing runtime, local, or personal should ever land here.
+/*
+
+# --- Shipped plugin (the kit itself) ---
+!/SKILL.md
+!/.claude-plugin/
+!/agents/
+!/commands/
+!/references/
+
+# --- Distribution ---
+!/README.md
+!/LICENSE
+!/.gitignore
+
+# --- Dev harness for developing THIS plugin (curated only) ---
+!/.claude/
+/.claude/*
+!/.claude/CLAUDE.md
+!/.claude/devlog/
+
+# Never track even inside whitelisted dirs
+.credentials.json
+settings.local.json
+*.bak*
+*.log
+__pycache__/
+.DS_Store

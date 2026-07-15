@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "claude-code-harness",
+  "owner": {
+    "name": "nikitaCodeSave",
+    "email": "nickbalakirev@gmail.com"
+  },
+  "metadata": {
+    "description": "The claude-code-harness kit — designs, bootstraps, audits, and extends a Claude Code harness (.claude/ + root CLAUDE.md). Opinion: under a capable model, less harness yields more productivity."
+  },
+  "plugins": [
+    {
+      "name": "claude-code-harness",
+      "source": "./",
+      "description": "Designs, bootstraps, audits, and extends a Claude Code harness (.claude/ + root CLAUDE.md). Bootstrap / Audit / Extend / Explain modes + long-running build kit.",
+      "version": "1.12.2",
+      "category": "workflow"
+    }
+  ]
+}

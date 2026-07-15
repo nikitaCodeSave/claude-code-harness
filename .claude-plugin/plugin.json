@@ -1,0 +1,13 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "claude-code-harness",
+  "version": "1.12.2",
+  "description": "Designs, bootstraps, audits, and extends a Claude Code harness — the .claude/ directory and root CLAUDE.md. Opinion: under a capable model, less harness yields more productivity.",
+  "author": {
+    "name": "nikitaCodeSave",
+    "email": "nickbalakirev@gmail.com"
+  },
+  "skills": [
+    "./"
+  ]
+}

@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.14.1] — 2026-07-15
+
+Locale standardization and unified versioning. The kit's shipped **prompts** are now
+uniformly English (matching the agents, README, and project-docs); the **devlog** companion
+stays in the operator's language because its artifacts — devlog entries — are written in the
+user's language, and its machinery is now language-agnostic rather than Russian-only.
+
+### Changed
+- **Harness-plugin prompt surfaces translated to English** — the `/external-audit` command,
+  `operator-playbook`, `harness-evolution`, and the operator-handoff footer in `SKILL.md` were
+  the last Russian-language files on the shipped harness surface; they now match the rest of
+  the plugin. No behavioral change — prose only.
+- **`devlog` preview extraction is now language-agnostic** — `rebuild-index.py` anchors on the
+  first `## ` section instead of a hardcoded `## Контекст`, so `## Context`, `## Контекст`, and
+  any-language headings all resolve. Devlog entries can now be written in the user's language
+  (RU/EN and beyond) from one machinery; slugs were already bilingual via transliteration.
+- **Both plugins share one version, bumped in lockstep** — `harness` and `devlog` are now both
+  `1.14.1`; `scripts/release.sh` versions and stages both plugin trees under one number
+  (previously it touched only the harness plugin, leaving devlog to a manual bump).
+
+### Fixed
+- `operator-playbook` referenced `.claude/audit/<slug>/` (singular) while `/external-audit`
+  writes `.claude/audits/<slug>/` (plural). Aligned the doc to the command, which is the
+  source of truth.
+
+### Added
+- Two regression tests for language-agnostic preview extraction (RU/EN/DE headings + first-
+  section anchoring that fails under the old hardcoded heading).
+
 ## [1.14.0] — 2026-07-15
 
 Multi-plugin marketplace: the harness kit gains a `devlog` companion so the continuity

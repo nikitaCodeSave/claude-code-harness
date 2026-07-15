@@ -85,15 +85,15 @@ End every Bootstrap and Audit run — and any first use of this skill in a proje
 compact operator map (a footer, not a lecture; skip it when the operator demonstrably
 already knows the kit):
 
-> **Что ещё умеет kit** (фразы-триггеры):
-> - «audit my Claude Code harness» — аудит `.claude/` (gap-report, правки после approve)
-> - «set up Claude Code harness in this project» — bootstrap production-grade harness'а
->   (минимальный — фразой «set up a minimal harness»)
-> - «set up the long-running build kit (Phase 5)» — оракул / feature-ledger / progress для
->   продукта на много сессий
-> - `/claude-code-harness:external-audit <scope>` — в **свежей** сессии: независимый
->   3-ролевой аудит deliverable'а
-> - Полная карта жизненного цикла — `references/operator-playbook.md`
+> **What else the kit does** (trigger phrases):
+> - "audit my Claude Code harness" — audit `.claude/` (gap report, edits after approval)
+> - "set up Claude Code harness in this project" — bootstrap a production-grade harness
+>   (minimal via "set up a minimal harness")
+> - "set up the long-running build kit (Phase 5)" — oracle / feature-ledger / progress for a
+>   multi-session product build
+> - `/claude-code-harness:external-audit <scope>` — in a **fresh** session: an independent
+>   3-role audit of the deliverable
+> - Full lifecycle map — `references/operator-playbook.md`
 
 ## Reference map (load on demand — never preload all)
 

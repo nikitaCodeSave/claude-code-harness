@@ -1,90 +1,92 @@
 ---
-description: "3-ролевой внешний аудит deliverable'а (evidence-executor ∥ process-auditor ∥ code-refuter → adjudication → AUDIT-VERDICT.json)"
-argument-hint: "<scope: фича/milestone + где спека; опционально commit-range>"
+description: "3-role external audit of a deliverable (evidence-executor ∥ process-auditor ∥ code-refuter → adjudication → AUDIT-VERDICT.json)"
+argument-hint: "<scope: feature/milestone + where the spec lives; optionally a commit range>"
 ---
 
-Ты — adjudicator внешнего аудита, запущенный оператором в СВЕЖЕЙ сессии (не авторской) в
-корне проверяемого проекта. Проведи 3-ролевой аудит scope'а: **$ARGUMENTS**
+You are the adjudicator of an external audit, launched by the operator in a FRESH session (not
+the authoring one) at the root of the audited project. Run a 3-role audit of the scope:
+**$ARGUMENTS**
 
-Правило протокола: внешний аудит > self-orchestrated (само-заказанный автором Evaluator
-наследует его фрейминг). Если по контексту видно, что эта сессия сама писала проверяемый
-код, — остановись и скажи оператору открыть свежую сессию.
+Protocol rule: an external audit beats a self-orchestrated one (an Evaluator the author
+commissions inherits the author's framing). If the context shows this session itself wrote the
+audited code, stop and tell the operator to open a fresh session.
 
-## Шаг 0 — scope и preconditions
+## Step 0 — scope and preconditions
 
-1. Зафиксируй audited surface: прочитай `.claude/features.json` / `.claude/progress/` /
-   спеку из $ARGUMENTS; определи commit-range scope'а (`git log --oneline`). **Если проект
-   без Phase 5 kit** (нет features.json/progress — типично для легаси): scope и preconditions
-   бери из $ARGUMENTS + git log + README/CLAUDE.md; отсутствие ledger'а — не блокер, но
-   зафиксируй это в context вердикта. Сам код НЕ ревьюй — ты adjudicator, не четвёртая
-   роль; глубокое чтение испортит независимость.
-2. Создай `.claude/audits/<slug>/` (slug — короткое имя scope'а + дата).
-3. Проверь preconditions живого стека (из `features.json.preconditions` / CLAUDE.md):
-   контейнеры/сервисы подняты? Если нет — подними dev-сервисы, если это безопасно и
-   обратимо (docker start dev-контейнера — да; что-либо прод-подобное — стоп, к оператору).
+1. Fix the audited surface: read `.claude/features.json` / `.claude/progress/` / the spec from
+   $ARGUMENTS; determine the scope's commit range (`git log --oneline`). **If the project has no
+   Phase 5 kit** (no features.json/progress — typical for legacy): take scope and preconditions
+   from $ARGUMENTS + git log + README/CLAUDE.md; a missing ledger is not a blocker, but record it
+   in the verdict's context. Do NOT review the code yourself — you are the adjudicator, not a
+   fourth role; deep reading would compromise your independence.
+2. Create `.claude/audits/<slug>/` (slug — a short name for the scope + date).
+3. Check the live stack's preconditions (from `features.json.preconditions` / CLAUDE.md): are the
+   containers/services up? If not, bring the dev services up if it is safe and reversible (docker
+   start of a dev container — yes; anything production-like — stop, go to the operator).
 
-## Шаг 1 — три роли параллельно
+## Step 1 — three roles in parallel
 
-**Резолвинг ролей (важно — иначе аудит не запустится).** Роли едут внутри плагина
-`claude-code-harness` и видны как agent-типы `claude-code-harness:evidence-executor` /
-`claude-code-harness:process-auditor` / `claude-code-harness:code-refuter` (verified на
-чистом профиле). Если эти типы в твоём списке есть — спавни их напрямую через
-`subagent_type`, role-файл читать не нужно. (Косвенная pre-flight проверка вне сессии:
-`claude plugin list` → `claude-code-harness` в статусе loaded/enabled.)
+**Resolving the roles (important — otherwise the audit won't launch).** The roles ship inside the
+`claude-code-harness` plugin and appear as the agent types `claude-code-harness:evidence-executor` /
+`claude-code-harness:process-auditor` / `claude-code-harness:code-refuter` (verified on a clean
+profile). If those types are in your list — spawn them directly via `subagent_type`; no need to
+read the role file. (Indirect out-of-session pre-flight check: `claude plugin list` →
+`claude-code-harness` in loaded/enabled status.)
 
-**Fallback** (типов в списке нет — роли лежат файлами вне плагина): спавни
-`general-purpose` и заставляй его загрузить роль с диска первой строкой prompt'а.
-Определи `ROLE_DIR` — первый путь, в котором **есть все 3 role-файла** (проверяй файлы,
-не существование каталога — каталог `agents/` с посторонними файлами не считается):
-1. `${CLAUDE_PLUGIN_ROOT}/agents/` — если команда доставлена плагином (дефолт);
-2. `~/.claude/skills/claude-code-harness/agents/` — @skills-dir разработка/symlink мейнтейнера;
-3. `.claude/agents/` в корне проверяемого проекта — если роли вкопированы локально.
+**Fallback** (the types are not in your list — the roles live as files outside the plugin): spawn
+`general-purpose` and make it load the role from disk as the first line of the prompt. Determine
+`ROLE_DIR` — the first path that **contains all 3 role files** (check the files, not the directory's
+existence — an `agents/` directory with unrelated files does not count):
+1. `${CLAUDE_PLUGIN_ROOT}/agents/` — if the command was delivered by the plugin (default);
+2. `~/.claude/skills/claude-code-harness/agents/` — @skills-dir development / maintainer symlink;
+3. `.claude/agents/` at the audited project's root — if the roles were copied in locally.
 
-Запусти ТРЕМЯ параллельными вызовами Agent (один блок). В fallback-режиме первой
-строкой prompt'а каждого:
-> «Прочитай `<ROLE_DIR>/<role>.md` (evidence-executor | process-auditor | code-refuter) и
-> действуй СТРОГО как эта роль — это твоё полное определение, следуй ему буквально, включая
-> формат выходного JSON и его jq-контракт.»
+Launch with THREE parallel Agent calls (one block). In fallback mode, the first line of each
+prompt:
+> "Read `<ROLE_DIR>/<role>.md` (evidence-executor | process-auditor | code-refuter) and act
+> STRICTLY as that role — it is your full definition, follow it literally, including the output
+> JSON format and its jq contract."
 
-Дальше в том же prompt'е передай:
-- target project directory (абсолютный путь) и git_head;
-- audited scope одной строкой + где спека + commit-range;
-- известные preconditions (адреса dev-БД/LLM и т.п.);
+Then in the same prompt pass:
+- target project directory (absolute path) and git_head;
+- audited scope in one line + where the spec lives + commit range;
+- known preconditions (dev DB/LLM addresses, etc.);
 - output file path: `.claude/audits/<slug>/AUDIT-EVIDENCE.json` / `AUDIT-PROCESS.json` /
-  `AUDIT-REFUTER.json` соответственно (абсолютные пути);
-- специфичные для scope'а probe-подсказки, если оператор дал их в $ARGUMENTS.
+  `AUDIT-REFUTER.json` respectively (absolute paths);
+- scope-specific probe hints, if the operator gave any in $ARGUMENTS.
 
-Если ни один путь из ROLE_DIR не существует — остановись и скажи оператору: role-файлы не
-найдены, проверь установку плагина / git-clone слоя.
+If none of the ROLE_DIR paths exists — stop and tell the operator: role files not found, check the
+plugin install / the git-clone layer.
 
-## Шаг 2 — валидация вердиктов
+## Step 2 — validate the verdicts
 
-Для каждого из трёх JSON прогони jq-проверку из соответствующего agent-определения
-(`<ROLE_DIR>/<role>.md`; при native-резолвинге ROLE_DIR — каталог `agents/` рядом с этой
-командой: `${CLAUDE_PLUGIN_ROOT}/agents/`; не хардкодь `~/.claude`).
-Невалидный файл → пере-spawn этой роли (1 retry), затем —
-честный отчёт оператору о невалидном выводе. Не чини JSON руками — это подмена вердикта.
-Если `jq` в окружении отсутствует — не падай: провалидируй те же обязательные ключи и
-enum-значения чтением JSON и пометь в финальном ответе, что jq-контракт не исполнялся.
+For each of the three JSONs, run the jq check from the corresponding agent definition
+(`<ROLE_DIR>/<role>.md`; under native resolution ROLE_DIR is the `agents/` directory next to this
+command: `${CLAUDE_PLUGIN_ROOT}/agents/`; do not hardcode `~/.claude`). An invalid file →
+re-spawn that role (1 retry), then an honest report to the operator about the invalid output. Do
+not fix the JSON by hand — that substitutes the verdict. If `jq` is absent from the environment —
+do not fail: validate the same required keys and enum values by reading the JSON, and note in the
+final answer that the jq contract was not executed.
 
-## Шаг 3 — adjudication
+## Step 3 — adjudication
 
-Своди вердикты по правилам (порядок применения сверху вниз):
+Combine the verdicts by the rules (apply top to bottom):
 
-1. **Исполненное доказательство сильнее прочитанного.** Если finding роли-читателя
-   (process-auditor / reasoned-finding refuter'а) прямо противоречит наблюдаемому выводу
-   реального run'а evidence-executor'а — finding отклоняется (dismissed) с указанием
-   опровергающего run'а. Кейс-прецедент: reader-вердикт «golden-числа недоказаны» против
-   executor-переисполнения, совпавшего до копейки.
-2. **Verified-critical = REFUTED.** Любой finding с `severity: critical` и
-   `demonstrability: verified` (любой роли) → итог `refuted`, независимо от остальных.
-3. **Blocked executor блокирует итог.** `AUDIT-EVIDENCE.verdict.status == "blocked"` →
-   итог `blocked` (аудит без исполнения не выносит confirmed — reader-only недостаточен).
-4. Иначе: все три чисты (`confirmed`+`clean`+`stands`, без выживших major) → `confirmed`;
-   выжившие major-findings или process-violations при работающем продукте →
-   `confirmed_with_debt` (каждый долг — actionable item).
+1. **Executed evidence beats read evidence.** If a reader role's finding (process-auditor /
+   refuter's reasoned finding) directly contradicts the observed output of an actual
+   evidence-executor run — the finding is dismissed with a reference to the refuting run. Case
+   precedent: a reader verdict "golden numbers unproven" against an executor re-derivation that
+   matched to the last digit.
+2. **Verified-critical = REFUTED.** Any finding with `severity: critical` and
+   `demonstrability: verified` (from any role) → verdict `refuted`, regardless of the rest.
+3. **A blocked executor blocks the verdict.** `AUDIT-EVIDENCE.verdict.status == "blocked"` →
+   verdict `blocked` (an audit without execution cannot return confirmed — reader-only is not
+   enough).
+4. Otherwise: all three clean (`confirmed`+`clean`+`stands`, no surviving major) → `confirmed`;
+   surviving major findings or process violations with a working product →
+   `confirmed_with_debt` (each debt an actionable item).
 
-Запиши `.claude/audits/<slug>/AUDIT-VERDICT.json`:
+Write `.claude/audits/<slug>/AUDIT-VERDICT.json`:
 
 ```json
 {
@@ -94,15 +96,15 @@ enum-значения чтением JSON и пометь в финальном 
   "context": { "git_head": "<sha>", "dirty": true },
   "role_verdicts": { "evidence_executor": "confirmed|refuted|blocked", "process_auditor": "clean|violations", "code_refuter": "stands|refuted" },
   "surviving_findings": [ { "summary": "", "severity": "critical|major|minor", "source_role": "", "file": "" } ],
-  "dismissed_findings": [ { "summary": "", "source_role": "", "dismissed_by": "<run/факт, опровергший finding>" } ],
-  "verdict": { "status": "confirmed|confirmed_with_debt|refuted|blocked", "summary": "<3-5 предложений>" }
+  "dismissed_findings": [ { "summary": "", "source_role": "", "dismissed_by": "<run/fact that refuted the finding>" } ],
+  "verdict": { "status": "confirmed|confirmed_with_debt|refuted|blocked", "summary": "<3-5 sentences>" }
 }
 ```
 
-## Шаг 4 — результат оператору
+## Step 4 — report to the operator
 
-1. Surviving findings допиши actionable-items'ами в next steps прогресс-файла проекта
-   (`.claude/progress/<...>.md`) в формате «воспроизвести → закрыть» (claim, не факт).
-   Код НЕ правь — фиксы делает авторская сессия отдельным red→green циклом.
-2. Финальный ответ: вердикт + таблица ролей + surviving/dismissed findings + что именно
-   было исполнено (runs evidence-executor'а) + путь к `.claude/audits/<slug>/`.
+1. Append the surviving findings as actionable items to the next steps of the project's progress
+   file (`.claude/progress/<...>.md`) in "reproduce → close" form (a claim, not a fact). Do NOT
+   edit the code — fixes are done by the authoring session in a separate red→green cycle.
+2. Final answer: verdict + role table + surviving/dismissed findings + what exactly was executed
+   (evidence-executor's runs) + the path to `.claude/audits/<slug>/`.

@@ -1,113 +1,109 @@
-# Harness evolution — D-циклы и strip-ревизия
+# Harness evolution — D-cycles and strip revision
 
-Процедура эволюции **канона** — репозитория этого плагина
-(`nikitaCodeSave/claude-code-harness`) — по эмпирическим сигналам, а не по вкусу.
-(Практический baseline §1–8 живёт в operator-global `~/.claude/CLAUDE.md` и эволюционирует
-отдельно; при релизе его снимок re-distill'ится в `references/practice-baseline.md`.)
-Две операции: **D-цикл** (fold доказанных находок внутрь) и **strip-ревизия**
-(вынос устаревшего наружу). Обе подчинены headline-принципу: компонент живёт, только
-пока кодирует то, чего модель не делает нативно.
+The procedure for evolving the **canon** — this plugin's repository
+(`nikitaCodeSave/claude-code-harness`) — by empirical signals, not by taste.
+(The practice baseline §1–8 lives in the operator-global `~/.claude/CLAUDE.md` and evolves
+separately; on a release its snapshot is re-distilled into `references/practice-baseline.md`.)
+Two operations: the **D-cycle** (folding proven findings inward) and the **strip revision**
+(carrying obsolete pieces outward). Both are subordinate to the headline principle: a component
+lives only as long as it encodes something the model does not do natively.
 
-## Refresh ledger — baseline для дельты
+## Refresh ledger — the baseline for the delta
 
-Канон стареет по трём **внешним** осям: **CC-версия** (новые primitives), **поколение
-модели** (что модель умеет нативно, effort-дефолты), **подходы** (first-party essays,
-arXiv, community). Чтобы strip-ревизия сверяла *дельту*, а не «всё с нуля», канон несёт
-один provenance-штамп — последнюю точку заземления:
+The canon ages along three **external** axes: **CC version** (new primitives), **model generation**
+(what the model does natively, effort defaults), and **approaches** (first-party essays, arXiv,
+community). So the strip revision compares a *delta* rather than "everything from scratch", the
+canon carries one provenance stamp — its last grounding point:
 
 <!-- harness-refresh-ledger
 last-grounded: CC v2.1.210 · Claude 5 family (Fable 5, Sonnet 5) + Opus 4.8 · 2026-07-15
 sources-checked: code.claude.com changelog + docs (sub-agents, plugins-reference, commands, hooks, memory, model-config) · anthropic.com engineering + news · binary strings 2.1.210
 -->
 
-Штамп обновляется в конце каждой strip-ревизии (проход external-intake ниже). Текущая
-CC-версия для сравнения — `claude --version`; срез built-ins живёт в
-`native-capabilities.md`, и его version-строка после refresh **должна совпадать** с этим
-штампом. Дельта `claude --version` против ledger — самостоятельный триггер ревизии (её
-видно в начале сессии, без отдельной машинерии).
+The stamp is updated at the end of each strip revision (the external-intake pass below). The
+current CC version to compare against is `claude --version`; the built-ins snapshot lives in
+`native-capabilities.md`, and its version line after a refresh **must match** this stamp. A delta
+of `claude --version` against the ledger is a standalone revision trigger (visible at the start of
+a session, with no extra machinery).
 
-## Источники сигналов
+## Signal sources
 
-- `.claude/harness-journal.md` проекта — 1–3 наблюдения «kit-не-хватило / kit-помешал»
-  за сессию (opt-in, см. operator-playbook §2).
-- Вердикты внешних аудитов (`/external-audit`, fresh-context Evaluator'ы).
-- Поправки оператора по ходу работы (повторяющиеся — особенно).
-- **Внешний дрейф** (CC-версия / модель / подходы) — сверяется в strip-ревизии,
-  проход external-intake; baseline — refresh-ledger выше.
+- The project's `.claude/harness-journal.md` — 1–3 "kit-fell-short / kit-got-in-the-way"
+  observations per session (opt-in, see operator-playbook §2).
+- The verdicts of external audits (`/external-audit`, fresh-context Evaluators).
+- The operator's corrections along the way (the recurring ones especially).
+- **External drift** (CC version / model / approaches) — compared during the strip revision, the
+  external-intake pass; the baseline is the refresh-ledger above.
 
-## D-цикл (≈1 сессия)
+## D-cycle (≈1 session)
 
-Триггер: закрыт milestone, или накопилось ≥5 содержательных наблюдений. Для проектов
-**без journal'а** (он opt-in) журнального триггера не будет — там работают milestone-close
-и вердикты внешних аудитов; не жди «5 наблюдений», которых неоткуда взяться.
+Trigger: a milestone closed, or ≥5 substantive observations accumulated. For projects **without a
+journal** (it is opt-in) there is no journal trigger — there, milestone-close and external-audit
+verdicts are what work; don't wait for "5 observations" that have nowhere to come from.
 
-1. **Собрать** наблюдения журнала + audit-вердикты + операторские поправки за период.
-2. **Классифицировать** каждое: `kit-gap` (канон не покрыл повторяемую нужду) ·
-   `project-specific` (остаётся в проектном CLAUDE.md/rules) · `single-incident`
-   (наблюдать дальше) · `noise`.
-3. **Gate**: в канон проходит только `kit-gap` с multi-source evidence или повторной
-   эмпирикой. **Single-incident в invariant не превращается** — он остаётся в журнале
-   с пометкой «watch».
-4. **Fold** — точечная правка конкретного reference (checklist / discipline /
-   native-capabilities), не новый файл и не новый слой. Формулировка model-agnostic;
-   evidence-провенанс (даты, n) — допустим и желателен. Empirics: harness-gains
-   локализуются в tools/middleware/memory, НЕ в прозе (AHE ablation, arXiv 2604.25850) —
-   предпочитай fold в механический носитель (checklist-шаг, permission-правило, schema),
-   а не в новый абзац прозы.
-5. **Зафиксировать**: commit в репо плагина + devlog-запись там же со списком
-   «находка → куда сложена → доказательство». Значимое изменение состава kit'а →
-   релиз через `scripts/release.sh <version>` (bump `version` в `plugin.json` — единый
-   источник истины — + tag + push). (Шаг мейнтейнера: commit/devlog — в репо плагина;
-   эмпирика экспериментов — в репо-лаборатории. На машине-потребителе этого шага нет —
-   там канон обновляется `/plugin update`.)
+1. **Collect** the journal observations + audit verdicts + operator corrections for the period.
+2. **Classify** each: `kit-gap` (the canon didn't cover a recurring need) ·
+   `project-specific` (stays in the project CLAUDE.md/rules) · `single-incident`
+   (keep watching) · `noise`.
+3. **Gate**: only a `kit-gap` with multi-source evidence or repeated empirics passes into the
+   canon. **A single-incident does not become an invariant** — it stays in the journal marked
+   "watch".
+4. **Fold** — a surgical edit of a specific reference (checklist / discipline /
+   native-capabilities), not a new file and not a new layer. The wording is model-agnostic;
+   evidence provenance (dates, n) is acceptable and desirable. Empirics: harness gains localize in
+   tools/middleware/memory, NOT in prose (AHE ablation, arXiv 2604.25850) — prefer a fold into a
+   mechanical carrier (a checklist step, a permission rule, a schema) over a new paragraph of prose.
+5. **Record it**: a commit to the plugin repo + a devlog entry there listing
+   "finding → where it went → evidence". A significant change to the kit's composition →
+   a release via `scripts/release.sh <version>` (bump `version` in `plugin.json` — the single
+   source of truth — + tag + push). (Maintainer's step: commit/devlog — in the plugin repo;
+   the empirics of experiments — in the lab repo. On a consumer machine this step does not
+   exist — there the canon is updated with `/plugin update`.)
 
-Анти-паттерн D-цикла: «раз сессия всё равно открыта — причешу заодно соседние разделы».
-Правки только по находкам цикла; всё остальное — отдельным решением.
+D-cycle anti-pattern: "since the session is open anyway, I'll tidy up the neighboring sections
+too". Edits only from the cycle's findings; everything else is a separate decision.
 
-## Strip-ревизия (раз в 3–6 мес, на major-релизе модели, или на дельте CC-версии)
+## Strip revision (every 3–6 months, on a major model release, or on a CC-version delta)
 
-Триггер cadence — календарь (3–6 мес), major-релиз модели, **или** дельта
-`claude --version` против refresh-ledger. Ревизия идёт двумя проходами: сперва
-**external-intake** (что изменилось снаружи — обновляет канон под новую реальность),
-затем **re-test** (что из канона устарело относительно изменившейся модели/окружения).
+The cadence trigger is the calendar (3–6 months), a major model release, **or** a delta of
+`claude --version` against the refresh ledger. The revision runs in two passes: first
+**external-intake** (what changed outside — updates the canon to the new reality), then
+**re-test** (what in the canon has become obsolete relative to the changed model/environment).
 
-### Проход 1 — external-intake (что сдвинулось снаружи)
+### Pass 1 — external-intake (what shifted outside)
 
-Сверять дельту *от refresh-ledger*, не «всё с нуля». Источники — CLI-нативно
-(WebFetch / WebSearch, без Anthropic API):
+Compare the delta *from the refresh ledger*, not "everything from scratch". Sources are CLI-native
+(WebFetch / WebSearch, no Anthropic API):
 
-1. **CC-changelog** since ledger-версии → новые hooks / tools / flags / команды.
-   Каждую релевантную — fold в `native-capabilities.md` (она не должна отставать от
-   live `claude --version`).
-2. **First-party docs / blog** (code.claude.com/docs, anthropic.com / claude.com) →
-   сдвиги дефолтов (effort, model-config), новые canonical-паттерны.
-3. **external-sources catalog** → новые essays / arXiv по T1–T7 rubric.
-4. Каждую находку — через D-цикл-gate (`kit-gap` с multi-source · `single-incident` ·
-   `noise`). External-сигнал **не привилегирован**: «вышла статья / появился флаг»
-   single-incident в invariant не превращается; fold — point-edit конкретного
-   reference, не новый слой.
+1. **CC changelog** since the ledger version → new hooks / tools / flags / commands. Fold each
+   relevant one into `native-capabilities.md` (it must not fall behind live `claude --version`).
+2. **First-party docs / blog** (code.claude.com/docs, anthropic.com / claude.com) → shifts in
+   defaults (effort, model-config), new canonical patterns.
+3. **external-sources catalog** → new essays / arXiv per the T1–T7 rubric.
+4. Run each finding through the D-cycle gate (`kit-gap` with multi-source · `single-incident` ·
+   `noise`). An external signal **is not privileged**: "an article came out / a flag appeared"
+   does not become an invariant as a single-incident; the fold is a point-edit of a specific
+   reference, not a new layer.
 
-### Проход 2 — re-test (что из канона устарело)
+### Pass 2 — re-test (what in the canon is obsolete)
 
-1. Перечислить компоненты канона с их assumption «модель не умеет X»
-   (включая every «under Opus <version>» в текстах).
-2. Re-test каждого: умеет ли модель X нативно теперь. Быстрый инструмент —
-   `claude --safe-mode` (старт без CLAUDE.md/skills/hooks/MCP): если без компонента
-   не хуже — он устарел.
-3. Устаревшее **удалять, не архивировать в канон** (история остаётся в git + devlog).
-4. То, что добавлено последним D-циклом и не сработало, — первый кандидат на вынос.
+1. List the canon's components with their assumption "the model can't do X"
+   (including every "under Opus <version>" in the texts).
+2. Re-test each: does the model do X natively now. The quick tool is
+   `claude --safe-mode` (start with no CLAUDE.md/skills/hooks/MCP): if it's no worse without the
+   component — it's obsolete.
+3. Obsolete pieces are **deleted, not archived into the canon** (history stays in git + devlog).
+4. Whatever the last D-cycle added and that didn't work is the first candidate for removal.
 
-В конце ревизии — **обновить refresh-ledger** (новая CC-версия / модель / дата /
-проверенные источники), синхронизировать version-строку `native-capabilities.md`,
-зафиксировать devlog-записью. Значимый сдвиг состава канона → bump `version`
-(см. D-цикл шаг 5).
+At the end of the revision — **update the refresh ledger** (new CC version / model / date /
+checked sources), sync the version line of `native-capabilities.md`, and record a devlog entry. A
+significant shift in the canon's composition → bump `version` (see D-cycle step 5).
 
-## Доказательная база процедуры
+## The procedure's evidence base
 
-Выращено на dogfood-треке (maintainer's lab Harnesses-Claude, devlog #78–#82 — артефакты
-не отгружаются с kit'ом): 2 D-цикла,
-12 находок сложено в kit, каждая — с журнальной или аудиторской эмпирикой; первопартийное
-основание — Anthropic «review your configuration every 3-6 months» и «find the simplest
-solution possible» (см. `references/evidence-base.md`).
+Grown on the dogfood track (the maintainer's lab Harnesses-Claude, devlog #78–#82 — artifacts not
+shipped with the kit): 2 D-cycles, 12 findings folded into the kit, each with journal or audit
+empirics; the first-party grounding is Anthropic's "review your configuration every 3-6 months"
+and "find the simplest solution possible" (see `references/evidence-base.md`).
 
 <!-- last-updated: 2026-07-15 -->

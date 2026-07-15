@@ -45,7 +45,7 @@ SCHEMA = {
         "status": "complete | superseded | wip (default: complete)",
         "supersedes": "int|null, id of replaced entry",
         "path": "relative path from <devlog_root>",
-        "preview": "1-paragraph summary, derived from first paragraph of '## Контекст' section (≤280 chars)",
+        "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)",
     },
 }
 
@@ -125,7 +125,8 @@ def slugify_legacy(s: str, max_len: int = 60) -> str:
 
 
 def extract_preview(text: str) -> str:
-    """First paragraph of '## Контекст' section (fallback: first body paragraph).
+    """First paragraph of the first '## ' section — language-agnostic
+    (## Контекст / ## Context / any language; fallback: first body paragraph).
 
     Strips frontmatter, markdown emphasis, joins folded lines into one paragraph,
     truncates to PREVIEW_MAX_LEN at word boundary.
@@ -134,8 +135,10 @@ def extract_preview(text: str) -> str:
     m = re.match(r"^---\n.*?\n---\n", text, re.DOTALL)
     body = text[m.end():] if m else text
 
-    # Try to locate '## Контекст' (case-sensitive — our convention)
-    section_match = re.search(r"^##\s+Контекст\s*$", body, re.MULTILINE)
+    # Locate the first '## ' section, whatever the heading's language. By template
+    # convention the first section is the context/motivation, so its first
+    # paragraph is the summary — no hardcoded heading name.
+    section_match = re.search(r"^##\s+\S.*$", body, re.MULTILINE)
     if section_match:
         section = body[section_match.end():]
     else:

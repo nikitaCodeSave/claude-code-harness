@@ -52,3 +52,23 @@ def test_collect_rejects_wrong_slug(tmp_path):
     _write_entry(tmp_path, "0003-sovsem-drugoy-slug.md", 3, "Релиз plugin v1.3.0")
     entries, errors = ri.collect_entries(tmp_path)
     assert len(errors) == 1 and "slug" in errors[0]
+
+
+def _entry_with_heading(heading: str) -> str:
+    return (f"---\nid: 1\ndate: 2026-06-11\ntitle: T\n---\n\n"
+            f"# T\n\n## {heading}\n\nSummary paragraph.\n\n## Next\n\nX\n")
+
+
+def test_extract_preview_language_agnostic():
+    # preview берётся из первой '## '-секции независимо от языка заголовка (RU/EN/…)
+    assert ri.extract_preview(_entry_with_heading("Контекст")) == "Summary paragraph."
+    assert ri.extract_preview(_entry_with_heading("Context")) == "Summary paragraph."
+    assert ri.extract_preview(_entry_with_heading("Kontext")) == "Summary paragraph."
+
+
+def test_extract_preview_anchors_on_first_section_not_preamble():
+    # Якорь — первая '## '-секция, а не преамбула между H1 и секцией.
+    # Падает при захардкоженном '## Контекст' (fallback вернул бы преамбулу).
+    text = ("---\nid: 1\ndate: 2026-06-11\ntitle: T\n---\n\n"
+            "# T\n\nPreamble noise.\n\n## Context\n\nThe real summary.\n")
+    assert ri.extract_preview(text) == "The real summary."

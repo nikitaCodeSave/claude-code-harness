@@ -10,11 +10,11 @@
       "status": "complete | superseded | wip (default: complete)",
       "supersedes": "int|null, id of replaced entry",
       "path": "relative path from <devlog_root>",
-      "preview": "1-paragraph summary, derived from first paragraph of '## Контекст' section (≤280 chars)"
+      "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-15T19:35:59Z",
-  "entry_count": 1,
+  "generated_at": "2026-07-15T20:49:35Z",
+  "entry_count": 2,
   "entries": [
     {
       "id": 1,
@@ -28,6 +28,19 @@
       "supersedes": null,
       "path": "entries/0001-devlog-companion-plugin-multi-plugin-marketplace-layout.md",
       "preview": "Kit ссылался на devlog как на рекомендованный continuity-компонент (10 упоминаний в references/README), но сама runnable-машинерия (/devlog skill + rebuild-index.py) жила только в операторском глобальном ~/.claude/skills/devlog/. Для публичного установщика плагина это dangling…"
+    },
+    {
+      "id": 2,
+      "date": "2026-07-15",
+      "title": "Локали кита: harness на английский, devlog языко-независим",
+      "tags": [
+        "refactor",
+        "i18n"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0002-lokali-kita-harness-na-angliyskiy-devlog-yazyko-nezavisim.md",
+      "preview": "Кит был локале-сплит: harness-промпты частично по-русски (/external-audit, operator-playbook, harness-evolution, footer SKILL.md), а devlog-машинерия хардкодила ## Контекст в извлечении preview — плюс path-рассинхрон audits/ (мн.ч. в команде) vs audit/ (ед.ч. в playbook). Для…"
     }
   ]
 }

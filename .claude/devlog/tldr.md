@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #2 · 2026-07-15 · Локали кита: harness на английский, devlog языко-независим
+
+**Tags:** refactor, i18n
+
+Кит был локале-сплит: harness-промпты частично по-русски (/external-audit, operator-playbook, harness-evolution, footer SKILL.md), а devlog-машинерия хардкодила ## Контекст в извлечении preview — плюс path-рассинхрон audits/ (мн.ч. в команде) vs audit/ (ед.ч. в playbook). Для…
+
+[→ entries/0002-lokali-kita-harness-na-angliyskiy-devlog-yazyko-nezavisim.md](entries/0002-lokali-kita-harness-na-angliyskiy-devlog-yazyko-nezavisim.md)
+
+---
+
 ## #1 · 2026-07-15 · Devlog companion plugin + multi-plugin marketplace layout
 
 **Tags:** feature, plugin

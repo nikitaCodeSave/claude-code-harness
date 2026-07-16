@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #14 · 2026-07-16 · Безопасная проба кита: два адресата, два текста
+
+**Tags:** docs, harness
+
+Установка кита ничего не пишет в ~/.claude — но это утверждение, и у потенциального пользователя нет причин принимать его на веру. Способа попробовать кит, ничего не трогая, в README не было. Заявка была сформулирована как «добавить DEMO.md, чтоб пользователи могли безопасно…
+
+[→ entries/0014-bezopasnaya-proba-kita-dva-adresata-dva-teksta.md](entries/0014-bezopasnaya-proba-kita-dva-adresata-dva-teksta.md)
+
+---
+
 ## #13 · 2026-07-16 · Оракул — это команда, а не файл
 
 **Tags:** docs, harness

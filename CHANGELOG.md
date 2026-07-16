@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.16.2] — 2026-07-16
+
+A safe way to try the kit before it touches anything. Installing already writes nothing to your
+`~/.claude/` — but "already" is a claim a prospective user has no reason to take on faith, so the
+README now carries a throwaway-config recipe they can run and undo with one `rm -rf`.
+
+### Added
+- **README "Try it in a throwaway config first"** — `CLAUDE_CONFIG_DIR` (relocates the *whole*
+  `~/.claude`, so the session sees the kit and none of your own setup) plus `--scope project`
+  (keeps the install in the demo project's `.claude/settings.json`). The two are orthogonal and
+  both are needed: no project-level file can switch off a global `~/.claude/CLAUDE.md`. Run
+  end-to-end against a clean config on 2.1.211 before shipping the text — the marketplace/install
+  pair resolves the GitHub source and delivers the current version. The credentials line is
+  platform-split straight from first-party docs: Linux/Windows keep `.credentials.json` *inside*
+  the config dir, so it moves with `CLAUDE_CONFIG_DIR` and copying it skips a re-login, while macOS
+  keeps credentials in the Keychain, where the copy would be pointless.
+- **`.claude/DEMO.md`** — the maintainer's consumer-journey rig, now tracked. Same clean-config
+  stand, but pointed at a *local* checkout so unreleased edits can be walked as a subscriber would
+  see them, plus the traps that cost a session to find: the plugin is `claude-code-harness`, not
+  `harness` (that is only its folder); `plugin details` outside the stand reports the symlink
+  dogfood rather than the package, which reads as a packaging bug that doesn't exist; `plugin
+  update` is gated on the version, not the content. It opens with an addressee marker pointing
+  users to the README recipe — the two readers differ, so the two texts do. Dev-harness: it ships
+  in neither plugin.
+
 ## [1.16.1] — 2026-07-16
 
 Two corrections to shipped guidance, both the same shape: an instruction that read as protection or

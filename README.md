@@ -33,6 +33,35 @@ your changelog by hand.
 runs on Linux, macOS, and Windows/Git Bash. It joins `PATH` when the plugin loads, so right
 after installing run `/reload-plugins` (or restart the session) before first use.
 
+### Try it in a throwaway config first
+
+Installing changes nothing in your `~/.claude/` profile — but if you'd rather touch nothing at
+all, run the kit against a disposable config and a disposable project:
+
+```bash
+export CLAUDE_CONFIG_DIR=~/claude-fresh                # a whole separate ~/.claude
+mkdir -p "$CLAUDE_CONFIG_DIR"
+cp ~/.claude/.credentials.json "$CLAUDE_CONFIG_DIR/"   # Linux/Windows: skips a re-login.
+                                                       # macOS keeps credentials in the Keychain — omit this
+mkdir -p ~/demo-project && cd ~/demo-project && git init -q
+
+claude plugin marketplace add nikitaCodeSave/claude-code-harness --scope project
+claude plugin install claude-code-harness --scope project
+
+claude    # then say: "set up Claude Code harness in this project"
+```
+
+The two halves are orthogonal and you need both. `CLAUDE_CONFIG_DIR` relocates the *entire*
+`~/.claude` — global `CLAUDE.md`, settings, skills, memory — so the session sees the kit and none
+of your own setup; no project-level file can switch off a global `~/.claude/CLAUDE.md`.
+`--scope project` keeps the install in the demo project's `.claude/settings.json` rather than your
+user settings.
+
+Undo is `rm -rf ~/claude-fresh ~/demo-project` — your real `~/.claude` is never written to. Two
+things that bite: the plugin is named `claude-code-harness`, not `harness` (that is only its folder
+under `plugins/`), and a fresh config does not trust the demo project until you accept the dialog
+once.
+
 ## First session (start here)
 
 Everything is driven by plain phrases in a Claude Code session — there is no setup wizard

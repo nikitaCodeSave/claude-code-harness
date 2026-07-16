@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-16T18:59:37Z",
-  "entry_count": 13,
+  "generated_at": "2026-07-16T19:19:08Z",
+  "entry_count": 14,
   "entries": [
     {
       "id": 1,
@@ -194,6 +194,19 @@
       "supersedes": null,
       "path": "entries/0013-orakul-eto-komanda-a-ne-fayl.md",
       "preview": "Phase 5 item 1 предписывал авторить init.sh каждому долгоживущему проекту: альтернатива — «or documented one-liner» — пряталась в скобках посреди абзаца, под жирным «Runnable oracle + env init», и де-факто дефолт читался как «сочини файл». Второй энтрипойнт, гоняющий те же…"
+    },
+    {
+      "id": 14,
+      "date": "2026-07-16",
+      "title": "Безопасная проба кита: два адресата, два текста",
+      "tags": [
+        "docs",
+        "harness"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0014-bezopasnaya-proba-kita-dva-adresata-dva-teksta.md",
+      "preview": "Установка кита ничего не пишет в ~/.claude — но это утверждение, и у потенциального пользователя нет причин принимать его на веру. Способа попробовать кит, ничего не трогая, в README не было. Заявка была сформулирована как «добавить DEMO.md, чтоб пользователи могли безопасно…"
     }
   ]
 }

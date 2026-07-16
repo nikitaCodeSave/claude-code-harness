@@ -40,14 +40,18 @@ or re-run before proposing edits to its machinery.
 
 ## 2. Duplicates & shadowing
 
-- The same skill in both `~/.claude/skills/` and `<project>/.claude/skills/` — which is
+- The same skill in both the user-level `skills/` and `<project>/.claude/skills/` — which is
   authoritative? Forks drift; the project copy often hardcodes paths the global one parameterized.
+  (User-level paths in this checklist live in the **active config dir** — `CLAUDE_CONFIG_DIR` if
+  set and non-empty, else `<home>/.claude`; resolve it with whatever your shell supports and hand file tools
+  the resolved literal, they don't expand `$VAR`. Auditing the default path while the variable
+  points elsewhere audits someone else's profile; an absent dir is a valid "empty layer".)
 - **A hand-kept copy of something a plugin already ships.** Plugin skills are namespaced
   (`plugin:skill`), so they never *collide* with a personal one — which is exactly the trap:
   no error, no shadowing warning, just two skills with the same description and a model
   picking either. Same for a personal hook beside the plugin's on one event. The tell is a
   fix that must be applied twice. Replace the copy with a **symlink to the plugin directory**
-  (`~/.claude/skills/<name>` → `<repo>/plugins/<name>`): a dir with `.claude-plugin/plugin.json`
+  (`<config-dir>/skills/<name>` → `<repo>/plugins/<name>`): a dir with `.claude-plugin/plugin.json`
   loads `@skills-dir`, in place, so the repo stays the single source
   (`code.claude.com/docs/en/plugins-reference`). Observed here: a personal devlog skill drifted
   a month from the shipped one — a stale script path and a language-pinned parser — while a
@@ -116,7 +120,8 @@ or re-run before proposing edits to its machinery.
   newer → offer re-sync, diff-first (a non-stamp delta is a potential hand-edit to preserve).
   Unstamped embed (pre-v1.16 install, or hand-adapted) → treat the copy as a hand-edit: diff
   against the current block, show the delta, offer a stamped re-install. A **global** copy in
-  `~/.claude/CLAUDE.md` is never edited by an audit — if its stamp is older than the canon,
+  the user CLAUDE.md (`<config-dir>/CLAUDE.md`, §2's active-config-dir resolution) is never
+  edited by an audit — if its stamp is older than the canon,
   report it and offer the guarded refresh (diff + timestamped backup + explicit approval;
   `practice-baseline.md`, "Keeping installed copies current").
 - **Orphan sweep on a corrective re-sync**: when a re-sync **removes or corrects** baseline

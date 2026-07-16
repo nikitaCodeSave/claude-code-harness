@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #15 · 2026-07-16 · Детект-гейты читают активный config dir, не хардкод ~/.claude
+
+**Tags:** harness, portability, silent-wrong
+
+Kit хардкодил ~/.claude/ в исполняемых проверках. Claude Code переносит весь конфиг через CLAUDE_CONFIG_DIR (демо-стенды, контейнеры, CI) — и под переопределением гейты читали операторский профиль вместо активного, делая вывод о чужом окружении. Класс silent-wrong: ошибки нет…
+
+[→ entries/0015-detekt-geyty-chitayut-aktivnyy-config-dir-ne-khardkod-claude.md](entries/0015-detekt-geyty-chitayut-aktivnyy-config-dir-ne-khardkod-claude.md)
+
+---
+
 ## #14 · 2026-07-16 · Безопасная проба кита: два адресата, два текста
 
 **Tags:** docs, harness

@@ -38,7 +38,10 @@ read the role file. (Indirect out-of-session pre-flight check: `claude plugin li
 `ROLE_DIR` — the first path that **contains all 3 role files** (check the files, not the directory's
 existence — an `agents/` directory with unrelated files does not count):
 1. `${CLAUDE_PLUGIN_ROOT}/agents/` — if the command was delivered by the plugin (default);
-2. `~/.claude/skills/claude-code-harness/agents/` — @skills-dir development / maintainer symlink;
+2. `<config-dir>/skills/claude-code-harness/agents/` — @skills-dir development / maintainer
+   symlink. `<config-dir>` is the **active** config dir: `CLAUDE_CONFIG_DIR` if set and
+   non-empty, else `<home>/.claude` (the skills dir follows the override) — resolve it with whatever your
+   shell supports and hand file tools the resolved literal;
 3. `.claude/agents/` at the audited project's root — if the roles were copied in locally.
 
 Launch with THREE parallel Agent calls (one block). In fallback mode, the first line of each

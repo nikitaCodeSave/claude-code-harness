@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-16T19:19:08Z",
-  "entry_count": 14,
+  "generated_at": "2026-07-16T20:29:29Z",
+  "entry_count": 15,
   "entries": [
     {
       "id": 1,
@@ -207,6 +207,20 @@
       "supersedes": null,
       "path": "entries/0014-bezopasnaya-proba-kita-dva-adresata-dva-teksta.md",
       "preview": "Установка кита ничего не пишет в ~/.claude — но это утверждение, и у потенциального пользователя нет причин принимать его на веру. Способа попробовать кит, ничего не трогая, в README не было. Заявка была сформулирована как «добавить DEMO.md, чтоб пользователи могли безопасно…"
+    },
+    {
+      "id": 15,
+      "date": "2026-07-16",
+      "title": "Детект-гейты читают активный config dir, не хардкод ~/.claude",
+      "tags": [
+        "harness",
+        "portability",
+        "silent-wrong"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0015-detekt-geyty-chitayut-aktivnyy-config-dir-ne-khardkod-claude.md",
+      "preview": "Kit хардкодил ~/.claude/ в исполняемых проверках. Claude Code переносит весь конфиг через CLAUDE_CONFIG_DIR (демо-стенды, контейнеры, CI) — и под переопределением гейты читали операторский профиль вместо активного, делая вывод о чужом окружении. Класс silent-wrong: ошибки нет…"
     }
   ]
 }

@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.16.3] — 2026-07-16
+
+The kit hardcoded `~/.claude` in its *executable* detect-gates. Claude Code relocates the whole
+config directory via `CLAUDE_CONFIG_DIR` (throwaway stands, containers, CI) — and under the
+override the gates read the **operator's** profile instead of the active one, verdicting about
+someone else's environment. Silent-wrong class: no error, a plausible and false conclusion.
+Observed twice on a clean-config stand (2.1.211): the devlog detect-gate saw the maintainer's
+symlinks and withheld the companion offer; the Phase 2b baseline detect saw the maintainer's
+global CLAUDE.md and withheld the baseline offer.
+
+### Fixed
+- **Executable detect-gates resolve the active config dir** — `CLAUDE_CONFIG_DIR` if set and
+  non-empty, else `<home>/.claude` — shipped as a *rule the agent resolves with whatever its
+  shell supports*, not a mandated one-liner: `Read`/`Glob` don't expand `$VAR` (the path must
+  reach them as a literal), and on Windows without Git Bash the shell is PowerShell, where bash
+  substitution isn't syntax. The bash form (`"${CLAUDE_CONFIG_DIR:-$(echo ~)/.claude}"` — its
+  tilde survives even unset `HOME` via passwd) remains as a parenthesized hint and as the direct
+  substitution inside the inherently-bash Phase 0 block. An absent dir is a valid "layer
+  absent", not an error. Gates touched: bootstrap Phase 0 profile listing, the devlog-companion
+  detect (hooks + skills), Phase 2b baseline detect and the guarded-merge backup path, audit §2
+  duplicate/symlink checks and §4 global-stamp check, and `/external-audit`'s ROLE_DIR fallback
+  — which now practices the "do not hardcode `~/.claude`" its neighboring step preaches.
+  Descriptive prose (layer maps, provenance, maintainer rituals) keeps the literal default:
+  parameterizing an explanation is noise, not portability. Externally refuted before release
+  (`code-refuter`: stands, 0 critical/major); the fix matches the host's own semantics —
+  the binary reads the variable as `process.env.CLAUDE_CONFIG_DIR || homedir()` with `trim()` —
+  and a two-arm headless A/B confirmed both branches at runtime: default profile → carrier
+  found; override → the gate inspects the fixture and returns a valid "absent", where the old
+  wording would have reported someone else's profile.
+
 ## [1.16.2] — 2026-07-16
 
 A safe way to try the kit before it touches anything. Installing already writes nothing to your

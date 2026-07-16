@@ -32,7 +32,9 @@ ls -la                      # repo shape
 ls -la .claude/ 2>/dev/null # confirm empty / absent
 git log --oneline 2>/dev/null | wc -l             # project age (0 + stderr-fatal on a fresh repo is fine)
 git log --oneline --since="3 months ago" 2>/dev/null | wc -l  # active vs dormant
-ls ~/.claude/               # operator-level config already present
+ls "${CLAUDE_CONFIG_DIR:-$(echo ~)/.claude}"      # user-level config already present — always the
+# ACTIVE config dir ($CLAUDE_CONFIG_DIR when set and non-empty, else <home>/.claude; non-bash shells apply the
+# same rule their own way). Absent dir = empty layer, a valid answer, not an error.
 ```
 
 Detect the stack from manifests (`package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod` …),
@@ -52,7 +54,7 @@ sessions where the operator is present.
 |---|---|
 | `CLAUDE.md` (root) | **yes** — project entry-point indexer |
 | `.claude/settings.json` | **yes** — permissions + minimal env |
-| practice baseline (Phase 2b) | **offer, operator decides** — project embed `.claude/rules/practice-baseline.md` (default) or guarded global `~/.claude/CLAUDE.md` merge (opt-in); skip if a loaded layer already carries it |
+| practice baseline (Phase 2b) | **offer, operator decides** — project embed `.claude/rules/practice-baseline.md` (default) or guarded user-global CLAUDE.md merge (opt-in); skip if a loaded layer already carries it |
 | `.claude/docs/` (Phase 2c) | **yes** — shipped distillation: `workflow.md` + `testing.md` + `docs-discipline.md`, copied verbatim from the kit |
 | `docs/ARCHITECTURE.md` + `docs/CODE-MAP.md` | **yes** — real content from the code read in Phase 0, never boilerplate (MVH-on-request: skip) |
 | `.claude/agents/` | **no** — built-ins cover it; defer until evidence |
@@ -337,9 +339,14 @@ apps* (T1). Set up:
    It's optional — the layer, not the tool, is what's required. **Detect before installing it,
    the same way Phase 2b detects before delivering the baseline:** hooks and skills from every
    layer *merge, never override*, so an operator who already runs a personal `SessionStart`
-   digest or keeps `~/.claude/skills/devlog/` gets both — the same state twice, in two formats,
-   ahead of turn one, with no error to signal it. Check `~/.claude/settings.json` hooks and
-   `~/.claude/skills/` first; on overlap, name it and let the operator pick one carrier. A
+   digest or keeps a user-level `skills/devlog/` gets both — the same state twice, in two formats,
+   ahead of turn one, with no error to signal it. Resolve the **active config dir** first —
+   `CLAUDE_CONFIG_DIR` if set and non-empty, else `<home>/.claude`; resolve it with whatever your shell
+   supports (bash: `echo "${CLAUDE_CONFIG_DIR:-$(echo ~)/.claude}"`) and hand file tools the
+   resolved literal (Read/Glob don't expand `$VAR`) — then check `<resolved>/settings.json`
+   hooks and `<resolved>/skills/`. Checking the default path while the variable points elsewhere
+   detects someone else's profile; an absent dir is a valid "no carrier", not an error.
+   On overlap, name it and let the operator pick one carrier. A
    detect gate that guards ~80 lines of prose while waving through a hook that fires every
    session has it backwards. The episodic layer is separate from
    in-flight progress and is what makes state legible to the human operator, not only to the

@@ -17,10 +17,15 @@ Detect-then-prescribe; files outside the repo are touched only with explicit app
 only through the guarded merge in step 3.
 
 1. **Detect — across every layer, not one file.** The substance can already arrive from any
-   memory layer the session loads (order: managed policy → user `~/.claude/CLAUDE.md` →
-   project `CLAUDE.md` / `.claude/rules/*.md` → auto-memory; `native-capabilities.md`,
-   Memory §). Check them all — an org-managed policy file or an existing project embed counts
-   the same as the user file. Four outcomes:
+   memory layer the session loads (order: managed policy → user CLAUDE.md → project
+   `CLAUDE.md` / `.claude/rules/*.md` → auto-memory; `native-capabilities.md`, Memory §).
+   Check them all — an org-managed policy file or an existing project embed counts the same
+   as the user file. The user layer lives in the **active config dir**: `CLAUDE_CONFIG_DIR`
+   if set and non-empty, else `<home>/.claude` — resolve it with whatever your shell supports (bash:
+   `echo "${CLAUDE_CONFIG_DIR:-$(echo ~)/.claude}"`) and hand file tools the resolved
+   literal (Read/Glob don't expand `$VAR`). Reading the default path while the variable
+   points elsewhere detects someone else's profile; an absent file is a valid "layer
+   absent", not an error. Four outcomes:
    - **Substance present** (think-before-coding, simplicity/surgical rules, runnable-oracle
      testing, continuity layers, fresh-context verification) → **skip entirely**; duplicating
      it into another layer wastes context budget.
@@ -46,8 +51,10 @@ only through the guarded merge in step 3.
    approved:
    - **Show the diff first** — the exact block to be appended/merged, plus anything the merge
      dedupes out of the project layer.
-   - **Back up before writing** — `~/.claude/CLAUDE.md` is usually not under version control,
-     so the backup is the rollback: copy it to `~/.claude/CLAUDE.md.bak-<YYYY-MM-DD>` first.
+   - **Back up before writing** — the user CLAUDE.md is usually not under version control,
+     so the backup is the rollback: copy `<config-dir>/CLAUDE.md` to
+     `<config-dir>/CLAUDE.md.bak-<YYYY-MM-DD>` first (`<config-dir>` = the active config dir
+     resolved in step 1 — the merge and its backup target the same file the session loads).
    - **Respect the file's budget** — the ≤200-line discipline that governs project CLAUDE.md
      applies here with machine-wide radius. If the merge would push the file past it,
      say so and recommend keeping the project embed instead.

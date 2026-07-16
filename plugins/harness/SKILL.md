@@ -154,7 +154,7 @@ already knows the kit):
 | .claude/docs/{workflow,testing,docs-discipline}.md | shipped distillation (verbatim, versioned) | 3 files |
 | docs/ARCHITECTURE.md + docs/CODE-MAP.md | real content from the code read | 2 files |
 | (no custom subagents/hooks/skills) | built-ins cover it | — |
-## Offered — practice baseline (Phase 2b): project embed `.claude/rules/practice-baseline.md` (~80 lines, default) or guarded global `~/.claude/CLAUDE.md` merge (opt-in); operator decides
+## Offered — practice baseline (Phase 2b): project embed `.claude/rules/practice-baseline.md` (~80 lines, default) or guarded user-global CLAUDE.md merge (opt-in); operator decides
 ## Sustained build (Phase 5) adds — oracle (reuse the project's entry point; author scripts/init.sh only if none exists) · .claude/features.json · progress+devlog conventions
 ## Minimal MVH (CLAUDE.md + settings only) — explicit operator request only
 ## Deferred until justified — subagents (evidence) · hooks (recurring pain) · skills (≥3× repeat)

@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-16T23:01:08Z",
-  "entry_count": 19,
+  "generated_at": "2026-07-16T23:17:24Z",
+  "entry_count": 20,
   "entries": [
     {
       "id": 1,
@@ -275,6 +275,19 @@
       "supersedes": null,
       "path": "entries/0019-ukazatel-perezhil-notu-kotoraya-ego-zapreshchaet.md",
       "preview": "Оператор назвал остаток, который сам же не тронул в v1.17.1, чтобы не расширять скоуп: строка change-sizing в шаблоне ## Working style заканчивается указателем — .claude/docs/workflow.md, а MVH-нота её не дропает. В MVH-проекте (CLAUDE.md + settings.json, больше ничего)…"
+    },
+    {
+      "id": 20,
+      "date": "2026-07-17",
+      "title": "README как онбординг: счастливый путь вперёд, devlog из сноски в продукт",
+      "tags": [
+        "docs",
+        "onboarding"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0020-readme-kak-onbording-schastlivyy-put-vpered-devlog-iz-snoski.md",
+      "preview": "README был написан для читателя, который уже знает, что такое кит. Два дефекта — оба про онбординг, не про прозу:"
     }
   ]
 }

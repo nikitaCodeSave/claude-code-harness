@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #20 · 2026-07-17 · README как онбординг: счастливый путь вперёд, devlog из сноски в продукт
+
+**Tags:** docs, onboarding
+
+README был написан для читателя, который уже знает, что такое кит. Два дефекта — оба про онбординг, не про прозу:
+
+[→ entries/0020-readme-kak-onbording-schastlivyy-put-vpered-devlog-iz-snoski.md](entries/0020-readme-kak-onbording-schastlivyy-put-vpered-devlog-iz-snoski.md)
+
+---
+
 ## #19 · 2026-07-17 · Указатель пережил ноту, которая его запрещает
 
 **Tags:** harness, docs

@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.17.3] — 2026-07-17
+
+**The README was written for someone who already knew what the kit was.** Two things it got wrong for
+a first-time reader: the happy path was buried — install, then thirty lines of `CLAUDE_CONFIG_DIR`
+sandbox mechanics before the one phrase that actually starts the thing — and `devlog` was filed under
+"Optional" at the bottom, three paragraphs of component inventory, as if a project's memory across
+sessions were a nice-to-have. Both are onboarding defects, not prose defects: the reader who bounces
+off a README never reaches the kit that would have served them.
+
+### Changed
+- **The happy path is three lines**: two `/plugin` commands and one sentence to say. The throwaway-config
+  recipe (v1.16.2) keeps every hard-won detail — both mechanisms and why you need both, the
+  Linux/Windows-vs-Keychain split, `rm -rf` undo, the `claude-code-harness`-not-`harness` trap — but
+  inside a collapsed `<details>`, where it serves the reader who wants it without taxing the one who
+  doesn't.
+- **`devlog` is installed by default, not offered as a footnote**: the install block ships both
+  plugins, the header says "two plugins … and keep a memory of it across sessions", and a real section
+  (`The devlog companion: your project's memory`) leads with the problem — a session that opens cold
+  re-litigates a settled decision — before the components. Framed as the atemporal harness (what's true
+  about the project) vs. the episodic record (what happened in it): different jobs, and the second is
+  where sessions bleed time. Requirements (Python 3, platforms) demoted to a closing line; the
+  skip-it-if-you-changelog-by-hand escape hatch kept.
+- **`What you can say` gained two rows**: `/devlog:devlog` (the skill was never shown being called) and
+  an explicit, fully-qualified `/claude-code-harness:claude-code-harness` invocation — with a note that
+  the phrases are examples, not incantations. The namespaced form is the one a subscriber actually has;
+  the bare `/claude-code-harness` only resolves in the maintainer's symlink-dogfood environment
+  (the #14/DEMO.md trap, caught before it shipped this time).
+- **`Four modes` is gone** — it restated the phrase table in abstract nouns. Bootstrap/Audit live in the
+  table and in `The opinion` (which moved below the how-to: the reader learns what it does before why
+  it's built that way); Extend/Explain collapsed into one table row. `What ships` became a `Learn more`
+  link — repo-path inventory is a contributor's view, not a user's.
+
+Untouched: every `plugins/**` behaviour. This release is the README only — no skill, reference, agent,
+hook, or template changed, so `/plugin update` delivers identical kit behaviour with a readable front door.
+
 ## [1.17.2] — 2026-07-17
 
 **The MVH note's own rule, applied to the line it walked past.** The `## Working style` template ends

@@ -6,9 +6,9 @@
 > **Адресат — мейнтейнер, не пользователь.** Рецепт ниже ставит плагин из **локального
 > чекаута** (`~/PROJECTS/claude-code-harness`), чтобы проверять ещё не выпущенные правки, а
 > грабли — про симлинк-догфуд, итерацию без bump и `plugin details` вне стенда. Пользователю,
-> который хочет безопасно попробовать кит, нужен README → «Try it in a throwaway config
-> first»: та же пара `CLAUDE_CONFIG_DIR` + `--scope project`, но источник — GitHub, и без
-> авторского шума.
+> который хочет безопасно попробовать кит, нужен README → `Install` → свёрнутый блок «Prefer to
+> try it without touching your own setup at all?»: та же пара `CLAUDE_CONFIG_DIR` +
+> `--scope project`, но источник — GitHub, и без авторского шума.
 
 Проверено на Claude Code 2.1.211 (Linux). Флаги CLI меняются — при расхождении верить
 `claude plugin install --help`, не этому файлу.

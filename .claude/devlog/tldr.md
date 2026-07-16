@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #7 · 2026-07-16 · Skill release: ритуал обновления репо — dev-harness commit vs shipped-release
+
+**Tags:** feature, skill, dev-harness, release
+
+За сессию release-ритуал выполнялся вручную дважды (v1.14.3, v1.14.4) одной и той же последовательностью, с повторяющимися gotcha-граблями (release.sh не стейджит .claude/devlog/; slug только через настоящий slugify; shipped-правка без бампа доставляет консюмерам ничего…
+
+[→ entries/0007-skill-release-ritual-obnovleniya-repo-dev-harness-commit-vs.md](entries/0007-skill-release-ritual-obnovleniya-repo-dev-harness-commit-vs.md)
+
+---
+
 ## #6 · 2026-07-16 · Docs-гигиена: снять декоративный edit-log, оставить функциональные staleness-стампы
 
 **Tags:** docs, refactor, canon

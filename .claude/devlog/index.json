@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-16T06:39:03Z",
-  "entry_count": 6,
+  "generated_at": "2026-07-16T07:00:44Z",
+  "entry_count": 7,
   "entries": [
     {
       "id": 1,
@@ -97,6 +97,21 @@
       "supersedes": null,
       "path": "entries/0006-docs-gigiena-snyat-dekorativnyy-edit-log-ostavit-funktsional.md",
       "preview": "Оператор указал на ## Provenance в practice-baseline.md и на класс «архаизмов» в справочной документации — прозу, описывающую правки самого документа: это читается как логи / AI-slop, а не польза для плагина. Инстинкт верный и совпадает с собственным правилом кита…"
+    },
+    {
+      "id": 7,
+      "date": "2026-07-16",
+      "title": "Skill release: ритуал обновления репо — dev-harness commit vs shipped-release",
+      "tags": [
+        "feature",
+        "skill",
+        "dev-harness",
+        "release"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0007-skill-release-ritual-obnovleniya-repo-dev-harness-commit-vs.md",
+      "preview": "За сессию release-ритуал выполнялся вручную дважды (v1.14.3, v1.14.4) одной и той же последовательностью, с повторяющимися gotcha-граблями (release.sh не стейджит .claude/devlog/; slug только через настоящий slugify; shipped-правка без бампа доставляет консюмерам ничего…"
     }
   ]
 }

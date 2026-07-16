@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #16 · 2026-07-17 · tools: — это allowlist, и цена ошибки асимметрична
+
+**Tags:** adr, harness
+
+Открытый хвост #12 — аудиторские роли объявляют Grep/Glob, которых в окружении нет — закрыт замером, и вывод противоположен ожидаемому: чинить нечего, а «замер на нескольких окружениях» вообще не тот рычаг. Правку блокирует асимметрия allowlist'а, а не количество обследованных…
+
+[→ entries/0016-tools-eto-allowlist-i-tsena-oshibki-asimmetrichna.md](entries/0016-tools-eto-allowlist-i-tsena-oshibki-asimmetrichna.md)
+
+---
+
 ## #15 · 2026-07-16 · Детект-гейты читают активный config dir, не хардкод ~/.claude
 
 **Tags:** harness, portability, silent-wrong

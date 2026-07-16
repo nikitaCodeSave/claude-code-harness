@@ -18,8 +18,8 @@ the spec lives), output file path, and any known preconditions (live DB containe
    probe: a connection through the project's own code path, not just `docker ps`). If a
    precondition is down and you cannot start it read-safely, record it and set
    `verdict.status: "blocked"` — do NOT downgrade to reading artifacts.
-2. **Oracle** — run the project's documented verification entry point (e.g. `./init.sh`,
-   `pytest -q`). Record exact command + observed output.
+2. **Oracle** — run the project's documented verification entry point (e.g. `make check`,
+   `scripts/init.sh`, `pytest -q`). Record exact command + observed output.
 3. **Scope-specific execution** — for each verify-step of the audited feature(s) (from
    `features.json` / spec): execute it for real. Integration tests against the live stack,
    the user-facing surface (CLI/API) end-to-end, negative cases included.

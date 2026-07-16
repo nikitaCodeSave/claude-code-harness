@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-16T15:26:24Z",
-  "entry_count": 11,
+  "generated_at": "2026-07-16T18:59:37Z",
+  "entry_count": 13,
   "entries": [
     {
       "id": 1,
@@ -168,6 +168,32 @@
       "supersedes": null,
       "path": "entries/0011-odin-istochnik-istiny-plaginy-dogfudyatsya-simlinkom.md",
       "preview": "Проверка операторского окружения показала, что источником для devlog был не плагин, а личные копии: скилл-форк от 11 июня и SessionStart-хук, дублирующий поставляемый. Сегодняшний фикс хука пришлось применять дважды вручную — в личную копию и в shipped. Это признак, по которому…"
+    },
+    {
+      "id": 12,
+      "date": "2026-07-16",
+      "title": "Правила-пустышки в шаблоне settings.json",
+      "tags": [
+        "bugfix",
+        "harness"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0012-pravila-pustyshki-v-shablone-settings-json.md",
+      "preview": "Шаблон settings.json из Phase 3 отдавал правила, которые движок парсит и никогда не матчит: Glob(./) и Grep(./) в allow. Нашлось живым прогоном, не ревью — в конфиге оператора, куда попало прямо из чеклиста. Шаблон — ровно то место, где no-op размножается в каждый проект…"
+    },
+    {
+      "id": 13,
+      "date": "2026-07-16",
+      "title": "Оракул — это команда, а не файл",
+      "tags": [
+        "docs",
+        "harness"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0013-orakul-eto-komanda-a-ne-fayl.md",
+      "preview": "Phase 5 item 1 предписывал авторить init.sh каждому долгоживущему проекту: альтернатива — «or documented one-liner» — пряталась в скобках посреди абзаца, под жирным «Runnable oracle + env init», и де-факто дефолт читался как «сочини файл». Второй энтрипойнт, гоняющий те же…"
     }
   ]
 }

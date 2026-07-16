@@ -192,16 +192,32 @@ auto-allowed, dangerous ones denied or gated, no blanket `--dangerously-skip-per
     "allow": [
       "Bash(git status:*)", "Bash(git diff:*)", "Bash(git log:*)", "Bash(ls:*)",
       "Bash(<test-runner>:*)", "Bash(<lint-runner>:*)",
-      "Read(./**)", "Edit(./**)", "Glob(./**)", "Grep(./**)"
+      "Read(./**)", "Edit(./**)"
     ],
     "ask":  [ "Bash(git push:*)", "Bash(git commit --amend:*)", "Bash(git rebase:*)" ],
-    "deny": [ "Edit(./secrets/**)", "Edit(./.git/**)",
+    "deny": [ "Read(./secrets/**)", "Edit(./secrets/**)", "Edit(./.git/**)",
               "Bash(rm -rf /:*)", "Bash(git push --force:*)" ]
   }
 }
 ```
 
 Tune to what actually exists. If the project uses MCP, gate it via `enabledMcpjsonServers`.
+
+**Two rules cover every file tool: `Read(path)` and `Edit(path)` are the only forms the file-permission
+checks match.** `Read(./**)` already governs Grep and Glob; `Edit(./**)` already governs Write and
+NotebookEdit. Giving one of *those* tools a path of its own is the no-op — `Glob(path)`, `Write(path)`,
+`NotebookEdit(path)` are parsed, never matched, and warn at startup (v2.1.210+); live on 2.1.211 a
+`deny: Write(./s/**)` let the file be created anyway. `Grep(path)` never warns at all — the warning
+list is hardcoded and omits it — so nothing tells you it isn't doing what you meant; write `Read(path)`
+and the question doesn't arise. (`MultiEdit` is gone as a tool: "matches no known tool".) A **bare**
+tool name is a different rule and stays live: `deny: Write` without parens matches the tool everywhere
+and is not a typo. Dead rules are worse than absent ones — they read as protection while enforcing
+nothing, and a template is the one place a no-op propagates into every project that copies it.
+
+On the **deny** side the two are not interchangeable: a `Read` deny also blocks Edit on that path
+(v2.1.208+) but never reaches Write or NotebookEdit, so a path nothing may read *or* change needs both
+— hence the `Read(./secrets/**)` + `Edit(./secrets/**)` pair above. Neither reaches a subprocess that
+opens the file itself (a Python/Node script); for OS-level enforcement, enable the sandbox.
 
 **`.env` — distinguish secret-bearing from dev-only before denying it.** A blanket
 `deny: Edit(./.env*)` looks safe but, in a dev-only project, it blocks the agent from creating
@@ -213,9 +229,10 @@ The mechanical guard that matters most is `.gitignore` + the secret never reachi
 not blocking the file the agent legitimately needs to run.
 
 **Rewrite-with-donors:** when the project rewrites an existing system, pin donor/reference
-repos read-only *mechanically* — `allow: Read(//abs/path/**)` plus `deny: Edit(//abs/path/**)`,
-`Write(//abs/path/**)` (`//` = absolute path). A deny rule survives context loss; in live use
-the same mechanism also blocked a credential-file write that prompt-discipline had missed.
+repos read-only *mechanically* — `allow: Read(//abs/path/**)` plus `deny: Edit(//abs/path/**)`
+(`//` = absolute path; that one `Edit` deny is what covers Write and NotebookEdit — a `Read` deny
+would not). A deny rule survives context loss; in live use the same mechanism also blocked a
+credential-file write that prompt-discipline had missed.
 
 ## Phase 4 — (Optional) `.claude/rules/` for hard invariants
 
@@ -235,10 +252,23 @@ apps*, T1) actually bite. It is **conventions + a few prepared artifacts**, not 
 Source: *Effective harnesses for long-running agents* (T1) and *Harness design for long-running
 apps* (T1). Set up:
 
-1. **Runnable oracle + env init** — an `init.sh` (or documented one-liner) that starts the app and
-   runs basic end-to-end / test verification. The single most important long-horizon enabler: the
-   agent closes its own loop against it instead of "looks done". *"Run verification tests at session
-   start to catch undocumented bugs."* For web apps, wire **browser automation** (Playwright/Puppeteer
+1. **Runnable oracle + env init** — **one named command that returns a verdict**, covering app start
+   + basic end-to-end / test verification. The single most important long-horizon enabler: the agent
+   closes its own loop against it instead of "looks done". *"Run verification tests at session start
+   to catch undocumented bugs."*
+   **The oracle is a command, not a file — don't author a script by default.** Take the first branch
+   that fits:
+   (a) **an entry point already exists** (`make check`, `npm test`, `just check`, `tox`) → **that is
+   the oracle**; name it in CLAUDE.md and stop. A second entry point re-running the same gates is a
+   drift source — authoring one anyway is this phase's recurring over-scaffolding.
+   (b) **verification is a single well-known command** → document the one-liner in CLAUDE.md,
+   **create no file**.
+   (c) **no entry point, and verification is multi-gate** (tests + lint + format + app boot) **or
+   needs env prep** (venv, docker, exported vars) → author **one** script at **`scripts/init.sh`**
+   (or the project's own `bin/`/`tools/` convention) and point CLAUDE.md at it. **Not the repo
+   root** — a bespoke harness script among the build manifests reads as clutter to the operator,
+   and only (c) earns a file at all.
+   For web apps, wire **browser automation** (Playwright/Puppeteer
    MCP) so the evaluator can *"click through the running application the way a user would."*
    For non-web products define a **domain oracle** instead: golden inputs → expected outputs,
    **negative cases included** (a negative golden case has caught a latent donor-code bug that
@@ -246,7 +276,7 @@ apps* (T1). Set up:
    **Session 0 establishes a green baseline:** add any missing test/lint config + one trivial passing
    test (and a no-empty-tests guard, **per runner**: vitest — `--passWithNoTests`; pytest has no such
    flag and **exits 5 on an empty suite** — that exit 5 is non-zero, so a naive `pytest || fail` in
-   init.sh mis-reports an empty suite as a failure; the guard *is* the one trivial smoke test that
+   the oracle mis-reports an empty suite as a failure; the guard *is* the one trivial smoke test that
    makes the suite non-empty; jest — `--passWithNoTests`) so the oracle runs *green* from the first
    session — an oracle that is red on day 0 emits false-alarm signal until fixed.
    **Python venv — resolve each tool independently, never a blanket `.venv/bin/` prefix on the whole
@@ -284,7 +314,7 @@ apps* (T1). Set up:
    slot, sessions invent ad-hoc fields or root handoff files for it (observed twice
    independently).
    **Keep kit artifacts under `.claude/`** (`.claude/features.json`, `.claude/harness-journal.md`,
-   `.claude/progress/`, `.claude/devlog/`) — only genuine product files (`CLAUDE.md`, `init.sh`,
+   `.claude/progress/`, `.claude/devlog/`) — only genuine product files (`CLAUDE.md`,
    build manifests) belong at the repo root. A root cluttered with control files reads as mess to
    the operator and obscures what's product vs harness; point CLAUDE.md at the `.claude/` paths.
    features.json is the **single-track** ledger; a **multi-initiative** campaign keeps **one**
@@ -320,8 +350,8 @@ apps* (T1). Set up:
    must re-run it before relying on it — a fix asserted but never executed is a looks-done trap
    (a handoff "NFKC closes both cases" once proved wrong on execution: it missed zero-width chars).
    Phrase queued fixes as *"reproduce → close"*, not as finished solutions.
-4. **Session-start ritual** (put in CLAUDE.md or `init.sh`): `pwd` → read git log + progress file →
-   read feature list, pick the highest-priority incomplete feature → run init/e2e → work that one
+4. **Session-start ritual** (put it in CLAUDE.md): `pwd` → read git log + progress file →
+   read feature list, pick the highest-priority incomplete feature → run the oracle → work that one
    feature. (With the devlog companion installed, its SessionStart digest already surfaces
    recent devlog + active progress — the ritual then starts from acting on that state, not
    rediscovering it.)
@@ -390,6 +420,18 @@ custom subagents/hooks until a trigger earns them.
 ## Phase 7 — Verify
 
 ```bash
+claude --print "ok" </dev/null 2>&1 >/dev/null | grep -E '^(Permission |Ignoring .*permissions\.allow)'
+# pass = prints NOTHING. Read each hit, don't just count them:
+#   "not matched by file permission checks" → a no-op path form (Glob/Write/NotebookEdit).
+#   "matches no known tool" → a typo. Only deny/ask are typo-checked, so a typo'd *allow* rule is
+#     dropped forever without a word — eyeball that list yourself; this is a blind spot, not a pass.
+#   "Ignoring N permissions.allow entries … not been trusted" → the allow half was never validated.
+#     Accept the trust dialog once and re-run. Without this second pattern in the grep an untrusted
+#     workspace (fresh clone, CI) prints nothing while every allow rule is inert — a clean bill of
+#     health on the exact defect the check exists to find.
+# The name in parentheses is the source file: a hit can come from ~/.claude/settings.json or a
+# managed layer rather than this project (and the typo variant carries no label at all).
+# Also blind to `Grep(path)`, which never warns — only the Phase 3 template prevents that one.
 claude --print "what is the project's stack?"  # pass = answer matches CLAUDE.md, not a guess
 claude --print "what files are you not allowed to touch here?"  # pass = names the deny/ask rules from settings.json
 grep -ci "plan mode" CLAUDE.md && grep -ci "fresh-context" CLAUDE.md && grep -ci "size the change" CLAUDE.md
@@ -405,7 +447,8 @@ ls .claude/docs/workflow.md .claude/docs/testing.md .claude/docs/docs-discipline
 
 Each check has a crisp criterion — "command produced output" is not a pass.
 
-If a test/lint command or `init.sh` was named, **run it once and confirm it actually executes**
+If an oracle command was named (`make check`, `pytest -q`, `scripts/init.sh`), **run it once and
+confirm it actually executes**
 (the oracle must be real, not aspirational) — a runnable check the agent can close the loop against
 is the difference between long-horizon autonomy and drift. Running it will prompt for permission
 on first use — expected first-run approval; don't skip the run because of the prompt.

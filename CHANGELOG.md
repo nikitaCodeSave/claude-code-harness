@@ -7,6 +7,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.16.1] — 2026-07-16
+
+Two corrections to shipped guidance, both the same shape: an instruction that read as protection or
+as necessity while being neither. The Phase 3 `settings.json` template carried permission rules the
+engine parses and never matches — and a template is the one place a no-op propagates into every
+project that copies it. Phase 5, separately, buried its no-file alternative in a mid-paragraph
+parenthesis, so the de-facto default read as *author a script*: on a project whose entire
+verification is `pytest -q`, the old wording duly produced a root `init.sh` wrapping that one
+command.
+
+The permission half was found in live use rather than by review: an operator's own config carried
+`Glob(./**)` / `Grep(./**)` because the checklist put them there. Verified against Claude Code
+2.1.211 three ways — the permissions doc, the rule validator inside the shipped binary
+(`filePatternTools: ["Read","Write","Edit","Glob","NotebookRead","NotebookEdit","Cd"]` — no `Grep`),
+and a red→green fixture run.
+
+### Fixed
+- **Dead file rules removed from the template** — `Glob(./**)` and `Grep(./**)` out of `allow`,
+  `Write(//abs/path/**)` out of the rewrite-with-donors deny pair. The file-permission checks match
+  only `Read(path)` and `Edit(path)`: `Read` already governs Grep and Glob, `Edit` already governs
+  Write and NotebookEdit. `Glob(path)` / `Write(path)` / `NotebookEdit(path)` are parsed, never
+  matched, and warn on v2.1.210+ — a `deny: Write(./s/**)` demonstrably let the file be created
+  anyway. **`Grep(path)` never warns at all**, which is why the template's copy survived this long.
+  (`MultiEdit` is additionally gone as a tool: "matches no known tool".) A **bare** tool name stays
+  live and is a different rule: `deny: Write` without parens matches the tool everywhere.
+- **The template's `secrets/` deny now fences reading, not only writing** — `Read(./secrets/**)`
+  joins `Edit(./secrets/**)`. `audit-checklist.md` §10 already grades "secret paths not denied for
+  `Read`" as a finding while the template shipped exactly that. The two rules are not
+  interchangeable: a `Read` deny also blocks Edit (v2.1.208+) but never reaches Write or
+  NotebookEdit, so a path nothing may read *or* change needs both.
+
+### Added
+- **A mechanical check for the class, in both rituals — with its blind spots named, not papered
+  over.** Phase 7 gains a dead-rule grep (pass = no output) and `audit-checklist.md` §10 the matching
+  finding. The check greps for the untrusted-workspace line as well as `^Permission `, and that second
+  pattern is not decoration: a fresh-context refuter showed the obvious one-pattern form reports
+  **clean** in an untrusted workspace — a fresh clone, CI, the bootstrap case itself — because `allow`
+  entries are dropped *before* validation, and the single line that says so doesn't begin with
+  `Permission`. It would have handed operators a clean bill of health on precisely the dead-`allow`-rule
+  defect this release exists to eliminate. Two blind spots are stated outright: `Grep(path)` never
+  warns, and only deny/ask are typo-checked, so a typo'd *allow* rule vanishes without a word
+  (`Bogustool(./z/**)` in `allow` → zero output). Remediation is a **fold, not a delete**, and a bare
+  `Write`/`Glob` must survive it. A dead **deny** rule is graded the harness's most expensive defect
+  class — the operator believes a path is fenced and it is not.
+
+### Changed
+- **The Phase 5 oracle is a command, not a file — no script authored by default.** Item 1 stops
+  hiding the alternative in a parenthesis and branches explicitly: (a) an entry point already exists
+  (`make check`, `npm test`, `just check`, `tox`) → *that* is the oracle; name it in CLAUDE.md and
+  stop — a second entry point re-running the same gates is a drift source; (b) verification is one
+  well-known command → document the one-liner, create no file; (c) no entry point *and* multi-gate or
+  env-prep needed → author **one** script at `scripts/init.sh`, not the repo root (a bespoke harness
+  script among the build manifests reads as clutter; only (c) earns a file at all). Measured rather
+  than assumed: a three-fixture behavioural A/B against the old text — control shipped through the
+  same dogfood symlink, machine criterion, one run per cell — found that on a `pytest -q`-only
+  project the old wording created a root `init.sh` whose whole payload was `exec "$PYTEST" -q`, while
+  the new one names the command and writes no file. The asymmetry is recorded, not smoothed over:
+  branch (a) produced **no delta** — the model already reused an existing `make check` unprompted —
+  so (a) is insurance and (b)/(c) are what fix the measured defect. Ripples through everything that
+  named `init.sh` as a given: `SKILL.md`'s Phase 5 line, `operator-playbook.md` §2 and §3,
+  `evidence-executor.md`'s oracle step, `audit-checklist.md`'s post-refresh run, the root-files list,
+  the session-start ritual, and the Phase 7 run-it-once check. `project-docs/workflow.md` step 3 now
+  reads "run the oracle — the verification command CLAUDE.md names"; its `shipped-by` stamp advances
+  to v1.16.1, so installed copies are offered the re-sync on their next audit.
+- **`audit-checklist.md` grounding stamp synced to CC v2.1.211** — its §10 findings were live-verified
+  against 2.1.211 in this release, so the functional "grounded for X" stamp tracks that.
+  `harness-discipline.md` keeps v2.1.210: its content wasn't re-grounded here, and these stamps are
+  per-file provenance, not a global version marker.
+
+Untouched on purpose: `native-capabilities.md` §Settings (its "Read deny rules hide files from
+Glob/Grep" line was already correct — the fix was the template contradicting it, not the fact), and
+`Bash(rm -rf /:*)` in the template deny (not a no-op: it hardens the built-in circuit-breaker prompt
+into a hard deny).
+
 ## [1.16.0] — 2026-07-16
 
 Consumer-journey fold. A fresh-context external audit of how the kit lands on a machine that

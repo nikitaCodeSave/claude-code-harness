@@ -67,8 +67,9 @@ Step check: `claude --print "what is the project's stack?"` answers from CLAUDE.
 If the project is a product built feature-by-feature (not a library/script/one-off):
 
 1. Say: **"set up the long-running build kit (Phase 5)"**.
-2. You get conventions + files (not machinery): a runnable oracle `init.sh` with a green
-   baseline · `.claude/features.json` (verify steps + `preconditions`, `passes: false`)
+2. You get conventions + files (not machinery): a runnable oracle with a green baseline — your
+   existing `make check`/`npm test` if the project has one, a `scripts/init.sh` only if it doesn't
+   · `.claude/features.json` (verify steps + `preconditions`, `passes: false`)
    · `.claude/progress/<slug>.md` + devlog · a session-start ritual in CLAUDE.md
    · a line about the fresh-context Evaluator. (`docs/ARCHITECTURE.md` + `CODE-MAP.md` and the
    workflow distillation are already in place from bootstrap — that's the default shape, not
@@ -87,7 +88,7 @@ If the project is a product built feature-by-feature (not a library/script/one-o
   `features.json.preconditions` (DB docker container, local LLM, …). The session will check them
   and stop if they're missing.
 - **Session start**: it's enough to say "continue from features.json" — the session-start ritual
-  is wired into the project CLAUDE.md (git log → progress → one feature → `./init.sh`).
+  is wired into the project CLAUDE.md (git log → progress → one feature → the oracle).
 - **Session end**: check by eye — is there a commit per feature, is `progress` updated, is
   `passes: true` set only for features with completed verify steps.
 - **A handoff note is a claim, not a fact**: if the previous session wrote "verified" — the next
@@ -101,7 +102,7 @@ If the project is a product built feature-by-feature (not a library/script/one-o
   journal/progress, don't follow the contract blindly. Resolve commands per-tool (`.venv` first,
   PATH fallback) — and **watch what actually resolved**: an inherited PATH may substitute another
   project's venv (the oracle is "green" but the interpreter isn't from this project); have
-  init.sh print resolved paths.
+  the oracle print resolved paths.
 
 ## 4. An existing project — bring it to the canon
 

@@ -8,6 +8,26 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #13 · 2026-07-16 · Оракул — это команда, а не файл
+
+**Tags:** docs, harness
+
+Phase 5 item 1 предписывал авторить init.sh каждому долгоживущему проекту: альтернатива — «or documented one-liner» — пряталась в скобках посреди абзаца, под жирным «Runnable oracle + env init», и де-факто дефолт читался как «сочини файл». Второй энтрипойнт, гоняющий те же…
+
+[→ entries/0013-orakul-eto-komanda-a-ne-fayl.md](entries/0013-orakul-eto-komanda-a-ne-fayl.md)
+
+---
+
+## #12 · 2026-07-16 · Правила-пустышки в шаблоне settings.json
+
+**Tags:** bugfix, harness
+
+Шаблон settings.json из Phase 3 отдавал правила, которые движок парсит и никогда не матчит: Glob(./) и Grep(./) в allow. Нашлось живым прогоном, не ревью — в конфиге оператора, куда попало прямо из чеклиста. Шаблон — ровно то место, где no-op размножается в каждый проект…
+
+[→ entries/0012-pravila-pustyshki-v-shablone-settings-json.md](entries/0012-pravila-pustyshki-v-shablone-settings-json.md)
+
+---
+
 ## #11 · 2026-07-16 · Один источник истины: плагины догфудятся симлинком
 
 **Tags:** refactor, harness

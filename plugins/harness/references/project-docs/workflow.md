@@ -1,4 +1,4 @@
-<!-- shipped-by: claude-code-harness v1.15.0 — do not hand-evolve in the project;
+<!-- shipped-by: claude-code-harness v1.16.1 — do not hand-evolve in the project;
      improvements flow through the plugin (re-synced on audit). Project-specific
      facts live in CLAUDE.md (and features.json, if present), not here. -->
 
@@ -12,7 +12,8 @@ when the trigger fires; this file is on-demand, not per-turn context.
 1. `git log --oneline -10` + read `.claude/progress/` — restore state.
 2. Read `.claude/features.json` (if present) — take **one** highest-priority open feature;
    skip `blocked: true` entries — they wait on what `blocked_reason` names, not on another attempt.
-3. Run the oracle (test suite / `init.sh`) — confirm the baseline is green *before* changing code.
+3. Run the oracle — the verification command CLAUDE.md names (`make check` / the test suite /
+   `scripts/init.sh`). Confirm the baseline is green *before* changing code.
 4. A handoff note is a **claim, not a fact**: "verified" written by a past session must be
    re-executed before you rely on it. Phrase queued fixes as "reproduce → close".
 

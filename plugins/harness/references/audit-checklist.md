@@ -2,7 +2,7 @@
 
 Walk top-down. For each finding write a one-line gap + a proposed remediation; **do not edit
 until the operator approves** the items they want fixed. Output uses the report template in
-`SKILL.md`. Grounded for the Claude 5 family / Opus 4.8 generation, Claude Code v2.1.210 (July 2026).
+`SKILL.md`. Grounded for the Claude 5 family / Opus 4.8 generation, Claude Code v2.1.211 (July 2026).
 
 ## 0. Live machinery vs completed-run artifact (ask this first)
 
@@ -187,6 +187,16 @@ or re-run before proposing edits to its machinery.
 ## 10. Permissions & secrets
 
 - Destructive commands in `allow` rather than `ask`/`deny`; secret paths not denied for `Read`.
+- **Dead file rules — a line that reads as a guard and enforces nothing.** The file-permission checks
+  match only `Read(path)` and `Edit(path)`: `Glob(path)`, `Write(path)` and `NotebookEdit(path)` are
+  parsed, never matched, and warn at startup (v2.1.210+); `Grep(path)` never warns at all. Run the
+  Phase 7 dead-rule check from `bootstrap-checklist.md` and read its output — *including* the
+  untrusted-workspace line, without which the check reports clean while every `allow` rule is inert.
+  Two blind spots it cannot cover, so grep for them by hand: `Grep(` in the settings file, and a
+  typo'd tool name in `allow` (only deny/ask are typo-checked). Remediation is a **fold, not a
+  delete** — `Glob(p)`/`Grep(p)` → `Read(p)`, `Write(p)`/`NotebookEdit(p)` → `Edit(p)`; a **bare**
+  `Write` / `Glob` with no parens is a working whole-tool rule, leave it. Grade a dead **deny** rule
+  as the harness's most expensive defect class — the operator believes a path is fenced and it is not.
 - `--dangerously-skip-permissions` or bypass mode baked into committed settings.
 - API-only features assumed (managed-agents, beta headers, `--bare`) on a CLI subscription.
 
@@ -205,7 +215,7 @@ refreshing its own harness needs them, not just the maintainer:
   `diff` clean against `references/project-docs/*`; the `shipped-by:` header is the re-sync key,
   don't hand-edit it. Add the CLAUDE.md pointer noting the project's `.claude/rules/` *extend* the
   baseline.
-- **After any refresh → run the project's oracle** (`init.sh`/test suite) green before declaring
+- **After any refresh → run the project's oracle** (the command CLAUDE.md names) green before declaring
   done; a harness edit that breaks a hook or a referenced path shows up there, not in the diff.
 
 ## Severity ordering for the report

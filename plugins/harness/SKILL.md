@@ -53,7 +53,11 @@ travel with a plugin install — detect across memory layers, then offer a proje
 sustained, multi-session product build, also set up the long-running build kit** (runnable
 oracle / feature-spec ledger / progress-handoff conventions — checklist Phase 5; Anthropic's
 long-running-harness playbook, files+conventions not machinery; still no custom
-subagents/hooks). Then stop.
+subagents/hooks). **Greenfield (0 files, 0 commits) is a valid detected state, not a reason to
+stall**: an explicit request for the full harness on an empty repo is informed consent — deploy it
+with honestly-labelled stubs (never invented facts) and an `F0` ledger feature that closes them in
+the loop. **Close every bootstrap by recording it** (Phase 8: the run writes its own first devlog
+entry — the episodic layer starts live instead of as a convention nobody has exercised). Then stop.
 
 ### Mode 2: Audit (existing `.claude/`)
 Read `references/audit-checklist.md`. Walk it top-down; produce a gap statement + remediation
@@ -146,18 +150,20 @@ already knows the kit):
 
 ```markdown
 # Claude Code harness bootstrap — <repo>
-## Detected state — stack / age / existing docs / existing `.claude/`
+## Detected state — stack / age / existing docs / existing `.claude/` (greenfield = 0 files/0 commits is a state, not a blocker)
 ## Default shape (production-grade, any project size)
 | File | Purpose | ~size |
-| CLAUDE.md (root) | entry-point indexer (incl. Working style + verification ladder) | ~80 lines |
+| CLAUDE.md (root) | entry-point indexer (incl. Working style + verification ladder + continuity duty) | ~80 lines |
 | .claude/settings.json | permissions + minimal env | ~20 lines |
 | .claude/docs/{workflow,testing,docs-discipline}.md | shipped distillation (verbatim, versioned) | 3 files |
 | docs/ARCHITECTURE.md + docs/CODE-MAP.md | real content from the code read | 2 files |
 | (no custom subagents/hooks/skills) | built-ins cover it | — |
 ## Offered — practice baseline (Phase 2b): project embed `.claude/rules/practice-baseline.md` (~80 lines, default) or guarded user-global CLAUDE.md merge (opt-in); operator decides
 ## Sustained build (Phase 5) adds — oracle (reuse the project's entry point; author scripts/init.sh only if none exists) · .claude/features.json · progress+devlog conventions
+## Greenfield (no code yet) — ARCHITECTURE/CODE-MAP ship as labelled stubs, never invented facts; ledger seeds `F0` "get the brief → fill Stack / ARCHITECTURE / CODE-MAP / name the oracle", `passes: false`
 ## Minimal MVH (CLAUDE.md + settings only) — explicit operator request only
 ## Deferred until justified — subagents (evidence) · hooks (recurring pain) · skills (≥3× repeat)
+## Closes with — Phase 8: the bootstrap records itself as devlog entry #1 (live episodic layer + a carrier smoke test)
 ```
 
 ## Gotchas

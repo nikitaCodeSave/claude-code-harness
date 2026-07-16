@@ -7,6 +7,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.17.0] — 2026-07-17
+
+A clean-environment bootstrap test caught the kit failing its own write-through rule. The Phase 2
+CLAUDE.md template carried no continuity duty, so **a session following the checklist to the letter
+was obliged to produce a CLAUDE.md with zero mention of devlog or progress** — while Phase 7's
+write-through grep, whose stated job is catching instructions that stay in the references instead of
+landing in the project, tested three other tokens and passed it green. The depth had shipped twice
+over (`practice-baseline.md` §6, `project-docs/workflow.md` §Continuity); only the ~per-turn duty and
+the carrier's name never made the trip. The second gap: at 0 files / 0 commits nothing in the
+checklist applied, so the session improvised a policy on the spot.
+
+### Added
+- **Continuity duty in the Phase 2 CLAUDE.md template** — three lines by the existing
+  `Doc-with-code` pattern: the trigger (feature / fix / config or API change / decision → episodic
+  entry), the carrier, `.claude/progress/<slug>.md`, and a pointer to `.claude/docs/workflow.md` for
+  the depth. Deliberately **not** a section: the kit's own division of labor (Phase 2c) puts the
+  ~per-turn duty in CLAUDE.md and the on-demand depth in `.claude/docs/` — restating the shipped
+  depth in every project's CLAUDE.md is the over-correction, not the fix.
+- **Phase 8 — Record the bootstrap.** The run writes its own devlog entry #1 in the carrier the
+  Phase 2 duty names. One action, four effects: the *why* of the harness enters the episodic layer
+  instead of evaporating with the session; `.claude/devlog/entries/` exists for real; the
+  SessionStart digest has something to show on turn one; and the carrier gets a live smoke test.
+  Phase 6 "Stop" keeps its name — it is about *not adding machinery*, not about the end.
+- **Greenfield policy (Phase 0)** — "0 files, 0 commits" is a valid detected state, not a blocker.
+  An explicit request for the full harness on an empty repo is **informed consent: deploy it, don't
+  argue the project is too small**. Undeterminable intent → ask once, default to the full shape.
+- **`F0` ledger seed (Phase 5, item 2)** — on a greenfield sustained build the ledger seeds
+  `F0` "get the brief → fill Stack / ARCHITECTURE / CODE-MAP / name the oracle", `passes: false`.
+  The session ritual lands on it first, so the TBDs close **inside the loop** rather than in the
+  operator's memory.
+- **`continuity` as Phase 7's fourth write-through grep token** — the regression test for the bug
+  above. Carrier-agnostic on purpose: it passes whether the carrier is a devlog or disciplined
+  commits.
+- **Audit gap-check** — CLAUDE.md that names no continuity duty. Every project bootstrapped on
+  ≤1.16.3 has this by construction, so the audit now surfaces it (adopt-on-proof: this run is the
+  proof).
+
+### Changed
+- **Placeholder vs boilerplate, made explicit (Phase 2 + Phase 1 table).** "Never boilerplate" bans
+  *inventing a plausible fact you did not read*; it does not ban an honestly-labelled empty cell that
+  names its own fill trigger. Greenfield `docs/ARCHITECTURE.md` / `docs/CODE-MAP.md` therefore ship as
+  marked stubs. A labelled stub is legible state; an invented one is a lie the next session trusts.
+- **Phase 5 item 3** now points at the Phase 2 duty instead of describing the episodic layer in
+  mid-air — a layer described only in the checklist is a layer the working session never hears about.
+  The carrier detect-gate is unchanged.
+- **Phase 7** marks the stack probe and the oracle run **N/A by construction** on greenfield (the
+  stack is a labelled TBD — there is nothing to match and no command to run), not "skipped". The
+  deny-rules probe and all four greps still apply.
+
+### Fixed
+- **Stubs no longer cite an `F0` that will never exist.** Phase 5 is explicitly skipped for
+  libraries / scripts / one-offs, so on a *non-sustained* greenfield there is no `features.json` —
+  yet the first draft asserted unconditionally that the stub's fill trigger "is the `F0` ledger
+  feature". A stub pointing at a file the project will never have is precisely the dangling-pointer
+  noise the checklist's own MVH note forbids, wearing an accountability costume. The claim is now
+  branch-aware, and the same Phase-5 assumption is removed from Phase 8's carrier fallback and from
+  the duty template's carrier placeholder. (Caught pre-release by refutation of the diff, then
+  confirmed by an A/B of two live bootstraps.)
+
+### Not touched
+`practice-baseline.md` (its content-version stamp stays **v1.16.0** — it advances only when the
+block's text changes) and `references/project-docs/*` (their per-file `shipped-by` stamps stay at
+v1.9.2 / v1.10.1 / v1.16.1). The continuity depth was already correct in both; only the project-side
+duty was missing.
+
 ## [1.16.3] — 2026-07-16
 
 The kit hardcoded `~/.claude` in its *executable* detect-gates. Claude Code relocates the whole

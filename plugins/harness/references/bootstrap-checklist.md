@@ -43,6 +43,15 @@ the operator's stated goal): is this a *sustained, multi-session product build* 
 + Phase 5 kit) or a small/one-off/library (→ default shape without Phase 5)? A capable model reads
 all this itself — you are confirming, not teaching it. **Write nothing in Phase 0.**
 
+**Greenfield — 0 files, 0 commits — is a detected state, not a blocker.** "No manifests, no code,
+no history" is a valid answer to every probe above: record it as the detected state and continue.
+Nothing downstream requires a stack to exist *yet*; it requires the harness to be honest about not
+knowing one. An explicit operator request for the full harness on an empty repo is **informed
+consent — deploy it, don't argue the project is too small to need one**: laying the flow down at
+file zero is the cheapest it will ever be, and the retrofit is what costs a session. When intent is
+genuinely undeterminable (no README, no stated goal, nothing to read), ask once — sustained product
+build or one-off? — and default to the full shape if there is no one to answer.
+
 ## Phase 1 — Propose the default shape
 
 Present this and get approval before writing. **Headless / fire-and-forget flow** (operator said
@@ -56,7 +65,7 @@ sessions where the operator is present.
 | `.claude/settings.json` | **yes** — permissions + minimal env |
 | practice baseline (Phase 2b) | **offer, operator decides** — project embed `.claude/rules/practice-baseline.md` (default) or guarded user-global CLAUDE.md merge (opt-in); skip if a loaded layer already carries it |
 | `.claude/docs/` (Phase 2c) | **yes** — shipped distillation: `workflow.md` + `testing.md` + `docs-discipline.md`, copied verbatim from the kit |
-| `docs/ARCHITECTURE.md` + `docs/CODE-MAP.md` | **yes** — real content from the code read in Phase 0, never boilerplate (MVH-on-request: skip) |
+| `docs/ARCHITECTURE.md` + `docs/CODE-MAP.md` | **yes** — real content from the code read in Phase 0, never boilerplate; greenfield (no code to read) → labelled stubs, never invented facts (MVH-on-request: skip) |
 | `.claude/agents/` | **no** — built-ins cover it; defer until evidence |
 | `.claude/hooks/` | **no** — defer until a recurring pain |
 | `.claude/skills/` | **no** — defer until a workflow repeats ≥3× |
@@ -102,13 +111,22 @@ build.)
   and the full flow — `.claude/docs/workflow.md`.
 - Doc-with-code: a change updates its matching doc in the same commit — mapping table in
   `.claude/docs/docs-discipline.md`.
+- Continuity: a feature / fix / config or API change / architectural decision closes with an
+  episodic entry (`/devlog:devlog` if installed, else a `.claude/devlog/entries/` note — or this
+  project's disciplined commit messages); a task spanning sessions keeps
+  `.claude/progress/<slug>.md` current. Layers and triggers — `.claude/docs/workflow.md`.
 - Big/long tasks: give the full task spec up front in one well-specified turn, decompose into
   independently-verifiable slices, and run at `high`/`xhigh` effort for long-horizon / async work.
 ```
 
-MVH-on-request: drop the two `.claude/docs/` pointer lines (ladder semantics, doc-with-code)
-and the two `.claude/docs/` Reference-materials lines — rules pointing at files that don't
-exist are noise (detect-then-prescribe).
+MVH-on-request: drop the ladder-semantics, doc-with-code and continuity duty lines together with
+the `.claude/docs/` + `.claude/devlog/` Reference-materials lines — rules pointing at files that
+don't exist are noise (detect-then-prescribe).
+
+**Resolve the continuity carrier as you write the line.** The branches above are the choice, not
+the text to copy: CLAUDE.md names the one carrier this project actually uses (detect it — is the
+companion installed?), and that same carrier is the one Phase 8 records the bootstrap in. A duty
+line that ships the menu instead of the decision hands the next session the choice all over again.
 
 The `## Working style` block stays even though the system prompt overlaps it — target model
 versions vary and the ~16-line cost buys resilience. Do **not** inflate it to a 60-line treatise.
@@ -135,6 +153,8 @@ Then add these sections (kept short):
 - docs/ARCHITECTURE.md / docs/CODE-MAP.md / docs/ADR/ / .claude/rules/ (only those that exist)
 - .claude/docs/workflow.md — flow: session ritual, plan, verification ladder, continuity
 - .claude/docs/testing.md · .claude/docs/docs-discipline.md — invariants (shipped by the kit)
+- .claude/devlog/entries/ — episodic record, one entry per change (the first entry creates the
+  directory; index.json / tldr.md there are generated — never hand-edit them)
 ```
 
 **Root `docs/` is part of the default shape**: write `docs/ARCHITECTURE.md` (module map, data
@@ -146,6 +166,21 @@ docs rules (doc-with-code mapping, ADR threshold, glossary first-use, owner/last
 frontmatter) ship as `.claude/docs/docs-discipline.md` in Phase 2c — CLAUDE.md carries only
 the one-line duty pointer, not the rules themselves. `GLOSSARY.md` / `ADR/` / `RUNBOOKS/`
 are created on first real entry, not empty. MVH-on-request: skip `docs/` entirely.
+
+**Placeholder ≠ boilerplate — the ban is on invention, not on empty cells.** "Never boilerplate"
+forbids writing a plausible-looking fact you did not read: a module map for modules that don't
+exist, a data flow you imagined, a stack you assumed from the repo name. It does not forbid an
+**honestly-labelled empty cell that names its own fill trigger**. So on a greenfield repo both
+files are still written — as stubs carrying the heading skeleton the real content will occupy and
+a marker saying what they are: `> Stub — no code exists yet. Fill from the first modules that land
+(bootstrap <date>).` A labelled stub is legible state; the next session sees exactly what is
+missing and what fills it. An invented one is a lie the next session trusts. **Name the fill
+trigger inside the marker, and name one that exists**: on a sustained build the trigger is the
+`F0` ledger feature (Phase 5, item 2) — cite it. Where Phase 5 is *not* deployed (a greenfield
+library / one-off), there is no ledger: the marker itself is the trigger, so let it say what
+lands ("fill from the first modules that land") and **do not cite a `features.json` this project
+will never have**. A stub pointing at a file that does not exist is the noise the MVH note above
+forbids, wearing an accountability costume.
 
 ## Phase 2b — Transmit the practice baseline
 
@@ -301,6 +336,14 @@ apps* (T1). Set up:
       "passes": false, "preconditions": ["postgres up: docker compose up -d db", "TEST_DB_URL exported"]}]}
    ```
 
+   **Greenfield seed — `F0`, the bootstrap's own open loop.** With no code yet the ledger is not
+   empty: seed `F0` = *"get the brief → fill Stack in CLAUDE.md, replace the ARCHITECTURE.md and
+   CODE-MAP.md stubs from real code, name the oracle command"*, `passes: false`, with `verify`
+   naming the check that proves each stub is gone. The session ritual (item 4) picks the
+   highest-priority incomplete feature, so `F0` is what turn one lands on — the TBDs close inside
+   the loop instead of resting in the operator's memory. Without it a greenfield bootstrap hands
+   over placeholders nothing is accountable for, and the harness's first act is to trust them.
+
    All features seed at `passes: false`. Work **one feature at a time**; flip
    `passes` only when verified. *"It is unacceptable to remove or edit tests."* Write verification
    steps as **explicit contracts** (what is required vs defaulted, negative cases included) —
@@ -332,7 +375,12 @@ apps* (T1). Set up:
    at session start. **Also keep an episodic record** — a project devlog
    (`.claude/devlog/entries/`, one entry per feature/decision) or, where the project already
    keeps "what changed and why" in disciplined commit messages, lean on that: the layer is the
-   requirement, the carrier is a default, not a mandate. For the runnable devlog carrier
+   requirement, the carrier is a default, not a mandate. **Whichever carrier you settle on, the
+   per-turn duty line naming it belongs in CLAUDE.md's Working style (Phase 2) — write it there,
+   not only here.** A layer described in this checklist and nowhere in the project is a layer the
+   working session never hears about: that is precisely how bootstraps that followed this file to
+   the letter shipped a CLAUDE.md with zero mention of continuity. Phase 7's `continuity` grep is
+   the gate on it. For the runnable devlog carrier
    (a `/devlog:devlog` skill + a `devlog-reindex` index/digest regenerator + a SessionStart
    digest that auto-surfaces recent devlog and active progress at session start), install the
    companion plugin from this same marketplace: `/plugin install devlog@claude-code-harness`.
@@ -441,15 +489,23 @@ claude --print "ok" </dev/null 2>&1 >/dev/null | grep -E '^(Permission |Ignoring
 # Also blind to `Grep(path)`, which never warns — only the Phase 3 template prevents that one.
 claude --print "what is the project's stack?"  # pass = answer matches CLAUDE.md, not a guess
 claude --print "what files are you not allowed to touch here?"  # pass = names the deny/ask rules from settings.json
-grep -ci "plan mode" CLAUDE.md && grep -ci "fresh-context" CLAUDE.md && grep -ci "size the change" CLAUDE.md
+grep -ci "plan mode" CLAUDE.md && grep -ci "fresh-context" CLAUDE.md && grep -ci "size the change" CLAUDE.md \
+  && grep -ci "continuity" CLAUDE.md
 ls .claude/docs/workflow.md .claude/docs/testing.md .claude/docs/docs-discipline.md docs/ARCHITECTURE.md docs/CODE-MAP.md
-# pass = greps all ≥1 (plan-mode duty + verification ladder + change-sizing landed in CLAUDE.md) and all five
-# shipped/authored docs exist. This is the write-through check — it catches instructions that
-# stayed in the kit's references instead of landing in the project (e.g. a skipped evaluator
-# line). It is mechanical on purpose: a behavioral probe (`claude --print "what happens next
+# pass = all four greps ≥1 (plan-mode duty + verification ladder + change-sizing + continuity duty landed
+# in CLAUDE.md) and all five shipped/authored docs exist. This is the write-through check — it catches
+# instructions that stayed in the kit's references instead of landing in the project (e.g. a skipped
+# evaluator line, or — the case that earned the fourth token — a CLAUDE.md naming no continuity duty
+# at all, while the depth sat shipped and unreferenced in `.claude/docs/workflow.md`). `continuity` is
+# carrier-agnostic on purpose: it passes whether the carrier is a devlog or disciplined commits.
+# It is mechanical on purpose: a behavioral probe (`claude --print "what happens next
 # after a feature?"`) is contaminated by the operator's global baseline once Phase 2b installs
 # it — the union of layers answers correctly even when the project file is missing the lines.
-# MVH-on-request projects: only the two greps apply.
+# Greenfield: the stack probe above and the oracle run below are **N/A by construction** — the stack is
+# a labelled TBD, so nothing exists for an answer to match and no oracle command exists to run. Record
+# them as N/A-by-construction, not "skipped", with F0 as their due date; the deny-rules probe and all
+# four greps apply unchanged (settings.json and CLAUDE.md are real on day zero).
+# MVH-on-request projects: only the plan-mode and change-sizing greps apply.
 ```
 
 Each check has a crisp criterion — "command produced output" is not a pass.
@@ -459,6 +515,24 @@ confirm it actually executes**
 (the oracle must be real, not aspirational) — a runnable check the agent can close the loop against
 is the difference between long-horizon autonomy and drift. Running it will prompt for permission
 on first use — expected first-run approval; don't skip the run because of the prompt.
+
+## Phase 8 — Record the bootstrap
+
+The bootstrap writes its own first episodic entry **in the carrier the Phase 2 duty line names** —
+`/devlog:devlog` where the companion is installed, otherwise a hand-written
+`.claude/devlog/entries/0001-*.md`, or, where the project's carrier is disciplined commit messages,
+the bootstrap commit itself. The content is the bootstrap itself — what was detected (including
+"greenfield"), what shape was deployed, what was deliberately deferred, what is still a labelled
+stub. (Phase 5 item 3 elaborates the carrier choice for a sustained build; this phase does not
+depend on Phase 5 having run — the duty, and therefore the carrier, is Phase 2's.)
+
+Four things fall out of that one action, which is why it is a phase and not a nicety: the *why* of
+this harness lands in the episodic layer instead of evaporating with the session that chose it;
+`.claude/devlog/entries/` exists for real, so the next entry appends to a live directory instead of
+re-inventing the convention; the SessionStart digest has something to show on turn one instead of
+greeting the next session with silence; and the carrier gets a live smoke test — a `/devlog:devlog`
+that breaks on entry #1 breaks now, while you are here to fix it, not three sessions later when
+someone finally tries to use it. MVH-on-request: skip.
 
 ## Optional next steps (only after the trigger fires)
 

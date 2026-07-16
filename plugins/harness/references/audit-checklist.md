@@ -101,6 +101,17 @@ or re-run before proposing edits to its machinery.
   transcript-grounded (sessions without them proposed zero ladder rungs and coded nontrivial
   work plan-free). Don't flag them under §4/§5; their retire triggers: embed → global baseline
   installed; duty lines → a target model proposes these steps unprompted.
+- **Continuity duty absent from CLAUDE.md** (`grep -ci continuity CLAUDE.md` → 0). The project may
+  keep a devlog, ship `.claude/docs/workflow.md`, and carry the baseline's §6 — and still never tell
+  a working session that a feature/fix/config change/decision closes with an episodic entry, or name
+  the carrier. Finding: the layer then holds only while the operator watches; entries stop the first
+  session nobody reminds. **Expect this on every project bootstrapped before v1.17.0** — the
+  checklist described the layer in Phase 5 and never asked CLAUDE.md to name it, while the
+  write-through grep tested three other tokens (found by a clean-environment bootstrap run,
+  2026-07-17). Remediation: add the duty line from `bootstrap-checklist.md` Phase 2 — trigger +
+  carrier + `.claude/progress/<slug>.md` + pointer to `.claude/docs/workflow.md`, three lines. Do
+  **not** restate the depth `workflow.md` §Continuity and the baseline §6 already ship; a 14-line
+  continuity section in CLAUDE.md is this finding's over-correction, not its fix.
 - **Shipped-docs re-sync**: compare the `shipped-by: claude-code-harness vX.Y.Z` header in each
   `.claude/docs/*` file against the header of the **same file in the installed plugin's
   `references/project-docs/`** — content-version vs content-version, never vs the plugin's

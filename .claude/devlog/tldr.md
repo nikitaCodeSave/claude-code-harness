@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #17 · 2026-07-17 · Continuity доезжает в проект, а гейт ловит свой же класс
+
+**Tags:** harness, adr, config
+
+Тест кита в чистом окружении (claude-fresh config + пустой demo-project, v1.16.3) вскрыл два разрыва. Оператор поймал руками то, что должен был поймать механический гейт.
+
+[→ entries/0017-continuity-doezzhaet-v-proekt-a-geyt-lovit-svoy-zhe-klass.md](entries/0017-continuity-doezzhaet-v-proekt-a-geyt-lovit-svoy-zhe-klass.md)
+
+---
+
 ## #16 · 2026-07-17 · tools: — это allowlist, и цена ошибки асимметрична
 
 **Tags:** adr, harness

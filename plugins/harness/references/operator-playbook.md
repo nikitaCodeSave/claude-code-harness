@@ -12,10 +12,11 @@ Each step below adds exactly what has proven its worth — and not before its tr
 
 | Layer | Where | What it is |
 |---|---|---|
-| Behavioral baseline | `~/.claude/CLAUDE.md` (or project-embed `.claude/rules/practice-baseline.md`) | §1–§8 for every project (Bootstrap Phase 2b) |
+| Behavioral baseline | project embed `.claude/rules/practice-baseline.md` (default) or `~/.claude/CLAUDE.md` (global, opt-in) | §1–§8 working discipline (Bootstrap Phase 2b); re-synced by its content-version stamp |
 | Kit (this plugin) | source of truth — repo `nikitaCodeSave/claude-code-harness`; on the machine — the installed plugin in `~/.claude/plugins/` | Bootstrap / Audit / Extend / Explain |
 | Independent verification | inside the plugin: `commands/external-audit.md` + `agents/{evidence-executor,process-auditor,code-refuter}.md` — travel with the plugin | fresh-context refute — the `code-refuter` role solo is the per-change workhorse; the full 3-role `/external-audit` is the rare escalation |
 | Workflow distillation | `<repo>/.claude/docs/{workflow,testing,docs-discipline}.md` | shipped by bootstrap verbatim from the kit (`references/project-docs/`); refreshed by a re-sync at audit time keyed on the `shipped-by` version |
+| Continuity companion | the `devlog` plugin (same marketplace, optional) | `/devlog:devlog` skill + `devlog-reindex` + a SessionStart digest that surfaces recent devlog & active progress (silent in projects without them) |
 | Project layer | `<repo>/CLAUDE.md` + `<repo>/.claude/` + `<repo>/docs/` | created by step 1, grows by triggers |
 
 The plugin and the behavioral baseline reach the machine/profile **separately**:
@@ -24,11 +25,22 @@ The plugin and the behavioral baseline reach the machine/profile **separately**:
   and the agent roles.
   (For a maintainer developing the plugin itself — symlink its checkout into `~/.claude/skills/`:
   a directory with `.claude-plugin/plugin.json` is auto-loaded as `claude-code-harness@skills-dir`,
-  with no install step.)
+  with no install step. This is the **only** dogfooding path that stays live: a marketplace
+  install *copies* the plugin into `~/.claude/plugins/cache/`, so edits need a reinstall, and
+  `--plugin-dir` is per-invocation. Symlink the **plugin directory itself** — not its `skills/`
+  subfolder — or you get the skill without the plugin's `hooks/` and `bin/`. Do this for every
+  plugin you maintain: a hand-kept copy of one you also ship is a fork that drifts —
+  `audit-checklist.md` §2.)
 - **The behavioral baseline (§1–8)** does NOT arrive with the plugin (the plugin does not ship an
   operator-global `CLAUDE.md`), but **Bootstrap delivers it** (Phase 2b,
-  `references/practice-baseline.md`): the session detects your `~/.claude/CLAUDE.md` and offers a
-  global install (with your approval) or a project-embed under `.claude/rules/`.
+  `references/practice-baseline.md`): the session detects what your memory layers already carry
+  and offers a project embed under `.claude/rules/` (the default) or a global merge into
+  `~/.claude/CLAUDE.md` — the global write only with your explicit approval, after showing the
+  diff and writing a timestamped backup.
+- **The continuity machinery** is the optional `devlog` companion
+  (`/plugin install devlog@claude-code-harness`): the `/devlog:devlog` skill, `devlog-reindex`,
+  and a SessionStart digest that auto-surfaces recent devlog + active progress in projects that
+  keep them (silent elsewhere). Neither plugin writes into your `~/.claude/` profile.
 
 ## 1. New project — bootstrap (first session)
 
@@ -39,8 +51,9 @@ The plugin and the behavioral baseline reach the machine/profile **separately**:
    (≤200 lines, an indexer, including a Working style with a verification ladder) +
    `.claude/settings.json` (the deny list matters more than allow) + the workflow distillation in
    `.claude/docs/` (3 files, verbatim from the kit) + `docs/ARCHITECTURE.md` and `docs/CODE-MAP.md`
-   with real content + an offer to install the practice baseline (globally in `~/.claude/CLAUDE.md`
-   — preferred — or in `.claude/rules/`). The minimal MVH (CLAUDE.md + settings only) — via a
+   with real content + an offer to install the practice baseline (project embed in
+   `.claude/rules/` by default; global `~/.claude/CLAUDE.md` merge only as a guarded opt-in —
+   diff shown, timestamped backup, your approval). The minimal MVH (CLAUDE.md + settings only) — via a
    separate phrase: **"set up a minimal harness"**. There are no custom agents/hooks/skills in
    either variant — this is discipline, not an omission.
 4. The contract (stack / acceptance of the first feature / verify mechanism / sensitive paths)
@@ -65,7 +78,7 @@ If the project is a product built feature-by-feature (not a library/script/one-o
    the seeded `features.json` and correct the boundaries/verify BEFORE the first feature (this is
    your insurance against silent micro-decisions).
 4. **harness-journal — opt-in, off by default**: ask for `.claude/harness-journal.md`
-   (1–3 "kit-fell-short" observations per session) only if you plan to run D-cycles (step 6).
+   (1–3 "kit-fell-short" observations per session) only if you plan to run D-cycles (step 7).
    Without D-cycles the journal is dead weight.
 
 ## 3. The build ritual — what the operator does between sessions
@@ -99,9 +112,31 @@ If the project is a product built feature-by-feature (not a library/script/one-o
 3. The audit also compares the `shipped-by` version of the workflow distillation (`.claude/docs/*`)
    against the same files in the installed plugin (content-version vs content-version — not the
    plugin's package number) and offers a re-sync when the canon copy is newer — so the factory
-   distillation in projects doesn't fall behind the canon.
+   distillation in projects doesn't fall behind the canon. A project practice-baseline embed
+   is re-synced the same way, keyed on its content-version stamp.
 
-## 5. Independent verification — two tiers (fresh context, not self-recheck)
+## 5. Keeping the kit and the baseline current
+
+Updates flow through the plugin: `/plugin update claude-code-harness` (and `devlog`). A new
+version changes only the plugin itself — copies that live in your projects or profile are
+re-synced deliberately, never silently:
+
+1. **Kit skills / agents / references** — current the moment the plugin updates; nothing to do.
+2. **Workflow distillation** (`.claude/docs/*` in each project) — at the next
+   **"audit my Claude Code harness"** the audit compares `shipped-by` headers and offers a
+   re-sync (diff shown first; hand-edits surfaced, not overwritten).
+3. **Practice baseline** — same mechanism, keyed on the block's content-version stamp: a
+   project embed is re-synced by Audit; a global copy in `~/.claude/CLAUDE.md` is refreshed
+   only on request (**"refresh my practice baseline"**) via the guarded merge — diff first,
+   timestamped backup, your approval (`references/practice-baseline.md`, "Keeping installed
+   copies current").
+4. **The devlog companion's digest and commands** live inside that plugin — they update with
+   it; nothing is copied into your profile or projects.
+
+The whole maintenance ritual: `/plugin update` → in each active project, say
+**"audit my Claude Code harness"** when convenient → approve or decline the offered re-syncs.
+
+## 6. Independent verification — two tiers (fresh context, not self-recheck)
 
 The lever is an independent *fresh context* that judges the deliverable — not a second pass in the
 authoring one, which anchors on its own solution (baseline §8). It comes in two weights; reach for
@@ -130,7 +165,7 @@ Empirically the two tiers settle this way: in a sustained real-product build the
 ran **once**, at a milestone; per-change verification used the `code-refuter` role alone. Ship the
 light tier as the default, the heavy tier as the exception.
 
-## 6. D-cycle — evolving the canon (role: canon maintainer)
+## 7. D-cycle — evolving the canon (role: canon maintainer)
 
 When: a milestone closed, or the journal has accumulated ≥5 substantive observations.
 How: a separate session following `references/harness-evolution.md` (classify observations →
@@ -140,7 +175,7 @@ gate "single-incident ≠ invariant" → a surgical fold into the canon → comm
 A plugin consumer does not edit the canon — they update the plugin version (`/plugin update`) and
 pass findings/journal observations to the maintainer.
 
-## 7. Strip revision — when to trim the harness
+## 8. Strip revision — when to trim the harness
 
 Once every 3–6 months or on a major model release: re-test each component "does the model already
 do this natively?" (a quick test — `claude --safe-mode`: if it's no worse without the harness, the

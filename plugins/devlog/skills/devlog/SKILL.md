@@ -11,6 +11,8 @@ allowed-tools: Read, Write, Bash(devlog-reindex:*), Bash(python3:*), Bash(ls:*),
 
 Скрипт регенерации поставляется **внутри этого плагина** и доступен как команда `devlog-reindex` на PATH, пока плагин включён (обёртка в `bin/` находит `skills/devlog/rebuild-index.py` относительно себя — `${CLAUDE_PLUGIN_ROOT}` в Bash-окружении не экспортируется, поэтому опираемся на PATH, а не на путь). Команда принимает devlog root через CLI-аргумент / `$CLAUDE_PROJECT_DIR` / cwd-relative fallback. Проекту достаточно создать `.claude/devlog/entries/` — копировать что-либо в проект не нужно. **Исключение — teammate/CI без этого плагина** должны регенерировать индекс сами: тогда положи копию `rebuild-index.py` в `<project>/.claude/devlog/rebuild-index.py`, зови в README локальный путь, и при наличии project-копии используй её (она — pin проекта).
 
+**SessionStart-дайджест (тоже поставляется этим плагином).** Хук `hooks/session-start-digest.sh` в начале каждой сессии поднимает в контекст последние 3 devlog-записи и до 3 активных progress-файлов (`.claude/progress/*.md`, кроме помеченных CLOSED). В проектах без `.claude/devlog/` и `.claude/progress/` хук молчит (exit 0 без вывода); read-only, без сети; git-статус не дублирует — его Claude Code инжектит сам. Это автоматизация session-start-ритуала harness-кита: state-on-disk сам находит следующую сессию, записи не нужно искать вручную.
+
 ## Когда использовать
 
 - После завершения фичи, исправления бага, рефакторинга

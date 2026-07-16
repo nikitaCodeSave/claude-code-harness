@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-16T09:18:05Z",
-  "entry_count": 8,
+  "generated_at": "2026-07-16T15:26:24Z",
+  "entry_count": 11,
   "entries": [
     {
       "id": 1,
@@ -129,6 +129,45 @@
       "supersedes": null,
       "path": "entries/0008-drift-remediation-fold-v1-15-0-continuity-profili-vneshniy-r.md",
       "preview": "Kickoff-артефакт лаборатории harness-drift-remediation.md (кросс-проектный fresh-context аудит: 4 адверсариальных harvest-агента над 37 .claude/-проектами, продолжение lab-devlog"
+    },
+    {
+      "id": 9,
+      "date": "2026-07-16",
+      "title": "Consumer-journey fold v1.16.0: baseline-гарды, SessionStart-дайджест, README first-session",
+      "tags": [
+        "feature",
+        "harness"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0009-consumer-journey-fold-v1-16-0-baseline-gardy-sessionstart-da.md",
+      "preview": "Fresh-context аудит того, как кит приземляется на чужую машину (без личных хуков и lab-правил), показал: слой доставки настолько несогласован, что внедрение читается хуже «чистого» Claude Code. Шесть находок: (1) догфуд-асимметрия — provenance baseline'а ссылается на дисциплину…"
+    },
+    {
+      "id": 10,
+      "date": "2026-07-16",
+      "title": "SessionStart-дайджест: ограниченность как инвариант",
+      "tags": [
+        "bugfix",
+        "harness"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0010-sessionstart-daydzhest-ogranichennost-kak-invariant.md",
+      "preview": "Дайджест из #9 при проверке оказался способен затопить контекст: 10-мегабайтный tldr.md давал 10 МБ stdout (~2.5M токенов) за 0.6 с — инжектированных дословно до первой реплики оператора, в любом каталоге, включая свежеклонированный чужой репо. Downstream-обрезки нет…"
+    },
+    {
+      "id": 11,
+      "date": "2026-07-16",
+      "title": "Один источник истины: плагины догфудятся симлинком",
+      "tags": [
+        "refactor",
+        "harness"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0011-odin-istochnik-istiny-plaginy-dogfudyatsya-simlinkom.md",
+      "preview": "Проверка операторского окружения показала, что источником для devlog был не плагин, а личные копии: скилл-форк от 11 июня и SessionStart-хук, дублирующий поставляемый. Сегодняшний фикс хука пришлось применять дважды вручную — в личную копию и в shipped. Это признак, по которому…"
     }
   ]
 }

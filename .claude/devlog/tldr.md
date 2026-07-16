@@ -8,6 +8,36 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #11 · 2026-07-16 · Один источник истины: плагины догфудятся симлинком
+
+**Tags:** refactor, harness
+
+Проверка операторского окружения показала, что источником для devlog был не плагин, а личные копии: скилл-форк от 11 июня и SessionStart-хук, дублирующий поставляемый. Сегодняшний фикс хука пришлось применять дважды вручную — в личную копию и в shipped. Это признак, по которому…
+
+[→ entries/0011-odin-istochnik-istiny-plaginy-dogfudyatsya-simlinkom.md](entries/0011-odin-istochnik-istiny-plaginy-dogfudyatsya-simlinkom.md)
+
+---
+
+## #10 · 2026-07-16 · SessionStart-дайджест: ограниченность как инвариант
+
+**Tags:** bugfix, harness
+
+Дайджест из #9 при проверке оказался способен затопить контекст: 10-мегабайтный tldr.md давал 10 МБ stdout (~2.5M токенов) за 0.6 с — инжектированных дословно до первой реплики оператора, в любом каталоге, включая свежеклонированный чужой репо. Downstream-обрезки нет…
+
+[→ entries/0010-sessionstart-daydzhest-ogranichennost-kak-invariant.md](entries/0010-sessionstart-daydzhest-ogranichennost-kak-invariant.md)
+
+---
+
+## #9 · 2026-07-16 · Consumer-journey fold v1.16.0: baseline-гарды, SessionStart-дайджест, README first-session
+
+**Tags:** feature, harness
+
+Fresh-context аудит того, как кит приземляется на чужую машину (без личных хуков и lab-правил), показал: слой доставки настолько несогласован, что внедрение читается хуже «чистого» Claude Code. Шесть находок: (1) догфуд-асимметрия — provenance baseline'а ссылается на дисциплину…
+
+[→ entries/0009-consumer-journey-fold-v1-16-0-baseline-gardy-sessionstart-da.md](entries/0009-consumer-journey-fold-v1-16-0-baseline-gardy-sessionstart-da.md)
+
+---
+
 ## #8 · 2026-07-16 · Drift-remediation fold v1.15.0: continuity-профили, внешний refuter, blocked-схема
 
 **Tags:** canon, d-cycle, continuity, verification, backlog, audit

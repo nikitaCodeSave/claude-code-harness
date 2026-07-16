@@ -52,7 +52,7 @@ sessions where the operator is present.
 |---|---|
 | `CLAUDE.md` (root) | **yes** — project entry-point indexer |
 | `.claude/settings.json` | **yes** — permissions + minimal env |
-| practice baseline (Phase 2b) | **offer, operator decides** — global `~/.claude/CLAUDE.md` merge (preferred) or `.claude/rules/practice-baseline.md`; skip if already present |
+| practice baseline (Phase 2b) | **offer, operator decides** — project embed `.claude/rules/practice-baseline.md` (default) or guarded global `~/.claude/CLAUDE.md` merge (opt-in); skip if a loaded layer already carries it |
 | `.claude/docs/` (Phase 2c) | **yes** — shipped distillation: `workflow.md` + `testing.md` + `docs-discipline.md`, copied verbatim from the kit |
 | `docs/ARCHITECTURE.md` + `docs/CODE-MAP.md` | **yes** — real content from the code read in Phase 0, never boilerplate (MVH-on-request: skip) |
 | `.claude/agents/` | **no** — built-ins cover it; defer until evidence |
@@ -147,18 +147,17 @@ are created on first real entry, not empty. MVH-on-request: skip `docs/` entirel
 
 ## Phase 2b — Transmit the practice baseline
 
-Read `references/practice-baseline.md` and follow its delivery procedure: detect whether the
-operator's global `~/.claude/CLAUDE.md` already encodes the behavioral baseline; if not, offer
-a global install (confirm first — personal file) or embed it as `.claude/rules/practice-baseline.md`.
-The kit's artifacts assume this behavior layer exists; a plugin install alone does not carry it.
-Three guards:
-- **Dedupe against Working style.** If the global install lands (or the baseline already exists),
+Read `references/practice-baseline.md` and follow its delivery procedure — it is the single
+source for detection (all memory layers, four outcomes including rule-conflict), the
+project-embed default, and the guarded global merge (explicit opt-in: diff preview,
+timestamped backup, budget check, headless never). The kit's artifacts assume this behavior
+layer exists; a plugin install alone does not carry it. Project-side guards:
+- **Dedupe against Working style.** If the baseline lands (in any layer) or already exists,
   trim the project Working style block to the project-specific deltas (plan-mode duty +
   verification-ladder lines) — don't double-load the same prose from two layers.
-- **Headless run:** skip the global offer (no one to approve a personal-file write); embed in
-  `.claude/rules/` and record that choice in the output.
-- **Retire trigger:** drop the project embed when the global baseline is installed; drop the
-  proposal-duty lines if a target model demonstrably proposes plan-mode/ladder steps unprompted.
+- **Retire trigger:** drop the project embed when a global baseline is installed (Audit
+  re-syncs embeds by the content-version stamp); drop the proposal-duty lines if a target
+  model demonstrably proposes plan-mode/ladder steps unprompted.
 
 ## Phase 2c — Ship the workflow distillation (`.claude/docs/`)
 
@@ -223,7 +222,7 @@ the same mechanism also blocked a credential-file write that prompt-discipline h
 Only if there are *non-negotiable* invariants the model must respect even when inconvenient
 (e.g. "PII fields must never be logged"). Each rule ≤ 30 lines, prescriptive, referenced from
 CLAUDE.md. If it needs more than 30 lines it is guidance — put it in `docs/CONVENTIONS.md`.
-One sanctioned exception: `.claude/rules/practice-baseline.md` (Phase 2b fallback, ~60 lines) —
+One sanctioned exception: `.claude/rules/practice-baseline.md` (Phase 2b default, ~80 lines) —
 a transmitted behavioral layer, not a project invariant; retired if the baseline goes global.
 
 ## Phase 5 — Long-running build kit (only for a sustained, multi-session product build)
@@ -293,17 +292,26 @@ apps* (T1). Set up:
    mirrors them — pick one editable canon and move on (same lever as item 7: reliable scoped
    delivery, not the data structure).
 3. **Progress + checkpoint discipline** — a progress file, **preferably `.claude/progress/<slug>.md`**
-   (keeping it under `.claude/` means any state-surfacing automation the operator may have —
-   e.g. a personal SessionStart hook, which this kit does **not** ship — finds it; a root
+   (keeping it under `.claude/` means state-surfacing automation finds it — the devlog
+   companion plugin ships a SessionStart digest of recent devlog + active progress, and
+   personal hooks conventionally look there too; a root
    `claude-progress.txt` stays invisible to such tooling), updated each session (state, decisions,
    remaining work, next steps); a one-line `Quick state — <facts>` heading keeps it scannable
    at session start. **Also keep an episodic record** — a project devlog
    (`.claude/devlog/entries/`, one entry per feature/decision) or, where the project already
    keeps "what changed and why" in disciplined commit messages, lean on that: the layer is the
    requirement, the carrier is a default, not a mandate. For the runnable devlog carrier
-   (a `/devlog:devlog` skill + a `devlog-reindex` index/digest regenerator), install the
+   (a `/devlog:devlog` skill + a `devlog-reindex` index/digest regenerator + a SessionStart
+   digest that auto-surfaces recent devlog and active progress at session start), install the
    companion plugin from this same marketplace: `/plugin install devlog@claude-code-harness`.
-   It's optional — the layer, not the tool, is what's required. The episodic layer is separate from
+   It's optional — the layer, not the tool, is what's required. **Detect before installing it,
+   the same way Phase 2b detects before delivering the baseline:** hooks and skills from every
+   layer *merge, never override*, so an operator who already runs a personal `SessionStart`
+   digest or keeps `~/.claude/skills/devlog/` gets both — the same state twice, in two formats,
+   ahead of turn one, with no error to signal it. Check `~/.claude/settings.json` hooks and
+   `~/.claude/skills/` first; on overlap, name it and let the operator pick one carrier. A
+   detect gate that guards ~80 lines of prose while waving through a hook that fires every
+   session has it backwards. The episodic layer is separate from
    in-flight progress and is what makes state legible to the human operator, not only to the
    agent. Number sessions sequentially. **Git commit per feature** with a descriptive message. Files are the authoritative
    handoff state — they survive compaction and a fresh-session reset (which the long-running-apps
@@ -314,7 +322,9 @@ apps* (T1). Set up:
    Phrase queued fixes as *"reproduce → close"*, not as finished solutions.
 4. **Session-start ritual** (put in CLAUDE.md or `init.sh`): `pwd` → read git log + progress file →
    read feature list, pick the highest-priority incomplete feature → run init/e2e → work that one
-   feature.
+   feature. (With the devlog companion installed, its SessionStart digest already surfaces
+   recent devlog + active progress — the ritual then starts from acting on that state, not
+   rediscovering it.)
 5. **Fresh-context Evaluator for high-stakes verification** — for silent-wrong-is-costly work, judge
    with a *separate* context (new session or subagent) that tests the running app, not an in-context
    self-recheck. *Self-preferential bias* — "models confidently praise their own work" — is exactly

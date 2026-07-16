@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "devlog",
-  "version": "1.15.0",
-  "description": "Records significant changes to .claude/devlog/ — one markdown entry per feature/fix/refactor/decision, with a script that regenerates index.json + tldr.md. The episodic 'what changed and why' layer that survives compaction and hands state to the next session.",
+  "version": "1.16.0",
+  "description": "Records significant changes to .claude/devlog/ — one markdown entry per feature/fix/refactor/decision, with a script that regenerates index.json + tldr.md, plus a SessionStart digest that surfaces recent devlog entries + active progress at session start (silent in projects that keep neither). The episodic 'what changed and why' layer that survives compaction and hands state to the next session.",
   "author": {
     "name": "nikitaCodeSave",
     "email": "nickbalakirev@gmail.com"

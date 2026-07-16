@@ -80,6 +80,12 @@ CLAUDE.md). Тогда это **Путь B** — раз shipped-поверхно
 обнови его заголовок `<!-- shipped-by: claude-code-harness vX.Y.Z … -->` на **новую** версию —
 иначе `release.sh` откажет (он проверяет, что каждый изменённый project-doc несёт актуальный стамп).
 
+**Gotcha — baseline content-version стамп.** Если правка меняет текст канонического блока в
+`plugins/harness/references/practice-baseline.md` (fenced `markdown`-блок §1–8), подними его
+`practice-baseline content-version`-стамп на новую версию. Правки файла ВНЕ блока (delivery
+procedure, Provenance) стамп не трогают — он ключует блок, не файл. `release.sh` это НЕ
+проверяет (блочный дифф механически не стережётся) — ответственность ритуала.
+
 **Не трогай функциональные staleness-стампы без причины** (refresh-ledger в `harness-evolution.md`,
 version-line + `verified DATE` в `native-capabilities.md`) — но если релиз меняет CC-версию или
 grounding, синхронизируй их (это часть изменения, а не отдельная правка).

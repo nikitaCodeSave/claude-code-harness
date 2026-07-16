@@ -25,7 +25,7 @@
 
 1. Bump версии в `plugins/harness/.claude-plugin/plugin.json` — **единственный** источник
    (marketplace-запись версию НЕ несёт; `scripts/release.sh` это стережёт). devlog-плагин
-   версионируется независимо в `plugins/devlog/.claude-plugin/plugin.json`.
+   версионируется **в локстепе** тем же числом — `release.sh` бампит оба `plugin.json` сам.
 2. `plugins/harness/scripts/release.sh <version>` — стейджит surface, печатает commit/tag/push.
 3. Devlog-запись в `.claude/devlog/`.
 4. Commit + push → подписчики получают через `/plugin update`.

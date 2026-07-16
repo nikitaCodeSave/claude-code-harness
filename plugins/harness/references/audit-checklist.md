@@ -42,9 +42,26 @@ or re-run before proposing edits to its machinery.
 
 - The same skill in both `~/.claude/skills/` and `<project>/.claude/skills/` — which is
   authoritative? Forks drift; the project copy often hardcodes paths the global one parameterized.
+- **A hand-kept copy of something a plugin already ships.** Plugin skills are namespaced
+  (`plugin:skill`), so they never *collide* with a personal one — which is exactly the trap:
+  no error, no shadowing warning, just two skills with the same description and a model
+  picking either. Same for a personal hook beside the plugin's on one event. The tell is a
+  fix that must be applied twice. Replace the copy with a **symlink to the plugin directory**
+  (`~/.claude/skills/<name>` → `<repo>/plugins/<name>`): a dir with `.claude-plugin/plugin.json`
+  loads `@skills-dir`, in place, so the repo stays the single source
+  (`code.claude.com/docs/en/plugins-reference`). Observed here: a personal devlog skill drifted
+  a month from the shipped one — a stale script path and a language-pinned parser — while a
+  personal SessionStart hook duplicated the plugin's digest in every session.
 - Two skills with overlapping missions (e.g. two bootstrap skills) — one should be canonical.
 - A reachability trap: a skill whose description says "skip when already configured" living
   inside the very repo that is already configured → it can never fire there.
+- **Two hooks on one event doing the same job.** Hooks from every layer (user settings,
+  project settings, plugin `hooks.json`) **merge — they never override**, so a plugin that
+  ships a `SessionStart` digest lands *alongside* a personal hook that already surfaces the
+  same devlog/progress, and both fire. The operator sees no error; the model just gets the
+  same state twice, in two formats, before turn one. Check `settings.json` hooks against
+  every enabled plugin's `hooks.json` per event; when both exist, keep one and say which.
+  (Observed: this kit's own devlog companion vs the maintainer's personal hook.)
 
 ## 3. Built-in duplication
 
@@ -91,6 +108,17 @@ or re-run before proposing edits to its machinery.
   (and features.json, if present) first. Project header newer than the canon's → update the
   plugin, don't downgrade the files. Shipped docs **absent** on a non-MVH project (pre-v1.8
   bootstrap or skipped Phase 2c) → finding; offer to ship them (bootstrap Phase 2c).
+- **Practice-baseline re-sync**: if `.claude/rules/practice-baseline.md` exists, compare its
+  `practice-baseline content-version` stamp against the canonical block's stamp in the
+  installed plugin's `references/practice-baseline.md` — same content-version semantics as
+  shipped-docs (the stamp advances only when the block's text changes). **Read both files
+  from disk**: the stamp is an HTML comment, stripped from the context-injected copy. Canon
+  newer → offer re-sync, diff-first (a non-stamp delta is a potential hand-edit to preserve).
+  Unstamped embed (pre-v1.16 install, or hand-adapted) → treat the copy as a hand-edit: diff
+  against the current block, show the delta, offer a stamped re-install. A **global** copy in
+  `~/.claude/CLAUDE.md` is never edited by an audit — if its stamp is older than the canon,
+  report it and offer the guarded refresh (diff + timestamped backup + explicit approval;
+  `practice-baseline.md`, "Keeping installed copies current").
 - **Orphan sweep on a corrective re-sync**: when a re-sync **removes or corrects** baseline
   content (not just bumps the header), `git diff` the superseded lines and grep the project tree
   (`skills/`, `rules/`, `CLAUDE.md`, `docs/`) for references to the now-dead content. A corrected
@@ -118,6 +146,21 @@ or re-run before proposing edits to its machinery.
   `UserPromptSubmit`.
 - Hooks that fail closed without a fallback (no `jq`, missing tool) and break sessions.
 - Hooks added "for hygiene" before any pain proved the need.
+- **Context-injecting hooks (`SessionStart` / `UserPromptSubmit` / `Stop`) with unbounded
+  stdout.** Whatever they print is injected verbatim — no downstream trim, no size warning,
+  and it lands *before* the operator's first turn. A hook that echoes a project file, a `git
+  log` with no `-n`, or a field lifted from a file whose size nothing guarantees will flood
+  the window on the one repo that violates the assumption. Two independent caps: per field on
+  the way in, whole-digest on the way out; announce truncation rather than trimming silently.
+  Then verify against a hostile fixture, not a tidy repo — the failure is invisible until the
+  file is large. (Observed: a devlog digest read a *derived* `tldr.md` whose headings carried
+  no cap — a 10 MB file became 10 MB of context, ~2.5M tokens, in 0.6 s. Its own
+  source-of-truth path capped correctly; only the "fast path" skipped the guard.)
+- **A derived file read as a fast path.** Caching an `index.json` / `tldr.md` / digest to save
+  a few reads buys milliseconds and inherits two silent-wrong modes: it goes stale the moment
+  its generator lags (reporting old state as current), and its pre-joined fields skip the
+  validation the source-of-truth path applies. Read the source unless a measurement — not an
+  intuition — says you can't.
 
 ## 7. Skill shape
 

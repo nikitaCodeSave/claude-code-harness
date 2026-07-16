@@ -1,6 +1,6 @@
 ---
 name: claude-code-harness
-description: "Use this skill when introducing, auditing, refactoring, or extending the Claude Code harness of a project — i.e. its `.claude/` directory (CLAUDE.md, settings.json, hooks/, agents/, skills/, commands/) and root CLAUDE.md. Activates on phrases like 'set up Claude Code in this project', 'design my .claude/', 'audit my Claude Code harness', 'add a hook/skill/subagent', 'how should I organize CLAUDE.md', 'what built-ins does Claude Code already have', 'should I write a custom orchestrator subagent', 'when should I use a dynamic workflow', 'why is my harness slow / brittle / token-heavy', 'extend Claude Code with X'. Claude Code 2.x / Opus-class-specific — does NOT cover provider-neutral patterns for OpenAI/Codex/other frameworks. Skip when the project's `.claude/` already encodes this discipline."
+description: "Use this skill when introducing, auditing, refactoring, or extending the Claude Code harness of a project — i.e. its `.claude/` directory (CLAUDE.md, settings.json, hooks/, agents/, skills/, commands/) and root CLAUDE.md. Activates on phrases like 'set up Claude Code in this project', 'design my .claude/', 'audit my Claude Code harness', 'add a hook/skill/subagent', 'how should I organize CLAUDE.md', 'what built-ins does Claude Code already have', 'should I write a custom orchestrator subagent', 'when should I use a dynamic workflow', 'why is my harness slow / brittle / token-heavy', 'extend Claude Code with X', 'set up the long-running build kit (Phase 5)', 'refresh my practice baseline'. Claude Code 2.x / Opus-class-specific — does NOT cover provider-neutral patterns for OpenAI/Codex/other frameworks. Skip when the project's `.claude/` already encodes this discipline."
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls:*), Bash(tree:*), Bash(cat:*), Bash(find:*), Bash(grep:*), Bash(claude --help), Bash(claude agents:*), Bash(claude --version), Bash(claude --print:*), Bash(claude plugin list:*), Bash(git log:*), Bash(git status:*), Bash(wc:*)
 ---
 
@@ -48,7 +48,8 @@ root `CLAUDE.md` ≤ 200 lines + `settings.json` with sane permissions + the shi
 No custom subagents, hooks, or skills until justified; minimal MVH only on explicit operator
 request. **Transmit the practice baseline** (checklist Phase 2b /
 `references/practice-baseline.md`): the behavioral layer the kit's artifacts assume does not
-travel with a plugin install — detect, then offer a global or project install. **For a
+travel with a plugin install — detect across memory layers, then offer a project embed
+(default) or a guarded global merge (explicit opt-in). **For a
 sustained, multi-session product build, also set up the long-running build kit** (runnable
 oracle / feature-spec ledger / progress-handoff conventions — checklist Phase 5; Anthropic's
 long-running-harness playbook, files+conventions not machinery; still no custom
@@ -153,7 +154,7 @@ already knows the kit):
 | .claude/docs/{workflow,testing,docs-discipline}.md | shipped distillation (verbatim, versioned) | 3 files |
 | docs/ARCHITECTURE.md + docs/CODE-MAP.md | real content from the code read | 2 files |
 | (no custom subagents/hooks/skills) | built-ins cover it | — |
-## Offered — practice baseline (Phase 2b): global `~/.claude/CLAUDE.md` merge (preferred) or `.claude/rules/practice-baseline.md` (~60 lines); operator decides
+## Offered — practice baseline (Phase 2b): project embed `.claude/rules/practice-baseline.md` (~80 lines, default) or guarded global `~/.claude/CLAUDE.md` merge (opt-in); operator decides
 ## Sustained build (Phase 5) adds — oracle/init.sh · .claude/features.json · progress+devlog conventions
 ## Minimal MVH (CLAUDE.md + settings only) — explicit operator request only
 ## Deferred until justified — subagents (evidence) · hooks (recurring pain) · skills (≥3× repeat)

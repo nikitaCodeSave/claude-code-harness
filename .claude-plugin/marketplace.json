@@ -19,7 +19,7 @@
     {
       "name": "devlog",
       "source": "./plugins/devlog",
-      "description": "Records significant changes to .claude/devlog/ — the episodic 'what changed and why' continuity layer, one markdown entry per feature/fix/decision, with index+digest regeneration. The harness kit recommends this; installing it makes that guidance runnable.",
+      "description": "Records significant changes to .claude/devlog/ — the episodic 'what changed and why' continuity layer, one markdown entry per feature/fix/decision, with index+digest regeneration and a SessionStart digest that auto-surfaces recent devlog + active progress. The harness kit recommends this; installing it makes that guidance runnable.",
       "category": "workflow",
       "keywords": ["claude-code", "devlog", "changelog", "continuity", "session-handoff"]
     }

@@ -7,6 +7,109 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.16.0] — 2026-07-16
+
+Consumer-journey fold. A fresh-context external audit of how the kit lands on a machine that
+is *not* the maintainer's (no personal hooks, no lab rules) found the delivery layer
+inconsistent enough that adoption could read net-negative next to bare Claude Code: the
+practice baseline claimed a discipline whose machinery didn't ship, the global-merge
+procedure carried weaker guards than the kit demands for in-repo operations, and README gave
+a fresh installer no entry phrase. This release makes the two consumer flows — first contact
+and staying current — coherent end-to-end. Docs + one plugin hook; the kit's component set
+(skills/agents/commands) is unchanged — existing texts, including `SKILL.md`'s description
+and Mode 1, are edited in place.
+
+### Added
+- **`devlog` companion now ships a SessionStart continuity digest** (`hooks/hooks.json` +
+  `hooks/session-start-digest.sh`): surfaces the last 3 devlog entries + up to 3 active
+  (non-CLOSED) progress journals at session start; silent (exit 0, no output) in projects
+  that keep neither; read-only, POSIX + bash-3.2 portable, no dependencies. This closes the
+  dogfooding asymmetry the audit led with: the zero-prompting continuity empirics in
+  `practice-baseline.md` Provenance were observed under the lab's personal session-start
+  hook, which consumers never got — the equivalent machinery is now installable
+  (`/plugin install devlog@claude-code-harness`), and Provenance + delivery step 4 say so
+  directly instead of burying the confound in a subordinate clause.
+- **Practice-baseline content-version stamp** — the canonical block now opens with an HTML
+  comment stamp (stripped before context injection — zero runtime cost) with the same
+  semantics as the project-docs `shipped-by` headers: it advances only when the block's
+  text changes. `audit-checklist.md` §4 gains the matching re-sync check (embed vs canon,
+  diff-first, unstamped copy = hand-edit, a global copy is never auto-edited);
+  `practice-baseline.md` gains "Keeping installed copies current"; `operator-playbook.md`
+  gains §5 "Keeping the kit and the baseline current" (the `/plugin update` → audit →
+  offered-re-syncs ritual; former §§5–7 renumbered to 6–8).
+- **README "First session (start here)"** — the trigger-phrase table (bootstrap / minimal /
+  audit / Phase 5 / external-audit), an explicit what-bootstrap-touches contract (inside
+  repo / outside repo / profile), and a direct link to `operator-playbook.md` — previously
+  the only human-facing map was a table-cell mention with no path.
+
+### Changed
+- **Baseline delivery inverted: project embed is the default, global merge is a guarded
+  opt-in** (`practice-baseline.md` delivery procedure; synced in `bootstrap-checklist.md`
+  Phase 1/2b/4, `SKILL.md` Mode 1 + plan template, `operator-playbook.md` layer map + §1).
+  First contact lands the baseline in-repo (git-tracked, reviewable, removable); the global
+  merge is offered with its radius stated in the offer ("every project on this machine,
+  ~80 lines per session") and executes only after a shown diff, a timestamped backup
+  (`~/.claude/CLAUDE.md.bak-<date>` — the file is usually not under git, so the backup IS
+  the rollback), and a budget check against the same ≤200-line discipline as project
+  CLAUDE.md. Detection now spans **all** memory layers (managed policy → user → project →
+  auto-memory), and a fourth outcome is specified: a rule the baseline contradicts is named
+  to the operator and never silently merged — co-loaded contradictions tell the model X and
+  not-X every turn.
+- **Baseline §7 names the native floor** — destructive-command block + the permission flow
+  are the platform's out-of-the-box floor; the baseline's reactive `permissions.deny` layer
+  builds above it. Previously §7 implicitly assumed a machine-level guard hook that only
+  the maintainer's machine had.
+- Continuity texts (`bootstrap-checklist.md` Phase 5 items 3–4) no longer describe
+  state-surfacing automation as "which this kit does not ship" — the companion ships it;
+  the CLAUDE.md session-start ritual remains the carrier without it. The block's line-count
+  quotes corrected to the measured ~80 (were "~60").
+- **Audit checklist gained two hook items** the shipped digest's own defects earned:
+  context-injecting hooks (`SessionStart` / `UserPromptSubmit` / `Stop`) with unbounded
+  stdout (§6), and a derived file (`index.json` / `tldr.md`) read as a fast path — stale
+  and unvalidated for a few saved milliseconds (§6). §2 gained the hook-merge case below.
+- **Detect before installing the companion** (`bootstrap-checklist.md` Phase 5 item 3):
+  hooks and skills from every layer *merge, never override* (verified against the 2.1.211
+  bundle: hook sources are concatenated, not replaced — modulo `allowManagedHooksOnly` /
+  `disableAllHooks`), so an operator who already runs a personal SessionStart digest gets
+  the same state twice, in two formats, before turn one. The kit gated ~80 lines of prose
+  behind a four-outcome detect while waving through a hook that fires every session.
+
+- **The digest line now carries the entry's date** (`#id · date · title`): the id alone
+  doesn't answer "was this yesterday or in March?", and the date costs ~12 bytes per line.
+  Optional — an entry without one still surfaces. Order stays `latest last` (recency).
+- **Two duplication items the maintainer's own machine earned.** `audit-checklist.md` §2:
+  a hand-kept copy of something a plugin already ships. Plugin skills are namespaced
+  (`plugin:skill`), so a personal copy never *collides* — no error, no shadow warning, just
+  two skills with one description and a model picking either; the tell is a fix you must
+  apply twice. `operator-playbook.md`: symlinking the checkout is the **only** dogfooding
+  path that stays live (a marketplace install *copies* into `~/.claude/plugins/cache/`;
+  `--plugin-dir` is per-invocation) — and it must point at the **plugin directory**, not its
+  `skills/` subfolder, or you get the skill without the plugin's `hooks/` and `bin/`.
+
+### Fixed
+- **The SessionStart digest could flood the context window** (`session-start-digest.sh`).
+  Its stdout is injected verbatim ahead of the operator's first turn, in every project
+  including a freshly cloned untrusted one, with no downstream trim — so boundedness is the
+  component's core invariant. Two fresh-context refuter rounds found it broken in four ways,
+  all now closed and covered by a 36-case suite (`test-session-start-digest.sh`, new — the
+  hook shipped with none) green under bash, dash, `bash --posix` and busybox sh:
+  - **Frontmatter is now cut by its fence pair, not by a sed range.** A `/^---/,/^---/`
+    range re-opens on the next `---`, so a horizontal rule or setext underline in an entry
+    body — both idiomatic markdown — started a second "frontmatter" whose lines forged
+    `id`/`title`. An explicit `41q` also makes the read genuinely bounded: a whole-file scan
+    on an absent field previously read 402 MB (straced); a 382 MB entry now reads 65 KB.
+  - **`CLOSED` is matched as a status marker, not a substring.** `*CLOSED*` hid
+    `# Migrate CLOSED-account archive to S3` — an *active* journal — which is the exact
+    continuity loss the digest exists to prevent. Word boundaries alone then leaked
+    `CLOSED-2026-07-16` back in as active, so the tail rule distinguishes a status suffix
+    from an identifier; the residual (`CLOSED-shipped` reads as active) is signed in-file
+    as the cheap direction — noise beats a hidden active task.
+  - **CRLF entries** no longer emit a stray quote and CR into the context.
+  - **A whole-digest `MAX_BYTES` backstop** (4096, overridable via `DEVLOG_DIGEST_MAX_BYTES`)
+    now sits under the per-field caps, announcing truncation rather than silently dropping a
+    tail. It is deliberately unreachable in normal operation — and, being overridable, is
+    actually exercised by the suite: a guard no test fires is a guard nobody should trust.
+
 ## [1.15.0] — 2026-07-16
 
 Drift-remediation fold. A cross-project fresh-context audit of consumer projects (4 adversarial

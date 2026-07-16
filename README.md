@@ -23,13 +23,48 @@ OpenAI/Codex/other frameworks.
 
 The marketplace ships **two plugins**: the `claude-code-harness` design kit and a
 `devlog` continuity companion. The kit recommends keeping an episodic "what changed and
-why" record; installing `devlog` makes that guidance runnable (a `/devlog:devlog` skill
-plus a `devlog-reindex` command that regenerates `index.json` + `tldr.md`). Install it if
-you want the automation; skip it if you keep your changelog by hand.
+why" record; installing `devlog` makes that guidance runnable (a `/devlog:devlog` skill,
+a `devlog-reindex` command that regenerates `index.json` + `tldr.md`, and a SessionStart
+digest that surfaces recent devlog entries + active progress at session start — silent in
+projects that keep neither). Install it if you want the automation; skip it if you keep
+your changelog by hand.
 
 `devlog-reindex` needs **Python 3** on `PATH` (standard library only — no pip installs) and
 runs on Linux, macOS, and Windows/Git Bash. It joins `PATH` when the plugin loads, so right
 after installing run `/reload-plugins` (or restart the session) before first use.
+
+## First session (start here)
+
+Everything is driven by plain phrases in a Claude Code session — there is no setup wizard
+and nothing to configure by hand:
+
+| You want | Say |
+|---|---|
+| A project gets its harness (new or existing repo) | **"set up Claude Code harness in this project"** |
+| The minimal variant (CLAUDE.md + settings only) | **"set up a minimal harness"** |
+| A gap report on an existing `.claude/` | **"audit my Claude Code harness"** |
+| The multi-session product-build spine (oracle, feature ledger, progress) | **"set up the long-running build kit (Phase 5)"** |
+| Independent verification of a finished deliverable | **`/claude-code-harness:external-audit <scope>`** in a fresh session |
+
+What the first bootstrap touches — and what it doesn't:
+
+- **Inside the repo**: root `CLAUDE.md`, `.claude/settings.json`, the shipped workflow docs
+  in `.claude/docs/`, real `docs/ARCHITECTURE.md` + `docs/CODE-MAP.md` (`.mcp.json` only if a
+  clear external-tool need surfaces). Custom subagents, hooks, skills, and commands are
+  deliberately **not** created.
+- **Outside the repo**: nothing, unless you opt in. The one offer is the practice baseline
+  (the behavioral layer §1–8): by default it lands in the project
+  (`.claude/rules/practice-baseline.md` — in git, reviewable, removable); merging it into
+  your global `~/.claude/CLAUDE.md` happens only if you explicitly approve, after seeing the
+  diff, with a timestamped backup written first.
+- Installing the plugins changes nothing in your `~/.claude/` profile. The devlog
+  companion's only always-on piece is the read-only SessionStart digest above, silent
+  wherever there is nothing to surface.
+
+The human-facing lifecycle map — what to say at each stage, what to prepare between
+sessions, and how to keep everything current (`/plugin update` → "audit my Claude Code
+harness" → approve the offered re-syncs) — is
+[`plugins/harness/references/operator-playbook.md`](plugins/harness/references/operator-playbook.md).
 
 ## Four modes
 
@@ -49,7 +84,7 @@ after installing run `/reload-plugins` (or restart the session) before first use
 | `plugins/harness/SKILL.md` | The skill entry point — the four modes + routing |
 | `plugins/harness/references/` | On-demand knowledge (bootstrap/audit checklists, native-capabilities, evidence base, operator playbook, harness discipline/evolution, shippable project-docs) |
 | `plugins/harness/agents/` + `plugins/harness/commands/external-audit.md` | The 3-role external-audit pass (evidence-executor ∥ process-auditor ∥ code-refuter → adjudication) |
-| `plugins/devlog/skills/devlog/` + `plugins/devlog/bin/devlog-reindex` | The devlog companion plugin — the `/devlog:devlog` skill and the index/digest regenerator on `PATH` |
+| `plugins/devlog/` (skill + `bin/devlog-reindex` + `hooks/`) | The devlog companion plugin — the `/devlog:devlog` skill, the index/digest regenerator on `PATH`, and the SessionStart continuity digest |
 
 ## Provenance
 

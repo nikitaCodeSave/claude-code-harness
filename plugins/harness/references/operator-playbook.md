@@ -20,7 +20,8 @@ Each step below adds exactly what has proven its worth — and not before its tr
 
 The plugin and the behavioral baseline reach the machine/profile **separately**:
 - **The plugin (kit)** — `/plugin marketplace add nikitaCodeSave/claude-code-harness`, then
-  `/plugin install claude-code-harness`; carries SKILL.md, `/external-audit`, and the agent roles.
+  `/plugin install claude-code-harness@claude-code-harness`; carries SKILL.md, `/external-audit`,
+  and the agent roles.
   (For a maintainer developing the plugin itself — symlink its checkout into `~/.claude/skills/`:
   a directory with `.claude-plugin/plugin.json` is auto-loaded as `claude-code-harness@skills-dir`,
   with no install step.)
@@ -96,8 +97,9 @@ If the project is a product built feature-by-feature (not a library/script/one-o
 2. You get a gap report (finding → why it matters → remediation). **Edits happen only after your
    approval**, anything irreversible is flagged separately; before a strip — a branch/backup.
 3. The audit also compares the `shipped-by` version of the workflow distillation (`.claude/docs/*`)
-   with the version of the installed plugin and offers a re-sync if the plugin is newer — so the
-   factory distillation in projects doesn't fall behind the canon.
+   against the same files in the installed plugin (content-version vs content-version — not the
+   plugin's package number) and offers a re-sync when the canon copy is newer — so the factory
+   distillation in projects doesn't fall behind the canon.
 
 ## 5. Independent verification — two tiers (fresh context, not self-recheck)
 

@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #8 · 2026-07-16 · Drift-remediation fold v1.15.0: continuity-профили, внешний refuter, blocked-схема
+
+**Tags:** canon, d-cycle, continuity, verification, backlog, audit
+
+Kickoff-артефакт лаборатории harness-drift-remediation.md (кросс-проектный fresh-context аудит: 4 адверсариальных harvest-агента над 37 .claude/-проектами, продолжение lab-devlog
+
+[→ entries/0008-drift-remediation-fold-v1-15-0-continuity-profili-vneshniy-r.md](entries/0008-drift-remediation-fold-v1-15-0-continuity-profili-vneshniy-r.md)
+
+---
+
 ## #7 · 2026-07-16 · Skill release: ритуал обновления репо — dev-harness commit vs shipped-release
 
 **Tags:** feature, skill, dev-harness, release

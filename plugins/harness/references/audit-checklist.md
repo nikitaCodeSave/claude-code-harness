@@ -53,6 +53,12 @@ or re-run before proposing edits to its machinery.
   orchestrator; `general-purpose` is the deep delegate.
 - Any custom hook/skill/command reimplementing something now native (dynamic workflows,
   `/goal`, auto memory, `/deep-research`)?
+- A hand-rolled `sync-docs` skill/agent (classify the diff → update the matching docs)
+  duplicates the **kit-shipped** docs-discipline rule 1 ("doc-with-code") rather than a native
+  surface — same disposition as the custom code-reviewer below: retire toward the rule, moving
+  any project-specific doc-map into CLAUDE.md. (Observed pattern: the skill gets built only
+  where the rule is absent, and gets retired once the rule arrives — the main thread does
+  this natively.)
 - A custom `code-reviewer` subagent or hand-rolled review pipeline — review is shipped:
   `/code-review` (working diff, the local default), `/review` (PR), `/security-review`,
   `claude ultrareview` (cloud, high-stakes). Retire the custom agent; route to the built-ins
@@ -74,14 +80,17 @@ or re-run before proposing edits to its machinery.
   transcript-grounded (sessions without them proposed zero ladder rungs and coded nontrivial
   work plan-free). Don't flag them under §4/§5; their retire triggers: embed → global baseline
   installed; duty lines → a target model proposes these steps unprompted.
-- **Shipped-docs re-sync**: compare the `shipped-by: claude-code-harness vX.Y.Z` header in
-  `.claude/docs/*` against the installed plugin version. Plugin newer → offer re-sync, but
-  **diff the project copy against the current canon and show the diff to the operator before
-  overwriting** — any non-header delta is a potential hand-edit (incl. translations) that a
-  verbatim re-copy would destroy; propose moving such content to CLAUDE.md (and features.json,
-  if present) first. Header newer than the plugin → update the plugin, don't downgrade the
-  files. Shipped docs **absent** on a non-MVH project (pre-v1.8 bootstrap or skipped Phase 2c)
-  → finding; offer to ship them (bootstrap Phase 2c).
+- **Shipped-docs re-sync**: compare the `shipped-by: claude-code-harness vX.Y.Z` header in each
+  `.claude/docs/*` file against the header of the **same file in the installed plugin's
+  `references/project-docs/`** — content-version vs content-version, never vs the plugin's
+  package version (headers advance only when a file's content changes, so a package bumped for
+  unrelated reasons would read as a permanent false "re-sync available"). Canon header newer →
+  offer re-sync, but **diff the project copy against the current canon and show the diff to the
+  operator before overwriting** — any non-header delta is a potential hand-edit (incl.
+  translations) that a verbatim re-copy would destroy; propose moving such content to CLAUDE.md
+  (and features.json, if present) first. Project header newer than the canon's → update the
+  plugin, don't downgrade the files. Shipped docs **absent** on a non-MVH project (pre-v1.8
+  bootstrap or skipped Phase 2c) → finding; offer to ship them (bootstrap Phase 2c).
 - **Orphan sweep on a corrective re-sync**: when a re-sync **removes or corrects** baseline
   content (not just bumps the header), `git diff` the superseded lines and grep the project tree
   (`skills/`, `rules/`, `CLAUDE.md`, `docs/`) for references to the now-dead content. A corrected

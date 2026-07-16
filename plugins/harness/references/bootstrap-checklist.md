@@ -258,11 +258,12 @@ apps* (T1). Set up:
    canonical shape verbatim** — don't reinvent field names (the recurring drift is
    `{description, steps, passes}` vs `{title, acceptance, verify}`; the one canon is `title` = one-line
    handle, `description` = the contract prose, `verify[]` = the single verification-array, never
-   `steps`/`acceptance`):
+   `steps`/`acceptance`; `blocked`/`blocked_reason` are the optional externally-gated markers,
+   `notes` the optional narrative slot):
 
    ```json
    {"project": "acme-api", "milestone": "v1-auth",
-    "rules": ["one feature at a time; flip passes only when verified e2e", "never edit/delete a test for green"],
+    "rules": ["one feature at a time; flip passes only when verified e2e", "never edit/delete a test for green", "verify walled off outside the agent's reach -> blocked: true + blocked_reason, not a bare passes: false"],
     "features": [{"id": "F1", "title": "Login with email + password",
       "description": "POST /auth/login returns a signed JWT; a wrong password returns 401 without leaking which field failed.",
       "verify": ["pytest tests/test_auth.py::test_login_success", "pytest tests/test_auth.py::test_login_wrong_password asserts 401"],
@@ -274,10 +275,23 @@ apps* (T1). Set up:
    steps as **explicit contracts** (what is required vs defaulted, negative cases included) —
    vague steps make each session take silent micro-decisions. Add `preconditions` (services/env
    the operator must provide, e.g. a live DB container) so a session checks them before starting.
+   When a feature's verify is walled off outside the agent's reach (prod creds, an operator-only
+   service, a third-party approval), the session records `"blocked": true, "blocked_reason":
+   "<what unblocks it, and who>"` beside `passes: false` — `passes` alone cannot distinguish
+   "not done yet" from "cannot proceed here", and without the marker every later session
+   re-attempts the wall. Sessions work the next unblocked feature; the operator scans
+   `blocked_reason`s between sessions. The optional free-text `notes` field carries the
+   narrative (what verified green below the wall, what stays quarantined) — without a named
+   slot, sessions invent ad-hoc fields or root handoff files for it (observed twice
+   independently).
    **Keep kit artifacts under `.claude/`** (`.claude/features.json`, `.claude/harness-journal.md`,
    `.claude/progress/`, `.claude/devlog/`) — only genuine product files (`CLAUDE.md`, `init.sh`,
    build manifests) belong at the repo root. A root cluttered with control files reads as mess to
    the operator and obscures what's product vs harness; point CLAUDE.md at the `.claude/` paths.
+   features.json is the **single-track** ledger; a **multi-initiative** campaign keeps **one**
+   roadmap carrier of its choice rather than a ledger per initiative plus a roadmap that
+   mirrors them — pick one editable canon and move on (same lever as item 7: reliable scoped
+   delivery, not the data structure).
 3. **Progress + checkpoint discipline** — a progress file, **preferably `.claude/progress/<slug>.md`**
    (keeping it under `.claude/` means any state-surfacing automation the operator may have —
    e.g. a personal SessionStart hook, which this kit does **not** ship — finds it; a root

@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.15.0] — 2026-07-16
+
+Drift-remediation fold. A cross-project fresh-context audit of consumer projects (4 adversarial
+harvest agents over 37 `.claude/` projects; provenance in the maintainer's lab) showed the canon's
+prescriptive FORMAT diverging from what operators actually needed in two layers — continuity and
+verification — with almost every operator deviation better than the canon. Every fold below is
+multi-source-evidenced, passed a two-refuter adopt gate (two independent fresh-context refuters,
+verdicts converged 6/6), and was behaviorally A/B-verified on temp fixtures (kit-before vs
+kit-after, headless fresh-context runs, 3/3 fixtures with a visible delta) before landing.
+Text/schema only — no new machinery, zero always-on cost. Two further candidates (an optional
+4th `state/` continuity layer; a guard-heavy CLAUDE.md ≤200 carve-out) were **rejected** at the
+refuter gate as N=1-evidenced and already covered by existing canon — recorded as lab watch-items.
+
+### Changed
+- **Continuity: the progress layer now has two legitimate shapes** (`workflow.md` Continuity,
+  `practice-baseline.md` §6) — **task-scoped** (closes with the task; terminal = `CLOSED` marker
+  *or* delete, both valid — what matters is the file no longer reads as active work) and the
+  **workstream snapshot** (a long-lived rolling picture of one workstream's current state + open
+  threads; episodic history → devlog; prune, don't append). The hard "convert→devlog, then
+  delete" mandate is gone: across three audited projects the delete never once happened, and the
+  strongest operator practice was exactly the rolling snapshot the canon didn't recognize.
+- **Verification ladder: externally-initiated refute for the silent-wrong class**
+  (`workflow.md`) — for parsers/guards/validators prefer a refuter **initiated outside the
+  authoring session** (fresh session / external audit) over a subagent the author spawns: a
+  self-commissioned evaluator partly inherits the author's framing (a real one passed a denylist
+  that an external pass then broke with Unicode-obfuscated input). And "verify passed" ≠ "the
+  invariant holds": a consumer ledger stood at 6/6 green while an external audit refuted the
+  invariant with an input class the suite never encoded — the refuter's mandate is the
+  invariant, not the diff.
+- **features.json canon: `blocked` / `blocked_reason` / `notes`** (`bootstrap-checklist.md`
+  Phase 5 + `workflow.md`) — externally-gated verify is now expressible in the ledger. A bare
+  `passes: false` can't distinguish "not done yet" from "cannot proceed here", so sessions
+  re-attempted walls and invented ad-hoc carriers (a consumer project and a fixture run
+  independently invented `notes`-like fields and root handoff files). Now: verify every
+  reachable layer below the wall first, record `blocked` + `blocked_reason` (what unblocks it,
+  and who), route the narrative to `notes`/progress, skip blocked features at session start,
+  never flip `passes` on partial verify. Plus the campaign fork: a multi-initiative campaign
+  keeps **one** roadmap carrier — not a ledger per initiative with a mirror roadmap.
+- **Shipped-docs re-sync keys on content-versions** (`audit-checklist.md` §4,
+  `operator-playbook.md` §4) — the project copy's `shipped-by` header is compared against the
+  canon file's own header, never the plugin package version (which advances on unrelated
+  releases and turned "re-sync available" into a permanent false positive).
+
+### Added
+- **Skills invocation-control facts** (`native-capabilities.md` Skills §, verified against
+  first-party docs 2026-07-16): `user-invocable: false` (background knowledge, hidden from the
+  `/` menu; exact spelling — the `user-invokable` variant seen in the wild is silently ignored)
+  vs `disable-model-invocation: true`; `context: fork` + `agent:` for forked knowledge lookups.
+  `harness-discipline.md` names the proven reference-skill species: the **project-knowledge
+  skill** (background domain knowledge out of CLAUDE.md), pointing at those mechanics.
+- **Audit checklist §3: hand-rolled `sync-docs` skill/agent** — duplicates the *kit-shipped*
+  docs-discipline rule 1 ("doc-with-code") rather than a native surface; observed built only in
+  projects that lacked the rule and retired once the rule arrived. Retire toward the rule.
+
+### Fixed
+- `operator-playbook.md` install command now matches README:
+  `/plugin install claude-code-harness@claude-code-harness`.
+
 ## [1.14.4] — 2026-07-16
 
 Docs hygiene — strip decorative edit-log meta from the reference surface, keeping the

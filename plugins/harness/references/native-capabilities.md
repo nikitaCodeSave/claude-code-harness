@@ -253,6 +253,14 @@ correctly refuses injection-shaped instructions found in a working directory.
 - **Skills** — `.claude/skills/` (+ `~/.claude/`), load on demand by description; descriptions
   cost context at start, full body only when used; `disable-model-invocation: true` → zero cost
   until you trigger it. Reference-skills (knowledge) vs action-skills (do something).
+  Invocation control is two independent flags (verified 2026-07-16, `/en/skills`):
+  `disable-model-invocation: true` = only the user triggers it (side-effect workflows);
+  `user-invocable: false` = only Claude triggers it — hidden from the `/` menu, made for
+  background knowledge (first-party example: a `legacy-system-context` skill). **Exact
+  spelling `user-invocable`** — the `user-invokable` variant seen in the wild is silently
+  ignored. `context: fork` (+ `agent: <type>`) runs the skill body as the prompt of a forked
+  subagent — the body never enters main context, only the result returns; combine with
+  read-only `allowed-tools` for knowledge lookups over a docs corpus.
 - **Slash commands** — `.claude/commands/*.md`; appear in `/`-autocomplete.
 - **MCP** — external tools appear as normal tools; `Elicitation`/`ElicitationResult` support input flows.
 - **Plugins** — marketplaces `anthropics/claude-plugins-official` (auto-registered) and

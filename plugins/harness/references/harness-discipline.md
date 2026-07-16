@@ -66,7 +66,11 @@ A skill encodes either a *workflow the main thread executes* (action: "write a d
 or *knowledge loaded on demand* (reference). Both are legitimate. What is **not** legitimate is
 a skill that re-describes the main thread's own role — that duplicates CLAUDE.md. Side-effect
 skills you only trigger yourself should set `disable-model-invocation: true` (zero context cost
-until invoked).
+until invoked). A recurring reference-skill species is the **project-knowledge skill** —
+background domain knowledge (schemas, pipeline maps, docs navigation) that would otherwise
+bloat CLAUDE.md; the invocation-control and forked-lookup mechanics for it
+(`user-invocable: false`, the `context: fork` router shape) are catalogued in
+`native-capabilities.md` (Skills §).
 
 ## Subagents are for context isolation / parallelism — not ownership
 

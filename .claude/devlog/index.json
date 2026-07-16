@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-16T07:00:44Z",
-  "entry_count": 7,
+  "generated_at": "2026-07-16T09:18:05Z",
+  "entry_count": 8,
   "entries": [
     {
       "id": 1,
@@ -112,6 +112,23 @@
       "supersedes": null,
       "path": "entries/0007-skill-release-ritual-obnovleniya-repo-dev-harness-commit-vs.md",
       "preview": "За сессию release-ритуал выполнялся вручную дважды (v1.14.3, v1.14.4) одной и той же последовательностью, с повторяющимися gotcha-граблями (release.sh не стейджит .claude/devlog/; slug только через настоящий slugify; shipped-правка без бампа доставляет консюмерам ничего…"
+    },
+    {
+      "id": 8,
+      "date": "2026-07-16",
+      "title": "Drift-remediation fold v1.15.0: continuity-профили, внешний refuter, blocked-схема",
+      "tags": [
+        "canon",
+        "d-cycle",
+        "continuity",
+        "verification",
+        "backlog",
+        "audit"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0008-drift-remediation-fold-v1-15-0-continuity-profili-vneshniy-r.md",
+      "preview": "Kickoff-артефакт лаборатории harness-drift-remediation.md (кросс-проектный fresh-context аудит: 4 адверсариальных harvest-агента над 37 .claude/-проектами, продолжение lab-devlog"
     }
   ]
 }

@@ -1,4 +1,4 @@
-<!-- shipped-by: claude-code-harness v1.12.0 — do not hand-evolve in the project;
+<!-- shipped-by: claude-code-harness v1.15.0 — do not hand-evolve in the project;
      improvements flow through the plugin (re-synced on audit). Project-specific
      facts live in CLAUDE.md (and features.json, if present), not here. -->
 
@@ -10,7 +10,8 @@ when the trigger fires; this file is on-demand, not per-turn context.
 ## Session start (every working session)
 
 1. `git log --oneline -10` + read `.claude/progress/` — restore state.
-2. Read `.claude/features.json` (if present) — take **one** highest-priority open feature.
+2. Read `.claude/features.json` (if present) — take **one** highest-priority open feature;
+   skip `blocked: true` entries — they wait on what `blocked_reason` names, not on another attempt.
 3. Run the oracle (test suite / `init.sh`) — confirm the baseline is green *before* changing code.
 4. A handoff note is a **claim, not a fact**: "verified" written by a past session must be
    re-executed before you rely on it. Phrase queued fixes as "reproduce → close".
@@ -52,7 +53,16 @@ goes almost straight to Plan — the full gate set is the exception, not a ritua
   (red→green is the default, not dogma — see `testing.md` rule 2 for what actually matters).
   Never weaken or delete a test to get green.
 - One feature per cycle; `passes: true` in the ledger only after **every** verify step ran,
-  negative cases included.
+  negative cases included. When verify hits a wall outside your reach (missing creds, an
+  operator-only service, a third-party dependency), record `blocked: true` +
+  `blocked_reason: "<what unblocks it, and who>"` beside `passes: false` — a bare
+  `passes: false` cannot tell "cannot proceed here" from "not done yet", and the next
+  session will burn a cycle rediscovering the wall. Never flip `passes` on partial verify.
+  Before recording `blocked`, verify every layer you *can* reach below the wall (unit /
+  service-layer / stubbed-boundary dispatch) — `blocked` describes the last mile, not the
+  whole feature. Route the narrative (what ran green, what stays quarantined for whom) to
+  the feature's `notes` or the progress file — never invent ad-hoc ledger fields or root
+  handoff files.
 - Git commit per feature with a descriptive message. Doc-with-code: the same commit updates
   the docs its diff touches (mapping table — `docs-discipline.md`).
 - **Exercise runtime-critical paths on real input before fixing the design.** For
@@ -72,11 +82,15 @@ Run the rungs in order; escalate by stakes — and **name the chosen rung to the
 |---|---|---|
 | Self-verify | always | oracle green + lint/types + end-to-end check of the actual behavior ("looks done" ≠ "is done") |
 | `/code-review` | substantive diff | run it yourself at the end of the change (it reviews the working diff; `/review` is PR-review — verify the surface exists in your session's `/`-autocomplete) |
-| Fresh-context second opinion | high-stakes, "looks done", silent-wrong-is-costly; **per-change** for silent-wrong-prone components (parsers/rewriters of untrusted input, guards/validators, invariant refactors) | separate session or subagent prompted to **refute**, not confirm — the author anchors on its own solution. Also usable UPSTREAM on a large/irreversible design decision before you freeze it — grill it to kill ≥1 alternative with a concrete failure scenario or cost |
+| Fresh-context second opinion | high-stakes, "looks done", silent-wrong-is-costly; **per-change** for silent-wrong-prone components (parsers/rewriters of untrusted input, guards/validators, invariant refactors) | separate session or subagent prompted to **refute**, not confirm — the author anchors on its own solution. For the silent-wrong class, prefer a refuter **initiated outside the authoring session** (fresh session / external audit) over a subagent you spawn: a self-commissioned evaluator partly inherits your framing (one passed a denylist that an external pass then broke with Unicode-obfuscated input). Also usable UPSTREAM on a large/irreversible design decision before you freeze it — grill it to kill ≥1 alternative with a concrete failure scenario or cost |
 | External audit | milestone closed / security-correctness-critical / irreversible | operator opens a **new** session and runs `/claude-code-harness:external-audit <scope>` (requires the claude-code-harness plugin; without it — a fresh session prompted to refute, the rung above); executed evidence beats read evidence |
 
 Periodically worth running on *accepted* features too — fresh-context audits have caught
-HIGH defects in already-green code.
+HIGH defects in already-green code. For guard/validator/parser features, "verify passed" and
+"the invariant holds" are different claims: the suite proves the cases it encodes, while the
+invariant lives in adversarial input space — a ledger has stood at all-green while an external
+audit refuted the invariant with an input class the suite never encoded. The refuter's mandate
+is the invariant, not the diff.
 
 ## Continuity (what survives the session)
 
@@ -85,20 +99,25 @@ continuity elsewhere (descriptive git commits, a workspace/notes convention, str
 memory), meet it there instead of adding a parallel store. The conventions below are the
 kit's default carriers, not a mandate:
 
-- `.claude/progress/<slug>.md` — in-flight state of the current long task: what's done,
-  what's stuck, next steps. Update before ending a session; one-line `Quick state — <facts>`
-  heading on top.
+- `.claude/progress/<slug>.md` — the in-flight layer, in either of two legitimate shapes:
+  **task-scoped** (state of one bounded task: what's done, what's stuck, next steps — closes
+  when the task does) or a **workstream snapshot** (a long-lived rolling picture of one
+  workstream's *current* state + open threads; episodic history goes to the devlog, and the
+  file is pruned, not appended, so it stays a snapshot). Update before ending a session;
+  one-line `Quick state — <facts>` heading on top.
 - `.claude/devlog/entries/NNNN-<slug>.md` — one entry per feature/fix/decision: what changed
   and why. Episodic layer, distinct from progress; written when the change lands, converted
   from the progress file when a long task closes.
 - Durable knowledge lives in artifacts (ADR / docs / devlog), never only in chat.
 
-**Closing a long task** (iteration/feature-set done):
+**Closing a long task** (task-scoped progress; a workstream snapshot doesn't close — it gets
+pruned back to current state):
 1. Verify every closed feature has its episodic record (devlog entry or equivalent) — it
    outlives the progress file.
 2. Confirm features.json (if present) marks them done (passes:true).
-3. Delete the progress file (or set Quick state → CLOSED) — `progress/` holds only *active* tasks;
-   closed history lives in devlog + git. A tracked file → delete is reversible via git.
+3. Make the terminal state legible: set `Quick state → CLOSED` or delete the file — both are
+   valid ends (closed history lives in devlog + git); what matters is that a finished task's
+   file no longer reads as active work.
 
 ## Production posture (day 0, not "later")
 

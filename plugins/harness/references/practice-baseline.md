@@ -85,8 +85,10 @@ the carrier:
 - episodic "what changed and why" — e.g. a devlog (`.claude/devlog/entries/`) or
   disciplined commit messages; record after a feature / fix / config change / decision.
 - in-flight state of one long task — e.g. `.claude/progress/<slug>.md`: what's done,
-  what's stuck; close it out (fold into the episodic record, then delete) when the
-  task ends — an open journal for a finished task misleads the next session.
+  what's stuck; when the task ends, fold it into the episodic record and mark it
+  CLOSED (or delete it) — a finished task's journal left looking active misleads the
+  next session. A long-lived workstream may instead keep a rolling current-state
+  snapshot (episodic history → devlog; prune, don't append).
 - atemporal facts (auto-memory / CLAUDE.md) — preferences and constraints, not history.
 
 ## 7. Guardrails — Encode "What Not to Do" Mechanically

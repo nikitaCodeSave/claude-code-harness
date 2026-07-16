@@ -1,6 +1,6 @@
 # Native capabilities — what Claude Code already does
 
-Working inventory as of **Claude Code v2.1.210 / the Claude 5 family (Fable 5, Sonnet 5) +
+Working inventory as of **Claude Code v2.1.211 / the Claude 5 family (Fable 5, Sonnet 5) +
 Opus 4.8 model generation** (July 2026). Default model is account-type-dependent [FP,
 `model-config`]: Opus 4.8 on Max / Team Premium / Enterprise PAYG; **Sonnet 5** (v2.1.197+)
 on Pro / Team Standard / Enterprise seats; Fable 5 is the default on no account type.
@@ -318,8 +318,11 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
   reason surfaces in the transcript, a toast, and `/permissions` → recent denials (v2.1.193); keys
   `autoMode.classifyAllShell` + `autoMode.{allow, soft_deny, hard_deny, environment}` with
   `$defaults` inheritance; the classifier defaults to Sonnet 5 for external sessions,
-  pinned per session (v2.1.210). **Since v2.1.207 `autoMode` is no longer read from the
-  repo-resident `.claude/settings.local.json`** — put these keys in `~/.claude/settings.json`. `!`-commands now auto-provoke a model response by default — revert with
+  pinned per session (v2.1.210). A **PreToolUse hook `ask` now floors the auto-mode decision
+  at a prompt** for unsandboxed Bash (v2.1.211) — the classifier can no longer silently
+  downgrade a hook `ask`, so a guard hook stays authoritative over auto mode (consistent with
+  "hooks are deterministic enforcement", above). **Since v2.1.207 `autoMode` is no longer read
+  from the repo-resident `.claude/settings.local.json`** — put these keys in `~/.claude/settings.json`. `!`-commands now auto-provoke a model response by default — revert with
   `respondToBashCommands: false`.
 
 ## Out of scope (API-only — never propose for a CLI-subscription harness)

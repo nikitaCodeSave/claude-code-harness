@@ -16,8 +16,8 @@ community). So the strip revision compares a *delta* rather than "everything fro
 canon carries one provenance stamp — its last grounding point:
 
 <!-- harness-refresh-ledger
-last-grounded: CC v2.1.210 · Claude 5 family (Fable 5, Sonnet 5) + Opus 4.8 · 2026-07-15
-sources-checked: code.claude.com changelog + docs (sub-agents, plugins-reference, commands, hooks, memory, model-config) · anthropic.com engineering + news · binary strings 2.1.210
+last-grounded: CC v2.1.211 · Claude 5 family (Fable 5, Sonnet 5) + Opus 4.8 · 2026-07-16
+sources-checked: code.claude.com changelog delta 2.1.210→2.1.211 (micro external-intake — changelog only) · prior full sweep (docs sub-agents/plugins-reference/commands/hooks/memory/model-config · anthropic.com engineering+news · binary strings) grounded at CC v2.1.210 / 2026-07-15, pending next strip revision
 -->
 
 The stamp is updated at the end of each strip revision (the external-intake pass below). The
@@ -106,4 +106,4 @@ shipped with the kit): 2 D-cycles, 12 findings folded into the kit, each with jo
 empirics; the first-party grounding is Anthropic's "review your configuration every 3-6 months"
 and "find the simplest solution possible" (see `references/evidence-base.md`).
 
-<!-- last-updated: 2026-07-15 -->
+<!-- last-updated: 2026-07-16 -->

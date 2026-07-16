@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #5 · 2026-07-16 · Micro external-intake 2.1.211: рефреш леджера + фолд hook-ask-floors
+
+**Tags:** canon, refresh-ledger, native-capabilities
+
+Refresh-ledger (harness-evolution.md) числился last-grounded на CC v2.1.210, а живой claude --version = 2.1.211. По harness-evolution.md дельта claude --version против леджера — самостоятельный триггер strip-revision (external-intake pass). Дельта минимальная (один patch), но…
+
+[→ entries/0005-micro-external-intake-2-1-211-refresh-ledzhera-fold-hook-ask.md](entries/0005-micro-external-intake-2-1-211-refresh-ledzhera-fold-hook-ask.md)
+
+---
+
 ## #4 · 2026-07-16 · Фолд «эмпирика > спека»: посылка ТЗ — тоже claim, измерь её до постройки
 
 **Tags:** canon, d-cycle, verification

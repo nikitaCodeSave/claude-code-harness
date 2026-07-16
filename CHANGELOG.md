@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.14.3] — 2026-07-16
+
+Micro external-intake pass — the refresh ledger drifted one CC patch behind live
+(`claude --version` = 2.1.211 vs the ledger's 2.1.210), which is a standalone strip-revision
+trigger. Swept the changelog delta 2.1.210→2.1.211, folded the one canon-relevant finding, and
+re-stamped the ledger. Not a full strip revision: only the changelog was re-checked; the
+docs/blog/binary sweep stays grounded at 2.1.210 until the next calendar revision.
+
+### Changed
+- **`native-capabilities.md` current to CC v2.1.211** — the inventory version line advanced from
+  2.1.210, and the auto-mode-classifier note now records that a **PreToolUse hook `ask` floors the
+  auto-mode decision at a prompt** for unsandboxed Bash (v2.1.211): the classifier can no longer
+  silently downgrade a hook `ask`, so a guard hook stays authoritative over auto mode. This is the
+  only 2.1.211 delta that touches harness design — the rest of the release is bug/UX fixes and
+  niche SDK flags (`--forward-subagent-text`), which the D-cycle gate correctly rejects as
+  non-canon.
+- **Refresh ledger re-stamped** (`harness-evolution.md`) to CC v2.1.211 / 2026-07-16, honestly
+  scoped to "changelog delta only" so the next strip revision still knows the full multi-source
+  sweep is grounded at 2.1.210.
+
 ## [1.14.2] — 2026-07-16
 
 Canon evolution — two D-cycle folds distilled from a real consumer project's usage, each verified

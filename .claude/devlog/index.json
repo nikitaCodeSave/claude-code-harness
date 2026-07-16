@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-15T21:11:50Z",
-  "entry_count": 4,
+  "generated_at": "2026-07-16T06:26:01Z",
+  "entry_count": 5,
   "entries": [
     {
       "id": 1,
@@ -69,6 +69,20 @@
       "supersedes": null,
       "path": "entries/0004-fold-empirika-speka-posylka-tz-tozhe-claim-izmer-ee-do-postr.md",
       "preview": "Watch-item из того же анализа Greenplun, что и reposition (#3). Повторяющийся паттерн: измерение опровергает не только переданный факт, но и саму посылку ТЗ. Две инстанции: (1) ложный «потолок модели» — Q4/Q23 числились ceiling'ом Qwen3, детерминированный intent-guard…"
+    },
+    {
+      "id": 5,
+      "date": "2026-07-16",
+      "title": "Micro external-intake 2.1.211: рефреш леджера + фолд hook-ask-floors",
+      "tags": [
+        "canon",
+        "refresh-ledger",
+        "native-capabilities"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0005-micro-external-intake-2-1-211-refresh-ledzhera-fold-hook-ask.md",
+      "preview": "Refresh-ledger (harness-evolution.md) числился last-grounded на CC v2.1.210, а живой claude --version = 2.1.211. По harness-evolution.md дельта claude --version против леджера — самостоятельный триггер strip-revision (external-intake pass). Дельта минимальная (один patch), но…"
     }
   ]
 }

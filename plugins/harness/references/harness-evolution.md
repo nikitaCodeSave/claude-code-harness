@@ -105,5 +105,3 @@ Grown on the dogfood track (the maintainer's lab Harnesses-Claude, devlog #78–
 shipped with the kit): 2 D-cycles, 12 findings folded into the kit, each with journal or audit
 empirics; the first-party grounding is Anthropic's "review your configuration every 3-6 months"
 and "find the simplest solution possible" (see `references/evidence-base.md`).
-
-<!-- last-updated: 2026-07-16 -->

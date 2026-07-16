@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.14.4] — 2026-07-16
+
+Docs hygiene — strip decorative edit-log meta from the reference surface, keeping the
+functional staleness machinery intact. The kit's own `docs-discipline` rule 7 ("current-state,
+not changelog") and practice-baseline §6 ("atemporal facts, not history") apply to the kit's
+own references: a date that drives a future action (re-verify / re-sync / delta-compare) is
+load-bearing and stays; a date that only records "this file was edited" is a log and goes.
+
+### Removed
+- **Decorative edit-log meta** — the dated "re-distilled on DATE (added §1/§2/§6/§8…)" changelog
+  narration from `practice-baseline.md`'s Provenance, and two `<!-- last-updated -->` HTML
+  comments (`harness-evolution.md`, `operator-playbook.md`) that only stamped a file-edit date
+  and pointed at unshipped lab artifacts.
+
+### Changed
+- **`practice-baseline.md` Provenance rewritten to current-state** — keeps the load-bearing
+  empirical anchor (§5/§6 zero-prompt red→green, §8 fresh-context-critic result) and now
+  cross-references `evidence-base.md` for the wider citation set, instead of narrating what was
+  added when.
+- **`evidence-base.md` grounding stamp synced to CC v2.1.211** — was left at 2.1.210 after the
+  1.14.3 bump; this is a functional "verified against docs on X" stamp, so it tracks live.
+
+Untouched (functional provenance, deliberately kept): the `harness-evolution.md` refresh ledger,
+`native-capabilities.md`'s version line + `verified DATE` / `re-ground on bump` markers, and the
+`shipped-by:` headers that key the project-docs re-sync.
+
 ## [1.14.3] — 2026-07-16
 
 Micro external-intake pass — the refresh ledger drifted one CC patch behind live

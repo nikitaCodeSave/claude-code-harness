@@ -152,5 +152,3 @@ component is obsolete). The procedure is the second half of `references/harness-
   `references/bootstrap-checklist.md`), never speculatively.
 - The project code is not touched through harness rituals: the scope of audits and Audit mode is
   `.claude/`, `CLAUDE.md`, `docs/`.
-
-<!-- last-updated: 2026-07-15 (v1.13.0) · sources (maintainer's lab, not shipped): WORKFLOW.md, devlog #78–#82; bootstrap-checklist.md (in the kit) -->

@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-16T06:26:01Z",
-  "entry_count": 5,
+  "generated_at": "2026-07-16T06:39:03Z",
+  "entry_count": 6,
   "entries": [
     {
       "id": 1,
@@ -83,6 +83,20 @@
       "supersedes": null,
       "path": "entries/0005-micro-external-intake-2-1-211-refresh-ledzhera-fold-hook-ask.md",
       "preview": "Refresh-ledger (harness-evolution.md) числился last-grounded на CC v2.1.210, а живой claude --version = 2.1.211. По harness-evolution.md дельта claude --version против леджера — самостоятельный триггер strip-revision (external-intake pass). Дельта минимальная (один patch), но…"
+    },
+    {
+      "id": 6,
+      "date": "2026-07-16",
+      "title": "Docs-гигиена: снять декоративный edit-log, оставить функциональные staleness-стампы",
+      "tags": [
+        "docs",
+        "refactor",
+        "canon"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0006-docs-gigiena-snyat-dekorativnyy-edit-log-ostavit-funktsional.md",
+      "preview": "Оператор указал на ## Provenance в practice-baseline.md и на класс «архаизмов» в справочной документации — прозу, описывающую правки самого документа: это читается как логи / AI-slop, а не польза для плагина. Инстинкт верный и совпадает с собственным правилом кита…"
     }
   ]
 }

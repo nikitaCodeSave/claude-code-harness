@@ -107,13 +107,11 @@ class. Overhead for trivial work.
 
 ## Provenance
 
-Distilled from the maintainer's production global baseline (lab: Harnesses-Claude);
-re-distilled 2026-07-15 against the live global file (added: negative-search validation
-§1, recommendation-triage §2, continuity-carrier softening §6, per-change silent-wrong
-scope §8 — the latter two cross-project-grounded, lab devlog #115).
-Empirical anchors: §5/§6 produced the observed red→green + devlog/progress discipline in a
-real product build with zero per-session prompting; §8 is the fresh-context-critic result
-(in-context premortem added ~0 recall; a fresh-context critic recovered a real bug every
-native pass missed). References to personal machinery (a global system-guard hook, a devlog
-skill) were deliberately removed — the baseline must be self-sufficient on a bare plugin
-install; the kit's Phase 5 conventions supply the devlog/progress file formats.
+Distilled from the maintainer's production global baseline (lab: Harnesses-Claude). The
+discipline is empirically grounded, not stylistic: §5/§6 produced the observed red→green +
+devlog/progress discipline in a real product build with zero per-session prompting, and §8 is
+the fresh-context-critic result (an in-context premortem added ~0 recall; a fresh-context
+critic recovered a real bug every native pass missed) — see `evidence-base.md` for the wider
+citation set. References to personal machinery (a global system-guard hook, a devlog skill)
+are deliberately omitted so the baseline is self-sufficient on a bare plugin install; the
+kit's Phase 5 conventions supply the devlog/progress file formats.

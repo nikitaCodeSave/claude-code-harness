@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #6 · 2026-07-16 · Docs-гигиена: снять декоративный edit-log, оставить функциональные staleness-стампы
+
+**Tags:** docs, refactor, canon
+
+Оператор указал на ## Provenance в practice-baseline.md и на класс «архаизмов» в справочной документации — прозу, описывающую правки самого документа: это читается как логи / AI-slop, а не польза для плагина. Инстинкт верный и совпадает с собственным правилом кита…
+
+[→ entries/0006-docs-gigiena-snyat-dekorativnyy-edit-log-ostavit-funktsional.md](entries/0006-docs-gigiena-snyat-dekorativnyy-edit-log-ostavit-funktsional.md)
+
+---
+
 ## #5 · 2026-07-16 · Micro external-intake 2.1.211: рефреш леджера + фолд hook-ask-floors
 
 **Tags:** canon, refresh-ledger, native-capabilities

@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.17.2] — 2026-07-17
+
+**The MVH note's own rule, applied to the line it walked past.** The `## Working style` template ends
+its change-sizing bullet with a pointer to `.claude/docs/workflow.md`, and that bullet is one of the
+two Phase 7 greps that still apply to an MVH project — so it has to survive where the note drops its
+neighbours. It survived with the pointer attached, into the one shape that never creates
+`.claude/docs/`. The defect pre-dates v1.17.0; v1.17.1 fixed its sibling in Phase 2b's delta list and
+left this one standing.
+
+### Fixed
+- **The MVH note strips the change-sizing pointer** instead of only dropping whole lines: the duty
+  stays (Phase 7 greps `size the change` there), its trailing `.claude/docs/workflow.md` goes.
+  Dropping the line — the other obvious fix — would have put the note in conflict with its own gate.
+  Every other `.claude/` mention in the two template blocks was already handled, by the note
+  (ladder-semantics · doc-with-code · continuity · the `.claude/docs/` + `.claude/devlog/`
+  Reference-materials lines) or by "(only those that exist)" — so an MVH CLAUDE.md now points at
+  nothing that shape doesn't create.
+
+Untouched: the Phase 7 gate, `practice-baseline.md`, `project-docs/*` (per-file stamps).
+
 ## [1.17.1] — 2026-07-17
 
 **v1.17.0's regression test did not work.** External refutation of the shipped diff (arriving after

@@ -124,7 +124,9 @@ build.)
 
 MVH-on-request: drop the ladder-semantics, doc-with-code and continuity duty lines together with
 the `.claude/docs/` + `.claude/devlog/` Reference-materials lines — rules pointing at files that
-don't exist are noise (detect-then-prescribe).
+don't exist are noise (detect-then-prescribe). The change-sizing line stays — Phase 7 greps it —
+but strip its trailing `.claude/docs/workflow.md` pointer: the duty stands without it, and a
+dangling one is the same noise on a line that survives.
 
 **Resolve the continuity carrier as you write the line.** The branches above are the choice, not
 the text to copy: CLAUDE.md names the one carrier this project actually uses (detect it — is the

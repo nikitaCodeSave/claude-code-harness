@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #19 · 2026-07-17 · Указатель пережил ноту, которая его запрещает
+
+**Tags:** harness, docs
+
+Оператор назвал остаток, который сам же не тронул в v1.17.1, чтобы не расширять скоуп: строка change-sizing в шаблоне ## Working style заканчивается указателем — .claude/docs/workflow.md, а MVH-нота её не дропает. В MVH-проекте (CLAUDE.md + settings.json, больше ничего)…
+
+[→ entries/0019-ukazatel-perezhil-notu-kotoraya-ego-zapreshchaet.md](entries/0019-ukazatel-perezhil-notu-kotoraya-ego-zapreshchaet.md)
+
+---
+
 ## #18 · 2026-07-17 · Гейт, который проходил на собственном баге
 
 **Tags:** harness, adr, testing

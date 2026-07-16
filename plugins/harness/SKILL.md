@@ -55,9 +55,12 @@ oracle / feature-spec ledger / progress-handoff conventions — checklist Phase 
 long-running-harness playbook, files+conventions not machinery; still no custom
 subagents/hooks). **Greenfield (0 files, 0 commits) is a valid detected state, not a reason to
 stall**: an explicit request for the full harness on an empty repo is informed consent — deploy it
-with honestly-labelled stubs (never invented facts) and an `F0` ledger feature that closes them in
-the loop. **Close every bootstrap by recording it** (Phase 8: the run writes its own first devlog
-entry — the episodic layer starts live instead of as a convention nobody has exercised). Then stop.
+with honestly-labelled stubs (never invented facts); on a *sustained* greenfield an `F0` ledger
+feature closes them in the loop, and where Phase 5 is skipped the stub marker carries its own fill
+trigger (never cite a `features.json` the project won't have). **Close every bootstrap by recording
+it** (Phase 8: the run writes its own first episodic entry, in whatever carrier the project's
+continuity duty names — the layer starts live instead of as a convention nobody has exercised).
+Then stop.
 
 ### Mode 2: Audit (existing `.claude/`)
 Read `references/audit-checklist.md`. Walk it top-down; produce a gap statement + remediation
@@ -160,10 +163,10 @@ already knows the kit):
 | (no custom subagents/hooks/skills) | built-ins cover it | — |
 ## Offered — practice baseline (Phase 2b): project embed `.claude/rules/practice-baseline.md` (~80 lines, default) or guarded user-global CLAUDE.md merge (opt-in); operator decides
 ## Sustained build (Phase 5) adds — oracle (reuse the project's entry point; author scripts/init.sh only if none exists) · .claude/features.json · progress+devlog conventions
-## Greenfield (no code yet) — ARCHITECTURE/CODE-MAP ship as labelled stubs, never invented facts; ledger seeds `F0` "get the brief → fill Stack / ARCHITECTURE / CODE-MAP / name the oracle", `passes: false`
+## Greenfield (no code yet) — ARCHITECTURE/CODE-MAP ship as labelled stubs, never invented facts; on a sustained build the ledger seeds `F0` "get the brief → fill Stack / ARCHITECTURE / CODE-MAP / name the oracle", `passes: false` (no Phase 5 → no ledger: the stub marker carries the trigger)
 ## Minimal MVH (CLAUDE.md + settings only) — explicit operator request only
 ## Deferred until justified — subagents (evidence) · hooks (recurring pain) · skills (≥3× repeat)
-## Closes with — Phase 8: the bootstrap records itself as devlog entry #1 (live episodic layer + a carrier smoke test)
+## Closes with — Phase 8: the bootstrap records itself as episodic entry #1, in the carrier the continuity duty names (live layer + a carrier smoke test)
 ```
 
 ## Gotchas

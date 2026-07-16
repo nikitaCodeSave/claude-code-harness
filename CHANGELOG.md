@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.17.1] — 2026-07-17
+
+**v1.17.0's regression test did not work.** External refutation of the shipped diff (arriving after
+the push) found that `grep -ci continuity CLAUDE.md` — the gate written specifically to catch a
+CLAUDE.md with no continuity duty — **passes that exact file**. Measured, not argued: a fixture built
+from the pre-diff template (Working style with no duty + the verbatim `Reference materials` block)
+scores `continuity` = 1, because the block this same template prescribes already ends a line with the
+word: `- .claude/docs/workflow.md — flow: session ritual, plan, verification ladder, continuity`.
+v1.17.0's two live bootstraps could not reveal it — both wrote the duty, so the gate returned ≥1 for
+the *right* reason. A gate that passes when the artifact is correct and passes when it is broken is
+not a gate. This release is that gate, actually working.
+
+### Fixed
+- **Phase 7's continuity token is anchored**: `grep -ciE '^#{0,4} *-? *\*{0,2}Continuity'` — the word
+  as a *label at line start* (duty bullet, or a `## Continuity` heading), which no pointer line
+  satisfies. Verified against four real artifacts: buggy fixture → 0 (catches it); library bootstrap,
+  sustained bootstrap, section-style CLAUDE.md → 1 (all pass). The refuter's proposed token
+  (`closes with an episodic`) was rejected on evidence, not taste: sessions paraphrase the duty
+  ("closes with a `/devlog:devlog` entry"), so it scored **0 on all three correct bootstraps** — it
+  would have replaced a false pass with a false fail on every project.
+- **The same anchor in `audit-checklist.md`.** The bare grep made the new gap-check miss most of the
+  population it targets — pre-1.17.0 projects carry that Reference-materials line, so `→ 0` never
+  fires. The "expect this on **every** project bootstrapped before v1.17.0" claim was wrong and is
+  corrected to "common".
+- **Phase 2b told sessions to delete the line Phase 7 demands.** Its dedupe rule trimmed Working style
+  to "project-specific deltas (plan-mode duty + verification-ladder lines)" — and the practice
+  baseline's §6 *is* continuity, with the project embed as Phase 2b's default. A session obeying both
+  phases deleted the duty and then failed the gate. The delta list is now explicit (plan-mode ·
+  ladder · change-sizing · continuity · doc-with-code) and says why these survive: they are the
+  project-side write-through, and "the baseline says it one layer up" is the union-of-layers argument
+  Phase 7 exists to reject. The same unclosed list in audit §4's "evidence-backed keeps" is updated —
+  its neighbouring "lines that don't change behavior → cut" bullets read as a licence to cut exactly
+  these. (`size the change` had this defect before v1.17.0; fixed here too.)
+- **Remaining unconditional Phase-5 references** (v1.17.0 fixed three of five): Phase 7's "with F0 as
+  their due date" and SKILL.md's greenfield line + Mode 1 prose all promised an `F0`/ledger that a
+  non-sustained greenfield never gets. Now branch-aware.
+- **The `.claude/devlog/entries/` Reference-materials line is conditional** on the devlog actually
+  being the project's carrier — where the carrier is disciplined commits it pointed at a directory
+  the project will never grow, which is the dangling-pointer noise the MVH note forbids.
+- **Phase 5 item 1's "Session 0 establishes a green baseline"** got the greenfield clause the
+  neighbouring phases received: at 0 files there is no runner to configure and no entry point to
+  reuse, so the oracle is a TBD carried by `F0` — and authoring `scripts/init.sh` against a guessed
+  stack is the invented-fact ban in script form.
+- **"the full shape"** (Phase 0) named a shape the file never defined; it now resolves to
+  "default shape + Phase 5". `~16-line cost` → `~25-line` (the block is 25 lines).
+
 ## [1.17.0] — 2026-07-17
 
 A clean-environment bootstrap test caught the kit failing its own write-through rule. The Phase 2

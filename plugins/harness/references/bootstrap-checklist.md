@@ -50,7 +50,10 @@ knowing one. An explicit operator request for the full harness on an empty repo 
 consent — deploy it, don't argue the project is too small to need one**: laying the flow down at
 file zero is the cheapest it will ever be, and the retrofit is what costs a session. When intent is
 genuinely undeterminable (no README, no stated goal, nothing to read), ask once — sustained product
-build or one-off? — and default to the full shape if there is no one to answer.
+build or one-off? — and if there is no one to answer, default to the **default shape plus Phase 5**
+(the two named shapes are "default shape" = Phase 1's table, and "default shape + Phase 5" for a
+sustained build; "full harness", when an operator says it, means the latter — confirm rather than
+guess when someone is there to ask).
 
 ## Phase 1 — Propose the default shape
 
@@ -129,7 +132,7 @@ companion installed?), and that same carrier is the one Phase 8 records the boot
 line that ships the menu instead of the decision hands the next session the choice all over again.
 
 The `## Working style` block stays even though the system prompt overlaps it — target model
-versions vary and the ~16-line cost buys resilience. Do **not** inflate it to a 60-line treatise.
+versions vary and its ~25-line cost buys resilience. Do **not** inflate it to a 60-line treatise.
 The plan-mode and verification-ladder lines are **proposal duties, not silent rituals**: their
 value is that the *session* surfaces the workflow to the operator (transcript evidence: without
 them, sessions never proposed a single ladder rung and coded nontrivial integrations plan-free).
@@ -155,6 +158,9 @@ Then add these sections (kept short):
 - .claude/docs/testing.md · .claude/docs/docs-discipline.md — invariants (shipped by the kit)
 - .claude/devlog/entries/ — episodic record, one entry per change (the first entry creates the
   directory; index.json / tldr.md there are generated — never hand-edit them)
+  ^ only when the devlog IS this project's carrier; where the carrier is disciplined commit
+  messages, drop this line — pointing at a directory the project will never grow is the same
+  dangling-pointer noise the MVH note calls out.
 ```
 
 **Root `docs/` is part of the default shape**: write `docs/ARCHITECTURE.md` (module map, data
@@ -190,8 +196,15 @@ project-embed default, and the guarded global merge (explicit opt-in: diff previ
 timestamped backup, budget check, headless never). The kit's artifacts assume this behavior
 layer exists; a plugin install alone does not carry it. Project-side guards:
 - **Dedupe against Working style.** If the baseline lands (in any layer) or already exists,
-  trim the project Working style block to the project-specific deltas (plan-mode duty +
-  verification-ladder lines) — don't double-load the same prose from two layers.
+  trim the project Working style block to the project-specific deltas — don't double-load the same
+  prose from two layers. **The deltas are: plan-mode duty · verification-ladder · change-sizing ·
+  continuity · doc-with-code.** These five survive the trim *because Phase 7 greps for them* — they
+  are the write-through evidence that the duty reached the project, and the baseline carrying the
+  same idea one layer up is not a substitute (that is exactly the union-of-layers reasoning Phase 7
+  rejects: the union answers correctly while the project file is missing the line). Trim the
+  *general* prose the baseline already states — think-first, simplicity, surgical changes, red→green
+  — not these. A session that trims a delta passes Phase 2b and fails Phase 7; that contradiction is
+  the bug, not the session.
 - **Retire trigger:** drop the project embed when a global baseline is installed (Audit
   re-syncs embeds by the content-version stamp); drop the proposal-duty lines if a target
   model demonstrably proposes plan-mode/ladder steps unprompted.
@@ -310,6 +323,11 @@ apps* (T1). Set up:
    For non-web products define a **domain oracle** instead: golden inputs → expected outputs,
    **negative cases included** (a negative golden case has caught a latent donor-code bug that
    every positive test missed).
+   **Greenfield exception — you cannot name an oracle for a stack that does not exist.** At 0 files
+   there is no runner to configure and no entry point to reuse: the oracle is a labelled TBD in
+   CLAUDE.md, `F0` carries it (its `verify` is what makes it real), and Phase 7's oracle run is N/A
+   by construction. Do **not** author a `scripts/init.sh` against a guessed stack — that is the
+   invented-fact ban in script form. Everything below applies at `F0`, not at bootstrap.
    **Session 0 establishes a green baseline:** add any missing test/lint config + one trivial passing
    test (and a no-empty-tests guard, **per runner**: vitest — `--passWithNoTests`; pytest has no such
    flag and **exits 5 on an empty suite** — that exit 5 is non-zero, so a naive `pytest || fail` in
@@ -490,20 +508,30 @@ claude --print "ok" </dev/null 2>&1 >/dev/null | grep -E '^(Permission |Ignoring
 claude --print "what is the project's stack?"  # pass = answer matches CLAUDE.md, not a guess
 claude --print "what files are you not allowed to touch here?"  # pass = names the deny/ask rules from settings.json
 grep -ci "plan mode" CLAUDE.md && grep -ci "fresh-context" CLAUDE.md && grep -ci "size the change" CLAUDE.md \
-  && grep -ci "continuity" CLAUDE.md
+  && grep -ciE '^#{0,4} *-? *\*{0,2}Continuity' CLAUDE.md
 ls .claude/docs/workflow.md .claude/docs/testing.md .claude/docs/docs-discipline.md docs/ARCHITECTURE.md docs/CODE-MAP.md
 # pass = all four greps ≥1 (plan-mode duty + verification ladder + change-sizing + continuity duty landed
 # in CLAUDE.md) and all five shipped/authored docs exist. This is the write-through check — it catches
 # instructions that stayed in the kit's references instead of landing in the project (e.g. a skipped
 # evaluator line, or — the case that earned the fourth token — a CLAUDE.md naming no continuity duty
-# at all, while the depth sat shipped and unreferenced in `.claude/docs/workflow.md`). `continuity` is
-# carrier-agnostic on purpose: it passes whether the carrier is a devlog or disciplined commits.
+# at all, while the depth sat shipped and unreferenced in `.claude/docs/workflow.md`).
+# **The continuity token is ANCHORED, and that anchor is the whole check.** A bare `grep -ci continuity`
+# is a false pass: the Reference-materials block this very template prescribes already ends a line with
+# the word ("…verification ladder, continuity"), so the buggy CLAUDE.md — pointer present, duty absent —
+# scores 1 and passes. Measured against the real artifact, not reasoned about. The anchor demands the
+# word as a *label at line start* (the duty bullet, or a `## Continuity` heading), which no pointer line
+# satisfies. Don't "simplify" it back. Equally, don't swap it for a prose fragment like
+# `closes with an episodic`: sessions paraphrase the duty (observed: "closes with a `/devlog:devlog`
+# entry"), so a phrase-token false-fails correct bootstraps — it was tried and scored 0 on all three.
+# The anchor is carrier-agnostic: it passes whether the carrier is a devlog or disciplined commits.
 # It is mechanical on purpose: a behavioral probe (`claude --print "what happens next
 # after a feature?"`) is contaminated by the operator's global baseline once Phase 2b installs
 # it — the union of layers answers correctly even when the project file is missing the lines.
 # Greenfield: the stack probe above and the oracle run below are **N/A by construction** — the stack is
 # a labelled TBD, so nothing exists for an answer to match and no oracle command exists to run. Record
-# them as N/A-by-construction, not "skipped", with F0 as their due date; the deny-rules probe and all
+# them as N/A-by-construction, not "skipped" — due when the stack lands (on a sustained build that is
+# `F0`; without Phase 5 there is no ledger, so name the due date in the stub marker instead). The
+# deny-rules probe and all
 # four greps apply unchanged (settings.json and CLAUDE.md are real on day zero).
 # MVH-on-request projects: only the plan-mode and change-sizing greps apply.
 ```

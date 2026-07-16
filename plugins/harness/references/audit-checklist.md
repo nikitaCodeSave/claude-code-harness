@@ -97,21 +97,30 @@ or re-run before proposing edits to its machinery.
   convert to a hook.
 - **Evidence-backed keeps, not cruft**: the kit's own deliverables — `.claude/rules/practice-baseline.md`
   (Phase 2b embed), the shipped `.claude/docs/{workflow,testing,docs-discipline}.md` (Phase 2c)
-  and the Working style proposal-duty lines (plan-mode self-entry, verification ladder) — are
-  transcript-grounded (sessions without them proposed zero ladder rungs and coded nontrivial
-  work plan-free). Don't flag them under §4/§5; their retire triggers: embed → global baseline
+  and the Working style duty lines (**plan-mode self-entry · verification ladder · change-sizing ·
+  continuity · doc-with-code**) — are transcript-grounded (sessions without them proposed zero ladder
+  rungs and coded nontrivial work plan-free). Don't flag them under §4/§5 — and note the neighbouring
+  bullets above ("lines that don't change behavior → cut", "rules Claude already follows → delete")
+  read like a licence to cut exactly these; they are not, because the duty is the *project-side*
+  write-through the bootstrap's Phase 7 greps for. Their retire triggers: embed → global baseline
   installed; duty lines → a target model proposes these steps unprompted.
-- **Continuity duty absent from CLAUDE.md** (`grep -ci continuity CLAUDE.md` → 0). The project may
-  keep a devlog, ship `.claude/docs/workflow.md`, and carry the baseline's §6 — and still never tell
-  a working session that a feature/fix/config change/decision closes with an episodic entry, or name
-  the carrier. Finding: the layer then holds only while the operator watches; entries stop the first
-  session nobody reminds. **Expect this on every project bootstrapped before v1.17.0** — the
+- **Continuity duty absent from CLAUDE.md** — `grep -ciE '^#{0,4} *-? *\*{0,2}Continuity' CLAUDE.md`
+  → 0. **Use that anchored form, not a bare `grep -ci continuity`:** the kit's own Reference-materials
+  block ends a line with the word ("…verification ladder, continuity"), so the bare grep scores 1 on a
+  CLAUDE.md that has the pointer and no duty — it misses most of the population it is meant to find.
+  The anchor demands the word as a label at line start (duty bullet or a `## Continuity` heading).
+  The project may keep a devlog, ship `.claude/docs/workflow.md`, and carry the baseline's §6 — and
+  still never tell a working session that a feature/fix/config change/decision closes with an episodic
+  entry, or name the carrier. Finding: the layer then holds only while the operator watches; entries
+  stop the first session nobody reminds. **Common on projects bootstrapped before v1.17.0** — the
   checklist described the layer in Phase 5 and never asked CLAUDE.md to name it, while the
   write-through grep tested three other tokens (found by a clean-environment bootstrap run,
   2026-07-17). Remediation: add the duty line from `bootstrap-checklist.md` Phase 2 — trigger +
   carrier + `.claude/progress/<slug>.md` + pointer to `.claude/docs/workflow.md`, three lines. Do
   **not** restate the depth `workflow.md` §Continuity and the baseline §6 already ship; a 14-line
-  continuity section in CLAUDE.md is this finding's over-correction, not its fix.
+  continuity section in CLAUDE.md is this finding's over-correction, not its fix (a heading-shaped
+  section passes the anchored grep — it has the duty, in the wrong shape; that is a §4 altitude
+  finding, not this one).
 - **Shipped-docs re-sync**: compare the `shipped-by: claude-code-harness vX.Y.Z` header in each
   `.claude/docs/*` file against the header of the **same file in the installed plugin's
   `references/project-docs/`** — content-version vs content-version, never vs the plugin's

@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #18 · 2026-07-17 · Гейт, который проходил на собственном баге
+
+**Tags:** harness, adr, testing
+
+v1.17.0 отгружен полчаса назад. Внешняя рефутация диффа пришла после пуша (агент молчал, пока я релизил) и принесла CRITICAL: греп grep -ci continuity CLAUDE.md, написанный ровно ради ловли CLAUDE.md без continuity-duty, проходит на этом самом файле.
+
+[→ entries/0018-geyt-kotoryy-prokhodil-na-sobstvennom-bage.md](entries/0018-geyt-kotoryy-prokhodil-na-sobstvennom-bage.md)
+
+---
+
 ## #17 · 2026-07-17 · Continuity доезжает в проект, а гейт ловит свой же класс
 
 **Tags:** harness, adr, config

@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.17.4] — 2026-07-20
+
+**"See it fail" is not enough — the red has to fail for the right reason.** Rule #2 in the shipped
+testing invariants told sessions to watch a test go red before trusting it, but a red from an
+incidental `ImportError`, a typo in the test, or a broken fixture is red for the wrong reason: it
+proves the harness is broken, not that the test catches the behaviour it targets. A session that
+accepts any red as the green light ships a test that never actually guarded the thing it names. The
+sharpening survived a strict adopt-on-proof filter over a multi-agent harvest of an external
+agent-harness project (39 dedup practices → exactly one immediate keep); the other 38 were already
+ours (HAVE) or solve other harnesses' problems — multi-IDE rule-drift, weak-model step-skipping,
+marketplace distribution — and were rejected as out-of-scope.
+
+### Changed
+- **Testing rule #2 now names what makes the red trustworthy** (`references/project-docs/testing.md`):
+  after "see it fail … before trusting it," one sentence — the red must come from the assertion you
+  targeted, not an incidental `ImportError`, typo, or broken fixture; otherwise the red proves
+  nothing. The file's `shipped-by` stamp advances `v1.9.2 → v1.17.4` (the block's text changed, so the
+  per-file provenance moves with it), so installed copies are offered the re-sync on their next audit.
+  Single-source confirmed: `workflow.md` step 3 *links* to "`testing.md` rule 2 for what actually
+  matters" — a pointer, not a copy — so the sharpening lands in one place and propagates by reference.
+
+Untouched: every other rule, the cross-cutting block, and all other `plugins/**` behaviour — this is
+the one-sentence invariant sharpening and its stamp, nothing else. Distilled from the maintainer's lab,
+which carries the same wording one layer up.
+
 ## [1.17.3] — 2026-07-17
 
 **The README was written for someone who already knew what the kit was.** Two things it got wrong for

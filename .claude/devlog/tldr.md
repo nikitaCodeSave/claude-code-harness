@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #21 · 2026-07-20 · Заострение testing #2: красный по правильной причине
+
+**Tags:** docs, harness
+
+Правило #2 shipped-инвариантов testing говорило «увидь красный, прежде чем доверять тесту» — но не называло, что делает красный доверенным. Красный от случайного ImportError, опечатки в тесте или сломанного fixture — красный по неправильной причине: он доказывает, что сломан…
+
+[→ entries/0021-zaostrenie-testing-2-krasnyy-po-pravilnoy-prichine.md](entries/0021-zaostrenie-testing-2-krasnyy-po-pravilnoy-prichine.md)
+
+---
+
 ## #20 · 2026-07-17 · README как онбординг: счастливый путь вперёд, devlog из сноски в продукт
 
 **Tags:** docs, onboarding

@@ -1,4 +1,4 @@
-<!-- shipped-by: claude-code-harness v1.9.2 — do not hand-evolve in the project;
+<!-- shipped-by: claude-code-harness v1.17.4 — do not hand-evolve in the project;
      improvements flow through the plugin (re-synced on audit). Stack-specific
      commands live in CLAUDE.md, not here. -->
 
@@ -10,9 +10,10 @@ Five rules, extended by project CLAUDE.md, never replaced by it.
    compounds; write and run them before the session ends.
 2. **A test verifies behavior and is able to fail.** If it passes immediately and would not
    fail on broken behavior, it verifies nothing: see it fail (or prove it catches a planted
-   regression) before trusting it. Red→green ordering is a useful default, not dogma — the
-   lever is a runnable oracle asserting **observable behavior through the public interface**,
-   not prints, not private internals.
+   regression) before trusting it. The red must come from the assertion you targeted — not an
+   incidental ImportError, typo, or broken fixture; otherwise the red proves nothing. Red→green
+   ordering is a useful default, not dogma — the lever is a runnable oracle asserting
+   **observable behavior through the public interface**, not prints, not private internals.
 3. **Tests live next to the code**: `test_<module>` beside `<module>`, or a mirrored `tests/`
    tree. No tests in odd corners — it kills discoverability.
 4. **One test — one behavior.** When something breaks you should not have to guess which of

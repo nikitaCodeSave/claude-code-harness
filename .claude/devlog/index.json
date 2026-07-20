@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-16T23:17:24Z",
-  "entry_count": 20,
+  "generated_at": "2026-07-20T19:42:44Z",
+  "entry_count": 21,
   "entries": [
     {
       "id": 1,
@@ -288,6 +288,19 @@
       "supersedes": null,
       "path": "entries/0020-readme-kak-onbording-schastlivyy-put-vpered-devlog-iz-snoski.md",
       "preview": "README был написан для читателя, который уже знает, что такое кит. Два дефекта — оба про онбординг, не про прозу:"
+    },
+    {
+      "id": 21,
+      "date": "2026-07-20",
+      "title": "Заострение testing #2: красный по правильной причине",
+      "tags": [
+        "docs",
+        "harness"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0021-zaostrenie-testing-2-krasnyy-po-pravilnoy-prichine.md",
+      "preview": "Правило #2 shipped-инвариантов testing говорило «увидь красный, прежде чем доверять тесту» — но не называло, что делает красный доверенным. Красный от случайного ImportError, опечатки в тесте или сломанного fixture — красный по неправильной причине: он доказывает, что сломан…"
     }
   ]
 }

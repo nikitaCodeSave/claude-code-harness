@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-20T19:42:44Z",
-  "entry_count": 21,
+  "generated_at": "2026-07-22T17:18:23Z",
+  "entry_count": 22,
   "entries": [
     {
       "id": 1,
@@ -301,6 +301,19 @@
       "supersedes": null,
       "path": "entries/0021-zaostrenie-testing-2-krasnyy-po-pravilnoy-prichine.md",
       "preview": "Правило #2 shipped-инвариантов testing говорило «увидь красный, прежде чем доверять тесту» — но не называло, что делает красный доверенным. Красный от случайного ImportError, опечатки в тесте или сломанного fixture — красный по неправильной причине: он доказывает, что сломан…"
+    },
+    {
+      "id": 22,
+      "date": "2026-07-22",
+      "title": "Спека фиксирует что и зачем; соседка по брифу не прошла",
+      "tags": [
+        "docs",
+        "harness"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0022-speka-fiksiruet-chto-i-zachem-sosedka-po-brifu-ne-proshla.md",
+      "preview": "Разговор, из которого растёт спека, всегда содержит реализационные реплики — имя таблицы, путь к файлу, библиотека, которую кто-то вскользь назвал. Без правила они не остаются репликами: в лабораторном A/B (~/PROJECTS/Harnesses-Claude, прогон 2026-07-22 — CC 2.1.217, Opus 4.8…"
     }
   ]
 }

@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.18.0] — 2026-07-22
+
+**A spec written out of a conversation designs for the implementer by default.** Every conversation
+a spec grows out of carries implementation asides — a table name, a file path, a library someone
+happened to mention. Absent a rule, they don't stay asides: in a 2026-07-22 lab A/B (Claude Code
+2.1.217, Opus 4.8, 21 headless runs, N=3 per arm, deterministic oracles) all 6 planted
+implementation details landed in the *binding* sections of the synthesized spec in 3/3 runs — and in
+one run an implementation key replaced the acceptance criterion outright ("re-running the same file
+— *the same `file_hash`* — creates no entries", where the actual pain was double-charging a
+*payment*). With the detector: 0/6, in 3/3 runs, with every one of the 8 required business facts
+still present in both arms — the guard for the known regression class (a rule that strips facts
+along with the narrative, devlog #113) stayed clean. Full separation, no overlap, and the spec came
+out *shorter*, not longer. The delta's neighbour in the same brief did not survive the same filter:
+a spec-faithfulness axis in the review mandate tied 3/3 against baseline on both a smelly and a
+silent spec defect — a control arm with `docs/SPEC.md` deleted from the repo produced 0 references
+to requirements while still finding every code smell, which locates the lever in **the spec being a
+file in the repo**, not in the wording of the mandate. Adopt-on-proof cuts both ways; that is the
+point of running it.
+
+### Changed
+- **`references/project-docs/workflow.md` — two bullets in `Size the change before you build`,
+  beside NON-GOALS**: (1) *Spec what and why; leave how to the implementer* — the detector is
+  business-risk-or-architecture → write it down, pure implementation (class and function names, file
+  paths, table schema, library choice) → don't, because the implementer's call beats a guess frozen
+  into the spec; (2) *Constraints are invariants, not steps* — "the operation is idempotent", not
+  "add a dedup table", each marked `[hard]` (non-negotiable) or `[soft]` (may be traded away for
+  simplicity — an explicit licence to simplify, not decoration). Minor, not patch: the second bullet
+  adds an element to the spec skeleton, and both change what a session writes.
+- The file's `shipped-by` stamp advances `v1.16.1 → v1.18.0`, so installed copies are offered the
+  re-sync on their next audit. `testing.md` (v1.17.4) and `docs-discipline.md` (v1.10.1) keep their
+  own stamps — per-file provenance, untouched files don't move.
+
+Untouched, deliberately: the CLAUDE.md template's duty lines (`bootstrap-checklist.md` Phase 2) —
+this rule is needed at the moment a spec is written, and on-demand `workflow.md` is exactly the
+carrier for that, so it does not earn per-turn context; `practice-baseline.md` §1 — the baseline is
+the operator-global layer and this delta is spec-phase-scoped; `harness-discipline.md` — its Plan
+bullet already lists "critical files" as legitimate recon output, and a *don't fix file paths*
+sentence beside it would read as a contradiction rather than a sharpening. Everything else under
+`plugins/**` is unchanged.
+
 ## [1.17.4] — 2026-07-20
 
 **"See it fail" is not enough — the red has to fail for the right reason.** Rule #2 in the shipped

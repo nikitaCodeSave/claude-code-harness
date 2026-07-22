@@ -1,4 +1,4 @@
-<!-- shipped-by: claude-code-harness v1.16.1 — do not hand-evolve in the project;
+<!-- shipped-by: claude-code-harness v1.18.0 — do not hand-evolve in the project;
      improvements flow through the plugin (re-synced on audit). Project-specific
      facts live in CLAUDE.md (and features.json, if present), not here. -->
 
@@ -28,6 +28,15 @@ goes almost straight to Plan — the full gate set is the exception, not a ritua
   invariant, migration, irreversible, or an unfamiliar brownfield subsystem) → the gates below.
 - **NON-GOALS**: a large change freezes scope with an explicit "what we deliberately do NOT do"
   line before Work — the always-skipped item that stops scope drift. (Hygiene, not a halting gate.)
+- **Spec *what* and *why*; leave *how* to the implementer.** Detector: a detail that moves
+  business risk or architecture → write it down; pure implementation (class and function names,
+  file paths, table schema, library choice) → don't — that is the implementer's call, and it beats
+  a guess frozen into the spec. The conversation a spec grows out of always carries implementation
+  asides; without the detector they settle into the *binding* sections and start standing in for
+  the requirement.
+- **Constraints are invariants, not steps** — "the operation is idempotent", not "add a dedup
+  table". Mark each `[hard]` (non-negotiable) or `[soft]` (may be traded away for simplicity —
+  that mark is an explicit licence to simplify, not decoration).
 - **Brownfield recon**: before touching a shared invariant on an existing subsystem, do read-only
   recon with the built-in **Explore** agent (map · invariants · blast-radius) and state what
   breaks. Keep it in context — persist it only if the operator asks; no per-feature doc.

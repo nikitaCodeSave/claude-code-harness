@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #22 · 2026-07-22 · Спека фиксирует что и зачем; соседка по брифу не прошла
+
+**Tags:** docs, harness
+
+Разговор, из которого растёт спека, всегда содержит реализационные реплики — имя таблицы, путь к файлу, библиотека, которую кто-то вскользь назвал. Без правила они не остаются репликами: в лабораторном A/B (~/PROJECTS/Harnesses-Claude, прогон 2026-07-22 — CC 2.1.217, Opus 4.8…
+
+[→ entries/0022-speka-fiksiruet-chto-i-zachem-sosedka-po-brifu-ne-proshla.md](entries/0022-speka-fiksiruet-chto-i-zachem-sosedka-po-brifu-ne-proshla.md)
+
+---
+
 ## #21 · 2026-07-20 · Заострение testing #2: красный по правильной причине
 
 **Tags:** docs, harness

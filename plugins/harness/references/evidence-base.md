@@ -39,7 +39,7 @@ T6–T7 anecdote does not earn a rule (see `harness-discipline.md`, single-incid
 
 ## Empirical grounding notes (current model generation)
 
-- **Capable-model baseline (Fable 5 / Opus 4.8)**: strong native tool triggering — defensive
+- **Capable-model baseline (current frontier generation)**: strong native tool triggering — defensive
   "remember to run X" prompting is low-value; if it must happen every time, use a hook.
   Long-context and post-compaction recovery are reliable, but context rot still holds:
   bigger ≠ free. Thinking is adaptive — don't manage budgets from the harness.

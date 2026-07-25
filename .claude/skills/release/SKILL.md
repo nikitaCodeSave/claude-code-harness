@@ -137,7 +137,7 @@ claude-code-harness vX.Y.Z: <однострочное summary>
 
 <1–2 абзаца: что и зачем; при желании — что осталось нетронутым>
 
-Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+<трейлер Co-Authored-By: модель ТЕКУЩЕЙ сессии — из baseline, а не скопированная из прошлого коммита>
 EOF
 )"
 git tag vX.Y.Z

@@ -37,6 +37,28 @@ or re-run before proposing edits to its machinery.
 - Are built-in inventories current? (5 subagents incl. `claude-code-guide`; effort default
   `high`; dynamic workflows exist.) An inventory pinned to an old version is the weakest
   provenance in a harness.
+- **Target form: exactly one file carries the currency pin; every other live doc is
+  version-free and points at it.** The *currency* pin is the "what generation is this written
+  against" claim — the CC version and model generation the docs assume. Duplicated across two
+  live docs it goes stale in one of them *silently*: nothing fails, the two just disagree, and
+  the reader believes whichever they opened. Name the project's single version-carrying
+  document (in this kit: `references/native-capabilities.md`). A dated "since vX this behaves
+  like Y" attribution elsewhere is sourcing, not a currency pin — it stays (previous bullet).
+- **Run the drift detector — the class, not the case.** Manual proofreading has now missed this
+  across three consecutive model upgrades, so audit it mechanically (also after every model / CC
+  upgrade). The allowlist is the inventory itself plus the frozen layers:
+
+  ```bash
+  grep -rnE "Opus 4\.[0-9]|Opus [0-9]|Sonnet [0-9]|v?2\.1\.[0-9]{3}" \
+    --include="*.md" . \
+    | grep -vE "(archive/|devlog/|/reports/|/audits/|CHANGELOG\.md|native-capabilities\.md)"
+  ```
+
+  Classify each survivor by the rule above — behavioral binding → de-version; honest
+  when/against-what sourcing → keep — and adapt the allowlist to the project's own frozen paths
+  and its own inventory filename. **A rising hit count between audits is the drift signal**, so
+  record the number. Deliberately *not* a hook: block-at-write is corrosive (§6), and the
+  detector's output needs a human classification pass, which is what an audit is.
 
 ## 2. Duplicates & shadowing
 

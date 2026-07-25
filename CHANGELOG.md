@@ -7,6 +7,107 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.19.0] — 2026-07-26
+
+**A pin duplicated in two live docs goes stale in one of them silently.** Nothing fails, no test
+goes red — the two files just disagree, and the reader believes whichever they opened. The kit
+drifted this way three model upgrades in a row (4.7 → 4.8 → 5), each time caught by hand, each
+time re-introduced, because "proofread the docs for stale versions" is not a procedure — it is a
+hope. So this release does two separable things: it re-issues the inventory against the current
+generation, and it adds the *mechanical* detector that makes the next drift visible instead of
+discovered. The target form is one file carrying the currency pin (`native-capabilities.md`),
+every other live doc version-free and pointing at it.
+
+### Added
+- **`references/audit-checklist.md` §1 — target form + drift detector.** Names the single
+  version-carrying document as the goal state, and ships the `grep` that enumerates every version
+  reference outside the inventory and the frozen layers (`archive/`, `devlog/`, `reports/`,
+  `audits/`, `CHANGELOG.md`). Each survivor gets classified by the section's existing rule
+  (behavioral binding → de-version; honest when/against-what sourcing → keep); **a rising hit
+  count between audits is the drift signal**, so the count gets recorded. Run on audit and after
+  every model / CC upgrade. Deliberately **not** a hook: block-at-write is corrosive (§6), and the
+  output needs a human classification pass — which is what an audit is. Minor, not patch: this
+  adds a rule and a procedure to the checklist, not a wording fix.
+
+### Changed
+- **`references/native-capabilities.md` re-issued against CC v2.1.220 / Opus 5** and now states
+  in-band that it is the kit's single version-pinned document. Substantive deltas, all
+  changelog- and binary-verified:
+  - **`context: fork` skills run in the background by default since v2.1.218** — a fork-skill whose
+    answer the current turn depends on **must** carry `background: false`, or the turn proceeds
+    unanswered. This generalizes the long-standing `AskUserQuestion` incompatibility from an edge
+    case into the default path. The highest-consequence correction in this release.
+  - **Subagent nesting was wrong**: not "5 levels deep" — depth **3** by default (v2.1.219; nesting
+    was off entirely in v2.1.217), `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` disables it. Added the
+    native fan-out caps: 20 concurrent subagents, 200 spawns/session (reset by `/clear`), 200
+    WebSearch calls/session — a runaway backstop no harness needs to re-encode.
+  - **`/fork` is no longer the in-session fork** (v2.1.212): it copies the conversation into a
+    *background* session with its own `claude agents` row; the in-session forked subagent is
+    **`/subtask`**.
+  - **Review is invoke-only** — `/verify` + `/code-review` since v2.1.215, `/deep-research` since
+    v2.1.218: the model no longer reaches for them on its own, so that rung of the verification
+    ladder has to be pulled by an operator, a duty line, a command, or a hook. `/code-review` also
+    runs as a background subagent now (v2.1.218).
+  - **Effort configuration mechanics**, previously absent — session-wide (`effortLevel` in
+    settings, enum low|medium|high|xhigh with `max`/`ultracode` rejected there;
+    `CLAUDE_CODE_EFFORT_LEVEL`, which adds `auto` and overrides the settings key; `claude
+    --effort`, `claude agents --effort`) **and per delegate**, which is the part a harness
+    actually steers with: `effort:` in `.claude/agents/*.md` frontmatter (named level, integer,
+    or `inherit`), since the Agent tool overrides only `model` per call — a dynamic workflow is
+    the one surface taking effort per call. Measured: same prompt, same parent, `effort: low` →
+    862 / 656 output tokens vs `effort: xhigh` → 3358 / 3452.
+  - **Effort precedence, measured** (org ceiling ▸ env ▸ launch pin ▸ settings ▸ model default),
+    with the trap it creates spelled out: an `env: {"CLAUDE_CODE_EFFORT_LEVEL": …}` block inside
+    `settings.json` is still the env var, so it silently outranks that same file's `effortLevel`
+    key, the `--effort` flag and `/effort` — a harness pinned that way can never raise effort
+    again. With the env set, `--effort low` vs `xhigh` moved nothing (911/953 vs 798/533 tokens);
+    with it unset the same pair separated cleanly (722 vs 1053 median).
+  - **The `WebSearch`-dies-at-`xhigh` class, with its issue trail** (anthropics/claude-code
+    #76689 / #79798 / #68797, open): the server-tool sub-request carries the session's current
+    effort but omits the thinking config → `400 output_config.effort 'xhigh' is not supported
+    when thinking is disabled`. Reported on Opus 4.8, **reproduced here on Opus 5 / CC 2.1.220**
+    once the session level genuinely reached `xhigh`; regression traced to v2.1.207. It earns a
+    place in the kit because of *how* it fails: mostly inside **subagents**, and **silently** —
+    the error sits in the `WebSearch` `tool_result` body with no `is_error` flag, so a research
+    delegate returns a confident report with a source tier missing. Recorded with the verified
+    workarounds — and the one that does *not* work: a delegate pinned to `effort: high` still
+    fails, because the sub-request carries the session's level, so only a different model
+    (`model: sonnet`), `WebFetch`, or a session at `high` or below actually avoids it — plus the
+    detection glob one level deeper than the session file. Also documented: the
+    first-party rule it collides with (thinking may be disabled only at effort ≤ `high`) and the
+    silent tool-call-as-text mode when thinking is off.
+  - **First-party counter-pressure on prompt-level self-verification** [FP, `whats-new-opus-5`]:
+    the current Opus generation verifies its own work unprompted, and the docs say to *remove*
+    carried-over instructions like "include a final verification step" / "use a subagent to
+    verify" — they cause over-verification. Recorded beside the review surfaces with the boundary
+    stated: this retires prompt-level nagging, **not** the ladder's external rungs (a
+    fresh-context evaluator is not the author checking itself).
+  - **`CLAUDE_EFFORT` is documented as *not* a reliable oracle** — measured false on v2.1.220:
+    it reported `high` in `claude --print` under `--effort low|xhigh|max`, and reported the
+    parent's level inside a subagent pinned to `low`/`xhigh`, while behavior differed 4–5× in
+    token spend. The oracle that did discriminate is the subagent's own transcript under
+    `<session-dir>/subagents/`.
+  - Dynamic-workflow size guideline defaults to **medium** ("fewer than 15 agents") since v2.1.219
+    and is settable from any settings file via `workflowSizeGuideline`; `/fast` now covers Opus 5
+    and 4.8 (dropped from 4.7); hooks list gains **`DirectoryAdded`** (30 → 31 events, counted);
+    the auto-mode classifier absorbed the dangerous-`rm` / background-`&` / Windows-path prompts
+    (v2.1.218); Bash permission parsing hardened in v2.1.214–216 — including non-ASCII word
+    boundaries, which matters to any project guard that inspects the command string itself; new
+    `sandbox.filesystem.disabled` and `sandbox.network.strictAllowlist` keys.
+- **`references/evidence-base.md`** — the capable-model baseline note de-versioned
+  (`Fable 5 / Opus 4.8` → `current frontier generation`). The claim itself is untouched: it is a
+  first-party citation, not our measurement, and re-writing it under a new model would be
+  laundering someone else's finding.
+
+### Not touched (deliberately)
+- **Grounding stamps stay where they were** in `audit-checklist.md`, `harness-discipline.md`,
+  `harness-evolution.md`, `evidence-base.md`. A stamp is an honest claim about a past
+  verification; those files were not re-verified end-to-end in this release, and raising the stamp
+  without the re-check would be a lie about re-grounding. `native-capabilities.md` moves because
+  it actually was re-issued.
+- **`references/project-docs/*.md`** — already version-free, checked, zero pins; their `shipped-by`
+  headers therefore do not move.
+
 ## [1.18.0] — 2026-07-22
 
 **A spec written out of a conversation designs for the implementer by default.** Every conversation

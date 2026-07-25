@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-22T17:25:19Z",
-  "entry_count": 22,
+  "generated_at": "2026-07-26T00:11:57Z",
+  "entry_count": 23,
   "entries": [
     {
       "id": 1,
@@ -314,6 +314,20 @@
       "supersedes": null,
       "path": "entries/0022-speka-fiksiruet-chto-i-zachem-sosedka-po-brifu-ne-proshla.md",
       "preview": "Разговор, из которого растёт спека, всегда содержит реализационные реплики — имя таблицы, путь к файлу, библиотека, которую кто-то вскользь назвал. Без правила они не остаются репликами: в лабораторном A/B (~/PROJECTS/Harnesses-Claude, прогон 2026-07-22 — CC 2.1.217, Opus 4.8…"
+    },
+    {
+      "id": 23,
+      "date": "2026-07-26",
+      "title": "Один файл несёт версию: детектор вместо вычитки",
+      "tags": [
+        "docs",
+        "harness",
+        "audit"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0023-odin-fayl-neset-versiyu-detektor-vmesto-vychitki.md",
+      "preview": "Версионный пин, продублированный в двух живых доках, протухает в одном из них молча: ничего не падает, два файла просто расходятся, и читатель верит тому, который открыл. Кит проезжал по этому классу три апгрейда модели подряд (4.7 → 4.8 → 5), каждый раз пин ловился вручную и…"
     }
   ]
 }

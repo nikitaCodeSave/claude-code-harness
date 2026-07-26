@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-26T04:38:16Z",
-  "entry_count": 28,
+  "generated_at": "2026-07-26T04:54:09Z",
+  "entry_count": 29,
   "entries": [
     {
       "id": 1,
@@ -404,6 +404,21 @@
       "supersedes": null,
       "path": "entries/0028-refuter-poymal-vernye-vyvody-na-nedostatochnykh-ulikakh.md",
       "preview": "Первое применение шага B3.5, добавленного в release-ритуал часом раньше: две роли внешнего аудита свежим контекстом по релизам v1.19.2–v1.19.4. evidence-executor независимо переснял стек на собственном стенде (14 прогонов, ноль переиспользования артефактов автора) — все четыре…"
+    },
+    {
+      "id": 29,
+      "date": "2026-07-26",
+      "title": "Регрессия внутри правки: строка мерилась не на том уровне",
+      "tags": [
+        "harness",
+        "bugfix",
+        "evidence",
+        "config"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0029-regressiya-vnutri-pravki-stroka-merilas-ne-na-tom-urovne.md",
+      "preview": "Рефутеру, закрывшему аудит v1.19.5, был отправлен второй запрос: проверить, что правки действительно закрывают его же находки, а не переформулируют их. Результат — 13 closed, 1 partially closed, 0 still open, и 3 проблемы, внесённых самой правкой. Ровно тот сценарий, ради…"
     }
   ]
 }

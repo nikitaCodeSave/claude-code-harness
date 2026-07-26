@@ -254,8 +254,10 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
     | `max` | `--effort max` | fails 2/2 |
     | `xhigh` | `CLAUDE_CODE_EFFORT_LEVEL` (env) | fails 2/2 |
 
-    Every rejection in the 12 re-measured runs quotes the tier actually in force — `'xhigh'` ×20
-    and `'max'` ×4, two per run — so none of those rows rests on an assumed level. **Mechanism
+    Every rejection in the 14 re-measured runs quotes the tier actually in force — `'xhigh'` ×24
+    and `'max'` ×4, two per run — so none of those rows rests on an assumed level. Each row is a
+    **session-level** measurement: the env row too, re-run with the same prompt and oracle rather
+    than borrowed from a delegate. **Mechanism
     independence rests on the two unconfounded flag rows, not on the `--effort xhigh` row**, which
     agreed with the settings value and therefore proves nothing on its own: `--effort high`
     overrode settings' `xhigh` *downward* (`CLAUDE_EFFORT` read `high`, search restored) and

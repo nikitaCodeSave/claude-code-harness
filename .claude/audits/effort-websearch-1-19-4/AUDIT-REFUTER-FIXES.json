@@ -1,0 +1,159 @@
+{
+  "role": "code-refuter — fix verification pass",
+  "scope": "3f9f46d..065c579 (v1.19.5, tag v1.19.5) — verification of the corrections raised in AUDIT-REFUTER.json",
+  "date": "2026-07-26",
+  "verdict": "13 closed, 1 partially closed, 0 still open; 3 issues introduced",
+
+  "summary": "The fixes are real, not cosmetic. Every new count re-derives from the raw logs, the two claims that were reversed were reversed on evidence with a proper discriminating control, and the two hardest items — C13 and C21 — were settled by measurement on the exact structure they concern rather than hedged. I verified the delegate probes structurally (parent_tool_use_id on every tool_use), not just by reading the final string, because 'the delegate reported its own effort' is precisely the claim a parent-executed printenv would fake. It did not fake it. One correction, C4, regressed while being fixed: the session matrix's env row lost its honest '(earlier run)' tag and gained a '2/2' that comes from delegate-scoped runs, so a session-level cell is now backed by a sub-agent measurement. Two bookkeeping items and one .gitignore side effect round it out.",
+
+  "integrity_check": {
+    "audit_trail_unmodified": "git show v1.19.5:.claude/audits/effort-websearch-1-19-4/AUDIT-REFUTER.json diffs clean against my working copy — byte-identical. The refuter's findings were not softened, trimmed or reworded before being committed. Checked because a self-graded audit trail is worthless if the graded party can edit it.",
+    "probe_artifacts_removed": "plugins/harness/agents/ contains exactly code-refuter.md, evidence-executor.md, process-auditor.md. `git diff 3f9f46d..065c579 --name-only | grep -iE 'probe|tmp'` returns nothing; `git status --porcelain` shows no stray agent file. The temporary plugin agent used for pl-pluginprobe-* is genuinely gone."
+  },
+
+  "findings": [
+    {
+      "id": "C9 + C10",
+      "was": "5 of 7 delegate-matrix rows measured through --agents JSON while the column was headed 'agent frontmatter'; v1.19.4 claimed the path gap was closed on the strength of 2 rows.",
+      "status": "closed",
+      "checked": "All seven rows now have frontmatter evidence in fmproj/.claude/agents/. I confirmed each agent file exists with the frontmatter the row claims (fm-high effort:high / fm-sonnet model:claude-sonnet-5 / fm-plain nothing / fm-xhigh effort:xhigh / fm-narrow tools:Read,Grep,Glob + model:sonnet-5) and re-derived every count from the logs: fm-son 2/2 ok (sonnet-5 in stream), fm-xh 2/2 fail quoting 'xhigh', fm-nar 2/2 NOTOOL with WS=0, fmenv-sonnet 2/2 ok, plus the pre-existing fm-high 2/2 ok and fm-plain 2/2 fail, plus my ctl-fmenvhigh 2/2 fail for row 6. subagent_type confirms the right agent ran in every single file. Rows 1 and 2 were correctly re-stated from 3/3 to 2/2 — the --agents counts were not silently carried over.",
+      "cross_path_claim": "'The same seven rows were also run through --agents, with identical outcomes' — verified pair by pair: high ok/ok, sonnet ok/ok, nothing fail/fail, xhigh fail/fail, narrow NOTOOL/NOTOOL, env+effort fail/fail, env+model ok/ok. 7/7 agree. The claim holds.",
+      "residual": "none"
+    },
+    {
+      "id": "C8",
+      "was": "'A delegate inherits the session's level' held the session at xhigh in all 20 rows — could not distinguish inheritance from a fixed xhigh default.",
+      "status": "closed",
+      "checked": "The text now names the varied-session control explicitly and states why it discriminates ('A fixed model default could not produce that difference'). Numbers match the logs: fail 2/2 from xhigh (fm-plain, and ag-plain on the other path) and search 2/2 from high (ctl-plainhigh-1/2, my runs — RESULTS=7, zero rejections, delegate on claude-opus-5). The cleanest reading of 'the same undeclared delegate' is the --agents pair ag-plain vs ctl-plainhigh, which is a within-path contrast; the frontmatter arm supplies the xhigh half independently. Either pairing gives 2/2 and 2/2.",
+      "bonus": "fm-probe now supplies a SECOND, independent oracle for the same claim: an undeclared delegate in an xhigh session reads back CLAUDE_EFFORT=xhigh from its own Bash. Two unrelated oracles now agree.",
+      "residual": "The 'high' arm was measured through --agents and the 'xhigh' arm exists on both paths; a purist would want the high arm on frontmatter too. Immaterial — the contrast is clean within either path."
+    },
+    {
+      "id": "C13",
+      "was": "'CLAUDE_EFFORT does not report a delegate's level' was asserted with no run behind it — every printenv in the evidence set executed in the main thread, and the supporting token-spend oracle is one the same file deprecates.",
+      "status": "closed",
+      "verdict_direction": "reversed, correctly — the old claim is refuted and the new opposite claim is properly measured",
+      "checked": "STRUCTURAL VERIFICATION, not string reading. In fm-probehigh-1 and fm-probe-1 I traced parent_tool_use_id on every tool_use: the Agent call has parent=null, and BOTH the Bash (printenv CLAUDE_EFFORT) and the WebSearch carry parent=<the Agent tool_use id> — they executed inside the delegate. This is the check that matters, because a parent-executed printenv would produce a plausible-looking MYEFFORT line that means nothing. Results: fm-probehigh (effort: high, session xhigh) → MYEFFORT=high RESULTS=7, 2/2, zero rejections; fm-probe (nothing declared) → MYEFFORT=xhigh RESULTS=ERROR, 2/2, 400 quoting 'xhigh'. The discriminating cell is fm-probehigh reading `high` while its session ran `xhigh` — a value that cannot be the parent's. It also refutes the old wording on the exact configuration the old wording described ('inside a subagent pinned by frontmatter it read the parent's'). Both agents declare tools: WebSearch, Bash, so they could genuinely run it; both arms ran on claude-opus-5 only, ruling out a model swap.",
+      "residual": "none. Two oracles agree per run: the delegate's own printenv and the tier the 400 quotes."
+    },
+    {
+      "id": "C17",
+      "was": "The built-in-delegate escape (Agent tool per-call `model` override) was prescribed but never measured.",
+      "status": "closed",
+      "checked": "pl-gpplain-1/2: subagent_type=general-purpose spawned plainly from an --effort xhigh session → SUB=RESULTS=ERROR 2/2, 400 quoting 'xhigh', stream shows claude-opus-5 only. pl-gpsonnet-1/2: same session, model override on the Agent call → SUB=RESULTS=7 2/2, zero rejections, stream carries both 'sonnet' (the call parameter) and 'claude-sonnet-5' (the resolved model), confirming the override actually resolved rather than being silently dropped. Clean two-armed contrast with the model control present in both arms.",
+      "residual": "The Agent tool's own carve-out — 'Ignored for subagent_type: \"fork\" — forks always inherit the parent model' — is still unmentioned. Not an over-claim any more, because the sentence is now scoped to `general-purpose` specifically rather than to built-in delegates generally. Informational only."
+    },
+    {
+      "id": "C21",
+      "was": "The shipped change put effort: xhigh in PLUGIN agent frontmatter, a load path never measured.",
+      "status": "closed",
+      "checked": "pl-pluginprobe-1/2: subagent_type=`claude-code-harness:tmp-plugin-probe` — the plugin namespace prefix proves it resolved through the plugin loader, not as a project agent. From an --effort xhigh session it searched 2/2 (RESULTS=7, zero rejections) on claude-opus-5.",
+      "adversarial_note": "There is no negative control on the plugin path (no plugin agent declaring nothing). The inference is nonetheless forced rather than assumed: the delegate ran on claude-opus-5 in an xhigh session, and the only established way for that combination to search is to be at high or below — which on this agent can only have come from its frontmatter effort:. If the plugin loader had dropped the key it would have inherited xhigh and failed, exactly as fm-plain and ag-plain do. Accepting as closed.",
+      "residual": "none material"
+    },
+    {
+      "id": "C22",
+      "was": ".claude/audits/ was gitignored by the whitelist rule, so the new refuter step filed evidence into a directory git silently discarded.",
+      "status": "closed",
+      "checked": "`!/.claude/audits/` added at .gitignore:25. `git check-ignore -v .claude/audits/effort-websearch-1-19-4/AUDIT-REFUTER.json` exits 1 (not ignored). `git ls-tree -r v1.19.5` lists both AUDIT-REFUTER.json and AUDIT-EVIDENCE.json — committed at the tag, not merely committable.",
+      "introduced": "see ISSUE-3"
+    },
+    {
+      "id": "C2",
+      "was": "The `high` control row omitted its model; it ran on claude-opus-5[1m] while the row below it used plain claude-opus-5.",
+      "status": "closed",
+      "checked": "Row now reads `--effort high`, `claude-opus-5[1m]`, matching the init model I re-derived from out-ctlhigh-1/2. The within-variant contrast against the [1m] xhigh row (fails 4/4) is now legible to a reader."
+    },
+    {
+      "id": "C3",
+      "was": "The `--effort xhigh` row was confounded with the settings key and presented as independent mechanism evidence.",
+      "status": "closed",
+      "checked": "Row annotated '(settings also said xhigh — confounded, see below)', and a new sentence puts mechanism independence explicitly on the two unconfounded flag rows, naming both directions: --effort high overrode settings' xhigh downward (CLAUDE_EFFORT read high, search restored) and --effort max overrode it upward (400 quotes 'max'). Both are re-derivable from out-ctlhigh-* and out-ultra-* and are exactly the argument I said the claim should rest on."
+    },
+    {
+      "id": "C4",
+      "was": "The env row carried the disavowed matrix's 5/5 under a table header asserting the new oracle and control; 'no row rests on an assumed level' was stated over a table containing that row.",
+      "status": "partially closed",
+      "closed_part": "The sentence is now correctly scoped: 'Every rejection in the 12 re-measured runs ... so none of those rows rests on an assumed level'. That is accurate — the tier tally (20 + 4 = 24 across 12 runs, which I re-derived) arithmetically excludes the env row.",
+      "open_part": "see ISSUE-1 — fixing the sentence broke the row."
+    },
+    {
+      "id": "C6",
+      "was": "'on Sonnet 5 and Fable 5 every effort level keeps search' / 'no such ceiling at any level' generalised from 2 of the 5 levels the binary enumerates.",
+      "status": "closed",
+      "checked": "native-capabilities now reads 'keep search at `xhigh` and `max` — the two tiers that break Opus 5. Their lower tiers were not run (they are safe on Opus too).' harness-discipline mirrors it: 'which keep search at `xhigh` and `max` — the two tiers that break Opus 5.' Both say exactly what the 8 runs support and no more."
+    },
+    {
+      "id": "C12",
+      "was": "'high, xhigh and max each read back as set, from effortLevel in settings and from the --effort flag' claimed a 6-cell cross-product; 3 cells were measured, 1 of those confounded.",
+      "status": "closed",
+      "checked": "Now enumerates the cells individually: 'high via the --effort flag, xhigh via effortLevel in settings, max via the flag'. That is precisely the three unconfounded cells backed by out-ctlhigh-*, out-base-*/out-1m-*, and out-ultra-*. 'The env path was not re-tested' retained."
+    },
+    {
+      "id": "C14",
+      "was": "'ultracode resolves to xhigh' reversed a previously published green row by unevidenced inference.",
+      "status": "closed",
+      "checked": "Now cites its oracle inline — 'first-party strings in the 2.1.220 binary say so verbatim (\"Ultracode runs at xhigh effort\")'. I independently confirmed that exact string via strings(1) on /home/nikita/.local/share/claude/versions/2.1.220 in the first pass (needle control: 'output_config' = 69 hits, so the negative would have been trustworthy too)."
+    },
+    {
+      "id": "C18",
+      "was": "'WebFetch is unaffected throughout' implied observation across matrices in which WebFetch was never once called.",
+      "status": "closed",
+      "checked": "Now reads 'WebFetch is unaffected as the upstream thread reports — not re-measured here'. Attribution restored and the non-measurement stated outright. Re-confirmed that zero jsonl in the evidence set contains a WebFetch tool call, so 'not re-measured here' is the correct characterisation."
+    },
+    {
+      "id": "C20",
+      "was": "v1.19.4's rationale for pinning effort: xhigh on the audit roles rested on the then-unestablished inheritance claim.",
+      "status": "closed",
+      "checked": "Consequential rather than textual: with C8 now carrying its discriminating control, the rationale is supported. The three role files are unchanged in this release and still declare no WebSearch/WebFetch in tools:, so C19 continues to hold."
+    },
+    {
+      "id": "method-warning",
+      "was": "n/a — new in this release",
+      "status": "accurate",
+      "checked": "The fourth rule ('Vary the variable the conclusion names; a row that holds it constant cannot support a causal claim, however many times it is repeated') states the C8 defect correctly and generally. The third cautionary round is described accurately, including the part most releases would omit: 'What caught that was a fresh-context refuter, not a third self-check — the author had already reviewed the same diff and passed it.' That matches what happened."
+    }
+  ],
+
+  "issues_introduced": [
+    {
+      "id": "ISSUE-1",
+      "severity": "moderate",
+      "location": "native-capabilities.md, session matrix row 6: `| xhigh | CLAUDE_CODE_EFFORT_LEVEL (env) | fails 2/2 |`",
+      "problem": "This row previously read 'fails 5/5 (earlier run)' — an honest provenance tag on a number from the disavowed matrix. v1.19.5 replaced it with a bare '2/2' that reads as one of the re-measured session rows. It is not. No run in the evidence set has an env-pinned session call WebSearch itself with the good oracle.",
+      "how_i_verified": "parent_tool_use_id tracing. In out-base-1.jsonl (a genuine session row) the WebSearch tool_use has parent=null — the session called it. In the only two env runs that produce a 400 (agenv-envhigh-1 and ctl-fmenvhigh-1) the WebSearch tool_use has parent=<the Agent tool_use id> — it ran inside a delegate. Every env run in the scratchpad is driven by a prompt that explicitly forbids the parent from searching ('Сам WebSearch не вызывай'), so a session-level env measurement structurally cannot exist in this batch.",
+      "why_it_matters": "The other five rows of that table are 'a session raised its level this way and searched'. Row 6 is now 'a delegate whose declared effort: high was overridden by env searched and failed'. The underlying physics is not in dispute — env pins xhigh, xhigh fails — but the cell asserts a measurement class it does not have, and it does so in the one table the release rewrote to stop doing exactly that. The pre-fix wording was more honest than the post-fix wording.",
+      "correction": "Either (a) qualify: 'fails 2/2 — measured on a delegate sub-request under an env-pinned session; the session's own search under env was not re-measured with this oracle', or (b) run it: run.sh with CLAUDE_CODE_EFFORT_LEVEL=xhigh and the original prompt.txt, 2 runs, ~2 minutes. Option (b) is cheap and makes the row genuinely homogeneous with its neighbours."
+    },
+    {
+      "id": "ISSUE-2",
+      "severity": "minor",
+      "location": "CHANGELOG 1.19.5 intro: 'The gaps were then measured rather than hedged — 16 further runs.'",
+      "problem": "18, not 16. Runs created after the audit landed: fm-son 2, fm-xh 2, fm-nar 2, fmenv-sonnet 2, fm-probe 2, fm-probehigh 2, pl-gpplain 2, pl-gpsonnet 2, pl-pluginprobe 2 = 18 (excluding my own 4 controls, which are cited separately in the text).",
+      "why_it_matters": "Trivial in substance, but this is a release whose entire subject is published numbers reproducing from raw logs. A headline count that does not reconcile is the wrong thing to leave in this particular CHANGELOG.",
+      "correction": "18, or state which subset the 16 refers to."
+    },
+    {
+      "id": "ISSUE-3",
+      "severity": "minor",
+      "location": ".gitignore:25 — `!/.claude/audits/`",
+      "problem": "The un-ignore is directory-wide, so three pre-existing local audit directories that were previously invisible now surface as untracked in a public repo: .claude/audits/config-dir-portability/, consumer-journey-v1-16-0/, session-context-hook/ (confirmed via git check-ignore: all three now NOT ignored). The file's own header states 'Nothing runtime, local, or personal should ever land here.'",
+      "why_it_matters": "Bounded — release.sh stages a curated surface — but a human `git add -A` now sweeps whatever local audit material happens to be on disk into a public marketplace repo. The whitelist existed to make that impossible.",
+      "correction": "Either commit the three deliberately (if they belong) or narrow the rule to the audit dirs actually intended for the repo. A one-line alternative that preserves the whitelist's guarantee: keep `!/.claude/audits/` but add `/.claude/audits/*/` + `!/.claude/audits/*/AUDIT-*.json`, so only verdict artifacts are trackable."
+    }
+  ],
+
+  "still_open": [],
+
+  "unchanged_and_still_standing": [
+    "C1 — tier is the trigger (12/12, self-reporting oracle, discrimination + precedence + call controls all present).",
+    "C5 — Sonnet 5 / Fable 5 clean 0/8 as session models.",
+    "C7 — the sub-request carries the delegate's effective level; now triple-sourced (frontmatter arm, --agents arm, and the delegate's own CLAUDE_EFFORT readback).",
+    "C11 — env outranks frontmatter effort:, measured on the frontmatter path (ctl-fmenvhigh) and now cited as such.",
+    "C15 — the binary quotation is verbatim.",
+    "C16 — narrowed tools: removes WebSearch silently; now confirmed on both paths (ag-narrow and fm-nar, WS=0 and NOTOOL in all four runs).",
+    "C19 — effort: xhigh is safe on the three audit roles; none carries WebSearch or WebFetch in tools:."
+  ],
+
+  "bottom_line": "Ship-quality. The corrections address the defects rather than the wording of the defects, and the two reversals (C13, and C8's causal direction) are now the best-evidenced claims in the file. Fix ISSUE-1 before the next release touches that table — it is the same scope-mismatch class the release was written to eliminate, reintroduced in one cell — and correct the two bookkeeping items whenever convenient."
+}

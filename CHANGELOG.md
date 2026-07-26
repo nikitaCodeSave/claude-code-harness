@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.19.6] — 2026-07-26
+
+**The refuter was asked whether its findings were closed, and found three problems the fixes
+themselves introduced.** 13 closed, 1 partially closed, 0 still open — plus three regressions,
+one of them the same scope-mismatch class v1.19.5 existed to remove.
+
+### Fixed
+
+- **The session matrix's env row is a session-level measurement again.** While being corrected it
+  lost its honest "earlier run" tag and gained a `2/2` taken from *delegate* runs — a cell about
+  the session backed by a sub-agent. Re-run at session level with the same prompt and oracle:
+  fails 2/2, `CLAUDE_EFFORT` reads `xhigh`, the 400 quotes `'xhigh'`, `WebSearch` was called.
+  Counts updated accordingly (14 re-measured runs, `'xhigh'` ×24).
+- **Run count in the 1.19.5 intro corrected** from 16 to 18.
+- **`.gitignore` audit rule narrowed to verdicts.** v1.19.5's `!/.claude/audits/` re-admitted the
+  whole directory, weakening the whitelist guarantee the rest of the block relies on; now only
+  `AUDIT-*.json` under an audit directory is trackable. Verified by both arms — a verdict file
+  shows in `git status`, a stray file in the same directory does not. Note that
+  `git check-ignore -v` returns 0 on a *negation* match, so its exit code cannot answer "is this
+  ignored"; `git status` was the oracle.
+
+Not touched: the 13 closed findings; every conclusion from v1.19.2–v1.19.5; the three
+pre-existing audit directories, which remain untracked pending an explicit decision to publish.
+
 ## [1.19.5] — 2026-07-26
 
 **First run of the new refuter step, and it caught the file shipping right conclusions on
@@ -14,7 +38,7 @@ insufficient evidence.** A fresh-context adversarial pass over v1.19.2–v1.19.4
 published number from the raw run logs (all reproduced) and an independent executor re-ran the
 stack from scratch on its own harness (all four headline claims confirmed). What did not survive
 was the bookkeeping: two claims refuted as stated, ten needing correction, zero wrong runtime
-conclusions. The gaps were then measured rather than hedged — 16 further runs.
+conclusions. The gaps were then measured rather than hedged — 18 further runs.
 
 ### Fixed
 

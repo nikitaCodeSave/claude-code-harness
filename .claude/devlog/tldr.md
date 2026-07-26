@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #29 · 2026-07-26 · Регрессия внутри правки: строка мерилась не на том уровне
+
+**Tags:** harness, bugfix, evidence, config
+
+Рефутеру, закрывшему аудит v1.19.5, был отправлен второй запрос: проверить, что правки действительно закрывают его же находки, а не переформулируют их. Результат — 13 closed, 1 partially closed, 0 still open, и 3 проблемы, внесённых самой правкой. Ровно тот сценарий, ради…
+
+[→ entries/0029-regressiya-vnutri-pravki-stroka-merilas-ne-na-tom-urovne.md](entries/0029-regressiya-vnutri-pravki-stroka-merilas-ne-na-tom-urovne.md)
+
+---
+
 ## #28 · 2026-07-26 · Рефутер поймал верные выводы на недостаточных уликах
 
 **Tags:** harness, evidence, bugfix, docs, adr

@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #32 · 2026-07-26 · Совет живёт там, где его прочтут
+
+**Tags:** harness, evidence, bugfix, docs
+
+Verify-after-fix по v1.19.8 — правки, снятые с трёх major-находок свежего рефутера, отданы ему же на перепроверку. Вердикт stands: все три держатся, регрессии того класса, ради которого дифф существовал, нет. Но с диффом пришли три minor, и одна из них — не про формулировку, а…
+
+[→ entries/0032-sovet-zhivet-tam-gde-ego-prochtut.md](entries/0032-sovet-zhivet-tam-gde-ego-prochtut.md)
+
+---
+
 ## #31 · 2026-07-26 · Свежий рефутер нашёл то, что пережило три прохода
 
 **Tags:** harness, evidence, bugfix, docs, adr

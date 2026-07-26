@@ -1,0 +1,97 @@
+{
+  "audit_version": "1.0",
+  "role": "code-refuter",
+  "scope": "Verify-after-fix over git diff 716bd85..e666882 (v1.19.8) against the three major findings in AUDIT-REFUTER.json. Bounded: this diff only, no re-opening of items already marked standing.",
+  "context": {
+    "git_head": "e666882",
+    "dirty": false,
+    "method": "Read the diff; re-verified each fix against the raw logs rather than against the previous verdict; ran 5 fresh headless probes to test the one thing the diff made load-bearing (the parent-cannot-see half) and the one thing that could silently fail in practice (whether printenv reveals a settings-env pin).",
+    "fresh_runs_dir": "/tmp/claude-1000/-home-nikita-PROJECTS-claude-code-harness/fc8a91da-3ddd-43eb-b13d-c1b9d3bb88e0/scratchpad/refute2/"
+  },
+
+  "fix_verification": [
+    {
+      "finding": "F1 — 'it is silent … with no is_error flag'",
+      "status": "closed",
+      "file": "plugins/harness/references/native-capabilities.md:276-282",
+      "checked": "Both halves re-verified independently, not taken on the fix's word. (i) 'The tool_result itself is marked: is_error: true, body prefixed API Error: 400 …' — re-scanned exhaustively rather than re-checking my earlier sample: every .jsonl in the corpus containing an output_config.effort 400 was enumerated and each matching tool_result's is_error read. 32 failing runs, 32 flagged is_error=true, 0 unflagged. Accurate. (ii) 'what is missing is an assistant-level API-error record, so a filter on isApiErrorMessage does not see it' — no isApiErrorMessage record occurs anywhere in the logs, and the binary docstring is 'True when this assistant message wraps an API error (from internal AssistantMessage.isApiErrorMessage)', i.e. assistant-message-level as stated. Accurate. (iii) 'decisively, a parent sees only a delegate's final text, never its tool_results' — this is the half the fix made load-bearing, so I verified it directly. In every failing delegate run (fm-plain-1, fm-xh-1, ctl-fmenvhigh-1, ag-plain-1, pl-gpplain-1, fm-probe-1) the Agent tool_result handed to the parent has is_error=null and content = [the delegate's final text, then an 'agentId: … <usage>subagent_tokens/tool_uses/duration_ms</usage>' block] — no error signal of any kind reaches the parent. Independently: every 400-bearing tool_result record carries parent_tool_use_id equal to the Agent call's id, never null, so it belongs to the delegate's sub-turn and never enters the parent's turn. The claim is exactly right, including the closing 'the delegate knows it failed and the parent cannot tell'.",
+      "residual": "Count understated — see finding NEW-3."
+    },
+    {
+      "finding": "F2 — effort: xhigh does not survive an env pin",
+      "status": "closed_with_residual",
+      "file": "plugins/harness/references/harness-discipline.md:104-115",
+      "checked": "The wording matches the evidence exactly. 'it cannot lower an env xhigh' = ctl-fmenvhigh-{1,2} (frontmatter effort: high under CLAUDE_CODE_EFFORT_LEVEL=xhigh, fails 2/2); 'an env low drags a delegate declared xhigh down to low' = my p3-fmxh-envlow-{1,2} (MYEFFORT=low, RESULTS=7, 2/2). '(2/2 each way)' is correct and 'both halves measured on the frontmatter path' is correct — both used .claude/agents/*.md, not --agents. Actionability of the prescribed check was the plausible silent failure here: if a settings-level `env:` block did not reach Bash subprocesses, `printenv CLAUDE_CODE_EFFORT_LEVEL` would return empty while the pin was in force, giving a false all-clear on precisely the trap shape the advice targets. Tested all three pin shapes on claude-opus-5, CC 2.1.220, with the launching shell's variable unset: project .claude/settings.json env block -> PIN=low ACTIVE=low, 2/2 (A-projsettings-*); --settings layer env block -> PIN=low ACTIVE=low, 2/2 (B-layer-*); real shell export as control -> PIN=low ACTIVE=low (C-shellenv-1). The check works on every shape, and the run doubles as independent confirmation of the file's own 'an env: block in settings.json is still the env var'.",
+      "residual": "The check is not reachable where it is needed — see finding NEW-2."
+    },
+    {
+      "finding": "F3 — 'the kit's single version-pinned document'",
+      "status": "closed",
+      "file": "plugins/harness/references/{harness-discipline,audit-checklist,evidence-base}.md:2-6",
+      "checked": "All three headers de-versioned to the target form audit-checklist.md §1 itself prescribes ('version-free and points at it'). Drift detector re-run, and its history verified rather than assumed: 18 hits at v1.19.0 (96138fa), 20 at 716bd85, 16 at HEAD (e666882) — so CHANGELOG 1.19.8's 'its count had risen from 18 to 20' is exactly right and the count fell by 4. The two remaining hits that read like stamps are: harness-evolution.md:19 'last-grounded: CC v2.1.211 · Claude 5 family (Fable 5, Sonnet 5) + Opus 4.8', which I judged defensible provenance in the original audit and am not re-opening (it is a machine-readable re-grounding ledger that names its own sources-checked); and audit-checklist.md:27, which is the detector matching the rule's own quoted example ('grounded for Opus 4.8 / CC vX'), an artifact, not a pin. No live doc now carries a competing currency pin in its header."
+    },
+    {
+      "finding": "Judgement call requested — the three agent definitions still declare effort: xhigh, unchanged",
+      "status": "sufficient",
+      "checked": "Leaving them is the right call and they are not now misleading. The three .md files make no claim about depth at all — the false claim lived in CHANGELOG 1.19.4's rationale, and a changelog entry is a frozen record the kit's own §1 forbids rewriting, so correcting it in the live layer is the correct layer. `effort: xhigh` still does real work: it holds against settings, the launch pin and inheritance, which is every path except env. The only thing missing is that the limit is documented two files away from where an operator meets it (NEW-2), and that a consumer editing `tools:` still gets no in-file warning about WebSearch (already recorded in the original audit's prescriptive_usability, not re-opened)."
+    }
+  ],
+
+  "findings": [
+    {
+      "summary": "New overclaim: 'a guarantee against every layer except that one' contradicts the file's own precedence ladder, which puts the org ceiling above env",
+      "category": "semantics",
+      "file": "plugins/harness/references/harness-discipline.md:114-115",
+      "claim": "\"…confirm printenv CLAUDE_CODE_EFFORT_LEVEL is empty — a declared level is a guarantee against every layer except that one.\"",
+      "verdict": "refuted",
+      "severity": "minor",
+      "trigger": "Reading the sentence against native-capabilities.md, Effort §, which this very paragraph cites.",
+      "checked": "native-capabilities.md states the ladder as 'org ceiling ▸ env ▸ launch pin ▸ settings ▸ model default' and adds 'The org ceiling sits above all of it (\"Effort 'X' exceeds your organization's limit …; set to 'Y'\")'. So two layers outrank agent frontmatter, not one. Worse for the word 'guarantee': the org ceiling was never measured against frontmatter at all — no org limit exists on this account, and none of the 30+ runs in the corpus touches it. The sentence is new in this diff and creates an inconsistency between two of the four files it touched.",
+      "impact": "Small in practice (org ceilings are rare on the target audience's plans) but it is a guarantee-shaped word covering an unmeasured layer, in the paragraph whose whole purpose is telling the reader when a declared level does not hold. That is the same failure mode as the claim it replaced.",
+      "correction": "\"…a declared level is a guarantee against every user-side layer except that one; an org ceiling sits above all of them (see native-capabilities.md, Effort §).\"",
+      "demonstrability": "reasoned"
+    },
+    {
+      "summary": "The pre-audit check is in a document the auditing operator does not open at the moment it matters",
+      "category": "semantics",
+      "file": "plugins/harness/references/harness-discipline.md:112-115 vs plugins/harness/commands/external-audit.md",
+      "claim": "\"Before an audit or verification pass whose whole value is depth, confirm printenv CLAUDE_CODE_EFFORT_LEVEL is empty.\"",
+      "verdict": "refuted",
+      "severity": "minor",
+      "trigger": "An operator running /external-audit, which is exactly the situation the sentence addresses.",
+      "checked": "The advice sits in harness-discipline.md's Subagents §, reached in Bootstrap/Extend modes. grep over plugins/harness for CLAUDE_CODE_EFFORT_LEVEL returns only those two lines: plugins/harness/commands/external-audit.md (113 lines) mentions neither effort nor env anywhere, and the verification-ladder rung in the same harness-discipline.md — the paragraph that actually names /external-audit and the code-refuter role — does not carry it either. So the reader who invokes the audit loads the command file and never sees the check.",
+      "impact": "The fix documents the limit but does not put it on the path where the failure occurs, so the silent shallow audit remains reachable for anyone who does not happen to have read the Subagents section. Partially closed rather than closed.",
+      "correction": "One line in external-audit.md's preflight ('if this pass must be deep, confirm `printenv CLAUDE_CODE_EFFORT_LEVEL` is empty — an env pin overrides the roles' declared effort: xhigh in both directions'), or the same line appended to the verification-ladder rung that names /external-audit.",
+      "demonstrability": "verified"
+    },
+    {
+      "summary": "'24 of 24 failing runs' was copied from the refuter's sample rather than re-derived; the corpus holds 30",
+      "category": "other",
+      "file": "plugins/harness/references/native-capabilities.md:279",
+      "claim": "\"verified on 24 of 24 failing runs, session-level and delegate-level alike\"",
+      "verdict": "refuted",
+      "severity": "minor",
+      "trigger": "Enumerating every log containing an output_config.effort 400 rather than the five delegate groups the original finding happened to name.",
+      "checked": "Exhaustive scan of the corpus: 30 failing runs in the published evidence (adding fm-probe-{1,2}, ag-xh-{1,2}, agenv-envhigh-{1,2} to the 24 originally cited), plus my 2 re-runs = 32. All 32 carry is_error=true; 0 unflagged. So 24 is a true but strict subset of its own evidence.",
+      "impact": "None to the conclusion — the direction is conservative and the claim is stronger than stated. But it is the 'count taken from a report instead of re-derived from the logs' class this file has been corrected for repeatedly, and it recurred inside the fix for a finding about exactly that. The same 24 also appears in CHANGELOG 1.19.8 and devlog #0031, which are frozen records and must not be edited.",
+      "correction": "In native-capabilities.md only: '…verified on all 30 failing runs in this file's evidence, session-level and delegate-level alike'.",
+      "demonstrability": "verified"
+    }
+  ],
+
+  "not_reopened": [
+    "Original finding 4 (four git-tracked audit artifacts fail the jq gate their own agent definitions mandate) remains open. It is honestly recorded as unfixed in both CHANGELOG 1.19.8 and devlog #0031, so it is deferred, not dropped. Not re-litigated here.",
+    "harness-evolution.md:19's last-grounded stamp: judged defensible provenance in the original audit, unchanged by this diff, not re-opened. One observation for a later pass, pre-existing and NOT introduced by this diff: harness-evolution.md says 'the canon carries one provenance stamp' while native-capabilities.md says 'This file is the kit's single version-pinned document' — two files each describing themselves as the single stamp carrier. They mean different things (re-grounding ledger vs currency pin) but a reader could take them as competing.",
+    "Everything listed as reproduced_without_change in AUDIT-REFUTER.json — untouched by this diff and not re-checked."
+  ],
+
+  "regression_check": {
+    "result": "none found",
+    "detail": "The specific risk named in the brief — a fix that reads plausible without addressing the defect — did not materialise on either load-bearing claim. The parent-cannot-see half was verified from the logs rather than accepted, and the printenv check was verified to work on the settings-`env` shape that would have made it a false all-clear. The three findings above are a scope slip, a reachability gap and an undercount; none reverses a conclusion and none is of the class the fix was removing. The diff also touches nothing outside the four reference files, the two plugin.json bumps, CHANGELOG, devlog and the audit artifacts."
+  },
+
+  "verdict": {
+    "status": "stands",
+    "summary": "All three major findings are addressed and the fixes hold under independent re-verification. F1's rewrite is accurate on all three halves, including the newly load-bearing one, which I confirmed from the Agent tool_result records (is_error=null, delegate's final text plus a usage block, and every 400-bearing tool_result carrying parent_tool_use_id) rather than accepting it. F2's rule matches the evidence 2/2 each way on the frontmatter path, and its prescribed `printenv CLAUDE_CODE_EFFORT_LEVEL` check was tested against all three pin shapes — project settings env block, --settings layer, shell export — and reveals the pin in every one, so it cannot give a false all-clear. F3's de-versioning drops the drift detector from 20 to 16, with the 18-to-20 history verified at the commits themselves. Three minor issues came in with the diff: 'a guarantee against every layer except that one' contradicts the file's own ladder, which puts an unmeasured org ceiling above env; the pre-audit check lives two documents away from the /external-audit command that needs it, so the failure stays reachable; and '24 of 24' was copied from my sample rather than re-derived from a corpus that holds 30 (all 30 flagged, so the direction is conservative). No regression of the class this diff existed to remove."
+  }
+}

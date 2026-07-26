@@ -13,6 +13,12 @@ audited code, stop and tell the operator to open a fresh session.
 
 ## Step 0 — scope and preconditions
 
+0. **Check the environment is not capping the roles' depth.** Run `printenv
+   CLAUDE_CODE_EFFORT_LEVEL`. If it is set, it **overrides the `effort:` each role declares — in
+   both directions** — so an env-pinned caller silently decides how deep this audit goes. Either
+   unset it for the run, or record the effective level in the verdict's context so a shallow
+   audit is not read as a clean one. (Same variable also breaks `WebSearch` above `high` on
+   Opus 5 — see `references/native-capabilities.md`, Effort §.)
 1. Fix the audited surface: read `.claude/features.json` / `.claude/progress/` / the spec from
    $ARGUMENTS; determine the scope's commit range (`git log --oneline`). **If the project has no
    Phase 5 kit** (no features.json/progress — typical for legacy): take scope and preconditions

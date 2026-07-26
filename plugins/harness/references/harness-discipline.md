@@ -111,8 +111,8 @@ both measured (`native-capabilities.md`, Effort §):
 
   The same asymmetry bites a delegate you *want* deep: an agent declaring `effort: xhigh` runs at
   whatever the env says. Before an audit or verification pass whose whole value is depth, confirm
-  `printenv CLAUDE_CODE_EFFORT_LEVEL` is empty — a declared level is a guarantee against every
-  layer except that one.
+  `printenv CLAUDE_CODE_EFFORT_LEVEL` is empty — a declared level holds against every user-side
+  layer except that one. Above both sits the org ceiling, which this kit has not measured.
 
 ```yaml
 ---

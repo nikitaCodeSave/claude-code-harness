@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.19.9] — 2026-07-26
+
+**Verify-after-fix on v1.19.8: the three fixes hold, three minor issues came in with them.**
+The refuter re-verified each fix against its own findings rather than accepting the claim — it
+confirmed the newly load-bearing half of the `is_error` rewrite from the Agent `tool_result`
+records, tested the prescribed `printenv` check against all three pin shapes (settings `env`
+block, `--settings` layer, shell export) and found it reveals the pin in every one, and measured
+the drift detector dropping 20 → 16. Verdict `stands`, no regression of the class the diff
+existed to remove.
+
+### Fixed
+
+- **The pre-audit env check now lives in `/external-audit` itself**, as Step 0, not two documents
+  away in `harness-discipline.md`. Advice placed where the reader will not be standing is advice
+  that does not run — the failure it prevents was still fully reachable.
+- **"A guarantee against every layer except that one" corrected.** It contradicted the file's own
+  precedence ladder, which puts an org ceiling above the env var. Now: holds against every
+  *user-side* layer except env, with the org ceiling named and marked unmeasured.
+- **`24 of 30` → `30 of 30`.** The `is_error` count was carried over from the auditor's sample
+  rather than re-derived from the full corpus. All 30 failing runs carry the flag, so the
+  direction was conservative — but a number in this file should come from the corpus it cites.
+
 ## [1.19.8] — 2026-07-26
 
 **A full three-role audit at the end of the day, with a refuter that had never seen this work,

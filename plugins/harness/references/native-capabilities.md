@@ -275,7 +275,7 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
     **subagents** (8 of 10 reported failures) — a research delegate keeps running and returns a
     report with a whole source tier missing; **(c)** it is **silent to the caller, though not
     unflagged**. The `tool_result` itself is marked: `is_error: true`, body prefixed
-    `API Error: 400 …` — verified on 24 of 24 failing runs, session-level and delegate-level
+    `API Error: 400 …` — verified on 30 of 30 failing runs, session-level and delegate-level
     alike, so a scan of `tool_result` records finds it. What is missing is an assistant-level
     API-error record, so a filter on `isApiErrorMessage` ("true when this assistant message wraps
     an API error") does not see it — and, decisively, **a parent sees only a delegate's final

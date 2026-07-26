@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #26 · 2026-07-26 · Потолок принадлежит Opus 5: делегат выходит из него сам
+
+**Tags:** harness, evidence, feature, docs
+
+v1.19.2 установила, что WebSearch ломает сам уровень, а не способ его задать. Оставался вопрос оператора: каких агентов создавать, чтобы у них поиск был? Ответить на него из v1.19.2 нельзя — она говорит «выше high поиска нет» и предлагает делегата на другой модели, не объясняя…
+
+[→ entries/0026-potolok-prinadlezhit-opus-5-delegat-vykhodit-iz-nego-sam.md](entries/0026-potolok-prinadlezhit-opus-5-delegat-vykhodit-iz-nego-sam.md)
+
+---
+
 ## #25 · 2026-07-26 · Триггер — уровень, а не env-слой: матрица не воспроизвелась
 
 **Tags:** harness, evidence, bugfix, docs

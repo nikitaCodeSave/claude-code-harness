@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-26T02:51:11Z",
-  "entry_count": 25,
+  "generated_at": "2026-07-26T03:36:07Z",
+  "entry_count": 26,
   "entries": [
     {
       "id": 1,
@@ -358,6 +358,21 @@
       "supersedes": null,
       "path": "entries/0025-trigger-uroven-a-ne-env-sloy-matritsa-ne-vosproizvelas.md",
       "preview": "Запись #24 отменила вывод #23 и объявила: WebSearch ломает env-слой (CLAUDE_CODE_EFFORT_LEVEL), а effortLevel в settings, флаг --effort и ultracode работают — 0/12 отказов. Вывод отгружен в v1.19.1. Живая проверка из главного треда в тот же день его опровергла: сессия при…"
+    },
+    {
+      "id": 26,
+      "date": "2026-07-26",
+      "title": "Потолок принадлежит Opus 5: делегат выходит из него сам",
+      "tags": [
+        "harness",
+        "evidence",
+        "feature",
+        "docs"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0026-potolok-prinadlezhit-opus-5-delegat-vykhodit-iz-nego-sam.md",
+      "preview": "v1.19.2 установила, что WebSearch ломает сам уровень, а не способ его задать. Оставался вопрос оператора: каких агентов создавать, чтобы у них поиск был? Ответить на него из v1.19.2 нельзя — она говорит «выше high поиска нет» и предлагает делегата на другой модели, не объясняя…"
     }
   ]
 }

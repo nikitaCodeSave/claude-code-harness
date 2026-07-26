@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.19.3] — 2026-07-26
+
+**The `WebSearch` ceiling turns out to be Opus 5's, and a delegate can step out of it — which
+converts "a capability you lose above `high`" into a spawn rule the orchestrator can act on.**
+v1.19.2 established that the tier is the trigger; two further matrices establish whom it binds
+and how a subagent escapes it.
+
+### Added
+
+- **Spawn rule for research delegates** (`harness-discipline.md`, Subagents §) — what an agent
+  must declare in order to reach the web: `WebSearch` in `tools:` (a narrowed allowlist drops it
+  outright, and the delegate reports having no such tool rather than erroring), plus either
+  `effort: high` or `model: claude-sonnet-5` / `claude-fable-5`. Includes the minimal frontmatter
+  and the built-in-delegate case, where the Agent tool's per-call `model` override is the escape.
+
+### Fixed
+
+- **The ceiling is Opus 5's, not Claude Code's.** As session models at `xhigh` and `max`,
+  `claude-sonnet-5` and `claude-fable-5` searched cleanly — 0/8 failures with real results —
+  where `claude-opus-5` and `claude-opus-5[1m]` failed. v1.19.2's "the session that searches runs
+  at `high` or below" holds only on Opus 5.
+- **The per-delegate `effort:` dial does save you** — corrects v1.19.2 and earlier. 16-run
+  delegate matrix from an Opus 5 session at `xhigh`: `effort: high` searched 3/3 and
+  `model: claude-sonnet-5` 3/3, while a delegate declaring nothing failed 2/2. The server-tool
+  sub-request carries the *delegate's* effective level, not the session's. Sole exception: an
+  env-pinned level outranks agent frontmatter, so under `CLAUDE_CODE_EFFORT_LEVEL` only the model
+  pin survives — measured both ways, 2/2 each.
+- **A delegate that declares no `effort:` inherits the session's level.** Replaces "an ad-hoc
+  delegate stays at the model default", which rested on token spend that never separated
+  (937/1550 vs 1043/746) — the oracle this same file marks as weak.
+
+Not touched: the tier finding from v1.19.2 (these matrices refine it, not overturn it), the
+`defaultMode` findings, the grounding stamps and drift detector, and
+`references/project-docs/*.md`.
+
 ## [1.19.2] — 2026-07-26
 
 **The same matrix re-run with an oracle that does not depend on the claim — and the green rows

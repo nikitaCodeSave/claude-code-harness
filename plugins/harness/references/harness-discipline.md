@@ -90,6 +90,34 @@ for grunt scans (current mapping: Fable 5/Opus-class lead, Sonnet-class reasonin
 Haiku-class grunt — a config fact, re-map at each model generation; Fable ≈2× Opus price,
 so no blanket lead-switch without evidence of lift).
 
+**A delegate that must search the web needs two things declared — neither is the default.**
+This is the most expensive place to be silently crippled: the delegate keeps working and returns
+a confident report with a whole source tier missing. Two independent ways to lose `WebSearch`,
+both measured (`native-capabilities.md`, Effort §):
+
+- **The tool.** Narrowing `tools:` without listing `WebSearch` removes it outright — the
+  delegate does not error, it reports having no such tool. Either omit `tools:` entirely
+  (inherits everything) or name `WebSearch` explicitly. The allowlist is asymmetric: an extra
+  name is dropped silently, a missing one costs the capability.
+- **The effort tier.** On Opus 5, `xhigh`/`max` kill `WebSearch`, and a delegate that declares
+  no `effort:` inherits the session's level. From a deep session, give a research delegate
+  either `effort: high` (or below, keeping the session model) or `model: claude-sonnet-5` /
+  `claude-fable-5`, which carry no such ceiling at any level. Where the session level arrives
+  through `CLAUDE_CODE_EFFORT_LEVEL`, frontmatter `effort:` cannot lower it — only the model pin
+  survives.
+
+```yaml
+---
+name: web-researcher
+description: Searches the web and returns a sourced summary.
+tools: WebSearch, WebFetch, Read
+model: claude-sonnet-5     # or drop this line and use: effort: high
+---
+```
+
+For a **built-in** delegate (`general-purpose`) there is no frontmatter to edit — the Agent
+tool's per-call `model` override is the same escape, since the ceiling is the model's.
+
 ## Single-agent first; bounded fan-out only when scope exceeds one context
 
 The default for typical coding is one main thread. For bounded fan-out, **dynamic workflows**

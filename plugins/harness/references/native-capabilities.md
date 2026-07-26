@@ -203,12 +203,15 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
   per call (`agent(prompt, {effort})`). Measured 2026-07-26 on v2.1.220, same prompt and same
   parent session: `effort: low` → 862 / 656 output tokens, `effort: xhigh` → 3358 / 3452 (N=2).
   So pinning a cheap level on a mechanical subagent, and a high one on a verifier, is a real
-  dial and not decoration. **An ad-hoc delegate does not inherit the session's level** — a
-  `general-purpose` agent spawned from a `low` session and from an `xhigh` session cost
-  937/1550 vs 1043/746 tokens on that same task (the model default either way), while the
-  frontmatter pin moved it 4×. Effort for a delegate is *declared*, never ambient — `inherit`
-  is an opt-in value, not the default. Raising the session's effort therefore buys depth for
-  the main thread only; a fleet of ad-hoc subagents stays at the model default.
+  dial and not decoration. **A delegate that declares no `effort:` inherits the session's
+  level** — measured with a hard binary oracle instead of token spend: from a session at
+  `xhigh`, an agent declaring nothing produced the server-tool 400 quoting `'xhigh'` (2/2),
+  while the same agent at `effort: high` searched cleanly (3/3). Since that sub-request carries
+  the *delegate's* effective level (below), the first case was genuinely running at the
+  session's. An earlier reading here — "an ad-hoc delegate stays at the model default" — rested
+  on token spend from a `low` and an `xhigh` parent (937/1550 vs 1043/746): ranges that never
+  separated, on the oracle this file marks as weak two bullets above. Declare the level
+  explicitly whenever it matters; do not assume a delegate starts cheap.
 - **`CLAUDE_EFFORT` reports the session's own level, not a delegate's.** It is read-only and
   exported into Bash subprocesses and hook commands (the same value arrives as the hook-input
   field `effort.level` on tool-context hooks); the binary describes it as the active level for
@@ -263,14 +266,34 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
     report with a whole source tier missing; **(c)** it is **silent** — the error text goes into
     the `WebSearch` `tool_result` body with no `is_error` flag and no API-error record, so
     nothing surfaces to the operator and a filter on `isApiErrorMessage` structurally cannot see
-    it. **There is no setting that buys both — the session that searches runs at `high` or
-    below.** Changing how the level arrives buys nothing. What still works above `high`: **a
-    delegate on another model** (`model: sonnet` — searched fine) and **`WebFetch`** (unaffected,
-    as the thread reports). What does **not** save you is the per-delegate `effort:` dial: an agent
-    pinned to `effort: high` still failed with `effort='xhigh'` in the error, i.e. the
-    server-tool sub-request carries the *session's* level, not the delegate's (the in-thread
-    workaround reported in #76689 was a *skill* frontmatter, a different path — don't assume it
-    generalizes to agents). Detection: grep transcripts
+    it. **The ceiling is Opus 5's, and the escape is per-delegate** — two further matrices,
+    same day, same oracle.
+
+    *Which model is affected.* As the **session** model at `xhigh` and `max`,
+    `claude-sonnet-5` and `claude-fable-5` searched cleanly — 0/8 failures, real results in
+    every run — where `claude-opus-5` and `claude-opus-5[1m]` failed. The tier rule belongs to
+    Opus 5, not to Claude Code: on Sonnet 5 and Fable 5 every effort level keeps search.
+
+    *What a delegate needs in order to search.* 16 runs, session on `claude-opus-5`, delegate
+    asked for one `WebSearch` call and nothing else:
+
+    | agent frontmatter | ran on | `WebSearch` |
+    | --- | --- | --- |
+    | `effort: high`, session pinned by `--effort xhigh` | opus-5 | ✅ 3/3 |
+    | `model: claude-sonnet-5` | sonnet-5 | ✅ 3/3 |
+    | *nothing declared* | opus-5 | ❌ 2/2 |
+    | `effort: xhigh` | opus-5 | ❌ 2/2 |
+    | `tools:` narrowed, `WebSearch` omitted | sonnet-5 | ❌ 2/2 — tool absent, never called |
+    | `effort: high`, session pinned by **`CLAUDE_CODE_EFFORT_LEVEL`** | opus-5 | ❌ 2/2 |
+    | `model: claude-sonnet-5`, session pinned by **env** | sonnet-5 | ✅ 2/2 |
+
+    So the per-delegate `effort:` dial **does** save you — correcting an earlier reading in this
+    file — because the sub-request carries the *delegate's* effective level, not the session's.
+    Its one blind spot is the env layer: `CLAUDE_CODE_EFFORT_LEVEL` outranks agent frontmatter,
+    so `effort: high` never takes hold there and only the model pin survives. A delegate that
+    declares nothing inherits the session's level and fails like the main thread.
+    **`WebFetch` is unaffected throughout.** The prescriptive form of this — what to put in an
+    agent you spawn for research — is in `harness-discipline.md` (Subagents §). Detection: grep transcripts
     for the signature, and glob **one level deeper** than the session file —
     `<session-dir>/subagents/agent-*.jsonl` (`isSidechain` is not a usable subagent marker).
     **Method warning, and this entry is the cautionary tale — twice over.** An `env`-block level

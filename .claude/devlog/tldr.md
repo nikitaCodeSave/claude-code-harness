@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #33 · 2026-07-26 · Внешний след закрыт: комментарий догоняет кит
+
+**Tags:** harness, docs
+
+Записи [#24](0024-lomaet-env-a-ne-uroven-matritsa-bez-kontrolya.md), [#25](0025-trigger-uroven-a-ne-env-sloy-matritsa-ne-vosproizvelas.md) и [#26](0026-potolok-prinadlezhit-opus-5-delegat-vykhodit-iz-nego-sam.md) оставляли одну и ту же открытую позицию: комментарий в…
+
+[→ entries/0033-vneshniy-sled-zakryt-kommentariy-dogonyaet-kit.md](entries/0033-vneshniy-sled-zakryt-kommentariy-dogonyaet-kit.md)
+
+---
+
 ## #32 · 2026-07-26 · Совет живёт там, где его прочтут
 
 **Tags:** harness, evidence, bugfix, docs

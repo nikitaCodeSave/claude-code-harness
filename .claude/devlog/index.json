@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-26T05:50:58Z",
-  "entry_count": 33,
+  "generated_at": "2026-07-26T06:29:21Z",
+  "entry_count": 34,
   "entries": [
     {
       "id": 1,
@@ -478,6 +478,19 @@
       "supersedes": null,
       "path": "entries/0033-vneshniy-sled-zakryt-kommentariy-dogonyaet-kit.md",
       "preview": "Записи [#24](0024-lomaet-env-a-ne-uroven-matritsa-bez-kontrolya.md), [#25](0025-trigger-uroven-a-ne-env-sloy-matritsa-ne-vosproizvelas.md) и [#26](0026-potolok-prinadlezhit-opus-5-delegat-vykhodit-iz-nego-sam.md) оставляли одну и ту же открытую позицию: комментарий в…"
+    },
+    {
+      "id": 34,
+      "date": "2026-07-26",
+      "title": "Шаги релиза живут в скилле, CLAUDE.md только указывает",
+      "tags": [
+        "harness",
+        "docs"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0034-shagi-reliza-zhivut-v-skille-claude-md-tolko-ukazyvaet.md",
+      "preview": "/doctor прошёлся по операторскому окружению и по dev-harness'у этого репо. Почти всё оказалось чистым: нативная установка без остатков npm, все конфиги парсятся, три агента в plugins/harness/agents/ валидны, авто-режим уже дефолт, версия совпадает с каналом latest, медленных…"
     }
   ]
 }

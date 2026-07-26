@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #34 · 2026-07-26 · Шаги релиза живут в скилле, CLAUDE.md только указывает
+
+**Tags:** harness, docs
+
+/doctor прошёлся по операторскому окружению и по dev-harness'у этого репо. Почти всё оказалось чистым: нативная установка без остатков npm, все конфиги парсятся, три агента в plugins/harness/agents/ валидны, авто-режим уже дефолт, версия совпадает с каналом latest, медленных…
+
+[→ entries/0034-shagi-reliza-zhivut-v-skille-claude-md-tolko-ukazyvaet.md](entries/0034-shagi-reliza-zhivut-v-skille-claude-md-tolko-ukazyvaet.md)
+
+---
+
 ## #33 · 2026-07-26 · Внешний след закрыт: комментарий догоняет кит
 
 **Tags:** harness, docs

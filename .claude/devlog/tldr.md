@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #28 · 2026-07-26 · Рефутер поймал верные выводы на недостаточных уликах
+
+**Tags:** harness, evidence, bugfix, docs, adr
+
+Первое применение шага B3.5, добавленного в release-ритуал часом раньше: две роли внешнего аудита свежим контекстом по релизам v1.19.2–v1.19.4. evidence-executor независимо переснял стек на собственном стенде (14 прогонов, ноль переиспользования артефактов автора) — все четыре…
+
+[→ entries/0028-refuter-poymal-vernye-vyvody-na-nedostatochnykh-ulikakh.md](entries/0028-refuter-poymal-vernye-vyvody-na-nedostatochnykh-ulikakh.md)
+
+---
+
 ## #27 · 2026-07-26 · Глубина аудита — свойство аудита, а не вызывающего
 
 **Tags:** harness, bugfix, evidence, config

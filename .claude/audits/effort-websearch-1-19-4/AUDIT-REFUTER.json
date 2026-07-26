@@ -1,0 +1,267 @@
+{
+  "role": "code-refuter",
+  "scope": "a95dade..HEAD — v1.19.2, v1.19.3, v1.19.4 + dev-harness commit 3ff5002",
+  "date": "2026-07-26",
+  "environment": {
+    "claude_code": "2.1.220",
+    "binary": "/home/nikita/.local/share/claude/versions/2.1.220",
+    "ambient_settings": "~/.claude/settings.json pins effortLevel:xhigh, alwaysThinkingEnabled:true; CLAUDE_CODE_EFFORT_LEVEL is NOT set anywhere (confirmed: no env-block key, absent from printenv) — so the 'settings mechanism' rows are genuinely non-env",
+    "evidence_dir": "/tmp/claude-1000/-home-nikita-PROJECTS-claude-code-harness/fc8a91da-3ddd-43eb-b13d-c1b9d3bb88e0/scratchpad/"
+  },
+
+  "verdict": "stands_with_required_corrections",
+  "summary": "Every published NUMBER re-derives exactly from the raw JSONL, and every substantive runtime CONCLUSION survived adversarial probing — including two that I had to run new controls to settle, both of which came back in the author's favour. What does not survive is the evidence bookkeeping: the central v1.19.3 claim ('a delegate declaring no effort: inherits the session's level') held the session level CONSTANT at xhigh across all 20 delegate runs, so as published it could not distinguish inheritance from a fixed xhigh default — I ran the missing arm and it confirms inheritance, but the file shipped the conclusion without the discriminating control, which is the exact error its own Method warning names. And v1.19.4's headline — 'the spawn rule is now verified on the path it prescribes' — is false as written: it re-verified 2 of the matrix's 7 rows on the frontmatter path; the matrix column is still labelled 'agent frontmatter' while 5 rows were measured through --agents JSON. 2 refuted claims, 10 requiring correction, 0 wrong runtime conclusions.",
+
+  "reproduction": {
+    "method": "Re-derived every count directly from *.jsonl: WebSearch call control via grep -c '\"name\":\"WebSearch\"'; failure signal via grep -c 'output_config.effort'; tier actually rejected via grep -o \"output_config.effort '[a-z]*'\"; model actually run via the type=system/subtype=init .model field (NOT the raw grep, which also matches assistant-message model fields); delegate identity via '\"subagent_type\":\"...\"'; verbatim outcome via jq 'select(.type==\"result\")|.result'.",
+    "session_matrix": "REPRODUCES EXACTLY. ctlhigh 2 runs: 0 x 400, RESULTS=7. base 3/3 fail, 1m 3/3 + pilot1m 1/1 = 4/4 fail, flagxhigh 3/3 fail, ultra 2/2 fail. 12 failing runs total, 2 rejections each = 24; tally 'xhigh' x20 + 'max' x4 — matches the published counts to the unit. WebSearch call control WS>=1 present in all 22 session runs.",
+    "model_matrix": "REPRODUCES EXACTLY. son-xh, son-max, fab-xh, fab-max = 8 runs, 0 x 400, RESULTS=7 in all 8, init model claude-sonnet-5 / claude-fable-5 as claimed.",
+    "delegate_matrix": "REPRODUCES EXACTLY, all 7 rows, 16 runs. inherit 3/3 ok, sonnet 2 + pilot 1 = 3/3 ok (ag-pilot-1 confirmed subagent_type=sonnet-searcher, so folding it into the 3 is legitimate), plain 2/2 fail@xhigh, xh 2/2 fail@xhigh, narrow 2/2 NOTOOL with WS=0, envhigh 2/2 fail@xhigh, envsonnet 2/2 ok. Delegate-model control confirmed: only claude-opus-5 appears in inherit/plain/xh streams; claude-sonnet-5 appears in the model-pinned rows.",
+    "frontmatter_matrix": "REPRODUCES EXACTLY. fm-high 2/2 ok (0 x 400, RESULTS=7), fm-plain 2/2 fail quoting 'xhigh'; both arms ran on claude-opus-5 only.",
+    "no_missing_or_mislabelled_runs": "The 'ultra' label is NOT ultracode despite the name — it is --effort max (CLAUDE_EFFORT=max, 400 quotes 'max', settings pins xhigh so only the flag can produce max; devlog #0025's own table lists it as --effort max and carries no ultracode row). Attribution in the shipped table is correct."
+  },
+
+  "new_evidence_i_generated": [
+    {
+      "id": "CTL-1",
+      "purpose": "Discriminate 'delegate inherits the session level' from 'ad-hoc delegate runs at a fixed default' — the control absent from the shipped matrix.",
+      "design": "run-ctl-session.sh: session claude-opus-5 --effort high, delegate plain-searcher (declares no effort:, tools:[WebSearch]), 2 runs. Under the fixed-default hypothesis the xhigh runs force default=xhigh, so this must still 400. Under inheritance it must search.",
+      "files": "ctl-plainhigh-1.jsonl, ctl-plainhigh-2.jsonl",
+      "result": "2/2 SUB=RESULTS=7, zero output_config.effort rejections, WS=1 each, delegate on claude-opus-5, subagent_type=plain-searcher. Fixed-default hypothesis REFUTED; inheritance CONFIRMED."
+    },
+    {
+      "id": "CTL-2",
+      "purpose": "Re-measure the 'env outranks frontmatter effort:' caveat on the path harness-discipline.md actually prescribes (it was measured only via --agents JSON).",
+      "design": "run-ctl-fmenv.sh: cwd=fmproj, CLAUDE_CODE_EFFORT_LEVEL=xhigh, no --effort flag, delegate fm-high (.claude/agents/fm-high.md, effort: high, tools: WebSearch), 2 runs.",
+      "files": "ctl-fmenvhigh-1.jsonl, ctl-fmenvhigh-2.jsonl",
+      "result": "2/2 SUB=RESULTS=ERROR, 400 quoting 'xhigh' in each, WS=1 each, subagent_type=fm-high, model claude-opus-5. Caveat CONFIRMED on the prescribed path."
+    },
+    {
+      "id": "CTL-3",
+      "purpose": "Settle the unmeasured 'ultracode resolves to xhigh' premise via an oracle independent of any run.",
+      "design": "strings(1) over the 2.1.220 ELF (grep over the packed binary would silently find nothing); needle control: 'output_config' returns 69 hits before trusting any negative.",
+      "result": "CONFIRMED verbatim: 'Enable ultracode for the session: xhigh effort plus standing dynamic-workflow orchestration', '- ultracode: xhigh + dynamic workflow orchestration (this session only)', 'Ultracode runs at xhigh effort'. Also confirmed the CLAUDE_EFFORT description quoted in native-capabilities.md verbatim: 'Active effort level for the current turn (e.g., \"low\", \"medium\", \"high\", \"xhigh\", \"max\"), after any silent downgrade for the selected model. Also exposed to hook commands and Bash as the CLAUDE_EFFORT env var.' And that agent-level effort is a first-class field: 'Reasoning effort level for this agent. Either a named level or an integer'."
+    }
+  ],
+
+  "claims": [
+    {
+      "id": "C1",
+      "location": "native-capabilities.md, Effort § bug bullet — session matrix",
+      "claim": "The trigger is the tier, not how the tier was set: high searches, xhigh and max do not; neither mechanism nor model variant moves the outcome.",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": true,
+      "checked": "12/12 failures re-derived; each failing run states its own tier in the 400, so no row rests on an assumed level; discrimination control present (ctlhigh returns RESULTS=7, so the rig can show success); precedence control present (--effort high beat settings' effortLevel:xhigh, proving the flag mechanism is live); WebSearch-was-called control present in all 22 runs.",
+      "notes": "This is the strongest part of the release. The oracle is genuinely independent of the claim — the API names the tier it rejected."
+    },
+    {
+      "id": "C2",
+      "location": "native-capabilities.md, session matrix row 1",
+      "claim": "| `high` | `--effort high` | ok 0/2 — returned 7 results |",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": false,
+      "checked": "Both ctlhigh runs have init model claude-opus-5[1m], NOT claude-opus-5. Rows 2 and 3 explicitly name their model variant; row 1 names none, so a reader takes it as the same base opus-5 the row below it uses. There is no `high` control on plain claude-opus-5 anywhere in the evidence set.",
+      "correction": "Add the model to row 1: `high` | `--effort high`, `claude-opus-5[1m]`. The tier conclusion survives regardless, because [1m]@high (ok 0/2) vs [1m]@xhigh (fails 4/4) is a clean within-variant contrast — but the matrix must not present a [1m] run as the unqualified control for plain-opus rows."
+    },
+    {
+      "id": "C3",
+      "location": "native-capabilities.md, session matrix row 4",
+      "claim": "| `xhigh` | `--effort xhigh` | fails 3/3 | — offered as independent evidence that the mechanism does not move the outcome.",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": false,
+      "checked": "~/.claude/settings.json pins effortLevel:xhigh. `--effort xhigh` therefore requests the level the file already pins: drop the flag and the effective config is identical to row 2 (`base`). The row cannot separate flag from settings and contributes no independent mechanism observation.",
+      "correction": "Either mark row 4 as confounded with row 2, or drop it. The mechanism-independence claim does not need it: it is carried by `--effort high` (flag overrode settings' xhigh downward — CLAUDE_EFFORT=high, search restored) and `--effort max` (flag overrode settings' xhigh upward — 400 quotes 'max'). Both are unconfounded; say so explicitly instead of listing a row that proves nothing."
+    },
+    {
+      "id": "C4",
+      "location": "native-capabilities.md, session matrix row 6 + the sentence 'Every rejection quotes the tier actually in force ... so no row rests on an assumed level'",
+      "claim": "| `xhigh` | `CLAUDE_CODE_EFFORT_LEVEL` (env) | fails 5/5 (earlier run) |",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": false,
+      "checked": "This is the sole surviving row of the matrix the same passage disavows. It has neither the stream-json oracle nor the WebSearch-was-called control that the table header claims for itself ('re-measured 2026-07-26 ... plus a control'). The tier tally (x20 + x4 = 24 across 12 runs) arithmetically excludes it, so the sentence 'no row rests on an assumed level' is false for row 6 as the table is laid out.",
+      "correction": "Either restate as 'x/y from the earlier, weaker-oracle run — kept because env only sets the tier and the tier is the trigger', or fold it in with my CTL-2 numbers, which re-measure the env->xhigh->fail chain with the good oracle (2/2, 400 quoting 'xhigh'). Scope the 'no row rests on an assumed level' sentence to the 12 re-measured runs."
+    },
+    {
+      "id": "C5",
+      "location": "native-capabilities.md 'Which model is affected' + CHANGELOG 1.19.3 'The ceiling is Opus 5's, not Claude Code's'",
+      "claim": "claude-sonnet-5 and claude-fable-5 searched cleanly as session models — 0/8 failures with real results.",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": true,
+      "checked": "All 8 runs re-derived: 0 rejections, RESULTS=7, WS=1, init models confirm sonnet-5/fable-5 actually ran. Control that the rig can produce a failure is present in the same batch (the opus rows)."
+    },
+    {
+      "id": "C6",
+      "location": "native-capabilities.md 'on Sonnet 5 and Fable 5 every effort level keeps search'; harness-discipline.md 'which carry no such ceiling at any level'",
+      "claim": "Sonnet 5 / Fable 5 keep WebSearch at every effort level.",
+      "verdict": "refuted_as_stated",
+      "evidence_sufficient_as_published": false,
+      "checked": "Measured at 2 of the 5 levels the binary enumerates ('low','medium','high','xhigh','max'), N=2 each. 'every level' / 'at any level' generalises past the measurement.",
+      "correction": "Narrow to what was run: 'at `xhigh` and `max` — the two levels that break Opus 5'. The practical advice is unaffected (the untested levels are the low ones, which are safe on Opus too), but the file's own standard forbids asserting rows it never ran."
+    },
+    {
+      "id": "C7",
+      "location": "native-capabilities.md delegate matrix rows 1-2 + CHANGELOG 1.19.3 'The per-delegate effort: dial does save you'",
+      "claim": "The server-tool sub-request carries the delegate's effective level, not the session's: effort: high searched 3/3 and model: claude-sonnet-5 3/3 from an xhigh session.",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": true,
+      "checked": "Session held at xhigh while the delegate's declaration varied — this is the one contrast in the delegate matrix where the manipulated variable actually varies. A sub-request carrying the session's xhigh could not have returned clean results, so the inference is forced. Re-confirmed independently on the frontmatter path by fm-high (2/2). Delegate-model control rules out a silent model swap: inherit/fm-high streams contain only claude-opus-5."
+    },
+    {
+      "id": "C8",
+      "location": "native-capabilities.md 'A delegate that declares no effort: inherits the session's level'; harness-discipline.md same; CHANGELOG 1.19.3 bullet 3",
+      "claim": "A delegate declaring no effort: inherits the session's level (replacing the earlier 'stays at the model default').",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": false,
+      "severity": "major",
+      "checked": "THE SESSION LEVEL WAS xhigh IN ALL 20 DELEGATE RUNS — 16 via --agents, 4 via frontmatter. A variable held constant across every row cannot be the one the matrix attributes the outcome to. As published, 'plain delegate 400s quoting xhigh' is exactly as consistent with 'the ad-hoc delegate default is xhigh' as with inheritance; the 400 tells you the delegate's level, not where that level came from. Note the direction of the error: the claim it REPLACED ('stays at the model default') did vary the parent session (low vs xhigh) and merely had a weak oracle. v1.19.3 swapped a varied-but-weak measurement for a strong-but-unvaried one and inverted the conclusion. This is the same class of defect as v1.19.0 ('a matrix that never varies the variable proves nothing, confidently') and v1.19.1, in a third form.",
+      "resolution": "I ran the missing arm (CTL-1): session --effort high + plain-searcher -> 2/2 RESULTS=7, zero rejections, delegate on claude-opus-5. That refutes the fixed-default alternative and confirms inheritance. The conclusion is correct; it was shipped without the control that establishes it.",
+      "correction": "Add the varied-session control to the bullet, e.g.: 'from an xhigh session a delegate declaring nothing fails 2/2 quoting xhigh; from a `high` session the same delegate searches 2/2 — the delegate's level tracks the session's.' Cite ctl-plainhigh-*.jsonl. Without it the file asserts a causal direction its matrix structurally cannot show."
+    },
+    {
+      "id": "C9",
+      "location": "native-capabilities.md delegate matrix — the column header 'agent frontmatter'",
+      "claim": "The 7-row matrix describes what an agent's YAML frontmatter must declare.",
+      "verdict": "refuted",
+      "evidence_sufficient_as_published": false,
+      "severity": "moderate",
+      "checked": "5 of the 7 rows were measured through --agents programmatic JSON (run-agent.sh / run-agent-env.sh + agents.json), never through frontmatter: `model: claude-sonnet-5`, `effort: xhigh`, narrowed `tools:`, and both CLAUDE_CODE_EFFORT_LEVEL rows. Only rows 1 (`effort: high`) and 3 (nothing declared) have frontmatter evidence, added in v1.19.4. The column header asserts frontmatter for all 7.",
+      "correction": "Relabel the column 'agent definition' and annotate per row which load path was measured — or re-run the remaining rows on frontmatter. I closed one of the five (see C11): the env x frontmatter arm now has direct evidence. Four rows remain --agents-only: `model: claude-sonnet-5`, `effort: xhigh`, narrowed `tools:`, and env x `model:` pin."
+    },
+    {
+      "id": "C10",
+      "location": "CHANGELOG 1.19.4, Fixed: 'The v1.19.3 spawn rule is now verified on the path it prescribes.'",
+      "claim": "The gap between --agents and frontmatter has been closed.",
+      "verdict": "refuted",
+      "evidence_sufficient_as_published": false,
+      "severity": "moderate",
+      "checked": "fm-high/fm-plain re-verify 2 of the matrix's 7 rows. The release announces the path gap as closed while 5 rows — including the env caveat that harness-discipline.md states in frontmatter terms ('frontmatter effort: cannot lower it') — remained on the other path. The bullet's own body is accurate about what it ran ('effort: high searched 2/2, an agent declaring nothing failed 2/2'); the headline generalises from 2 rows to 'the spawn rule'.",
+      "correction": "Reword to what was measured: 'The two effort rows of the v1.19.3 spawn rule are now verified on the frontmatter path; the model-pin, narrowed-tools and env rows remain measured through --agents.' Given C11, the env x `effort:` row can now be listed as frontmatter-verified too."
+    },
+    {
+      "id": "C11",
+      "location": "harness-discipline.md: 'Where the session level arrives through CLAUDE_CODE_EFFORT_LEVEL, frontmatter effort: cannot lower it — only the model pin survives'; native-capabilities.md same",
+      "claim": "An env-pinned level outranks agent frontmatter effort:.",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": false,
+      "checked": "As published the only evidence is agenv-envhigh-* — measured through --agents JSON, while the sentence says 'frontmatter'. Same defect as C9/C10, in the prescriptive file this time.",
+      "resolution": "I ran it on the prescribed path (CTL-2): CLAUDE_CODE_EFFORT_LEVEL=xhigh + .claude/agents/fm-high.md carrying `effort: high` -> 2/2 RESULTS=ERROR, 400 quoting 'xhigh', WS=1, subagent_type=fm-high. The caveat holds on frontmatter.",
+      "correction": "Cite ctl-fmenvhigh-*.jsonl so the sentence rests on the path it names. The counterpart half — 'only the model pin survives' under env — is still --agents-only (agenv-envsonnet); either hedge it or run the 2-run frontmatter arm."
+    },
+    {
+      "id": "C12",
+      "location": "native-capabilities.md, CLAUDE_EFFORT bullet",
+      "claim": "Re-measured it tracked correctly — high, xhigh and max each read back as set, from effortLevel in settings and from the --effort flag.",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": false,
+      "checked": "Re-derived: high from flag (ctlhigh) yes; xhigh from settings (base, 1m) yes; max from flag (ultra) yes. But the sentence claims the cross-product. xhigh-from-flag is confounded (settings pins xhigh — see C3); high-from-settings and max-from-settings were never run. 3 of 6 cells measured.",
+      "correction": "State the cells actually run: 'high via the flag, xhigh via settings, max via the flag — each read back as set and each matching the tier the 400 quotes.'"
+    },
+    {
+      "id": "C13",
+      "location": "native-capabilities.md, CLAUDE_EFFORT bullet: 'What it still does not report is a delegate's level: inside a subagent pinned by frontmatter it read the parent's, while behavior differed 4-5x in token spend'",
+      "claim": "CLAUDE_EFFORT read inside a delegate returns the parent's level.",
+      "verdict": "stands_unverified",
+      "evidence_sufficient_as_published": false,
+      "severity": "moderate",
+      "checked": "NO run in the evidence set reads CLAUDE_EFFORT inside a delegate. The `printenv CLAUDE_EFFORT` step in every delegate prompt executes in the MAIN thread (run-agent.sh asks the orchestrator to run it, and the agents.json delegates carry no Bash at all — sonnet/inherit/plain/xhigh-searcher declare tools:[WebSearch] only, so they physically cannot run printenv). The EFFORT=xhigh in those transcripts is the session's, not the delegate's. The supporting '4-5x token spend' is the oracle this same bullet-block deprecates, from the measurement generation whose method the file disavows.",
+      "correction": "Either hedge ('not re-measured; the earlier reading rested on the token oracle') or run it: give a delegate tools:[WebSearch, Bash], have it print CLAUDE_EFFORT itself, and compare against the tier its own 400 quotes — the 400 gives you an independent reading of the delegate's real level, which is exactly the discriminating oracle this claim needs."
+    },
+    {
+      "id": "C14",
+      "location": "native-capabilities.md: 'ultracode resolves to xhigh, so it inherits the failure — not re-measured separately'",
+      "claim": "ultracode == xhigh, therefore the v1.19.1 'ultracode ok 0/2' green is void.",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": false,
+      "checked": "No run supports it — and it reverses a previously PUBLISHED green row by inference alone, which the file's own new Method rule forbids. I settled it independently (CTL-3): the 2.1.220 binary states 'Enable ultracode for the session: xhigh effort plus standing dynamic-workflow orchestration', '- ultracode: xhigh + dynamic workflow orchestration (this session only)', 'Ultracode runs at xhigh effort'. The premise is correct.",
+      "correction": "Cite the binary string as the source, so the inference rests on a stated oracle rather than on assertion."
+    },
+    {
+      "id": "C15",
+      "location": "native-capabilities.md: 'the binary describes it as the active level for the current turn after any silent downgrade for the selected model'",
+      "claim": "Quotation from the binary.",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": true,
+      "checked": "Verbatim match in 2.1.220 via strings: 'Active effort level for the current turn (e.g., \"low\", \"medium\", \"high\", \"xhigh\", \"max\"), after any silent downgrade for the selected model. Also exposed to hook commands and Bash as the CLAUDE_EFFORT env var.'"
+    },
+    {
+      "id": "C16",
+      "location": "harness-discipline.md, Subagents §, tool bullet",
+      "claim": "Narrowing tools: without listing WebSearch removes it outright — the delegate does not error, it reports having no such tool. The allowlist is asymmetric.",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": true,
+      "checked": "ag-narrow-1/2: WS=0 (the tool was never invoked — this is a real negative control, not an absence of error), SUB=RESULTS=NOTOOL verbatim, delegate ran on sonnet-5. The 'does not error' half is directly observed. Measured via --agents array rather than the frontmatter comma-string (see C9), but the frontmatter arm corroborates the positive direction: fm-high/fm-plain declare `tools: WebSearch` and did get the tool."
+    },
+    {
+      "id": "C17",
+      "location": "harness-discipline.md: 'For a built-in delegate (general-purpose) there is no frontmatter to edit — the Agent tool's per-call model override is the same escape, since the ceiling is the model's.'",
+      "claim": "Per-call model override on the Agent tool restores WebSearch for a built-in delegate.",
+      "verdict": "stands_unverified",
+      "evidence_sufficient_as_published": false,
+      "checked": "No run uses general-purpose or the Agent tool's per-call model parameter. It is an inference from C5 (the ceiling is model-bound) plus the existence of the parameter. The parameter does exist. But the Agent tool's own description carves out an exception the prescription does not mention: 'Ignored for subagent_type: \"fork\" — forks always inherit the parent model', so the escape is not universal across delegate kinds.",
+      "correction": "Mark it as inferred rather than measured, and note the fork exception. Cheap to settle: 2 runs spawning general-purpose with and without model=sonnet from an xhigh session, same 400 oracle."
+    },
+    {
+      "id": "C18",
+      "location": "native-capabilities.md: 'WebFetch is unaffected throughout.'",
+      "claim": "WebFetch worked across these matrices.",
+      "verdict": "refuted_as_stated",
+      "evidence_sufficient_as_published": false,
+      "checked": "ZERO runs in the entire evidence set call WebFetch — every prompt forbids it ('Не используй WebFetch'), and I confirmed no jsonl contains a WebFetch tool call. The previous wording attributed this to the upstream thread ('unaffected, as the thread reports'); the rewrite drops the attribution and 'throughout' now reads as observed in these matrices.",
+      "correction": "Restore the attribution ('as the upstream thread reports') or measure it. Do not let a carried-over third-party report inherit the credibility of a matrix it was not part of."
+    },
+    {
+      "id": "C19",
+      "location": "agents/{evidence-executor,process-auditor,code-refuter}.md — effort: xhigh; CHANGELOG 1.19.4 Changed",
+      "claim": "Safe at this tier because none of the three carries WebSearch in its tools: — the Opus 5 search ceiling does not reach them.",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": true,
+      "checked": "All three declare `tools: Read, Grep, Glob, Bash, Write` — no WebSearch, no WebFetch, no other server tool. The 400 is a server-tool sub-request failure, so it cannot reach them. Confirmed against the shipped frontmatter."
+    },
+    {
+      "id": "C20",
+      "location": "CHANGELOG 1.19.4 rationale: '/external-audit launched from a shallow session produced a shallow audit, silently'",
+      "claim": "Motivation for pinning effort: xhigh on the three roles.",
+      "verdict": "stands",
+      "evidence_sufficient_as_published": false,
+      "checked": "Depends entirely on C8, which as published did not establish inheritance. At ship time the stated motivation rested on an unestablished causal claim. My CTL-1 confirms inheritance, so the rationale is now sound. Note the change is harmless under either hypothesis — declaring the level makes depth deterministic regardless of which mechanism holds — so no rollback is warranted.",
+      "correction": "None to the change. The CHANGELOG sentence becomes supportable once C8 carries the varied-session control."
+    },
+    {
+      "id": "C21",
+      "location": "plugins/harness/agents/*.md — the load path of the shipped change",
+      "claim": "(implicit) effort: xhigh in a PLUGIN agent's frontmatter takes effect.",
+      "verdict": "stands_unverified",
+      "evidence_sufficient_as_published": false,
+      "checked": "The only measured frontmatter path is a project's .claude/agents/*.md (fmproj). The shipped agents load through the plugin mechanism. The Agent tool's own description enumerates the sources as '.claude/agents/*.md frontmatter or SDK agents' and does not name plugin agents. Almost certainly the same parser — but by this release's own standard (a different load path is a different path, which is the entire premise of v1.19.4) it is unverified for the exact files being changed.",
+      "correction": "2-run probe: a temporary plugin agent with tools: WebSearch + effort: high spawned from an xhigh session; clean search proves the plugin path honours effort:. Low risk, but it is the one path the release actually shipped a change on."
+    },
+    {
+      "id": "C22",
+      "location": ".claude/skills/release/SKILL.md step B3.5 (dev-harness commit 3ff5002): 'Зелёный — приложи артефакт в .claude/audits/'",
+      "claim": "(process) The refuter artifact is retained as part of the repo's evidence trail.",
+      "verdict": "refuted",
+      "evidence_sufficient_as_published": false,
+      "severity": "moderate",
+      "checked": ".gitignore runs in whitelist mode: line 20 `/.claude/*` ignores everything under .claude/ except CLAUDE.md, DEMO.md, devlog/ and skills/. `git check-ignore -v .claude/audits/<...>` matches .gitignore:20 — this very file cannot be committed. The new step instructs an operator to file evidence into a directory git silently discards, so the artifact vanishes at the next clone and the trail the step exists to create is never created.",
+      "correction": "Add `!/.claude/audits/` to .gitignore, or point B3.5 at a tracked location. Mechanical fix, one line — and it matters precisely because this is the step meant to survive context loss."
+    }
+  ],
+
+  "not_in_dispute": [
+    "All published run counts (12/12, 20+4 tier quotes, 0/8, 3/3, 2/2, 4/4) re-derive exactly from the raw JSONL.",
+    "The WebSearch-was-called control is genuinely present in every run of the 2026-07-26 matrices — the negative-result trap from v1.19.1 is closed.",
+    "The 'ultra' label is --effort max, not ultracode; the shipped table attributes it correctly despite the misleading filename.",
+    "ag-pilot-1 is a legitimate third sonnet-searcher run (subagent_type confirmed), so the 3/3 is not padded.",
+    "CLAUDE_CODE_EFFORT_LEVEL was genuinely absent from the non-env runs — no env-block key in ~/.claude/settings.json and the flag/settings precedence control corroborates it. The v1.19.2 reversal of v1.19.1 is sound.",
+    "Delegate-model controls rule out silent model substitution in both the green and red arms."
+  ],
+
+  "required_corrections_ranked": [
+    "1. C8 — add the varied-session control (ctl-plainhigh-*.jsonl) to the inheritance bullet. Highest priority: the claim is correct but shipped on a matrix that structurally could not show it, in a file already wrong twice for adjacent reasons.",
+    "2. C10 / C9 — stop claiming the path gap is closed; annotate per-row which load path each matrix row was measured on. 4 rows remain --agents-only after my CTL-2.",
+    "3. C22 — one line in .gitignore, or the new refuter step produces artifacts git throws away.",
+    "4. C2 — name claude-opus-5[1m] in the `high` control row.",
+    "5. C18, C6, C13, C17 — downgrade four sentences from asserted-as-measured to inferred/attributed, or measure them.",
+    "6. C3, C4, C12, C14 — mark the confounded row, scope the 'no row rests on an assumed level' sentence to the 12 re-measured runs, state the CLAUDE_EFFORT cells actually run, cite the binary for ultracode."
+  ]
+}

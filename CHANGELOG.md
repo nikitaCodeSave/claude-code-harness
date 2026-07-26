@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.19.5] — 2026-07-26
+
+**First run of the new refuter step, and it caught the file shipping right conclusions on
+insufficient evidence.** A fresh-context adversarial pass over v1.19.2–v1.19.4 re-derived every
+published number from the raw run logs (all reproduced) and an independent executor re-ran the
+stack from scratch on its own harness (all four headline claims confirmed). What did not survive
+was the bookkeeping: two claims refuted as stated, ten needing correction, zero wrong runtime
+conclusions. The gaps were then measured rather than hedged — 16 further runs.
+
+### Fixed
+
+- **The delegate matrix is now measured on the path it prescribes.** All seven rows re-run
+  through YAML frontmatter in `.claude/agents/*.md`; previously five were measured through
+  `--agents` (programmatic definitions) while the column was headed "agent frontmatter". Both
+  paths give identical outcomes, and a plugin-shipped agent honours `effort:` too (2/2) — the
+  load path v1.19.4 actually changed.
+- **"A delegate inherits the session's level" now has the discriminating control.** As published
+  it held the session at `xhigh` in every row, so it could not tell inheritance from a fixed
+  default. Varying the session settles it: the same undeclared delegate fails 2/2 from `xhigh`
+  and searches 2/2 from `high`.
+- **`CLAUDE_EFFORT` inside a delegate reports the *delegate's* level, not the parent's.** An
+  agent pinned `effort: high` inside an `xhigh` session read back `high` and searched, 2/2. The
+  previous claim rested on token spend.
+- **The built-in-delegate escape is measured, not inferred.** `general-purpose` spawned plainly
+  from an `xhigh` session failed 2/2; with `model: sonnet` on the Agent call it searched 2/2.
+- **Sonnet 5 / Fable 5 narrowed to what was run** — `xhigh` and `max`, not "every effort level".
+- **The `--effort xhigh` session row is marked confounded** (settings said `xhigh` too).
+  Mechanism independence is carried by the two unconfounded flag rows, `--effort high` overriding
+  settings downward and `--effort max` overriding it upward — now said explicitly.
+- **`ultracode` = `xhigh` now cites its oracle** (first-party strings in the 2.1.220 binary),
+  and **`WebFetch` regains its attribution** to the upstream thread rather than borrowing the
+  credibility of a matrix it was never part of.
+- **`.gitignore`: `.claude/audits/` un-ignored.** The refuter step added in the release ritual
+  told the operator to file evidence into a directory git silently discarded — the artifact would
+  have vanished at the next clone.
+
+### Changed
+
+- **Method warning gains a fourth rule and a third cautionary round:** vary the variable the
+  conclusion names. Recorded plainly that what caught this round was a fresh-context refuter and
+  not a further self-review — the author had already re-read the same diff and passed it.
+
+Not touched: every runtime conclusion from v1.19.2–v1.19.4 — the audit confirmed all of them;
+`defaultMode`; grounding stamps; `references/project-docs/*.md`.
+
 ## [1.19.4] — 2026-07-26
 
 **An audit whose depth depends on whoever launched it is not a reliable verifier.** The three

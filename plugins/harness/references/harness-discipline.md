@@ -102,9 +102,9 @@ both measured (`native-capabilities.md`, Effort §):
 - **The effort tier.** On Opus 5, `xhigh`/`max` kill `WebSearch`, and a delegate that declares
   no `effort:` inherits the session's level. From a deep session, give a research delegate
   either `effort: high` (or below, keeping the session model) or `model: claude-sonnet-5` /
-  `claude-fable-5`, which carry no such ceiling at any level. Where the session level arrives
-  through `CLAUDE_CODE_EFFORT_LEVEL`, frontmatter `effort:` cannot lower it — only the model pin
-  survives.
+  `claude-fable-5`, which keep search at `xhigh` and `max` — the two tiers that break Opus 5.
+  Where the session level arrives through `CLAUDE_CODE_EFFORT_LEVEL`, frontmatter `effort:`
+  cannot lower it — only the model pin survives. Both halves measured on the frontmatter path.
 
 ```yaml
 ---
@@ -116,7 +116,8 @@ model: claude-sonnet-5     # or drop this line and use: effort: high
 ```
 
 For a **built-in** delegate (`general-purpose`) there is no frontmatter to edit — the Agent
-tool's per-call `model` override is the same escape, since the ceiling is the model's.
+tool's per-call `model` override is the escape, and it is measured: spawned plainly from an
+`xhigh` session it failed 2/2; with `model: sonnet` on the call it searched 2/2.
 
 ## Single-agent first; bounded fan-out only when scope exceeds one context
 

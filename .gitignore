@@ -22,6 +22,7 @@
 !/.claude/DEMO.md
 !/.claude/devlog/
 !/.claude/skills/
+!/.claude/audits/
 
 # Never track even inside whitelisted dirs
 .credentials.json

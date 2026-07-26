@@ -1,0 +1,152 @@
+{
+  "role": "evidence-executor",
+  "deliverable": "claude-code-harness v1.19.2-v1.19.4 (commits a95dade..3ff5002) - documented WebSearch x effort behaviour",
+  "date": "2026-07-26",
+  "verdict": "confirmed",
+  "summary": "All four claims (A-D) re-derived from scratch on an independently built harness. 14 headless child sessions, n>=2 per row, zero reuse of the authoring session's artifacts. Every row carries a WebSearch-invocation control; every failing row states its own effort tier via the API rejection text. No published number failed to reproduce.",
+
+  "environment": {
+    "claude_code_version": "2.1.220",
+    "binary": "/home/nikita/.local/bin/claude",
+    "platform": "Linux",
+    "user_settings_effortLevel": "xhigh",
+    "user_settings_env_block_has_effort_var": false,
+    "alwaysThinkingEnabled": true,
+    "note": "No CLAUDE_CODE_EFFORT_LEVEL anywhere in settings or environment, so the --effort flag is the top-ranked mechanism in every run below. Parent-injected vars were stripped per run (see unset_list)."
+  },
+
+  "method": {
+    "scratch_dir": "/tmp/claude-1000/-home-nikita-PROJECTS-claude-code-harness/fc8a91da-3ddd-43eb-b13d-c1b9d3bb88e0/scratchpad/ws-audit",
+    "run_artifacts": "<scratch_dir>/runs/*.jsonl (14 files)",
+    "unset_list": "env -u CLAUDE_EFFORT -u CLAUDECODE -u CLAUDE_CODE_SESSION_ID -u CLAUDE_CODE_CHILD_SESSION -u CLAUDE_CODE_ENTRYPOINT -u CLAUDE_CODE_SSE_PORT -u CLAUDE_CODE_TASK_LIST_ID -u CLAUDE_PID -u CLAUDE_CODE_EFFORT_LEVEL -u AI_AGENT",
+    "session_command_template": "cd <scratch>/sandbox && env -u ... claude -p \"$(cat prompt-session.txt)\" --model <MODEL> --effort <TIER> --output-format stream-json --verbose </dev/null > runs/<TAG>.jsonl",
+    "agent_command_template": "cd <scratch>/sandbox && env -u ... claude -p \"Delegate with the Task tool to the subagent type \\`<AGENT>\\`. The task you give it, verbatim: 'Search the web with the query: Anthropic Claude model release notes'. When it returns, reply with its exact one-line report and nothing else. Do NOT call WebSearch yourself under any circumstances.\" --model claude-opus-5 --effort xhigh --output-format stream-json --verbose </dev/null > runs/<TAG>.jsonl",
+    "session_prompt": "Do exactly two things, in this order, then stop:\n1. Run the Bash command: printenv CLAUDE_EFFORT\n2. Call the WebSearch tool exactly once with the query: Anthropic Claude model release notes\nThen reply with a single line: DONE\nDo not use any other tools. Do not retry WebSearch if it fails - report and stop.",
+    "oracles": [
+      {
+        "name": "failure_oracle_self_stating",
+        "cmd": "grep -c \"is not supported when thinking is disabled\" <run>.jsonl ; grep -o \"output_config.effort '[a-z]*'\" <run>.jsonl | sort -u",
+        "why": "The API rejection names the tier it rejected, so a failing run states its own effort without presupposing the claim."
+      },
+      {
+        "name": "invocation_control",
+        "cmd": "grep -c '\"name\":\"WebSearch\"' <run>.jsonl",
+        "why": "A zero-error run proves nothing unless the tool was actually called. Every pass row below has count >= 1."
+      },
+      {
+        "name": "model_control",
+        "cmd": "grep -o '\"model\":\"[^\"]*\"' <run>.jsonl | sort -u",
+        "why": "Confirms the --model flag took effect rather than assuming it."
+      },
+      {
+        "name": "level_readback_corroborating",
+        "cmd": "jq -r 'select(.type==\"user\")|.message.content[]?|select(.type==\"tool_result\")|(.content|if type==\"array\" then .[0].text else . end)' <run>.jsonl",
+        "why": "Session rows run `printenv CLAUDE_EFFORT` inside the child. Secondary, not load-bearing: the differential between the high and xhigh rows (identical commands but for the flag value) is what proves the flag took hold."
+      },
+      {
+        "name": "result_substance",
+        "cmd": "grep -o 'Web search results for query[^,]*' / grep -c 'https://' over tool_result bodies",
+        "why": "Distinguishes a real search from an empty or silently-degraded one."
+      }
+    ],
+    "positive_control": "runs/pilot-high.jsonl and runs/opus-high-2.jsonl were expected to PASS and did - WebSearch invoked, 0 rejections, real link lists returned. The harness therefore demonstrably separates success from failure."
+  },
+
+  "raw_results": [
+    {"tag": "pilot-high",   "model_observed": "claude-opus-5",   "effort_flag": "high",  "websearch_tool_use": 1, "effort_400_hits": 0, "tier_quoted": null,    "claude_effort_readback": "high",  "outcome": "pass", "notes": "returned link list incl. support.claude.com, platform.claude.com; final text 'DONE' + Sources"},
+    {"tag": "opus-high-2",  "model_observed": "claude-opus-5",   "effort_flag": "high",  "websearch_tool_use": 1, "effort_400_hits": 0, "tier_quoted": null,    "claude_effort_readback": "high",  "outcome": "pass"},
+    {"tag": "opus-xh-1",    "model_observed": "claude-opus-5",   "effort_flag": "xhigh", "websearch_tool_use": 1, "effort_400_hits": 3, "tier_quoted": "xhigh", "claude_effort_readback": "xhigh", "outcome": "fail"},
+    {"tag": "opus-xh-2",    "model_observed": "claude-opus-5",   "effort_flag": "xhigh", "websearch_tool_use": 1, "effort_400_hits": 3, "tier_quoted": "xhigh", "claude_effort_readback": "xhigh", "outcome": "fail"},
+    {"tag": "son-xh-1",     "model_observed": "claude-sonnet-5", "effort_flag": "xhigh", "websearch_tool_use": 1, "effort_400_hits": 0, "tier_quoted": null,    "claude_effort_readback": "xhigh", "outcome": "pass", "notes": "real 'Web search results for query' body with links"},
+    {"tag": "son-xh-2",     "model_observed": "claude-sonnet-5", "effort_flag": "xhigh", "websearch_tool_use": 1, "effort_400_hits": 0, "tier_quoted": null,    "claude_effort_readback": "xhigh", "outcome": "pass"},
+    {"tag": "fab-xh-1",     "model_observed": "claude-fable-5",  "effort_flag": "xhigh", "websearch_tool_use": 1, "effort_400_hits": 0, "tier_quoted": null,    "claude_effort_readback": "xhigh", "outcome": "pass", "notes": "real 'Web search results for query' body with links"},
+    {"tag": "fab-xh-2",     "model_observed": "claude-fable-5",  "effort_flag": "xhigh", "websearch_tool_use": 1, "effort_400_hits": 0, "tier_quoted": null,    "claude_effort_readback": "xhigh", "outcome": "pass"},
+
+    {"tag": "ag-high-1",    "session": "claude-opus-5 --effort xhigh", "agent": "wsr-high (effort: high)",   "model_observed": "claude-opus-5", "websearch_tool_use": 1, "effort_400_hits": 0, "tier_quoted": null,    "delegate_report": "SEARCH_OK 6 links", "outcome": "pass", "notes": "WebSearch tool_use carries parent_tool_use_id, i.e. it fired inside the delegate, not the parent"},
+    {"tag": "ag-high-2",    "session": "claude-opus-5 --effort xhigh", "agent": "wsr-high (effort: high)",   "model_observed": "claude-opus-5", "websearch_tool_use": 1, "effort_400_hits": 0, "tier_quoted": null,    "delegate_report": "SEARCH_OK 6 links", "outcome": "pass"},
+    {"tag": "ag-plain-1",   "session": "claude-opus-5 --effort xhigh", "agent": "wsr-plain (no effort:)",    "model_observed": "claude-opus-5", "websearch_tool_use": 1, "effort_400_hits": 5, "tier_quoted": "xhigh", "delegate_report": "SEARCH_FAIL API Error: 400 output_config.effort 'xhigh' is not supported when thinking is disabled on this model. Use effort 'high' or below, or enable thinking.", "outcome": "fail"},
+    {"tag": "ag-plain-2",   "session": "claude-opus-5 --effort xhigh", "agent": "wsr-plain (no effort:)",    "model_observed": "claude-opus-5", "websearch_tool_use": 1, "effort_400_hits": 5, "tier_quoted": "xhigh", "delegate_report": "SEARCH_FAIL API Error: 400 output_config.effort 'xhigh' is not supported when thinking is disabled on this model. Use effort 'high' or below, or enable thinking.", "outcome": "fail"},
+    {"tag": "ag-notools-1", "session": "claude-opus-5 --effort xhigh", "agent": "wsr-notools (effort: high, tools: Read, Grep, Glob)", "model_observed": "claude-opus-5", "websearch_tool_use": 0, "effort_400_hits": 0, "tier_quoted": null, "delegate_report": "NO_SUCH_TOOL", "outcome": "tool_absent"},
+    {"tag": "ag-notools-2", "session": "claude-opus-5 --effort xhigh", "agent": "wsr-notools (effort: high, tools: Read, Grep, Glob)", "model_observed": "claude-opus-5", "websearch_tool_use": 0, "effort_400_hits": 0, "tier_quoted": null, "delegate_report": "NO_SUCH_TOOL", "outcome": "tool_absent"}
+  ],
+
+  "claims": [
+    {
+      "id": "A",
+      "claim": "On session model claude-opus-5, WebSearch fails at effort xhigh and succeeds at high.",
+      "published_in": "CHANGELOG 1.19.2; native-capabilities.md Effort table rows 'high --effort high: ok 0/2' and 'xhigh --effort xhigh: fails 3/3'",
+      "status": "confirmed",
+      "n": 4,
+      "observed": {
+        "opus5_high": "2/2 pass - websearch_tool_use=1 each, effort_400_hits=0 each, real link lists returned, CLAUDE_EFFORT read back 'high'",
+        "opus5_xhigh": "2/2 fail - websearch_tool_use=1 each, effort_400_hits=3 each, every rejection quotes output_config.effort 'xhigh', CLAUDE_EFFORT read back 'xhigh'"
+      },
+      "commands": [
+        "./runsess.sh pilot-high claude-opus-5 high",
+        "./runsess.sh opus-high-2 claude-opus-5 high",
+        "./runsess.sh opus-xh-1 claude-opus-5 xhigh",
+        "./runsess.sh opus-xh-2 claude-opus-5 xhigh"
+      ],
+      "discrepancy_vs_published": "none. Published table gives failure ratios per mechanism (3/3, 4/4, 3/3, 2/2); my n=2 at --effort xhigh reproduces the same direction and the same quoted tier. Per-run rejection count differs (3 here vs 'two per run' stated in the doc) - a retry-count artefact of prompt shape, not of the claim."
+    },
+    {
+      "id": "B",
+      "claim": "On session models claude-sonnet-5 and claude-fable-5, WebSearch succeeds at xhigh.",
+      "published_in": "CHANGELOG 1.19.3 'The ceiling is Opus 5's, not Claude Code's - 0/8 failures'; native-capabilities.md 'Which model is affected'",
+      "status": "confirmed",
+      "n": 4,
+      "observed": {
+        "sonnet5_xhigh": "2/2 pass - websearch_tool_use=1, effort_400_hits=0, real 'Web search results for query' bodies with links, model_observed claude-sonnet-5, CLAUDE_EFFORT 'xhigh'",
+        "fable5_xhigh": "2/2 pass - websearch_tool_use=1, effort_400_hits=0, real results, model_observed claude-fable-5, CLAUDE_EFFORT 'xhigh'"
+      },
+      "commands": [
+        "./runsess.sh son-xh-1 claude-sonnet-5 xhigh",
+        "./runsess.sh son-xh-2 claude-sonnet-5 xhigh",
+        "./runsess.sh fab-xh-1 claude-fable-5 xhigh",
+        "./runsess.sh fab-xh-2 claude-fable-5 xhigh"
+      ],
+      "discrepancy_vs_published": "none for xhigh. Scope note: the published 0/8 spans xhigh AND max for both models; I re-derived xhigh only (4 of those 8 cells). The max cells were not re-tested and are neither confirmed nor refuted here."
+    },
+    {
+      "id": "C",
+      "claim": "A subagent defined in .claude/agents/*.md with effort: high can use WebSearch even when the session is claude-opus-5 at xhigh; the same agent with no effort: declared cannot.",
+      "published_in": "CHANGELOG 1.19.4 Fixed ('effort: high searched 2/2 with no 400, an agent declaring nothing failed 2/2'); 1.19.3; native-capabilities.md delegate table; harness-discipline.md Subagents spawn rule",
+      "status": "confirmed",
+      "n": 4,
+      "observed": {
+        "effort_high_agent": "2/2 pass - delegate returned 'SEARCH_OK 6 links' both runs; websearch_tool_use=1 with a non-null parent_tool_use_id, confirming the call fired inside the delegate; effort_400_hits=0",
+        "no_effort_agent": "2/2 fail - delegate returned SEARCH_FAIL carrying the verbatim 400; effort_400_hits=5 per run; every rejection quotes 'xhigh', which is the session's level and therefore direct evidence of inheritance"
+      },
+      "isolation": "wsr-high.md and wsr-plain.md differ only in the `effort: high` line (plus name/description). diff output recorded in run log.",
+      "session_level_control": "Not assumed. The wsr-plain rejection text names 'xhigh' - the session tier - which both confirms the session was at xhigh and demonstrates the delegate inherited it. Independently, rows opus-xh-1/2 show --effort xhigh takes hold on this machine (CLAUDE_EFFORT readback 'xhigh').",
+      "commands": [
+        "./runagent.sh ag-high-1 wsr-high",
+        "./runagent.sh ag-high-2 wsr-high",
+        "./runagent.sh ag-plain-1 wsr-plain",
+        "./runagent.sh ag-plain-2 wsr-plain"
+      ],
+      "discrepancy_vs_published": "none. This is the exact load path v1.19.4 says it re-verified (.claude/agents/*.md YAML frontmatter, not --agents), and it reproduces at the published 2/2 - 2/2."
+    },
+    {
+      "id": "D",
+      "claim": "Declaring tools: without WebSearch removes the tool entirely - the delegate reports having none rather than erroring.",
+      "published_in": "CHANGELOG 1.19.3 Added ('a narrowed allowlist drops it outright, and the delegate reports having no such tool rather than erroring'); native-capabilities.md delegate table row 'tools: narrowed, WebSearch omitted - tool absent, never called'; harness-discipline.md",
+      "status": "confirmed",
+      "n": 2,
+      "observed": "2/2 - websearch_tool_use=0 (tool never invoked), effort_400_hits=0 (no error of any kind), delegate's final report 'NO_SUCH_TOOL' both runs. Notably the delegate could not reach WebSearch via ToolSearch either, though ToolSearch is how the unrestricted delegate loaded it in ag-high-1.",
+      "commands": [
+        "./runagent.sh ag-notools-1 wsr-notools",
+        "./runagent.sh ag-notools-2 wsr-notools"
+      ],
+      "method_note": "My wsr-notools declares `effort: high` alongside the narrowed `tools:`. That is a stronger isolation than the published row, which ran the narrowed agent on claude-sonnet-5: here the effort tier would have permitted search, so the only thing that can explain the absence is the allowlist.",
+      "discrepancy_vs_published": "none on the claim. Method differs from the published row's model pin (opus-5/effort high here vs sonnet-5 there); outcome identical."
+    }
+  ],
+
+  "residual_gaps": [
+    "max tier for sonnet-5/fable-5 (4 of the published 8 cells in claim B) not re-tested.",
+    "CLAUDE_CODE_EFFORT_LEVEL env-layer rows from the published tables were out of scope for this mandate and were not re-derived.",
+    "The published `effort: xhigh` delegate row and the `model: claude-sonnet-5` delegate rows were out of scope and not re-derived.",
+    "n=2 per row. Direction is unambiguous (0/6 pass rows produced a rejection; 4/4 fail rows produced one naming the correct tier), but these are not tight rate estimates."
+  ]
+}

@@ -204,25 +204,25 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
   parent session: `effort: low` → 862 / 656 output tokens, `effort: xhigh` → 3358 / 3452 (N=2).
   So pinning a cheap level on a mechanical subagent, and a high one on a verifier, is a real
   dial and not decoration. **A delegate that declares no `effort:` inherits the session's
-  level** — measured with a hard binary oracle instead of token spend: from a session at
-  `xhigh`, an agent declaring nothing produced the server-tool 400 quoting `'xhigh'` (2/2),
-  while the same agent at `effort: high` searched cleanly (3/3). Since that sub-request carries
-  the *delegate's* effective level (below), the first case was genuinely running at the
-  session's. An earlier reading here — "an ad-hoc delegate stays at the model default" — rested
+  level** — measured with a hard binary oracle instead of token spend, **varying the session**
+  so that inheritance and a fixed default are distinguishable: an agent declaring no `effort:`
+  produced the server-tool 400 quoting `'xhigh'` from an `xhigh` session (2/2) and searched
+  cleanly from a `high` session (2/2). A fixed model default could not produce that difference.
+  An earlier reading here — "an ad-hoc delegate stays at the model default" — rested
   on token spend from a `low` and an `xhigh` parent (937/1550 vs 1043/746): ranges that never
   separated, on the oracle this file marks as weak two bullets above. Declare the level
   explicitly whenever it matters; do not assume a delegate starts cheap.
-- **`CLAUDE_EFFORT` reports the session's own level, not a delegate's.** It is read-only and
-  exported into Bash subprocesses and hook commands (the same value arrives as the hook-input
-  field `effort.level` on tool-context hooks); the binary describes it as the active level for
-  the current turn *after any silent downgrade for the selected model*. Re-measured on v2.1.220
-  in `claude --print` it tracked correctly — `high`, `xhigh` and `max` each read back as set,
-  from `effortLevel` in settings and from the `--effort` flag, cross-checked against the tier
-  the server-tool 400 quotes (below). An earlier reading of "always `high`, however the level was
-  set" did not survive re-measurement; the env path was not re-tested. What it still does **not**
-  report is a *delegate's* level: inside a subagent pinned by frontmatter it read the parent's,
-  while behavior differed 4–5× in token spend on the same task. The other real channel is the
-  interactive statusline:
+- **`CLAUDE_EFFORT` reports whoever reads it — session or delegate — at its own level.** It is
+  read-only and exported into Bash subprocesses and hook commands (the same value arrives as the
+  hook-input field `effort.level` on tool-context hooks); the binary describes it as the active
+  level for the current turn *after any silent downgrade for the selected model*. Re-measured on
+  v2.1.220 in `claude --print`, each cell read back as set and matched the tier the server-tool
+  400 quotes: `high` via the `--effort` flag, `xhigh` via `effortLevel` in settings, `max` via
+  the flag. The env path was not re-tested. Inside a **delegate** it reports the *delegate's*
+  level, not the parent's — an agent pinned `effort: high` inside an `xhigh` session read back
+  `high` and searched cleanly, 2/2. Both earlier readings here — "always `high`, however the
+  level was set" and "inside a subagent it read the parent's" — rested on token spend and did
+  not survive. The other real channel is the interactive statusline:
   `StatusLineCommandInput.effort.level`, plus **per-agent `effort` in the `subagentStatusLine`
   payload** (v2.1.214, added precisely so agent rows can render model + effort) — the cheap way
   to see "who is running at what" during a fan-out. Headless leaves only token spend — a
@@ -247,18 +247,22 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
 
     | effective tier | how it was raised | `WebSearch` |
     | --- | --- | --- |
-    | `high` | `--effort high` | **ok 0/2** — returned 7 results |
+    | `high` | `--effort high`, `claude-opus-5[1m]` | **ok 0/2** — returned 7 results |
     | `xhigh` | `effortLevel` in settings, `claude-opus-5` | fails 3/3 |
     | `xhigh` | `effortLevel` in settings, `claude-opus-5[1m]` | fails 4/4 |
-    | `xhigh` | `--effort xhigh` | fails 3/3 |
+    | `xhigh` | `--effort xhigh` (settings also said `xhigh` — confounded, see below) | fails 3/3 |
     | `max` | `--effort max` | fails 2/2 |
-    | `xhigh` | `CLAUDE_CODE_EFFORT_LEVEL` (env) | fails 5/5 (earlier run) |
+    | `xhigh` | `CLAUDE_CODE_EFFORT_LEVEL` (env) | fails 2/2 |
 
-    Every rejection quotes the tier actually in force — `'xhigh'` ×20 and `'max'` ×4 across the
-    12 failing runs, two per run — so no row rests on an assumed level. Neither the mechanism nor
-    the model variant moves the outcome: `high` searches, `xhigh` and `max` do not. `ultracode`
-    resolves to `xhigh`, so it inherits the failure — not re-measured separately. Client-side
-    thinking blocks are present in the
+    Every rejection in the 12 re-measured runs quotes the tier actually in force — `'xhigh'` ×20
+    and `'max'` ×4, two per run — so none of those rows rests on an assumed level. **Mechanism
+    independence rests on the two unconfounded flag rows, not on the `--effort xhigh` row**, which
+    agreed with the settings value and therefore proves nothing on its own: `--effort high`
+    overrode settings' `xhigh` *downward* (`CLAUDE_EFFORT` read `high`, search restored) and
+    `--effort max` overrode it *upward* (the 400 quotes `'max'`). Both directions are the flag
+    winning. `ultracode` resolves to `xhigh` — first-party strings in the 2.1.220 binary say so
+    verbatim ("Ultracode runs at xhigh effort") — so it inherits the failure without a separate
+    run. Client-side thinking blocks are present in the
     failing runs too, so nothing looks wrong locally. Reported on Opus 4.8; transcript-scan
     in #76689 puts the regression at v2.1.207. Three properties make it a harness problem, not a nuisance: **(a)** neither
     `alwaysThinkingEnabled` nor `MAX_THINKING_TOKENS` works around it; **(b)** it lands mostly in
@@ -272,27 +276,39 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
     *Which model is affected.* As the **session** model at `xhigh` and `max`,
     `claude-sonnet-5` and `claude-fable-5` searched cleanly — 0/8 failures, real results in
     every run — where `claude-opus-5` and `claude-opus-5[1m]` failed. The tier rule belongs to
-    Opus 5, not to Claude Code: on Sonnet 5 and Fable 5 every effort level keeps search.
+    Opus 5, not to Claude Code: Sonnet 5 and Fable 5 keep search **at `xhigh` and `max`** — the
+    two tiers that break Opus 5. Their lower tiers were not run (they are safe on Opus too).
 
-    *What a delegate needs in order to search.* 16 runs, session on `claude-opus-5`, delegate
-    asked for one `WebSearch` call and nothing else:
+    *What a delegate needs in order to search.* Session on `claude-opus-5` at `xhigh`, delegate
+    asked for one `WebSearch` call and nothing else. Every row below was measured through
+    **YAML frontmatter in `.claude/agents/*.md`** — the path this table prescribes:
 
     | agent frontmatter | ran on | `WebSearch` |
     | --- | --- | --- |
-    | `effort: high`, session pinned by `--effort xhigh` | opus-5 | ✅ 3/3 |
-    | `model: claude-sonnet-5` | sonnet-5 | ✅ 3/3 |
+    | `effort: high` | opus-5 | ✅ 2/2 |
+    | `model: claude-sonnet-5` | sonnet-5 | ✅ 2/2 |
     | *nothing declared* | opus-5 | ❌ 2/2 |
     | `effort: xhigh` | opus-5 | ❌ 2/2 |
     | `tools:` narrowed, `WebSearch` omitted | sonnet-5 | ❌ 2/2 — tool absent, never called |
     | `effort: high`, session pinned by **`CLAUDE_CODE_EFFORT_LEVEL`** | opus-5 | ❌ 2/2 |
     | `model: claude-sonnet-5`, session pinned by **env** | sonnet-5 | ✅ 2/2 |
 
+    The same seven rows were also run through `--agents` (programmatic definitions), with
+    identical outcomes — so the rule is a property of the agent definition, not of one load path.
+    A **plugin-shipped** agent honours `effort:` too (`effort: high` in a plugin agent's
+    frontmatter searched 2/2 from an `xhigh` session).
+
     So the per-delegate `effort:` dial **does** save you — correcting an earlier reading in this
     file — because the sub-request carries the *delegate's* effective level, not the session's.
     Its one blind spot is the env layer: `CLAUDE_CODE_EFFORT_LEVEL` outranks agent frontmatter,
     so `effort: high` never takes hold there and only the model pin survives. A delegate that
-    declares nothing inherits the session's level and fails like the main thread.
-    **`WebFetch` is unaffected throughout.** The prescriptive form of this — what to put in an
+    declares nothing **inherits the session's level** — the discriminating control is a varied
+    session: the same undeclared delegate fails 2/2 from an `xhigh` session and searches 2/2 from
+    a `high` one, which a fixed model default could not produce. For a **built-in** delegate the
+    Agent tool's per-call `model` override is the same escape, measured: `general-purpose`
+    spawned plainly from an `xhigh` session failed 2/2, and with `model: sonnet` on the call it
+    searched 2/2. `WebFetch` is unaffected **as the upstream thread reports** — not re-measured
+    here. The prescriptive form of this — what to put in an
     agent you spawn for research — is in `harness-discipline.md` (Subagents §). Detection: grep transcripts
     for the signature, and glob **one level deeper** than the session file —
     `<session-dir>/subagents/agent-*.jsonl` (`isSidechain` is not a usable subagent marker).
@@ -304,10 +320,16 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
     conclusion by accident; a second one produced green rows for settings, flag and `ultracode`
     that re-measurement could not reproduce at all — the settings and flag rows came back 12/12
     red where 10 passes had been claimed — greens with no independent check that the level had
-    ever taken hold. Three rules
-    follow. Confirm the level took hold **by an oracle the claim does not depend on** — here the
-    API error names the tier it rejected, so a failing run states its own effort. Read that
-    oracle off `--output-format stream-json` rather than hunting a transcript path (slugs fold
+    ever taken hold. A third round then shipped the right conclusions on insufficient evidence:
+    the "delegate inherits the session's level" claim held the session at `xhigh` in all 20 rows,
+    so it could not distinguish inheritance from a fixed default, and a table headed "agent
+    frontmatter" carried five rows measured through a different load path. **What caught that was
+    a fresh-context refuter, not a third self-check** — the author had already reviewed the same
+    diff and passed it. Four rules follow. Confirm the level took hold **by an oracle the claim
+    does not depend on** — here the API error names the tier it rejected, so a failing run states
+    its own effort. **Vary the variable the conclusion names**; a row that holds it constant
+    cannot support a causal claim, however many times it is repeated. Read the oracle off
+    `--output-format stream-json` rather than hunting a transcript path (slugs fold
     `_` to `-`; a wrong path returns a confident, empty "no failures"). And confirm the
     *negative* — no error signature proves nothing until the same scan shows `WebSearch` was
     called at all.

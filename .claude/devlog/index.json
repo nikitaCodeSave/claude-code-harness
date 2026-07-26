@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-26T03:55:03Z",
-  "entry_count": 27,
+  "generated_at": "2026-07-26T04:38:16Z",
+  "entry_count": 28,
   "entries": [
     {
       "id": 1,
@@ -388,6 +388,22 @@
       "supersedes": null,
       "path": "entries/0027-glubina-audita-svoystvo-audita-a-ne-vyzyvayushchego.md",
       "preview": "v1.19.3 установила: делегат, не объявивший effort:, наследует уровень сессии. Три роли внешнего аудита — evidence-executor, process-auditor, code-refuter — ничего не объявляли. Значит /external-audit, запущенный из неглубокой сессии, давал неглубокий аудит, молча и с тем же…"
+    },
+    {
+      "id": 28,
+      "date": "2026-07-26",
+      "title": "Рефутер поймал верные выводы на недостаточных уликах",
+      "tags": [
+        "harness",
+        "evidence",
+        "bugfix",
+        "docs",
+        "adr"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0028-refuter-poymal-vernye-vyvody-na-nedostatochnykh-ulikakh.md",
+      "preview": "Первое применение шага B3.5, добавленного в release-ритуал часом раньше: две роли внешнего аудита свежим контекстом по релизам v1.19.2–v1.19.4. evidence-executor независимо переснял стек на собственном стенде (14 прогонов, ноль переиспользования артефактов автора) — все четыре…"
     }
   ]
 }

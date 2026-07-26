@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-26T03:36:07Z",
-  "entry_count": 26,
+  "generated_at": "2026-07-26T03:55:03Z",
+  "entry_count": 27,
   "entries": [
     {
       "id": 1,
@@ -373,6 +373,21 @@
       "supersedes": null,
       "path": "entries/0026-potolok-prinadlezhit-opus-5-delegat-vykhodit-iz-nego-sam.md",
       "preview": "v1.19.2 установила, что WebSearch ломает сам уровень, а не способ его задать. Оставался вопрос оператора: каких агентов создавать, чтобы у них поиск был? Ответить на него из v1.19.2 нельзя — она говорит «выше high поиска нет» и предлагает делегата на другой модели, не объясняя…"
+    },
+    {
+      "id": 27,
+      "date": "2026-07-26",
+      "title": "Глубина аудита — свойство аудита, а не вызывающего",
+      "tags": [
+        "harness",
+        "bugfix",
+        "evidence",
+        "config"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0027-glubina-audita-svoystvo-audita-a-ne-vyzyvayushchego.md",
+      "preview": "v1.19.3 установила: делегат, не объявивший effort:, наследует уровень сессии. Три роли внешнего аудита — evidence-executor, process-auditor, code-refuter — ничего не объявляли. Значит /external-audit, запущенный из неглубокой сессии, давал неглубокий аудит, молча и с тем же…"
     }
   ]
 }

@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #27 · 2026-07-26 · Глубина аудита — свойство аудита, а не вызывающего
+
+**Tags:** harness, bugfix, evidence, config
+
+v1.19.3 установила: делегат, не объявивший effort:, наследует уровень сессии. Три роли внешнего аудита — evidence-executor, process-auditor, code-refuter — ничего не объявляли. Значит /external-audit, запущенный из неглубокой сессии, давал неглубокий аудит, молча и с тем же…
+
+[→ entries/0027-glubina-audita-svoystvo-audita-a-ne-vyzyvayushchego.md](entries/0027-glubina-audita-svoystvo-audita-a-ne-vyzyvayushchego.md)
+
+---
+
 ## #26 · 2026-07-26 · Потолок принадлежит Opus 5: делегат выходит из него сам
 
 **Tags:** harness, evidence, feature, docs

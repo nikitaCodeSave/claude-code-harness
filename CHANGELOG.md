@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.19.4] — 2026-07-26
+
+**An audit whose depth depends on whoever launched it is not a reliable verifier.** The three
+external-audit roles declared no `effort:`, and v1.19.3 established that a delegate declaring
+none inherits the session's level — so `/external-audit` launched from a shallow session
+produced a shallow audit, silently, while reporting the same verdict shape.
+
+### Changed
+
+- **`evidence-executor`, `process-auditor` and `code-refuter` now declare `effort: xhigh`.**
+  These are verification roles where the expensive failure is a false negative, and declaring the
+  level makes depth a property of the audit rather than of the caller's settings. Safe at this
+  tier because none of the three carries `WebSearch` in its `tools:` — the Opus 5 search ceiling
+  does not reach them.
+
+### Fixed
+
+- **The v1.19.3 spawn rule is now verified on the path it prescribes.** That rule was measured
+  through `--agents` (programmatic definitions) but written up as YAML frontmatter — a different
+  load path. Re-run against `.claude/agents/*.md` from a session at `xhigh`: `effort: high`
+  searched 2/2 with no `400`, an agent declaring nothing failed 2/2. The prescription stands as
+  written; the gap was in the evidence, not in the rule.
+
 ## [1.19.3] — 2026-07-26
 
 **The `WebSearch` ceiling turns out to be Opus 5's, and a delegate can step out of it — which

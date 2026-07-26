@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.19.1] — 2026-07-26
+
+**A matrix that never varies the variable proves nothing, confidently.** v1.19.0 shipped a
+finding — "`WebSearch` dies at `xhigh`/`max` on Opus 5" — measured across five call sites, both
+model tiers, main thread and subagents. Every row of it raised effort the same way: through
+`CLAUDE_CODE_EFFORT_LEVEL`. That turned out to be the *only* mechanism that breaks. Set the same
+`xhigh` through `effortLevel`, `--effort` or `ultracode` and search works — on `claude-opus-5`,
+same CLI, same day. The conclusion inverted: the tier is not the trigger, the env layer is, and
+the practical consequence flips from "you cannot run deep sessions with web access" to "move the
+level out of the environment". This release corrects that, and records the class of error that
+produced it — a control variable held constant across every row reads exactly like a confirmed
+finding.
+
+### Fixed
+- **`references/native-capabilities.md` — the `WebSearch` / effort entry, re-measured.** Retitled
+  from "dies at `xhigh`/`max`" to "dies when the level arrives through `CLAUDE_CODE_EFFORT_LEVEL`",
+  with the differential matrix (env `xhigh` fails 5/5, 3–4 rejections per run; `effortLevel` 0/5,
+  `--effort xhigh`/`max` 0/5, `ultracode` 0/2 — all `claude-opus-5`, CC 2.1.220). The remedy line
+  "the only general fix is keeping the session at `high` or below" is **removed**: it forbade
+  exactly the depth the level is raised for. `model: sonnet` and `WebFetch` stay documented, now
+  scoped to where the env layer cannot be removed. The refuted frontmatter workaround and the
+  silent-failure properties are unchanged — those measurements stood.
+- **`effortLevel` / `ultracode` in settings, corrected.** `ultracode` *is* a settings key
+  (boolean) and a `--settings` layer carrying it starts an `xhigh` session; the previous text
+  called it rejected there. `max` remains session-only. Out-of-enum `effortLevel` is swallowed by
+  a `.catch()` — it costs the level silently, it does not invalidate the file.
+- **Token spend demoted from oracle to weak signal.** The claim that a level is verified by
+  token spend rested on n=1 per group. On repeat it did not hold: `--effort low` vs `xhigh`
+  overlapped completely on a short prompt (n=3 each), and on a heavy reasoning task the medians
+  parted ~25% with ranges still crossing. Interactive `/effort` reports the level directly and is
+  now named as the answer.
+
+### Added
+- **`references/native-capabilities.md` — invalid config does not always degrade gracefully.** A
+  bad `permissions.defaultMode` discards the **entire** settings file, not the key: it is one of
+  the few schema entries without `.catch()`. Hooks (including a guard hook meant as the hard
+  floor), `permissions.allow`/`deny`, `effortLevel`, `language`, `enabledPlugins` and statuslines
+  all stop applying, with nothing printed. Found live in an operator config, where `"xhigh"` had
+  been pasted into the permissions block; confirmed by a differential language oracle (n=2 each).
+  Ships the accepted-value list (including `manual`, whose omission makes a validator reject a
+  valid config) and a one-line `jq` check. The general rule sits with it: verify a setting
+  *applied*, by a behaviour it controls — presence in the file is not evidence.
+
+### Not touched (deliberately)
+- The **v1.19.0 grounding stamps and the drift detector** — this release re-measures one finding,
+  it does not re-ground the inventory.
+- **devlog #23**, which carries the superseded conclusion. The devlog is episodic: what was
+  believed on the day is part of the record. #24 supersedes it and says so explicitly.
+
 ## [1.19.0] — 2026-07-26
 
 **A pin duplicated in two live docs goes stale in one of them silently.** Nothing fails, no test

@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #24 · 2026-07-26 · Ломает env, а не уровень: матрица без контроля
+
+**Tags:** harness, evidence, bugfix, docs
+
+В #23 зафиксирован вывод: на Opus 5 сессия выше high теряет WebSearch — server-tool sub-request несёт effort сессии без thinking-конфига, API отвечает 400 output_config.effort 'xhigh' is not supported when thinking is disabled. Матрица была снята добросовестно: пять точек…
+
+[→ entries/0024-lomaet-env-a-ne-uroven-matritsa-bez-kontrolya.md](entries/0024-lomaet-env-a-ne-uroven-matritsa-bez-kontrolya.md)
+
+---
+
 ## #23 · 2026-07-26 · Один файл несёт версию: детектор вместо вычитки
 
 **Tags:** docs, harness, audit

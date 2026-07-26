@@ -170,8 +170,11 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
   Opus 4.7+ and Sonnet 5 (live `/effort` dialog, verified 2026-07-15). **Default = `high`**
   (`xhigh` on Opus 4.7).
 - **How to set it — session-wide** (binary- and schema-verified 2026-07-25 on v2.1.220):
-  - `effortLevel` in settings — enum `low` | `medium` | `high` | `xhigh` **only**; `max` and
-    `ultracode` are session-only and are *rejected* in a settings file (use `/effort`).
+  - `effortLevel` in settings — enum `low` | `medium` | `high` | `xhigh` **only**. `max` is
+    session-only (use `/effort`); an out-of-enum value here is swallowed by a `.catch()` rather
+    than rejected, so a typo costs the level silently while leaving the file valid. `ultracode`
+    *is* a settings key (boolean) — a `--settings` layer carrying it starts an `xhigh` session
+    (verified 2026-07-26); only the interactive toggle refuses to persist it.
   - `CLAUDE_CODE_EFFORT_LEVEL` — same values **plus `auto`** (= the current model's default).
   - CLI: `claude --effort <level>` for the session (a *launch pin*: `/effort` then reports
     "the launch-effort pin holds effort at X"), `claude agents --effort <level>` as the default
@@ -187,7 +190,12 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
     key, the `--effort` flag, and `/effort`, which then answers "Not applied". Pinning effort by
     env in settings is how a harness ends up permanently unable to raise it. Prefer the
     `effortLevel` key. (Project-level `settings.json` is also ignored in an untrusted workspace —
-    verify a level took hold by token spend, not by the setting being present.)
+    the setting being present is not evidence it applied.) **Verifying that a level took hold is
+    itself hard**: token spend separates tiers only on a task long enough to spend on, and only
+    across several runs — on a short prompt, `--effort low` and `--effort xhigh` overlapped
+    completely (n=3 each, 2026-07-26), and on a heavy reasoning task the medians parted by ~25%
+    while the ranges still crossed. Interactively, `/effort` reports the active level directly;
+    that is the answer, not an inference.
 - **How to set it per delegate — this is the harness lever.** `effort:` in the frontmatter of
   `.claude/agents/*.md` (also accepted in skill and command frontmatter): a named level, an
   integer, or `inherit`. The **Agent tool overrides only `model` per call, never effort** — the
@@ -210,9 +218,10 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
   default, not a measurement. Where it *is* a real channel is the interactive statusline:
   `StatusLineCommandInput.effort.level`, plus **per-agent `effort` in the `subagentStatusLine`
   payload** (v2.1.214, added precisely so agent rows can render model + effort) — the cheap way
-  to see "who is running at what" during a fan-out. The oracle that holds in every mode:
-  token spend — a subagent's own transcript at `<session-dir>/subagents/agent-<id>.jsonl`
-  (+ `.meta.json` naming its `agentType`). The transcript's own per-message effort field
+  to see "who is running at what" during a fan-out. Headless leaves only token spend — a
+  subagent's own transcript at `<session-dir>/subagents/agent-<id>.jsonl` (+ `.meta.json` naming
+  its `agentType`) — and that is a **weak** oracle: it separates tiers only across several runs
+  on a task substantial enough to spend on (above). The transcript's own per-message effort field
   (announced v2.1.212) was **not** observed in headless session JSONL.
 - **Two traps when you raise effort on Opus 5** [FP,
   `platform.claude.com/docs/en/about-claude/models/whats-new-opus-5`]:
@@ -220,33 +229,50 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
     `thinking: {"type":"disabled"}` with `xhigh`/`max` returns 400, enforced per request. Also:
     with thinking disabled the model can write a tool call into its text output instead of
     emitting a `tool_use` block, so the tool never runs and nothing errors.
-  - *The open client-side bug this collides with — **`WebSearch` dies at `xhigh`/`max`***
-    (anthropics/claude-code **#76689**, **#79798**, family of **#68797**; all open as of
-    2026-07-26). The server-tool sub-request carries the session's **current effort** while
-    **omitting** the thinking config, so the API answers `400 output_config.effort 'xhigh' is
-    not supported when thinking is disabled on this model`. Reported on Opus 4.8, and
-    **reproduced here on Opus 5, CC 2.1.220, Linux CLI** (2026-07-26) the moment the session
-    level was actually raised to `xhigh` — main thread *and* ad-hoc subagent, with
-    `alwaysThinkingEnabled: true` in settings; Sonnet 5 delegates in the same session searched
-    fine. Transcript-scan in #76689 puts the regression at v2.1.207. Three properties make it a harness problem, not a nuisance: **(a)** neither
+  - *The open client-side bug this collides with — **`WebSearch` dies when the level arrives
+    through `CLAUDE_CODE_EFFORT_LEVEL`*** (anthropics/claude-code **#76689**, **#79798**, family
+    of **#68797**; all open as of 2026-07-26). The server-tool sub-request carries the session's
+    **current effort** while **omitting** the thinking config, so the API answers `400
+    output_config.effort 'xhigh' is not supported when thinking is disabled on this model`.
+    **The trigger is the env layer, not the tier** — measured on `claude-opus-5`, CC 2.1.220,
+    Linux CLI (2026-07-26), one prompt, transcript-signature oracle:
+
+    | how the level was raised | `WebSearch` |
+    | --- | --- |
+    | `CLAUDE_CODE_EFFORT_LEVEL=xhigh` (env) | **fails 5/5**, 3–4 rejections per run |
+    | `effortLevel: xhigh` in settings | ok 0/5 |
+    | `--effort xhigh` / `--effort max` | ok 0/5 |
+    | `ultracode: true` | ok 0/2 |
+
+    So a session runs at `xhigh`, `max` or `ultracode` with search intact — provided the level
+    does not arrive through the environment variable. Client-side thinking blocks are present in
+    the failing runs too, so nothing looks wrong locally. Reported on Opus 4.8; transcript-scan
+    in #76689 puts the regression at v2.1.207. Three properties make it a harness problem, not a nuisance: **(a)** neither
     `alwaysThinkingEnabled` nor `MAX_THINKING_TOKENS` works around it; **(b)** it lands mostly in
     **subagents** (8 of 10 reported failures) — a research delegate keeps running and returns a
     report with a whole source tier missing; **(c)** it is **silent** — the error text goes into
     the `WebSearch` `tool_result` body with no `is_error` flag and no API-error record, so
     nothing surfaces to the operator and a filter on `isApiErrorMessage` structurally cannot see
-    it. **Workarounds, as measured here** — the per-delegate `effort:` dial does **not** save
-    you: an agent pinned to `effort: high` still failed with `effort='xhigh'` in the error,
-    i.e. the server-tool sub-request carries the *session's* level, not the delegate's (the
-    in-thread workaround was a *skill* frontmatter, a different path — don't assume it
-    generalizes to agents). What did work in the same session: **a delegate on another model**
-    (`model: sonnet` — searched fine) and **`WebFetch`** (unaffected, as the thread reports).
-    The only general fix is keeping the session at `high` or below. Detection: grep transcripts
+    it. **The fix is to move the level out of the environment** — an `effortLevel` key, the
+    `--effort` flag or `ultracode` all buy the same depth with search working. Where the env
+    layer cannot be removed (a managed profile, CI), two things still work: **a delegate on
+    another model** (`model: sonnet` — searched fine) and **`WebFetch`** (unaffected, as the
+    thread reports). What does **not** save you is the per-delegate `effort:` dial: an agent
+    pinned to `effort: high` still failed with `effort='xhigh'` in the error, i.e. the
+    server-tool sub-request carries the *session's* level, not the delegate's (the in-thread
+    workaround reported in #76689 was a *skill* frontmatter, a different path — don't assume it
+    generalizes to agents). Detection: grep transcripts
     for the signature, and glob **one level deeper** than the session file —
     `<session-dir>/subagents/agent-*.jsonl` (`isSidechain` is not a usable subagent marker).
-    **Method warning, learned the hard way:** an `env`-block level in `settings.json` overrides
-    the `--effort` flag, so a probe that *sets* `xhigh` on the command line while the settings
-    file pins something else measures the settings value — a whole matrix of green runs can mean
-    "never actually left `high`". Confirm the level took hold before trusting a negative result.
+    **Method warning, and this entry is the cautionary tale.** An `env`-block level in
+    `settings.json` overrides the `--effort` flag, so a probe that *sets* `xhigh` on the command
+    line while the file pins something else measures the file — a whole matrix of green runs can
+    mean "never actually left `high`". The first version of this entry blamed the *tier* for
+    precisely that reason: every row of the original matrix was raised by the one mechanism that
+    breaks, so the variable that mattered was never varied. Two rules follow. Confirm the level
+    took hold before trusting a result. And confirm the *negative* too — a transcript grep that
+    finds no error signature proves nothing until the same grep shows `WebSearch` was called at
+    all (path slugs fold `_` to `-`; a wrong path returns a confident, empty "no failures").
   - *`max_tokens` is a hard cap on thinking **plus** response text.* First-party guidance: at
     `xhigh`/`max` set it large "so the model has room to think and act across subagents and tool
     calls" (in Claude Code: `CLAUDE_CODE_MAX_OUTPUT_TOKENS`). A budget sized for `high` can end
@@ -429,6 +455,27 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
 
 - The "default" permission mode is named **Manual** since v2.1.200 (`--permission-mode
   manual` / `"defaultMode": "manual"`; the old `default` spelling is still accepted).
+- **A bad `permissions.defaultMode` silently voids the whole settings file.** Most keys are
+  declared `.optional().catch(...)`, so a bad value is dropped and the rest of the file still
+  loads — `effortLevel` behaves exactly this way. `defaultMode` has **no `.catch()`**: an
+  out-of-enum string fails the parse and the *entire* file is discarded — hooks (including the
+  guard hook meant to be the hard floor), `permissions.allow`/`deny`, `effortLevel`, `language`,
+  `enabledPlugins`, statuslines. Nothing is printed; the session simply runs unconfigured.
+  Measured 2026-07-26 on v2.1.220 with a differential oracle: a `--settings` layer carrying
+  `{"language":"french", …}` answered in French with a valid `defaultMode` and fell back to the
+  user-level language with an invalid one (n=2 each). Accepted values:
+  `default` · `manual` (alias of `default`) · `acceptEdits` · `bypassPermissions` · `plan` ·
+  `dontAsk` · `auto`. Worth a one-line check anywhere settings are generated or edited by
+  tooling — and note that a validator omitting `manual` rejects a valid config:
+  ```bash
+  jq -e '.permissions.defaultMode // "default" |
+    IN("default","manual","acceptEdits","bypassPermissions","plan","dontAsk","auto")' \
+    ~/.claude/settings.json
+  ```
+  The general lesson beyond this key: **an invalid config value is not guaranteed to degrade
+  gracefully.** Whether a typo costs one setting or all of them depends on a `.catch()` you
+  cannot see from the file, so verify a setting *applied* — by an observable behaviour it
+  controls — rather than that it is present.
 - Deny rules accept a glob in the tool-name position (`"*"` denies all tools);
   `WebFetch(domain:...)` deny/ask/allow overrides the built-in preapproved hosts;
   `~`/`$HOME`-path deny rules also block Bash commands referencing them; Read deny rules

@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-26T02:01:28Z",
-  "entry_count": 24,
+  "generated_at": "2026-07-26T02:51:11Z",
+  "entry_count": 25,
   "entries": [
     {
       "id": 1,
@@ -343,6 +343,21 @@
       "supersedes": null,
       "path": "entries/0024-lomaet-env-a-ne-uroven-matritsa-bez-kontrolya.md",
       "preview": "В #23 зафиксирован вывод: на Opus 5 сессия выше high теряет WebSearch — server-tool sub-request несёт effort сессии без thinking-конфига, API отвечает 400 output_config.effort 'xhigh' is not supported when thinking is disabled. Матрица была снята добросовестно: пять точек…"
+    },
+    {
+      "id": 25,
+      "date": "2026-07-26",
+      "title": "Триггер — уровень, а не env-слой: матрица не воспроизвелась",
+      "tags": [
+        "harness",
+        "evidence",
+        "bugfix",
+        "docs"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0025-trigger-uroven-a-ne-env-sloy-matritsa-ne-vosproizvelas.md",
+      "preview": "Запись #24 отменила вывод #23 и объявила: WebSearch ломает env-слой (CLAUDE_CODE_EFFORT_LEVEL), а effortLevel в settings, флаг --effort и ultracode работают — 0/12 отказов. Вывод отгружен в v1.19.1. Живая проверка из главного треда в тот же день его опровергла: сессия при…"
     }
   ]
 }

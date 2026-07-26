@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.19.2] — 2026-07-26
+
+**The same matrix re-run with an oracle that does not depend on the claim — and the green rows
+came back red.** v1.19.1 corrected v1.19.0 by moving the blame for the `WebSearch` failure onto
+the env layer and clearing `effortLevel`, `--effort` and `ultracode`. A live call from a session
+pinned by `effortLevel: xhigh`, with `CLAUDE_CODE_EFFORT_LEVEL` set nowhere, failed with the same
+400. Re-measurement puts the trigger back on the tier, where v1.19.0 had it.
+
+### Fixed
+
+- **`WebSearch` × effort — attribution corrected back to the tier.** 14 headless runs on CC
+  2.1.220: `high` searched (0/2 failures, 7 results); `xhigh` and `max` failed 12/12 across
+  `effortLevel` in settings, the `--effort` flag, and both `claude-opus-5` and
+  `claude-opus-5[1m]`. Neither the mechanism nor the model variant moves the outcome. The
+  mitigation no longer reads "move the level out of the environment" — nothing above `high`
+  searches; a `model: sonnet` delegate and `WebFetch` remain the only ways out.
+- **`CLAUDE_EFFORT` is no longer written off as a false oracle.** Re-measured in `claude --print`
+  it read back `high` / `xhigh` / `max` exactly as set, matching the tier quoted in the 400; the
+  earlier "always `high`, however the level was set" reading did not reproduce. It still does not
+  report a *delegate's* level, and the env path was not re-tested.
+
+### Changed
+
+- **Method warning rewritten.** "Confirm the level took hold" did not save v1.19.1, because that
+  release left nothing to confirm it with — the token oracle was weakened and `CLAUDE_EFFORT`
+  declared false in the same pass. It now reads: confirm with an oracle the claim does not depend
+  on (the 400 names the tier it rejected), and read that oracle off `--output-format stream-json`
+  rather than a guessed transcript path.
+
+Not touched: the `defaultMode` findings and the weakened token oracle from v1.19.1 — the
+re-measurement does not bear on either; the v1.19.0 grounding stamps and drift detector; and
+`references/project-docs/*.md`.
+
 ## [1.19.1] — 2026-07-26
 
 **A matrix that never varies the variable proves nothing, confidently.** v1.19.0 shipped a

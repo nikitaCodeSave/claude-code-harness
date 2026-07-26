@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #25 · 2026-07-26 · Триггер — уровень, а не env-слой: матрица не воспроизвелась
+
+**Tags:** harness, evidence, bugfix, docs
+
+Запись #24 отменила вывод #23 и объявила: WebSearch ломает env-слой (CLAUDE_CODE_EFFORT_LEVEL), а effortLevel в settings, флаг --effort и ultracode работают — 0/12 отказов. Вывод отгружен в v1.19.1. Живая проверка из главного треда в тот же день его опровергла: сессия при…
+
+[→ entries/0025-trigger-uroven-a-ne-env-sloy-matritsa-ne-vosproizvelas.md](entries/0025-trigger-uroven-a-ne-env-sloy-matritsa-ne-vosproizvelas.md)
+
+---
+
 ## #24 · 2026-07-26 · Ломает env, а не уровень: матрица без контроля
 
 **Tags:** harness, evidence, bugfix, docs

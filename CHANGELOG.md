@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.19.7] — 2026-07-26
+
+**The verification loop terminated clean, and this closes the one note it left.** A third,
+deliberately narrow refuter pass over v1.19.6 confirmed all three regressions closed, re-derived
+the updated counts from the raw logs, and found nothing new of substance — `clean, loop can
+terminate`. It did leave one consistency note, fixed here.
+
+### Fixed
+
+- **The env row of the session matrix is now marked confounded, like the flag row.** Settings
+  pinned `xhigh` while the probe set `CLAUDE_CODE_EFFORT_LEVEL=xhigh`, so the row shows only that
+  the effective tier was `xhigh`, not that the environment set it. Row 4 already carried that
+  marker for the identical situation; row 6 did not. Added, together with a pointer to where the
+  env *mechanism* is genuinely demonstrated — the delegate rows, where frontmatter `effort: high`
+  fails under an env pin and succeeds without one, which only the env layer explains.
+- **The `git check-ignore` caveat gains its missing half.** v1.19.6 recorded that the command
+  exits 0 on a negation match; it also consults the index unless given `--no-index`, so a *1* can
+  mean "already tracked" rather than "not ignored". Both halves matter when it is used as an
+  oracle — the refuter caught this one in its own earlier reasoning and recorded it against
+  itself.
+
+Not touched: every conclusion in the file — the third pass confirmed the counts and found no new
+substantive issue.
+
 ## [1.19.6] — 2026-07-26
 
 **The refuter was asked whether its findings were closed, and found three problems the fixes

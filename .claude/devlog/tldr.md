@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #30 · 2026-07-26 · Петля верификации сошлась вхолостую
+
+**Tags:** harness, evidence, docs, adr
+
+Третий проход рефутера — узкий, только по диффу v1.19.6, с явным запретом переоткрывать 13 уже закрытых находок. Вопросов было два: закрыты ли три регрессии из прошлого раунда и внёс ли этот дифф что-то новое. Ответ: clean — loop can terminate. Все три закрыты, новых…
+
+[→ entries/0030-petlya-verifikatsii-soshlas-vkholostuyu.md](entries/0030-petlya-verifikatsii-soshlas-vkholostuyu.md)
+
+---
+
 ## #29 · 2026-07-26 · Регрессия внутри правки: строка мерилась не на том уровне
 
 **Tags:** harness, bugfix, evidence, config

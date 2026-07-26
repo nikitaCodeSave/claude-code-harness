@@ -252,12 +252,16 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
     | `xhigh` | `effortLevel` in settings, `claude-opus-5[1m]` | fails 4/4 |
     | `xhigh` | `--effort xhigh` (settings also said `xhigh` — confounded, see below) | fails 3/3 |
     | `max` | `--effort max` | fails 2/2 |
-    | `xhigh` | `CLAUDE_CODE_EFFORT_LEVEL` (env) | fails 2/2 |
+    | `xhigh` | `CLAUDE_CODE_EFFORT_LEVEL` (env) — settings also said `xhigh`, confounded | fails 2/2 |
 
     Every rejection in the 14 re-measured runs quotes the tier actually in force — `'xhigh'` ×24
     and `'max'` ×4, two per run — so none of those rows rests on an assumed level. Each row is a
     **session-level** measurement: the env row too, re-run with the same prompt and oracle rather
-    than borrowed from a delegate. **Mechanism
+    than borrowed from a delegate. That env row shows only that the effective tier was `xhigh`,
+    not that the environment variable is what set it — the same confound as the flag row. What
+    the *env mechanism* does own is carried by the delegate matrix below, where `effort: high` in
+    frontmatter fails under an env pin and succeeds without one: only the env layer explains
+    that. **Mechanism
     independence rests on the two unconfounded flag rows, not on the `--effort xhigh` row**, which
     agreed with the settings value and therefore proves nothing on its own: `--effort high`
     overrode settings' `xhigh` *downward* (`CLAUDE_EFFORT` read `high`, search restored) and

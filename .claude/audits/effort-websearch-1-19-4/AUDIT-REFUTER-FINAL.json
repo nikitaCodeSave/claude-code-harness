@@ -1,0 +1,82 @@
+{
+  "role": "code-refuter — loop-termination check",
+  "scope": "065c579..660b4dd (v1.19.6) — verification of ISSUE-1/2/3 only. The 13 findings closed in AUDIT-REFUTER-FIXES.json were not re-opened.",
+  "date": "2026-07-26",
+
+  "answers": {
+    "q1_are_the_three_issues_closed": "Yes — all three closed.",
+    "q2_did_this_diff_introduce_anything_new": "Nothing that changes a conclusion. One minor consistency note on the newly re-measured row, recorded below and explicitly non-blocking."
+  },
+
+  "verdict": "clean — loop can terminate",
+
+  "issues": [
+    {
+      "id": "ISSUE-1",
+      "was": "The session matrix's env row carried a `2/2` taken from delegate runs after losing its honest '(earlier run)' tag — a session-level cell backed by a sub-agent measurement.",
+      "status": "closed",
+      "checked": [
+        "SESSION-LEVEL PROOF, the check that defines this issue: in envsess-main-1 and envsess-main-2 every tool_use has parent_tool_use_id = null — Bash, ToolSearch and WebSearch alike. That is the same shape as out-base-1 (a genuine session row) and the opposite of agenv-envhigh-1 / ctl-fmenvhigh-1, where WebSearch carried a parent Agent id. The row is now measured on the level it describes.",
+        "Same prompt and oracle, as claimed: run-envsess.sh feeds `$(cat prompt.txt)` — the original two-step session prompt (md5 dbc1f731…) used by run.sh for every other row — and adds CLAUDE_CODE_EFFORT_LEVEL=xhigh in front of the same env-scrubbing preamble.",
+        "Per-run results re-derived: WS=1 in both (call control present), 2 rejections per run both quoting 'xhigh', final answer EFFORT=xhigh / RESULTS=ERROR, init model claude-opus-5.",
+        "UPDATED TOTALS RE-DERIVE EXACTLY. Concatenating all fourteen failing session runs (base 3, 1m 3, pilot1m 1, flagxhigh 3, ultra 2, envsess-main 2 = 14) and tallying the quoted tiers gives 'xhigh' ×24 and 'max' ×4 = 28 = 14 × 2. Matches the published '14 re-measured runs, ×24, ×4' to the unit.",
+        "No stale counts left behind: grep for '12 re-measured', '12 failing', '×20' across native-capabilities.md returns nothing."
+      ],
+      "text_accuracy": "'Each row is a session-level measurement: the env row too, re-run with the same prompt and oracle rather than borrowed from a delegate' — accurate as written."
+    },
+    {
+      "id": "ISSUE-2",
+      "was": "CHANGELOG 1.19.5 intro said '16 further runs'; the actual count was 18.",
+      "status": "closed",
+      "checked": [
+        "CHANGELOG 1.19.5 intro now reads '18 further runs'.",
+        "devlog #0028 updated to 18, and `git diff 065c579..660b4dd -- .claude/devlog/entries/0028*.md` shows that single line as the entry's only change — no retroactive rewriting of the record beyond the count.",
+        "18 is the right number: nine labels × 2 runs created after the audit landed (fm-son, fm-xh, fm-nar, fmenv-sonnet, fm-probe, fm-probehigh, pl-gpplain, pl-gpsonnet, pl-pluginprobe). Framing as 'Добор автора' correctly excludes my four controls, which the text cites separately."
+      ]
+    },
+    {
+      "id": "ISSUE-3",
+      "was": "`!/.claude/audits/` re-admitted the whole audits directory, weakening the whitelist guarantee the rest of the .gitignore block relies on.",
+      "status": "closed",
+      "checked": [
+        "ORACLE CHOICE. I did not rely on the bare check-ignore exit code, per your warning. The oracle was `git ls-files --others --exclude-standard`, which lists exactly the paths that are untracked AND not ignored — it cannot be fooled by a negation match.",
+        "ARM 1 (verdict trackable): the four AUDIT-*.json files under .claude/audits/*/ are the ONLY entries it returns.",
+        "ARM 2 (stray ignored): I created .claude/audits/effort-websearch-1-19-4/stray-probe.txt and it did not appear. Also probed one level deeper — .claude/audits/effort-websearch-1-19-4/sub/AUDIT-nested.json — and it did not appear either, so the `*/` glob binds to a single level as intended and a nested tree cannot smuggle files in. Both probes removed afterwards; `git status` is clean.",
+        "THE GIT CLAIM IS ITSELF CORRECT, and I verified it rather than accepting it. On an untracked file matching the negation, `git check-ignore -v` prints `!/.claude/audits/*/AUDIT-*.json` and exits 0; on a genuinely ignored stray in the same directory it prints `/.claude/audits/**` and also exits 0. Both cases exit 0, so the exit code cannot discriminate — the CHANGELOG's caveat and the choice of `git status` as the oracle are both right."
+      ],
+      "stated_residual_not_a_defect": "The three pre-existing audit directories each contain AUDIT-*.json, so four files remain reachable by `git add -A`. This is narrowed from 'anything in audits/' but not eliminated. It is not hidden: the CHANGELOG names it — 'the three pre-existing audit directories, which remain untracked pending an explicit decision to publish'. Documented and deliberate; operator's call, not a fix's."
+    }
+  ],
+
+  "new_in_this_diff": [
+    {
+      "id": "NOTE-1",
+      "severity": "minor — non-blocking, changes no conclusion",
+      "location": "native-capabilities.md, session matrix row 6 (`xhigh` | `CLAUDE_CODE_EFFORT_LEVEL` (env) | fails 2/2)",
+      "observation": "The newly re-measured env row is mechanism-confounded in exactly the way the file flags two rows above. ~/.claude/settings.json pins `effortLevel: xhigh`, and run-envsess.sh sets `CLAUDE_CODE_EFFORT_LEVEL=xhigh` — both name the same tier, so removing the env var would yield the identical result. The row therefore cannot show that the *env mechanism* set the level, only that the effective tier was xhigh. Row 4 carries the marker '(settings also said xhigh — confounded, see below)' for the identical situation; row 6 does not.",
+      "why_it_does_not_block": "The tier attribution — the row's actual job in this table — is sound: the 400 quotes 'xhigh' twice per run, and the table's thesis is that the tier is the trigger. The file already routes mechanism independence explicitly onto the two unconfounded flag rows, so nothing downstream leans on row 6's mechanism column. Note also that env's precedence is separately demonstrated elsewhere, over agent frontmatter (ctl-fmenvhigh: a delegate declaring `effort: high` still ran xhigh, which settings-only pinning would not produce, since fm-high proves frontmatter otherwise wins).",
+      "optional_correction": "Either add the same '(settings also said xhigh — confounded)' marker for symmetry, or make it unconfounded in one 2-run probe: set CLAUDE_CODE_EFFORT_LEVEL=max while settings stays xhigh — if the 400 quotes 'max', env demonstrably won. Neither is required for correctness."
+    },
+    {
+      "id": "NOTE-2",
+      "severity": "cosmetic — not shipped",
+      "location": "scratchpad/run-envsess.sh header comment",
+      "observation": "The script's comment block is copy-pasted from run.sh and still says 'при effortLevel:xhigh из settings' and 'именно env-слой — подозреваемый в #24', while the script actually sets CLAUDE_CODE_EFFORT_LEVEL. The code is correct; only the comment misdescribes it. Raised solely because label↔mechanism agreement in the raw evidence is this project's subject; the file never ships."
+    }
+  ],
+
+  "self_correction": {
+    "what": "In AUDIT-REFUTER-FIXES.json I cited `git check-ignore -v <AUDIT-REFUTER.json>` exiting 1 as evidence the verdict file was committable.",
+    "correction": "That exit code was 1 because the file was already tracked — check-ignore consults the index unless given --no-index — not because of the ignore rules. With --no-index the same path exits 0 on the negation match. The right oracle was the `git ls-tree -r v1.19.5` check I also ran, which is what actually established the file was committed.",
+    "impact": "None on the conclusion; C22 was and remains closed. Recorded because this audit's subject is oracle quality, so a confounded oracle of mine belongs in the record on the same terms as anyone else's."
+  },
+
+  "scope_and_hygiene_checks": [
+    "The diff touches nothing beyond its stated purpose: one hunk in native-capabilities.md, three lines in .gitignore, the 1.19.6 CHANGELOG section plus the 16→18 fix, both plugin.json bumped in lockstep to 1.19.6, devlog #0029 + the #0028 count line + regenerated index/tldr, and the committed AUDIT-REFUTER-FIXES.json. No shipped claim was added or altered anywhere else.",
+    "Version lockstep holds: plugins/harness and plugins/devlog both at 1.19.6.",
+    "devlog index integrity: re-ran rebuild-index.py; the regenerated index.json differs from the committed one only in the `generated_at` timestamp (entry_count 29 and all entries identical), and tldr.md is byte-identical. Working tree restored to clean afterwards.",
+    "AUDIT TRAIL INTEGRITY, second time: `git show 660b4dd:.claude/audits/.../AUDIT-REFUTER-FIXES.json` diffs clean against my working copy. The refuter's findings — including the three regressions it filed against the previous release — were committed verbatim, unsoftened."
+  ],
+
+  "bottom_line": "All three regressions are genuinely closed, each by addressing the defect rather than restating it, and each verified with an oracle chosen to survive the specific trap it faced — parent_tool_use_id for the scope question, ls-files --others --exclude-standard for the gitignore question. The updated counts (14 runs, ×24, ×4) re-derive exactly from the raw logs. Nothing new of substance was introduced. This loop terminates."
+}

@@ -1,0 +1,132 @@
+{
+  "audit_version": "1.0",
+  "role": "code-refuter",
+  "scope": "Shipped documentation kit v1.19.7: native-capabilities.md (Effort + WebSearch bug bullet), harness-discipline.md (Subagents spawn rule), plugins/harness/agents/*.md, CHANGELOG 1.19.0-1.19.7",
+  "context": {
+    "git_head": "716bd85",
+    "dirty": false,
+    "method": "Re-derived every published count from the raw stream-json logs in the session scratchpad; verified binary claims with `strings` on /home/nikita/.local/share/claude/versions/2.1.220 (needle-tested first); ran 6 fresh headless probes of my own on CC 2.1.220 to settle three claims the logs could not.",
+    "fresh_runs_dir": "/tmp/claude-1000/-home-nikita-PROJECTS-claude-code-harness/fc8a91da-3ddd-43eb-b13d-c1b9d3bb88e0/scratchpad/refute/"
+  },
+
+  "reproduced_without_change": [
+    "Session matrix, all 6 rows: high 0/2 (RESULTS=7 x2), settings/opus-5 3/3, settings/opus-5[1m] 4/4, --effort xhigh 3/3, max 2/2, env 2/2. Tier-quote totals reproduce exactly: 'xhigh' x24, 'max' x4, two per failing run. Model taken from each run's type==system/subtype==init record, not assumed; claude_code_version is 2.1.220 in every one. WebSearch-was-called control present in all 16 runs (WS>=1); the two NOTOOL rows are the only WS=0 runs and are labelled as such.",
+    "Delegate matrix, all 7 frontmatter rows reproduce from fm-*/fmenv-*/ctl-fmenvhigh-* logs. Every WebSearch tool_use carries parent_tool_use_id equal to the Agent tool_use id, so the calls are delegate-issued, not parent-issued. The Agent tool input's subagent_type confirms the intended agent ran in each file.",
+    "'The same seven rows were also run through --agents, with identical outcomes': verified pair by pair against ag-*/agenv-* logs. 7/7 agree.",
+    "Discriminating control for 'a delegate that declares no effort: inherits the session's level': ag-plain (xhigh session) fails 2/2 quoting 'xhigh'; ctl-plainhigh (high session) searches 2/2 with EFFORT=high. Same agent, same load path, session varied - a fixed model default cannot produce that difference. Holds.",
+    "'CLAUDE_EFFORT inside a delegate reports the delegate's level': fm-probe (nothing declared, xhigh session) MYEFFORT=xhigh + ERROR 2/2; fm-probehigh (effort: high, xhigh session) MYEFFORT=high + RESULTS=7 2/2. Holds.",
+    "Precedence rung env > launch pin: re-tested with a hard oracle instead of the token spend the file itself calls weak. CLAUDE_CODE_EFFORT_LEVEL=high with --effort max on claude-opus-5 gave EFFORT=high, RESULTS=7, zero 400s, 2/2 (p1-envhigh-flagmax-*). The binary agrees: in the /effort handler the CLAUDE_CODE_EFFORT_LEVEL check ('overrides effort this session') is evaluated before the launch-pin check ('the launch-effort pin holds effort at X'). The claim stands on better evidence than the file cites.",
+    "Binary/schema claims all verbatim in 2.1.220: effortLevel:v.enum([\"low\",\"medium\",\"high\",\"xhigh\"]).optional().catch(void 0); ultracode:v.boolean().optional().catch(void 0); N6s(): if(r===\"ultracode\"&&sZ(t))return{value:\"xhigh\"}; the string 'Ultracode runs at xhigh effort'; 'max is session-scoped ... Use low, medium, high, or xhigh instead'; 'Not applied: the launch-effort pin holds effort at X'.",
+    ".gitignore audit whitelist (CHANGELOG 1.19.6) and the git check-ignore caveat (1.19.7): live-tested in a fresh audit directory. AUDIT-*.json appears in `git status --porcelain -uall`, a stray.txt in the same directory does not; `git check-ignore -v` exits 0 for both, naming .gitignore:28 (negation) vs .gitignore:26 (ignore). Both halves hold.",
+    "CHANGELOG 1.19.6/1.19.7 'the three pre-existing audit directories remain untracked': confirmed, git ls-files .claude/audits returns only the four effort-websearch-1-19-4 files."
+  ],
+
+  "findings": [
+    {
+      "summary": "The WebSearch 400 is NOT unflagged: every failing tool_result carries is_error: true and an 'API Error: 400 ...' body",
+      "category": "semantics",
+      "file": "plugins/harness/references/native-capabilities.md:276-280",
+      "claim": "\"(c) it is silent - the error text goes into the WebSearch tool_result body with no is_error flag and no API-error record, so nothing surfaces to the operator and a filter on isApiErrorMessage structurally cannot see it.\"",
+      "verdict": "refuted",
+      "severity": "major",
+      "trigger": "jq over the tool_result records of any failing run in the project's own logs.",
+      "checked": "24/24 failing runs contradict the claim. Session-level (14/14: out-base-{1,2,3}, out-1m-{1,2,3}, out-pilot1m-1, out-flagxhigh-{1,2,3}, out-ultra-{1,2}, envsess-main-{1,2}) and delegate-level (10/10: fm-plain-*, fm-xh-*, ctl-fmenvhigh-*, ag-plain-*, pl-gpplain-*): every WebSearch tool_result whose content matches output_config.effort has is_error=true, and the body reads verbatim 'API Error: 400 output_config.effort 'xhigh' is not supported when thinking is disabled on this model. Use effort 'high' or below, or enable thinking.' My own fresh run reproduces it 2/2 (refute/p2-flagmax-*). Control that the flag discriminates: in the same records the Bash tool_result has is_error=false and the ToolSearch one is_error=null, so is_error=true is a real signal, not a constant.",
+      "impact": "The bullet is one of the three properties the file names to make this 'a harness problem, not a nuisance', and it drives the prescribed detection ('grep transcripts for the signature'). A reader who believes the failure is unflagged builds a fragile string grep when a structural filter is available and strictly better: jq 'select(.type==\"user\")|.message.content[]?|select(.type==\"tool_result\" and .is_error==true)' plus the tool name. Worse, that reader concludes no runtime guard is possible, when a PostToolUse/PostToolUseFailure hook on WebSearch has a flagged failure to fire on.",
+      "correction": "Rewrite (c): the error IS flagged on the tool_result (is_error: true, body prefixed 'API Error: 400 ...'), so it is detectable structurally - but there is no assistant-level API-error record, so a filter on isApiErrorMessage (binary: 'True when this assistant message wraps an API error') misses it, and the parent of a subagent sees only the delegate's final text, never its tool_results. That second half is what actually makes a research delegate's gap silent, and it is what the bullet should say. Keep the transcript-glob advice; add the is_error filter as the primary oracle.",
+      "demonstrability": "verified"
+    },
+    {
+      "summary": "effort: xhigh on the three audit agents does NOT make depth a property of the audit - an env-pinned caller still sets it, downward",
+      "category": "semantics",
+      "file": "CHANGELOG.md (1.19.4, 'Changed'); plugins/harness/agents/{code-refuter,evidence-executor,process-auditor}.md frontmatter",
+      "claim": "\"evidence-executor, process-auditor and code-refuter now declare effort: xhigh. ... declaring the level makes depth a property of the audit rather than of the caller's settings.\"",
+      "verdict": "refuted",
+      "severity": "major",
+      "trigger": "Any caller whose harness pins effort through CLAUDE_CODE_EFFORT_LEVEL - including the exact `env:` block inside settings.json that native-capabilities.md:188-193 flags as the standard harness trap - launching /external-audit.",
+      "checked": "Fresh measurement, not inference. A delegate declared in .claude/agents/*.md with `effort: xhigh` and `tools: WebSearch, Bash`, spawned from a session with CLAUDE_CODE_EFFORT_LEVEL=low on claude-opus-5: the delegate reports MYEFFORT=low and RESULTS=7, 2/2 (refute/p3-fmxh-envlow-{1,2}.jsonl). The env layer overrides frontmatter downward, not only upward as the previously measured ctl-fmenvhigh row showed. The file already states the rule ('CLAUDE_CODE_EFFORT_LEVEL outranks agent frontmatter'); nobody applied it back to the fix 1.19.4 shipped.",
+      "impact": "The failure v1.19.4 existed to remove survives on the one configuration the kit itself calls a trap: /external-audit launched from an env-pinned low/medium session runs all three verification roles at that level, silently, reporting the same verdict shape. This is the kit's top verification rung degrading without a signal - the false negative the changelog names as the expensive error.",
+      "correction": "Two edits. (1) Scope the rationale: 'declaring the level makes depth a property of the audit for every layer except env - CLAUDE_CODE_EFFORT_LEVEL still outranks agent frontmatter, so an env-pinned caller sets audit depth.' (2) Give the reader the check, in the external-audit command or in harness-discipline.md's verification-ladder rung: before an audit that must be deep, confirm `printenv CLAUDE_CODE_EFFORT_LEVEL` is unset or >= the declared level. There is no frontmatter fix for this path, exactly as the delegate matrix already reports for WebSearch.",
+      "demonstrability": "verified"
+    },
+    {
+      "summary": "'The kit's single version-pinned document' is false: four live docs carry currency pins and three disagree with it",
+      "category": "semantics",
+      "file": "plugins/harness/references/native-capabilities.md:16-18",
+      "claim": "\"This file is the kit's single version-pinned document. Every other live doc states behavior without binding it to a release and points here - a currency pin duplicated in two places goes stale in one of them silently.\"",
+      "verdict": "refuted",
+      "severity": "major",
+      "trigger": "Running the kit's own drift detector from audit-checklist.md §1 against this repo.",
+      "checked": "The detector (grep -rnE \"Opus 4\\\\.[0-9]|Opus [0-9]|Sonnet [0-9]|v?2\\\\.1\\\\.[0-9]{3}\" --include=*.md, minus the documented allowlist) returns 20 survivors, four of which are currency pins by audit-checklist.md's own definition ('the CC version and model generation the docs assume'), not the 'since vX this behaves like Y' sourcing the same rule says to keep: harness-discipline.md:5 'Grounded for the Claude 5 family / Opus 4.8 generation, Claude Code v2.1.210'; audit-checklist.md:5 and evidence-base.md:6, both v2.1.211; harness-evolution.md:19 'last-grounded: CC v2.1.211 · Claude 5 family (Fable 5, Sonnet 5) + Opus 4.8'. native-capabilities.md itself says v2.1.220 / Claude 5 family with Opus 5 as the default Opus model. The predicted harm has already happened: the pins disagree in both the CC version and the model generation.",
+      "impact": "harness-discipline.md is the worst case and it is primary shipped surface: its header stamps 'Opus 4.8 generation, Claude Code v2.1.210' on a file whose Subagents § carries the Opus-5-specific WebSearch spawn rule measured on 2.1.220 and added five releases later. A consumer cannot tell that the file's freshest, most consequential content is newer than its own grounding stamp - while the kit instructs them (audit-checklist §1) to enforce the single-pin rule on their own projects. harness-evolution.md:19 is defensible as a re-grounding ledger; the other three are not.",
+      "correction": "Either de-version the three live docs' headers to 'Grounded for a capable Claude Code / Opus-class generation; currency pin in references/native-capabilities.md' (the target form the checklist prescribes), or, if the stamps are kept deliberately as provenance, drop the absolute 'every other live doc states behavior without binding it to a release' from native-capabilities.md:16-18 and state what is true: one file carries the currency pin, others carry dated grounding stamps that must be refreshed with it. At minimum harness-discipline.md:5 must stop reading v2.1.210 / Opus 4.8 while carrying Opus-5 content measured on 2.1.220.",
+      "demonstrability": "verified"
+    },
+    {
+      "summary": "The kit's own published audit artifacts fail the jq gate the shipped agent definitions mandate before exit",
+      "category": "semantics",
+      "file": ".claude/audits/effort-websearch-1-19-4/*.json vs plugins/harness/agents/code-refuter.md and evidence-executor.md",
+      "claim": "\"Before exiting, validate: jq -e '.audit_version==\"1.0\" and .role==\"code-refuter\" and (.findings|type==\"array\") and (.verdict.status|IN(\"stands\",\"refuted\"))' <output-file> must succeed.\" (and the evidence-executor equivalent)",
+      "verdict": "refuted",
+      "severity": "minor",
+      "trigger": "Running each agent definition's own mandated validator against the artifacts the kit ships.",
+      "checked": "All four git-tracked files in .claude/audits/effort-websearch-1-19-4/ FAIL. In every one, `verdict` is a plain string ('stands_with_required_corrections', 'clean - loop can terminate', '13 closed, 1 partially closed...', 'confirmed'), so .verdict.status raises 'Cannot index string with string \"status\"'. AUDIT-REFUTER-FIXES.json also has findings[] entries carrying none of the mandated keys (no severity, no summary, no category). Control that the gate is passable and this is a regression, not a broken gate: .claude/audits/config-dir-portability/AUDIT-REFUTER.json and .claude/audits/session-context-hook/AUDIT-REFUTER.json both PASS the identical command.",
+      "impact": "These four files are git-tracked and public - the kit's worked example of its own 3-role audit. A consumer who copies their shape produces output the adjudicator cannot read (the definitions call the schema 'contract with the adjudicator'). It also shows the pre-exit self-validation did not happen, which is the prompt-compliance failure the kit's own §7 says to replace with a mechanical guard.",
+      "correction": "Either normalise the four artifacts to \"verdict\": {\"status\": \"...\", \"summary\": \"...\"} with the enum values the definitions allow, or - if free-form verdicts are wanted - widen the schema in the three agent definitions and say so. Note also that the adjudication step never enforced the gate; if the output is meant to be machine-read, enforcement belongs in the /external-audit command, not in a line of agent prose asking the agent to check itself.",
+      "demonstrability": "verified"
+    },
+    {
+      "summary": "'the 14 re-measured runs' annotates a matrix whose rows sum to 16 runs",
+      "category": "semantics",
+      "file": "plugins/harness/references/native-capabilities.md:257-258",
+      "claim": "\"Every rejection in the 14 re-measured runs quotes the tier actually in force - 'xhigh' x24 and 'max' x4, two per run.\"",
+      "verdict": "refuted",
+      "severity": "minor",
+      "trigger": "A reader adding up the matrix column immediately above: 0/2 + 3/3 + 4/4 + 3/3 + 2/2 + 2/2 = 16.",
+      "checked": "The quote counts are exactly right - summed per file: 24 'xhigh' and 4 'max' across the 16 logs. 14 is the number of FAILING runs (12 xhigh + 2 max), not of re-measured runs. Git history shows the drift: v1.19.4 said 'x20 and x4' with no run count; v1.19.5 introduced '12 re-measured runs' (= failing runs then); v1.19.6 added the 2-run env row, bumped x20 to x24 and 12 to 14 - updating the failing-run count in a sentence that reads as the matrix total.",
+      "impact": "Reader-visible arithmetic mismatch in the one paragraph whose whole job is to prove the counts are trustworthy. Cosmetic in effect, but it is the bookkeeping class this file has been corrected for three times.",
+      "correction": "\"Every rejection in the 14 failing runs of this 16-run matrix quotes the tier actually in force - 'xhigh' x24 and 'max' x4, two per run.\"",
+      "demonstrability": "verified"
+    },
+    {
+      "summary": "Prose under the frontmatter table attributes the varied-session control to that table's load path; it was measured through --agents",
+      "category": "semantics",
+      "file": "plugins/harness/references/native-capabilities.md:310-313",
+      "claim": "\"A delegate that declares nothing inherits the session's level - the discriminating control is a varied session: the same undeclared delegate fails 2/2 from an xhigh session and searches 2/2 from a high one\", stated in the paragraph following the table headed 'Every row below was measured through YAML frontmatter in .claude/agents/*.md'.",
+      "verdict": "refuted",
+      "severity": "minor",
+      "trigger": "Tracing which logs back the pair.",
+      "checked": "The xhigh arm is ag-plain-{1,2} and the high arm is ctl-plainhigh-{1,2}; both come from run-agent.sh / run-ctl-session.sh with `--agents agents.json`, Agent input subagent_type=plain-searcher - the programmatic path, not frontmatter. fm-plain (the frontmatter undeclared agent, the table's row 3) was only ever run from an xhigh session; it has no high-session counterpart in the logs. The pair is internally matched (same agent, same load path, session varied), so the CONCLUSION stands - only its attribution to the frontmatter path does not.",
+      "impact": "Exactly the scope-mismatch class v1.19.5 was released to remove - a claim reading as frontmatter-measured while resting on --agents runs - recurring in prose one paragraph below the table that was fixed for it. Low practical harm because cross-path equivalence is separately verified 7/7, but it re-opens the defect the release closed.",
+      "correction": "Say where it was measured: '...the discriminating control is a varied session, measured through --agents (the cross-path equivalence above carries it to frontmatter): the same undeclared delegate fails 2/2 from an xhigh session and searches 2/2 from a high one.' Or run fm-plain once from a high session and drop the qualifier.",
+      "demonstrability": "verified"
+    },
+    {
+      "summary": "Two published rows are not reproducible from the artifacts: the 'max' row's logs are named out-ultra-*, and the plugin-agent row's fixture no longer exists",
+      "category": "other",
+      "file": "plugins/harness/references/native-capabilities.md:254 and :304-305",
+      "claim": "\"| max | --effort max | fails 2/2 |\", used as one of the two unconfounded flag rows carrying mechanism independence; and \"A plugin-shipped agent honours effort: too (effort: high in a plugin agent's frontmatter searched 2/2 from an xhigh session).\"",
+      "verdict": "stands",
+      "severity": "minor",
+      "trigger": "Trying to tell from the artifacts alone which command produced a row.",
+      "checked": "The max row's only logs are out-ultra-{1,2}.jsonl, no command is recorded in any artifact, and 'ultra' names a different mechanism the same file discusses (ultracode). Settled by re-running it with known provenance: --effort max on claude-opus-5, no env, gives EFFORT=max and a 400 quoting 'max' twice, 2/2 (refute/p2-flagmax-{1,2}.jsonl) - identical to out-ultra. The row stands and so does the upward-override argument. Separately, pl-pluginprobe-* invoked subagent_type 'claude-code-harness:tmp-plugin-probe', absent from plugins/harness/agents/ at HEAD (only the three audit roles are there), so that row cannot be re-derived from the shipped tree and its frontmatter is unverifiable from the repo.",
+      "impact": "No published conclusion is wrong. But the file's own fourth method rule is about not trusting a row you cannot tie to what was run, and these two rows cannot be tied to it from the artifacts - one because the filename names a different mechanism, one because the fixture was deleted.",
+      "correction": "Record the exact command per row alongside the logs (a one-line manifest), and either keep the probe agent in the repo under a clearly-temporary path or state in the text that the plugin row's fixture was removed after measurement.",
+      "demonstrability": "verified"
+    }
+  ],
+
+  "prescriptive_usability": {
+    "harness_discipline_subagents_spawn_rule": "Works if followed literally. A reader copying the web-researcher frontmatter verbatim gets `tools: WebSearch, WebFetch, Read` + `model: claude-sonnet-5`, and fm-sonnet/fmenv-sonnet show that searches from an xhigh session with or without an env pin, 4/4. Following the inline comment instead ('drop this line and use: effort: high') matches fm-high, 2/2. The env caveat is stated and both halves are measured on the frontmatter path.",
+    "gaps_a_literal_reader_would_hit": [
+      "The block is headed 'needs two things declared - neither is the default', but the tool bullet then offers 'omit tools: entirely (inherits everything)' as an equally valid answer - declaring nothing is one of the two sanctioned options, contradicting the heading. Reword to 'needs two things to be true'.",
+      "`model: claude-fable-5` is prescribed as an equal alternative to claude-sonnet-5, but Fable was only run as a SESSION model (out-fab-xh/out-fab-max); no delegate was ever pinned to it. native-capabilities.md also records Fable at ~2x Opus price, so a reader taking that branch pays double on an untested path. Measure it or mark it inferred.",
+      "'give a research delegate either effort: high (or below, keeping the session model)' - only `high` was measured; low/medium are inferred from being under the ceiling. Reasonable, but it is inference and the file marks inference elsewhere.",
+      "The three shipped agents carry `effort: xhigh` with no comment in the files saying why WebSearch must stay out of their `tools:`. That reasoning lives only in CHANGELOG 1.19.4. A consumer who adds WebSearch to code-refuter's tools - a natural edit, 'let the refuter check upstream docs' - silently gets a role that cannot search. One comment line per frontmatter closes it."
+    ]
+  },
+
+  "verdict": {
+    "status": "refuted",
+    "summary": "Three major claims do not survive. (1) native-capabilities.md's 'silent - no is_error flag' is contradicted by 24 of the file's own 24 failing runs, every one carrying is_error: true and an 'API Error: 400 ...' body; the bullet is load-bearing both for why this is a harness problem and for the detection method it prescribes. (2) The v1.19.4 fix giving the three audit roles effort: xhigh does not deliver its stated purpose: a frontmatter effort: xhigh delegate reads back MYEFFORT=low under CLAUDE_CODE_EFFORT_LEVEL=low, 2/2, so an env-pinned caller still sets audit depth - on the exact configuration the kit calls a trap. (3) 'This file is the kit's single version-pinned document' is false by the kit's own drift detector: four live docs carry currency pins and three disagree with it, with harness-discipline.md stamped v2.1.210 / Opus 4.8 while carrying the Opus-5 spawn rule measured on 2.1.220. Four minor findings follow, including four git-tracked audit artifacts that fail the jq gate their own agent definitions mandate. Everything else held: all 16 session runs and all 7 frontmatter delegate rows re-derive exactly from the raw logs, the delegate calls are genuinely delegate-issued (parent_tool_use_id), the varied-session control is a real discriminator, the binary/schema claims are verbatim correct in 2.1.220, and the precedence rung env > launch pin - which the file supports with the token oracle it elsewhere calls weak - is true on a hard oracle run to check it."
+  }
+}

@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.19.8] — 2026-07-26
+
+**A full three-role audit at the end of the day, with a refuter that had never seen this work,
+found three major defects that three earlier passes had walked past.** The runtime conclusions
+still hold; what failed was a load-bearing property claim, the stated purpose of a fix shipped
+hours earlier, and the file's own claim to be the single version-pinned document.
+
+### Fixed
+
+- **"It is silent — no `is_error` flag" was false.** All 24 failing runs in this file's own
+  evidence carry `is_error: true` and a body prefixed `API Error: 400 …` on the `WebSearch`
+  `tool_result`. The property is rewritten to where the silence actually lives: the `tool_result`
+  *is* flagged and a scan of those records finds it; what is absent is an assistant-level
+  API-error record, and — decisively — a parent sees only a delegate's final text, never its
+  `tool_result`s. This bullet is load-bearing for both the "why it is a harness problem" argument
+  and the detection method, so it was wrong in the place it could do most damage.
+- **`effort: xhigh` on the three audit roles does not survive an env pin.** New measurement: a
+  frontmatter delegate declared `effort: xhigh`, spawned under `CLAUDE_CODE_EFFORT_LEVEL=low`,
+  reports `low`, 2/2. So `CLAUDE_CODE_EFFORT_LEVEL` overrides agent frontmatter **in both
+  directions**, not only upward as previously measured — and v1.19.4's rationale ("depth becomes
+  a property of the audit rather than of the caller") holds for every layer except that one. The
+  rule is corrected and a pre-audit check added: confirm `printenv CLAUDE_CODE_EFFORT_LEVEL` is
+  empty before a pass whose whole value is depth.
+- **Three live docs carried their own currency pins**, contradicting `native-capabilities.md`'s
+  claim to be the only version-pinned document — `harness-discipline.md` was stamped v2.1.210 /
+  Opus 4.8 while carrying the Opus-5 spawn rule measured on 2.1.220. `harness-discipline.md`,
+  `audit-checklist.md` and `evidence-base.md` are de-versioned to the form the checklist itself
+  prescribes, pointing at the single pin. The kit's own drift detector had been signalling this
+  the whole time; its count had risen from 18 to 20.
+
+Not touched: every runtime conclusion from v1.19.2–v1.19.7 — the audit re-derived all 16 session
+runs and all 7 frontmatter delegate rows from the raw logs and they reproduce exactly.
+
+Known and not fixed here, recorded for the next pass: `release.sh` accepts any string as a
+version and its `shipped-by` stamp guard is bypassed by a multi-commit release; `rebuild-index.py`
+writes a fresh `generated_at` on every run, so reindexing always dirties the tree.
+
 ## [1.19.7] — 2026-07-26
 
 **The verification loop terminated clean, and this closes the one note it left.** A third,

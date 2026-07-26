@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-26T05:04:30Z",
-  "entry_count": 30,
+  "generated_at": "2026-07-26T05:33:10Z",
+  "entry_count": 31,
   "entries": [
     {
       "id": 1,
@@ -434,6 +434,22 @@
       "supersedes": null,
       "path": "entries/0030-petlya-verifikatsii-soshlas-vkholostuyu.md",
       "preview": "Третий проход рефутера — узкий, только по диффу v1.19.6, с явным запретом переоткрывать 13 уже закрытых находок. Вопросов было два: закрыты ли три регрессии из прошлого раунда и внёс ли этот дифф что-то новое. Ответ: clean — loop can terminate. Все три закрыты, новых…"
+    },
+    {
+      "id": 31,
+      "date": "2026-07-26",
+      "title": "Свежий рефутер нашёл то, что пережило три прохода",
+      "tags": [
+        "harness",
+        "evidence",
+        "bugfix",
+        "docs",
+        "adr"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0031-svezhiy-refuter-nashel-to-chto-perezhilo-tri-prokhoda.md",
+      "preview": "Финальный полный аудит перед закрытием сессии — впервые все три роли, включая process-auditor, который за день ни разу не запускался, и нового рефутера без контекста предыдущих проходов. Прежний рефутер к этому моменту трижды проходил по тому же материалу и завершил петлю…"
     }
   ]
 }

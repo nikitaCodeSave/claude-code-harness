@@ -1,0 +1,96 @@
+{
+  "role": "process-auditor",
+  "date": "2026-07-26",
+  "scope": "96138fa..716bd85 — releases v1.19.0 through v1.19.7 (8 tagged release commits) plus the interleaved dev-harness commit 3ff5002. Jurisdiction: process discipline against the repo's own ritual (.claude/skills/release/SKILL.md, .claude/CLAUDE.md). Runtime truth of the documented Claude Code facts is explicitly NOT judged here.",
+  "verdict": "violations — 2 minor, 0 critical, 0 major. Release mechanics (bump, lockstep, tags, devlog, scope, retraction honesty) are clean across all 9 commits; both findings are omissions of secondary ritual duties, neither affects what consumers received.",
+  "prior_audits_read": [
+    ".claude/audits/effort-websearch-1-19-4/AUDIT-REFUTER.json (scope a95dade..HEAD, v1.19.2-v1.19.4)",
+    ".claude/audits/effort-websearch-1-19-4/AUDIT-REFUTER-FIXES.json (scope 3f9f46d..065c579)",
+    ".claude/audits/effort-websearch-1-19-4/AUDIT-REFUTER-FINAL.json (scope 065c579..660b4dd)",
+    ".claude/audits/effort-websearch-1-19-4/AUDIT-EVIDENCE.json"
+  ],
+  "no_overlap_note": "Neither finding below appears in the prior verdicts: grep -il 'audit-checklist|drift' over all four returns nothing, and none of them covers v1.19.0/v1.19.1 or the process layer.",
+  "checks": [
+    {
+      "item": "1. Bump discipline — every shipped-surface commit carries a bump; no dev-harness-only commit carries one",
+      "result": "PASS",
+      "evidence": "All 8 release commits touch plugins/** and each moves plugins/harness/.claude-plugin/plugin.json: 96138fa=1.19.0, a95dade=1.19.1, 1418818=1.19.2, 3d7b13f=1.19.3, 3f9f46d=1.19.4, 065c579=1.19.5, 660b4dd=1.19.6, 716bd85=1.19.7. The one dev-harness commit 3ff5002 (touches only .claude/skills/release/SKILL.md) correctly leaves both plugin.json at 1.19.4 and carries no tag — Path A applied correctly. No shipped-surface file changed without a bump anywhere in the range (verified via git log --name-status over 96138fa~1..HEAD)."
+    },
+    {
+      "item": "2. Lockstep — both plugin.json move together at every tagged commit",
+      "result": "PASS",
+      "evidence": "Checked at each of the 9 commits, not just HEAD: harness and devlog plugin.json report the identical version at every one (1.19.0/1.19.0 ... 1.19.7/1.19.7). .claude-plugin/marketplace.json carries no version field at any commit, which is the state release.sh guards (MARKETPLACE DRIFT check, release.sh:38) — no drift introduced."
+    },
+    {
+      "item": "3. Tags — exist, point at the right commit, exist on origin; CHANGELOG↔tag parity",
+      "result": "PASS",
+      "evidence": "All 8 tags v1.19.0..v1.19.7 exist locally and each points at the commit that bumped to that version. git ls-remote --tags origin returns the identical 8 SHAs — every tag is on origin. HEAD == origin/main == 716bd85, so the range is fully delivered (B6 satisfied). CHANGELOG.md at HEAD has exactly the sections [1.19.0]..[1.19.7], one per tag: no version without a tag, no tag without a section."
+    },
+    {
+      "item": "4a. Devlog — one entry per release, ids/slugs/frontmatter valid, index.json and tldr.md generated not hand-edited",
+      "result": "PASS",
+      "evidence": "Entries 0023..0030 map 1:1 onto v1.19.0..v1.19.7. Stronger check than the mandated one: for each of the 9 commits the tree was extracted and rebuild-index.py re-run against it — exit 0 every time, and the regenerated index.json (modulo the generated_at timestamp) and tldr.md are byte-identical to what was committed. So index.json/tldr.md were genuinely regenerated at every commit and never hand-edited. At HEAD the oracle also exits 0 and leaves only generated_at differing."
+    },
+    {
+      "item": "4b. Devlog immutability — no superseded entry rewritten to hide a reversal",
+      "result": "PASS",
+      "evidence": "Exactly one prior entry was modified in the whole range: 660b4dd touches .claude/devlog/entries/0028-refuter-poymal-vernye-vyvody-na-nedostatochnykh-ulikakh.md, a single line, 'Добор автора: 16 прогонов' -> '18 прогонов'. That is the sanctioned technical (count) kind, and it is disclosed in three places: the 660b4dd commit body ('Счёт прогонов в интро 1.19.5 исправлен с 16 на 18 (и в devlog #28)'), the CHANGELOG 1.19.6 section, and entry 0029 which labels it 'техническая правка счёта, вывод не менялся'. No conclusion was rewritten. Entries 0024 and 0025 explicitly refuse to edit the entries they supersede ('запись #23 — devlog эпизодичен, то, что считалось верным в тот день, часть записи')."
+    },
+    {
+      "item": "5. Scope cleanliness — every changed line traces to the stated purpose; no drive-bys, no scratch artifacts",
+      "result": "PASS",
+      "evidence": "All 9 diffs read. Every file touched is named either in the commit body or in the entry's '## Затронутые файлы'. Two files outside plugins/** rode in release commits, both legitimate under the ritual's boundary rule (Шаг 0, 'dev-harness-файлы просто едут в том же коммите') and both documented: .claude/skills/release/SKILL.md in 96138fa (hard-coded Opus 4.8 trailer replaced by a template — listed in entry 0023) and .gitignore in 065c579/660b4dd (audit-artifact whitelist — listed in entries 0028/0029). Only 12 files were added across the range, all of them devlog entries or AUDIT-*.json verdicts. No scratch/temp artifact is tracked anywhere (git ls-files matched against scratch|tmp|.bak|.orig|~ returns nothing); the scratch-note.txt used as a .gitignore test arm in v1.19.6 was deleted and never committed, as entry 0029 claims. Each diff is tight: v1.19.4 is literally three '+effort: xhigh' lines, v1.19.7 is one table cell plus four lines of caveat."
+    },
+    {
+      "item": "6. Claim/record consistency — CHANGELOG, devlog and diffs tell the same story; retractions honest, not overwritten",
+      "result": "PASS",
+      "evidence": "Three retractions occurred (v1.19.1 retracts v1.19.0's attribution, v1.19.2 retracts v1.19.1 and restores v1.19.0's, v1.19.5/v1.19.6 correct the evidence under v1.19.2-v1.19.4). All are recorded forward, in the new section, naming the superseded release and the class of error. Mechanically verified that no historical CHANGELOG section was rewritten: sections [1.19.0] through [1.19.4] extracted at their own release commit are byte-identical to the same sections at HEAD. The single historical edit is the disclosed 16->18 count fix inside [1.19.5] (660b4dd). Each release's '### Not touched' / 'Не тронуты' block matches the actual diff — spot-checked against v1.19.2 (defaultMode, token oracle, grounding stamps, project-docs untouched: confirmed), v1.19.4 (prompt bodies and tools: untouched: confirmed, only frontmatter effort lines changed) and v1.19.7."
+    },
+    {
+      "item": "7a. Ritual steps mandated but skipped",
+      "result": "FAIL — see findings PROC-1 and PROC-2"
+    },
+    {
+      "item": "7b. Actions performed that the ritual does not sanction",
+      "result": "PASS",
+      "evidence": "Nothing outside the ritual was performed. Semver choices are defensible under B0: 1.19.0 minor (audit-checklist §1 gains a new rule + procedure = additive change to the kit's composition), everything else patch (corrections and docs hygiene inside existing components). B3.5 (refuter for releases carrying a measured claim) did not exist until 06:56, so v1.19.0-v1.19.4 cannot be faulted for lacking it; every release after it that carries a measured claim (v1.19.5, v1.19.6, v1.19.7) has a fresh-context verdict attached under .claude/audits/, as B3.5 requires. Co-Authored-By trailer names the current session's model ('Claude Opus 5 (1M context)') on all 9 commits — including 96138fa, which fixed the stale Opus 4.8 template in the same commit."
+    }
+  ],
+  "findings": [
+    {
+      "id": "PROC-1",
+      "severity": "minor",
+      "title": "The drift invariant shipped in v1.19.0 was breached twice by later releases in the same series, and the detector was never re-run — hit count rose 18 -> 20 unrecorded",
+      "where": [
+        "plugins/harness/references/audit-checklist.md:40-59 (the rule, shipped by 96138fa)",
+        "plugins/harness/references/harness-discipline.md:102 (introduced by 3d7b13f, v1.19.3)",
+        "plugins/harness/references/harness-discipline.md:105 (introduced by 065c579, v1.19.5)"
+      ],
+      "detail": "v1.19.0 (96138fa, 01:01) shipped a target form — 'exactly one file carries the currency pin; every other live doc is version-free and points at it' — plus a mechanical grep detector and the instruction to classify each survivor and record the count, because 'a rising hit count between audits is the drift signal'. Entry 0023 records the baseline honestly: '18 выживших хитов, ноль поведенческих пинов'. Five hours later 3d7b13f (v1.19.3) added to harness-discipline.md the line 'On Opus 5, `xhigh`/`max` kill `WebSearch`', and 065c579 (v1.19.5) added '`claude-fable-5`, which keep search at `xhigh` and `max` — the two tiers that break Opus 5'. Both are behavioral prose pinned to named model versions, living in a second live doc — the exact shape audit-checklist.md:21-22 says to de-version. Re-running the shipped detector verbatim over each commit gives 18 hits at 96138fa, 19 at 3d7b13f, 20 at 065c579 and at HEAD. Neither release re-ran the detector, recorded the new count, nor classified the two new survivors as keep-or-de-version. Note in fairness: the checklist scopes the detector to 'on audit and after every model / CC upgrade', and no model/CC upgrade happened in the range — but v1.19.5 WAS an audit (its whole subject is a fresh-context review of v1.19.2-v1.19.4), which is the trigger, and the target form is an invariant that holds between runs regardless. Consumer impact: none directly; the cost is that the drift signal the series invented is already desensitised at the moment it ships.",
+      "recommendation": "Run the detector as shipped, classify the two survivors (they may well be legitimate 'keep' — the model name is the content of the finding, not a currency pin — but the classification has to be made and recorded, which is the whole point of the rule), and record the count. If they are keep, the count baseline in the devlog becomes 20, not 18."
+    },
+    {
+      "id": "PROC-2",
+      "severity": "minor",
+      "title": "Dev-harness commit 3ff5002 added a mandatory step to the release ritual with no devlog entry of its own",
+      "where": [
+        "3ff5002 — .claude/skills/release/SKILL.md:116-137 (step B3.5)"
+      ],
+      "detail": "Path A step 2 of the ritual says: 'Если изменение значимое (не опечатка) → devlog-запись + reindex ... devlog ведётся для любого значимого изменения репо, не только релизов.' Commit 3ff5002 adds a whole new mandated step (B3.5, the refuter gate) to the repo's own release procedure — a procedural/architectural decision by any reading, and 23 lines of it. It shipped with no devlog entry: the commit touches exactly one file. The change is not invisible — entry 0028 (v1.19.5) refers to it in prose ('Первое применение шага B3.5, добавленного в release-ритуал часом раньше') and in Related — but it is absent from 0028's '## Затронутые файлы', so no entry in the log owns the ritual change or the reasoning behind it. The precedent in the same range cuts the other way: the far smaller SKILL.md trailer fix in 96138fa IS listed under 'Затронутые файлы' in entry 0023.",
+      "recommendation": "Nothing to un-do; the ritual change itself is sound and was applied immediately. If the log is to stay the source of truth for repo chronology, add a retroactive entry for the B3.5 addition, or fold it into the next entry that touches the ritual — which is due anyway, since entry 0030's own Related section records a conclusion ('шаг B3.5 описывает только первый проход ... остановка по холостому проходу дешевле, чем по счёту тактов') that has not been folded back into SKILL.md; the file is unchanged since 3ff5002."
+    }
+  ],
+  "notable_positives": [
+    "Retraction hygiene is the strongest part of the record. Three reversals in one day, all written forward and none backward: v1.19.1 names v1.19.0's design flaw ('a matrix that never varies the variable proves nothing, confidently'), v1.19.2 names v1.19.1's ('the green rows came back red') and restores the earlier attribution, and entries 0024/0025 state explicitly why the superseded entries are left untouched. Five historical CHANGELOG sections verified byte-identical to their release-time text.",
+    "index.json/tldr.md were verified as genuinely generated at all 9 commits by re-running the generator against each extracted tree, not merely by exiting 0 at HEAD.",
+    "The find->fix->verify loop was terminated by an idle pass rather than by author fiat: v1.19.5 (audit) -> v1.19.6 (3 regressions the fixes themselves introduced) -> v1.19.7 ('clean — loop can terminate'), with each round's verdict committed. v1.19.6's headline regression is the same scope-mismatch class v1.19.5 existed to remove, and it is reported as such rather than smoothed over.",
+    "v1.19.4 pinned effort: xhigh on the three audit agents in the same day the series established that xhigh breaks WebSearch — checked and consistent, because none of the three declares WebSearch in tools:, and entry 0027 states that narrowing was deliberate."
+  ],
+  "verification_commands": [
+    "for c in 96138fa a95dade 1418818 3d7b13f 3f9f46d 3ff5002 065c579 660b4dd 716bd85; do git show $c:plugins/harness/.claude-plugin/plugin.json | jq -r .version; git show $c:plugins/devlog/.claude-plugin/plugin.json | jq -r .version; done",
+    "git ls-remote --tags origin 'v1.19.*'; git rev-parse HEAD origin/main",
+    "git archive <commit> | tar -x -C <tmp> && python3 <tmp>/plugins/devlog/skills/devlog/rebuild-index.py <tmp>/.claude/devlog && diff <(git show <commit>:.claude/devlog/index.json | jq 'del(.generated_at)') <(jq 'del(.generated_at)' <tmp>/.claude/devlog/index.json)",
+    "grep -rnE \"Opus 4\\.[0-9]|Opus [0-9]|Sonnet [0-9]|v?2\\.1\\.[0-9]{3}\" --include=\"*.md\" . | grep -vE \"(archive/|devlog/|/reports/|/audits/|CHANGELOG\\.md|native-capabilities\\.md)\" | wc -l",
+    "git log --format='== %h' --name-status --diff-filter=A 96138fa~1..HEAD"
+  ]
+}

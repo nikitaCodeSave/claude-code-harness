@@ -273,10 +273,14 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
     in #76689 puts the regression at v2.1.207. Three properties make it a harness problem, not a nuisance: **(a)** neither
     `alwaysThinkingEnabled` nor `MAX_THINKING_TOKENS` works around it; **(b)** it lands mostly in
     **subagents** (8 of 10 reported failures) — a research delegate keeps running and returns a
-    report with a whole source tier missing; **(c)** it is **silent** — the error text goes into
-    the `WebSearch` `tool_result` body with no `is_error` flag and no API-error record, so
-    nothing surfaces to the operator and a filter on `isApiErrorMessage` structurally cannot see
-    it. **The ceiling is Opus 5's, and the escape is per-delegate** — two further matrices,
+    report with a whole source tier missing; **(c)** it is **silent to the caller, though not
+    unflagged**. The `tool_result` itself is marked: `is_error: true`, body prefixed
+    `API Error: 400 …` — verified on 24 of 24 failing runs, session-level and delegate-level
+    alike, so a scan of `tool_result` records finds it. What is missing is an assistant-level
+    API-error record, so a filter on `isApiErrorMessage` ("true when this assistant message wraps
+    an API error") does not see it — and, decisively, **a parent sees only a delegate's final
+    text, never its `tool_result`s**. That is where the silence actually lives: the delegate
+    knows it failed and the parent cannot tell. **The ceiling is Opus 5's, and the escape is per-delegate** — two further matrices,
     same day, same oracle.
 
     *Which model is affected.* As the **session** model at `xhigh` and `max`,

@@ -2,7 +2,8 @@
 
 The reduced, Claude Code-specific rules for growing a `.claude/` without bloating it. Read in
 **Bootstrap** and **Extend** modes. Each rule has a first-party basis (see `evidence-base.md`).
-Grounded for the Claude 5 family / Opus 4.8 generation, Claude Code v2.1.210 (July 2026).
+Grounded for a capable Claude Code / Opus-class generation; the currency pin lives in
+`references/native-capabilities.md`.
 
 ## The one principle everything else serves
 
@@ -103,8 +104,15 @@ both measured (`native-capabilities.md`, Effort §):
   no `effort:` inherits the session's level. From a deep session, give a research delegate
   either `effort: high` (or below, keeping the session model) or `model: claude-sonnet-5` /
   `claude-fable-5`, which keep search at `xhigh` and `max` — the two tiers that break Opus 5.
-  Where the session level arrives through `CLAUDE_CODE_EFFORT_LEVEL`, frontmatter `effort:`
-  cannot lower it — only the model pin survives. Both halves measured on the frontmatter path.
+  Where the session level arrives through `CLAUDE_CODE_EFFORT_LEVEL`, frontmatter `effort:` is
+  overridden **in both directions** — it cannot lower an env `xhigh`, and an env `low` drags a
+  delegate declared `xhigh` down to `low` (2/2 each way). Under an env pin only the model pin
+  survives. Both halves measured on the frontmatter path.
+
+  The same asymmetry bites a delegate you *want* deep: an agent declaring `effort: xhigh` runs at
+  whatever the env says. Before an audit or verification pass whose whole value is depth, confirm
+  `printenv CLAUDE_CODE_EFFORT_LEVEL` is empty — a declared level is a guarantee against every
+  layer except that one.
 
 ```yaml
 ---

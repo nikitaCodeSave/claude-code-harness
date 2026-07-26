@@ -2,8 +2,8 @@
 
 Read this when someone challenges a recommendation or asks "where does this come from".
 Every core harness principle has a **first-party (T1)** citation — the discipline is grounded,
-not idiosyncratic. Verified against current docs July 2026 (Claude 5 family / Opus 4.8
-generation, Claude Code v2.1.211).
+not idiosyncratic. Verified against current docs July 2026; the currency pin lives in
+`references/native-capabilities.md`.
 
 ## Trust rubric
 

@@ -1,0 +1,326 @@
+{
+  "role": "evidence-executor",
+  "audit": "final-session-2026-07-26",
+  "deliverable": "claude-code-harness @ 716bd85396ff36b3bab491103e7d68736e2cf726 (v1.19.7)",
+  "executed_at": "2026-07-26",
+  "environment": {
+    "claude_code_version": "2.1.220 (Claude Code)",
+    "platform": "Linux",
+    "repo": "/home/nikita/PROJECTS/claude-code-harness",
+    "scratch": "/tmp/claude-1000/-home-nikita-PROJECTS-claude-code-harness/fc8a91da-3ddd-43eb-b13d-c1b9d3bb88e0/scratchpad/audit",
+    "method_note": "All mutating tests ran against a git clone at $SCRATCH/repo-copy, reset with 'git reset --hard HEAD && git clean -qfd' between cases. The source repo was mutated exactly once (rebuild-index.py writes in place, item 2) and restored immediately with 'git checkout -- .claude/devlog/index.json'."
+  },
+
+  "verdict": "confirmed-with-findings",
+  "summary": "All four pieces of live machinery execute and their guards genuinely fire. Three shipped runtime claims re-derived independently and reproduce, one to the exact result count. Findings: (a) release.sh accepts any string as a version — no format validation; (b) release.sh's shipped-by stamp guard is bypassed by a multi-commit release; (c) index.json is NOT byte-identical across runs — 'generated_at' changes every invocation, so the repo's own reindex always dirties the tree; (d) the drift detector's own count has risen 18 -> 20 since v1.19.0, i.e. it is signalling drift right now, and the two new hits sit in a file whose header pin contradicts its own body; (e) one published sub-claim is REFUTED: the failing WebSearch tool_result DOES carry is_error:true.",
+
+  "items": [
+    {
+      "id": 1,
+      "name": "plugins/harness/scripts/release.sh — release guard",
+      "status": "confirmed",
+      "what_it_actually_checks": [
+        "writes <version> into BOTH plugins' plugin.json (lockstep is enforced by construction, not by comparison)",
+        "marketplace drift: fails if any entry in .claude-plugin/marketplace.json declares a 'version' key",
+        "shipped-by stamps: every file in plugins/harness/references/project-docs/*.md that is modified-vs-HEAD or untracked must carry 'shipped-by: claude-code-harness v<version>' on line 1",
+        "tag v<version> must not already exist",
+        "stages the shippable surface; deliberately does not commit"
+      ],
+      "cases": [
+        {
+          "case": "T1 happy path",
+          "command": "bash plugins/harness/scripts/release.sh 1.20.0",
+          "observed": "version: harness=1.20.0  devlog=1.20.0  (lockstep; marketplace carries no version, by design) / staged both plugin.json / EXIT=0",
+          "result": "pass (control — the guard is reachable and does not false-positive)"
+        },
+        {
+          "case": "T2 marketplace drift",
+          "command": "jq '.plugins[0] += {version:\"9.9.9\"}' .claude-plugin/marketplace.json > /tmp/m.json && mv /tmp/m.json .claude-plugin/marketplace.json; bash plugins/harness/scripts/release.sh 1.20.0",
+          "observed": "MARKETPLACE DRIFT: a plugin entry in .claude-plugin/marketplace.json declares 'version' — remove it (plugin.json is authoritative). EXIT=1",
+          "result": "GUARD FIRES"
+        },
+        {
+          "case": "T3 tag already exists",
+          "command": "bash plugins/harness/scripts/release.sh 1.19.7",
+          "observed": "tag v1.19.7 already exists / EXIT=1",
+          "result": "GUARD FIRES",
+          "note": "The plugin.json files are rewritten BEFORE this check runs, so a rejected run still leaves the working tree modified. Cosmetic, not a correctness hole (the script never commits), but it means a failed release.sh must be followed by a git checkout."
+        },
+        {
+          "case": "T4 no argument",
+          "command": "bash plugins/harness/scripts/release.sh",
+          "observed": "line 21: 1: usage: scripts/release.sh <version, e.g. 1.14.0> / EXIT=1",
+          "result": "GUARD FIRES"
+        },
+        {
+          "case": "T5 garbage version string",
+          "command": "bash plugins/harness/scripts/release.sh banana",
+          "observed": "version: harness=banana  devlog=banana ... EXIT=0; jq -r .version plugins/harness/.claude-plugin/plugin.json -> \"banana\"; printed handoff says 'git tag vbanana'",
+          "result": "NO GUARD — FINDING",
+          "finding": "release.sh performs zero validation of the version argument. Any string is written into both plugin.json files and echoed into the commit/tag commands. Since plugin.json's version is the consumers' update cache key (the script's own header says so), a malformed or backwards version ships silently. A semver regex on $V before the jq write would close this in one line."
+        },
+        {
+          "case": "T6 project-doc modified without stamp bump",
+          "command": "printf '\\nedit\\n' >> plugins/harness/references/project-docs/docs-discipline.md; bash plugins/harness/scripts/release.sh 1.20.0",
+          "observed": "STAMP MISMATCH: plugins/harness/references/project-docs/docs-discipline.md is modified but its header is not 'shipped-by: claude-code-harness v1.20.0' / Fix the stamps above, then re-run. / EXIT=1",
+          "result": "GUARD FIRES"
+        },
+        {
+          "case": "T7 project-doc modified WITH stamp bumped",
+          "command": "sed -i '1s/v1\\.10\\.1/v1.20.0/' ...docs-discipline.md; printf '\\nedit\\n' >> ...; bash plugins/harness/scripts/release.sh 1.20.0",
+          "observed": "EXIT=0",
+          "result": "pass (negative control — the stamp guard is not a blanket refusal)"
+        },
+        {
+          "case": "T8 brand-new untracked project-doc, unstamped",
+          "command": "printf 'no stamp here\\n' > plugins/harness/references/project-docs/newdoc.md; bash plugins/harness/scripts/release.sh 1.20.0",
+          "observed": "STAMP MISMATCH: plugins/harness/references/project-docs/newdoc.md ... EXIT=1",
+          "result": "GUARD FIRES (the 'git ls-files --error-unmatch' branch works)"
+        },
+        {
+          "case": "T9 stamp displaced to line 2",
+          "command": "sed -i '1i\\ ' plugins/harness/references/project-docs/testing.md; bash plugins/harness/scripts/release.sh 1.20.0",
+          "observed": "STAMP MISMATCH: ...testing.md ... EXIT=1",
+          "result": "GUARD FIRES (head -1 is strict about line 1 — intended, and it does not silently pass)"
+        },
+        {
+          "case": "T10 lockstep repair",
+          "command": "jq '.version=\"0.0.1\"' plugins/devlog/.claude-plugin/plugin.json > /tmp/d.json && mv /tmp/d.json ...; bash plugins/harness/scripts/release.sh 1.20.0",
+          "observed": "version: harness=1.20.0  devlog=1.20.0",
+          "result": "pass — a desynced devlog plugin.json is overwritten, so lockstep cannot be violated by the script's own path"
+        },
+        {
+          "case": "HOLE PROBE — stamp guard vs a multi-commit release",
+          "command": "printf '\\nunstamped edit\\n' >> plugins/harness/references/project-docs/docs-discipline.md; git commit -qam 'wip: earlier commit of this release'; bash plugins/harness/scripts/release.sh 1.20.0",
+          "observed": "version: harness=1.20.0 devlog=1.20.0 / Staged. / EXIT=0 — NO stamp mismatch reported, while the file's line-1 stamp still read v1.10.1",
+          "control": "The identical edit left UNCOMMITTED does produce 'STAMP MISMATCH: ...docs-discipline.md' — so the probe method is sound and the difference is the commit, not the edit.",
+          "result": "GUARD BYPASSED — FINDING",
+          "finding": "The stamp check keys on 'git diff --quiet HEAD -- $f'. If a project-doc is edited and committed in an earlier commit of the same release cycle, HEAD already contains the edit, the diff is empty, and the file is never stamp-checked — a stale shipped-by stamp ships. This is exactly the class of defect release.sh was written to mechanize away (its header cites 'shipped-by stamps pointing at versions that exist in no commit'). Currently latent rather than live: the repo's release ritual runs release.sh before the single release commit. Closing it would mean diffing against the previous tag (git diff --quiet <last-tag> -- $f) instead of HEAD."
+        }
+      ]
+    },
+
+    {
+      "id": 2,
+      "name": "plugins/devlog/skills/devlog/rebuild-index.py — reindexer/validator",
+      "status": "confirmed-with-refutation",
+      "idempotence": {
+        "command": "python3 plugins/devlog/skills/devlog/rebuild-index.py .claude/devlog",
+        "observed": "index.json + tldr.md updated: 30 entries (devlog root: /home/nikita/PROJECTS/claude-code-harness/.claude/devlog) / EXIT=0",
+        "tldr_md": "BYTE-IDENTICAL (diff produced no output)",
+        "index_json": "NOT byte-identical — REFUTES the stated expectation",
+        "raw_diff": "16c16\n<   \"generated_at\": \"2026-07-26T05:04:30Z\"\n---\n>   \"generated_at\": \"2026-07-26T05:13:48Z\"",
+        "normalized_check": "jq 'del(.generated_at)' before | diff - after  ->  IDENTICAL modulo generated_at",
+        "finding": "index.json embeds a wall-clock 'generated_at' stamp, so every invocation of the repo's own reindexer produces a one-line diff on a committed, generated artifact ('M .claude/devlog/index.json') even when no entry changed. Content-wise the committed artifacts ARE in sync with entries/ — the delta is purely the timestamp. Practical cost: the devlog ritual cannot be run as a no-op verification (e.g. 'reindex and confirm clean tree'), and every devlog commit carries a spurious timestamp churn line. Either drop generated_at or exclude it from the tree-clean check.",
+        "restoration": "git checkout -- .claude/devlog/index.json (repo returned to as-found; verified with git diff --stat HEAD -> empty)"
+      },
+      "validator_cases": {
+        "method": "fresh scratch devlog at $SCRATCH/dl with one known-good entry; each case re-created the baseline then introduced exactly one defect",
+        "V0_baseline_control": "PASS — 'index.json + tldr.md updated: 1 entries', EXIT=0 (proves the harness accepts a valid entry, so the rejections below are not a blanket failure)",
+        "V1_bad_slug": "REJECTED — 'entries/0001-totally-wrong-slug.md: filename slug 'totally-wrong-slug' != slugify(title)='first-entry'', EXIT=1",
+        "V2_duplicate_id": "REJECTED — 'duplicate id 1: entries/0001-first-entry.md vs entries/0001-second-entry.md', EXIT=1",
+        "V3_missing_required_field": "REJECTED — 'entries/0002-no-title.md: required field 'title' missing', EXIT=1",
+        "V4_no_frontmatter": "REJECTED — 'entries/0003-naked.md: missing or malformed frontmatter', EXIT=1",
+        "V5_id_filename_mismatch": "REJECTED — 'entries/0009-mismatch-id.md: frontmatter id 7 != filename id 9', EXIT=1",
+        "V6_filename_not_NNNN_slug": "REJECTED — 'entries/no-number.md: filename must match NNNN-slug pattern', EXIT=1",
+        "V7_no_artifacts_on_error": "CONFIRMED — after a failing run, 'ls $SCRATCH/dl' showed only 'entries'; neither index.json nor tldr.md was written, so a rejected run cannot publish a half-valid index"
+      },
+      "unit_tests": {
+        "command": "python3 -m pytest plugins/devlog/skills/devlog/test_rebuild_index.py -q",
+        "observed": "7 passed in 0.01s, EXIT=0"
+      },
+      "conclusion": "It is a real validator: 6/6 seeded defects rejected with exit 1 and a specific message, artifacts withheld on error, and a passing control. The only refuted element is the byte-identity expectation for index.json."
+    },
+
+    {
+      "id": 3,
+      "name": "Drift detector (v1.19.0) — references/audit-checklist.md §1",
+      "status": "confirmed",
+      "location": "plugins/harness/references/audit-checklist.md, §1 'Stale model / version pins', bullet 'Run the drift detector — the class, not the case'",
+      "detector": "grep -rnE \"Opus 4\\.[0-9]|Opus [0-9]|Sonnet [0-9]|v?2\\.1\\.[0-9]{3}\" --include=\"*.md\" . | grep -vE \"(archive/|devlog/|/reports/|/audits/|CHANGELOG\\.md|native-capabilities\\.md)\"",
+      "cases": [
+        {
+          "case": "needle control (validate the method before trusting a count)",
+          "command": "grep -cE \"Opus 4\\.[0-9]|Opus [0-9]|Sonnet [0-9]|v?2\\.1\\.[0-9]{3}\" plugins/harness/references/native-capabilities.md",
+          "observed": "58 raw hits inside the inventory; 0 survive the allowlist",
+          "result": "method validated — the regex genuinely matches version pins, and the allowlist genuinely suppresses the inventory"
+        },
+        {
+          "case": "re-derive the recorded baseline",
+          "command": "git checkout v1.19.0 && <detector> | wc -l",
+          "observed": "18",
+          "claimed": "devlog #0023 'Проверка': '18 выживших хитов'",
+          "result": "REPRODUCES EXACTLY"
+        },
+        {
+          "case": "current count at HEAD (v1.19.7)",
+          "command": "<detector> | wc -l",
+          "observed": "20",
+          "result": "DETECTOR IS SIGNALLING — the checklist's own rule is 'a rising hit count between audits is the drift signal'; 18 -> 20 over seven releases in one day"
+        },
+        {
+          "case": "D1 — inject the drift it claims to detect, into a LIVE doc",
+          "command": "printf '\\nGrounded for Opus 4.7, Claude Code v2.1.199.\\n' >> plugins/harness/SKILL.md; <detector> | wc -l",
+          "observed": "21 (was 20); survivor listed as 'plugins/harness/SKILL.md:208:Grounded for Opus 4.7, Claude Code v2.1.199.'",
+          "result": "DETECTS"
+        },
+        {
+          "case": "D2 — same pin injected into FROZEN layers (must NOT raise)",
+          "command": "append the same line to CHANGELOG.md and .claude/devlog/tldr.md; <detector> | wc -l",
+          "observed": "20 (unchanged)",
+          "result": "correctly suppressed — the allowlist protects provenance layers as designed"
+        },
+        {
+          "case": "D3 — pin injected into the INVENTORY itself (must NOT raise)",
+          "command": "append the same line to plugins/harness/references/native-capabilities.md; <detector> | wc -l",
+          "observed": "20 (unchanged)",
+          "result": "correctly suppressed — the single version-carrying doc is exempt by design"
+        },
+        {
+          "case": "D4 — identify the two NEW survivors since v1.19.0",
+          "command": "diff <(sort v1190-hits) <(sort head-hits) | grep '^>'",
+          "observed": [
+            "plugins/harness/references/harness-discipline.md: '- **The effort tier.** On Opus 5, `xhigh`/`max` kill `WebSearch`, and a delegate that declares'",
+            "plugins/harness/references/harness-discipline.md: '  `claude-fable-5`, which keep search at `xhigh` and `max` — the two tiers that break Opus 5.'"
+          ],
+          "result": "the drift is real and localised"
+        }
+      ],
+      "finding": "The detector works on every axis tested — it fires on injected live-doc drift, stays silent on frozen layers and on the inventory, and its recorded baseline of 18 reproduces exactly. What it is currently reporting is a genuine, unremediated condition, and the target form named in the same section ('exactly one file carries the currency pin; every other live doc is version-free and points at it') is NOT met at HEAD. Four live reference docs still carry a currency pin, and all four disagree with native-capabilities.md (which states CC v2.1.220 / Opus 5): audit-checklist.md:5 'Claude 5 family / Opus 4.8 generation, Claude Code v2.1.211'; evidence-base.md:5-6 'Claude 5 family / Opus 4.8 generation, Claude Code v2.1.211'; harness-evolution.md:19 'last-grounded: CC v2.1.211 · ... + Opus 4.8'; harness-discipline.md:5 'Claude 5 family / Opus 4.8 generation, Claude Code v2.1.210'. The strongest single instance is internal to one file: harness-discipline.md's header claims it is grounded for the Opus 4.8 generation / CC v2.1.210, while its own line 102 (added in v1.19.3/v1.19.5 — git log confirms both commits touched this file after the header stamp was last set) states Opus-5-specific runtime behaviour. That is precisely the 'two files disagree and the reader believes whichever they opened' failure the release was written to prevent, compressed into one file. Note the section contains a genuine internal tension the detector defers to a human pass: an earlier bullet says dated grounding stamps are provenance and should be KEPT, while the target-form bullet says only one live doc may carry the currency pin. These four hits sit exactly on that seam."
+    },
+
+    {
+      "id": 4,
+      "name": "Independent re-derivation of shipped runtime claims (references/native-capabilities.md)",
+      "status": "confirmed-with-one-refutation",
+      "claims_selected": "The three a consumer is most likely to act on form a hazard / boundary / workaround triple: (1) WebSearch dies at xhigh on Opus 5 — what to avoid; (2) WebSearch works at high on Opus 5 — where the safe boundary is; (3) Sonnet 5 keeps search at xhigh — the prescribed escape (`model: claude-sonnet-5`).",
+      "harness": {
+        "runner": "$SCRATCH/run.sh — unsets every CLAUDE* var (and AI_AGENT) so the child computes its own state, then: timeout 300 claude -p \"Use the WebSearch tool exactly once to search for: Anthropic Claude Code release notes. Then reply with just the number of results you got. Use no other tool.\" --model $MODEL --effort $EFFORT --allowedTools WebSearch --output-format stream-json --verbose </dev/null > runs/$LABEL.jsonl",
+        "env_hygiene_verified": "for v in $(env | grep -oE '^CLAUDE[A-Za-z_]*' | sort -u); do unset \"$v\"; done  ->  'env | grep -c CLAUDE' returned 0",
+        "oracles": [
+          "primary: the API rejection text, which self-reports the tier actually in force — grep -o \"output_config.effort '[a-z]*'\"",
+          "control: grep -c '\"name\":\"WebSearch\"' — proves the tool was actually invoked, so a 'pass' is never just a skipped call",
+          "tier readback: the transcript's per-message effort field under ~/.claude/projects/<slug>/<session>.jsonl — the independent oracle for the rows that PASS, where no rejection text exists to name the tier"
+        ],
+        "confounder_controlled": "The operator's user-level ~/.claude/settings.json pins effortLevel:\"xhigh\". For the passing Opus row this is a real confound, closed by the transcript readback: the --effort high run recorded effort \"high\" x3, i.e. the launch flag overrode settings downward. All result files are my own; none were reused.",
+        "runs": "6 (2 per row for the three claims) + 1 bonus row at max"
+      },
+      "results": [
+        {
+          "claim": "1 — Opus 5 at xhigh: WebSearch fails with 400 quoting the tier",
+          "shipped_row": "| xhigh | effortLevel in settings / --effort xhigh | fails 3/3, 4/4, 3/3 |",
+          "runs": "pilot-opus5-xhigh, opus5-xhigh-b (N=2)",
+          "observed": "2/2 FAILED. WebSearch invoked 1/1 in each (control passes). Rejection body verbatim: \"API Error: 400 output_config.effort 'xhigh' is not supported when thinking is disabled on this model. Use effort 'high' or below, or enable thinking.\" Transcript per-message effort read \"xhigh\" x5 in both.",
+          "verdict": "CONFIRMED"
+        },
+        {
+          "claim": "2 — Opus 5 at high: WebSearch works",
+          "shipped_row": "| high | --effort high, claude-opus-5[1m] | ok 0/2 — returned 7 results |",
+          "runs": "opus5-high-a, opus5-high-b (N=2)",
+          "observed": "2/2 SUCCEEDED. WebSearch invoked 1/1 in each. No output_config.effort text anywhere. Model answer: '7' plus a source list (Claude Help Center release notes, Claude Platform release notes, ...). Transcript per-message effort read \"high\" x3, model claude-opus-5 — so --effort high genuinely overrode the settings' xhigh.",
+          "verdict": "CONFIRMED — and the result count matches the shipped row exactly (7 results), on claude-opus-5 rather than the 1m variant the row used"
+        },
+        {
+          "claim": "3 — Sonnet 5 keeps WebSearch at xhigh (the prescribed escape)",
+          "shipped_row": "'claude-sonnet-5 and claude-fable-5 searched cleanly — 0/8 failures ... Sonnet 5 and Fable 5 keep search at xhigh and max'",
+          "runs": "sonnet5-xhigh-a, sonnet5-xhigh-b (N=2)",
+          "observed": "2/2 SUCCEEDED. WebSearch invoked 1/1 in each. No effort rejection. Answer: '7'. Transcript per-message effort read \"xhigh\" x4, model claude-sonnet-5.",
+          "verdict": "CONFIRMED, and unconfounded — the transcript readback proves the tier really was xhigh, and the Opus runs in the identical harness at the same readback tier were rejected. Model is the only varied factor.",
+          "note": "This closes a gap the shipped table leaves open: a passing row has no rejection text to name its tier, so the shipped 0/8 rests on the mechanism rather than a readback. The per-message effort field supplies that readback."
+        },
+        {
+          "claim": "bonus — the rejection quotes the tier actually in force, not a fixed string",
+          "runs": "opus5-max-a (N=1)",
+          "observed": "FAILED with \"400 output_config.effort 'max' is not supported when thinking is disabled on this model\"; transcript effort \"max\" x5.",
+          "verdict": "CONFIRMED — 'xhigh' and 'max' rejections are distinct and track the tier, so the oracle is self-validating"
+        },
+        {
+          "claim": "REFUTED sub-claim — 'it is silent ... the error text goes into the WebSearch tool_result body with no is_error flag and no API-error record'",
+          "location": "plugins/harness/references/native-capabilities.md, property (c) of the WebSearch/xhigh section",
+          "observed": {
+            "stream_json_failing_run": "tool_result keys: ['content','is_error','tool_use_id','type'], is_error = True, content = \"API Error: 400 output_config.effort 'xhigh' is not supported...\"",
+            "stream_json_passing_run": "tool_result keys: ['content','tool_use_id','type'] — no is_error key at all",
+            "transcript_failing_run": "grep '\"is_error\":[a-z]*' -> 1 x \"is_error\":true",
+            "transcript_passing_runs": "0 occurrences of is_error",
+            "isApiErrorMessage": "0 occurrences in the failing transcript"
+          },
+          "verdict": "PARTIALLY REFUTED",
+          "detail": "The half of the claim about isApiErrorMessage STANDS — that field is genuinely absent, so a filter keyed on it cannot see the failure. But 'no is_error flag' is FALSE on CC 2.1.220 / Opus 5, on BOTH surfaces: the failing WebSearch tool_result carries is_error:true, and the succeeding one omits the key entirely. is_error is therefore an exact discriminator for this failure. Consumer impact is favourable and worth shipping: a harness can detect the whole class mechanically by filtering tool_result blocks where name==WebSearch and is_error==true — cheaper and more direct than the 'detection glob one level deeper than the session file' the doc currently prescribes. Secondary observation, weaker: in both failing runs the model's own final answer explicitly reported the search failure rather than returning a confident answer with a tier missing — but my prompt asked only for the result count, which makes a failure trivially noticeable, so this does not generalise to the research-delegate scenario the doc describes."
+        }
+      ]
+    },
+
+    {
+      "id": 5,
+      "name": "Repo hygiene as executed",
+      "status": "confirmed",
+      "checks": [
+        {
+          "check": "working tree clean",
+          "command": "git status --porcelain ; git diff --stat HEAD",
+          "observed": "No tracked file modified (git diff --stat HEAD empty). Untracked at audit start: .claude/audits/config-dir-portability/, .claude/audits/consumer-journey-v1-16-0/, .claude/audits/session-context-hook/. A fourth, .claude/audits/final-session-2026-07-26/, appeared during the audit (this audit's own output directory).",
+          "result": "clean with respect to tracked content"
+        },
+        {
+          "check": "HEAD == origin/main",
+          "command": "git fetch -q origin; git rev-parse HEAD origin/main; git rev-list --left-right --count HEAD...origin/main",
+          "observed": "716bd85396ff36b3bab491103e7d68736e2cf726 for both; 0\t0 (no divergence in either direction)",
+          "result": "IN SYNC"
+        },
+        {
+          "check": "every tag resolves on the remote",
+          "command": "for t in $(git tag); do git ls-remote --tags origin \"refs/tags/$t\" | grep -q . || echo \"MISSING ON REMOTE: $t\"; done ; comm -13 <(git tag|sort) <(remote tag list)",
+          "observed": "25 local tags, zero missing on remote, zero remote tags absent locally",
+          "result": "ALL 25 TAGS RESOLVE — the failure mode release.sh warns about ('a release exists only when committed, TAGGED and PUSHED') is not present"
+        },
+        {
+          "check": "temporary/scratch artifacts in git ls-files",
+          "command": "git ls-files | grep -iE '__pycache__|\\.pyc$|\\.pytest_cache|\\.tmp$|\\.bak$|\\.orig$|\\.rej$|~$|\\.DS_Store|/tmp/|scratch|\\.swp$'",
+          "observed": "no matches",
+          "result": "CLEAN — plugins/devlog/skills/devlog/__pycache__/ and /.pytest_cache/ exist on disk but are gitignored and untracked; .gitignore runs in whitelist mode ('/*' then explicit un-ignores), which is why nothing stray can drift in"
+        },
+        {
+          "check": "audit-record discipline",
+          "command": "for d in .claude/audits/*/; do ls -1 $d; git ls-files $d | wc -l; done",
+          "observed": "effort-websearch-1-19-4/ has 4 tracked AUDIT-*.json. config-dir-portability/ (AUDIT-REFUTER.json), consumer-journey-v1-16-0/ (AUDIT-REFUTER.json), session-context-hook/ (AUDIT-REFUTER-FIXES.json, AUDIT-REFUTER.json) have 0 tracked files each.",
+          "result": "MINOR FINDING",
+          "finding": ".gitignore line 28 explicitly whitelists '!/.claude/audits/*/AUDIT-*.json' — i.e. these records are intended to be tracked — yet 3 of 5 audit directories contain AUDIT-*.json files that were never committed. The continuity trail for those three audits exists only on this machine. Not a defect in any guard; an inconsistently applied convention."
+        }
+      ]
+    }
+  ],
+
+  "guards_i_could_not_make_fail": [
+    "marketplace drift check — fires on any 'version' key in any marketplace plugin entry",
+    "tag-already-exists check",
+    "shipped-by stamp check for uncommitted and untracked project-docs, including a stamp displaced off line 1",
+    "lockstep — structurally unbreakable via the script, which overwrites both plugin.json unconditionally",
+    "rebuild-index.py — 6/6 seeded defects rejected, artifacts withheld on error",
+    "drift detector — fires on injected live-doc drift, stays silent on frozen layers and the inventory"
+  ],
+
+  "guards_i_did_make_fail": [
+    "release.sh version validation — does not exist; 'banana' accepted and written to both plugin.json",
+    "release.sh shipped-by stamp check — bypassed when the project-doc edit is already committed (multi-commit release), demonstrated with a matched uncommitted control"
+  ],
+
+  "claims_refuted": [
+    "index.json is byte-identical across runs — FALSE; 'generated_at' changes every invocation (tldr.md IS byte-identical)",
+    "the WebSearch/xhigh failure carries 'no is_error flag' — FALSE on CC 2.1.220; is_error:true is present on the failing tool_result in both stream-json and the transcript, and absent on passing runs"
+  ],
+
+  "claims_reproduced": [
+    "drift detector count of 18 at v1.19.0 — exact",
+    "WebSearch fails at xhigh on Opus 5 with a 400 quoting the tier — 2/2",
+    "WebSearch works at high on Opus 5 — 2/2, and the shipped '7 results' matched",
+    "Sonnet 5 keeps WebSearch at xhigh — 2/2, tier confirmed by transcript readback",
+    "the 400 quotes the tier actually in force ('max' vs 'xhigh') — 1/1 bonus row"
+  ],
+
+  "repo_state_on_exit": {
+    "head": "716bd85396ff36b3bab491103e7d68736e2cf726",
+    "tracked_files_modified": 0,
+    "verification": "git diff --stat HEAD -> empty; git stash list -> empty; git status --porcelain -> only the four untracked .claude/audits/ directories (three pre-existing, one created by this audit for its own output)",
+    "statement": "The repository is exactly as found, except for this audit's own output directory."
+  }
+}

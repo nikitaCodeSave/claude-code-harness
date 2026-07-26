@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #31 · 2026-07-26 · Свежий рефутер нашёл то, что пережило три прохода
+
+**Tags:** harness, evidence, bugfix, docs, adr
+
+Финальный полный аудит перед закрытием сессии — впервые все три роли, включая process-auditor, который за день ни разу не запускался, и нового рефутера без контекста предыдущих проходов. Прежний рефутер к этому моменту трижды проходил по тому же материалу и завершил петлю…
+
+[→ entries/0031-svezhiy-refuter-nashel-to-chto-perezhilo-tri-prokhoda.md](entries/0031-svezhiy-refuter-nashel-to-chto-perezhilo-tri-prokhoda.md)
+
+---
+
 ## #30 · 2026-07-26 · Петля верификации сошлась вхолостую
 
 **Tags:** harness, evidence, docs, adr

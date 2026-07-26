@@ -2,7 +2,8 @@
 
 Walk top-down. For each finding write a one-line gap + a proposed remediation; **do not edit
 until the operator approves** the items they want fixed. Output uses the report template in
-`SKILL.md`. Grounded for the Claude 5 family / Opus 4.8 generation, Claude Code v2.1.211 (July 2026).
+`SKILL.md`. Grounded for a capable Claude Code / Opus-class generation; the currency pin lives
+in `references/native-capabilities.md`.
 
 ## 0. Live machinery vs completed-run artifact (ask this first)
 

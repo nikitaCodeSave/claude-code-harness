@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.20.0] — 2026-08-01
+
+**A cross-vendor refuter joins the verification ladder — as a skill the kit hands over on
+consent, behind a mechanical gate, and never as a reason to buy a second subscription.** A
+same-family refuter is fresh but not foreign: trained as the author was, it inherits a share of
+the author's blind spots. A reviewer from another vendor does not. The rung that ships stays the
+native `code-refuter`; this is an upgrade for operators who already run a second-vendor CLI.
+
+### Added
+
+- **`references/codex-peer-skill.md`** — the canonical `codex-peer` skill text plus its delivery
+  procedure. Not a live plugin skill on purpose: a plugin skill's description loads into every
+  consumer's session, so shipping it live would tax the majority who have no Codex and read as
+  "install another CLI". It reaches disk only through the same consent channel as
+  `practice-baseline.md` — global profile (recommended, matching the server's user scope) or
+  project embed, both on explicit approval, with a content-version stamp Audit re-syncs.
+- **One mechanical gate, stated in full in `bootstrap-checklist.md` Phase 2b**: a Codex MCP server
+  is already registered (`claude mcp list`). `codex` merely on PATH does not open it — an unwired
+  CLI means the operator has not chosen this, and offering to wire it is the recommendation the
+  gate exists to prevent. On a negative the option is not raised at all, and the reference is not
+  even loaded.
+- **`evidence-base.md`** — the provenance, bounded honestly: one controlled episode (n=1, one
+  component, one vendor: 5 real holes in a defensive Bash guard that 109 tests, three fix commits
+  and every same-family pass had missed; 16 raw findings triaged to those 5) plus the maintainer's
+  current daily practice, which is preference, not measurement, and days old rather than a track
+  record. It grounds the *discipline*, never "always call a second vendor".
+
+### Changed
+
+- **The scope disclaimer no longer contradicts the kit** (`SKILL.md` description + "Do NOT use
+  when", `README.md`): "does not cover provider-neutral patterns for OpenAI/Codex" became "does
+  not teach harness design *inside other frameworks*" — an external CLI wired into *this* harness
+  via MCP is in scope, and always was.
+- **`SKILL.md` Maintenance** gains a real re-verification trigger for the one shipped block whose
+  facts the kit cannot check from its own repo: re-read the live `tools/list` when a call is
+  rejected on an argument or the vendor's CLI is upgraded. A badge without a runner rots silently —
+  the kit's own finding, now honoured rather than repeated.
+
+### Not touched (deliberately)
+
+- **`references/project-docs/*`** — the files bootstrap copies verbatim and unconditionally into
+  every repository. A vendor-neutral clause was drafted for `workflow.md` and **removed after a
+  fresh-context refuter showed what it actually does**: a consumer with no second vendor would
+  have found, permanently in their own git history and re-synced at every audit, the statement
+  that the rung they have is not the strongest form. Their `shipped-by` stamps stay put.
+- **`references/practice-baseline.md`** — §8 stays vendor-neutral; ~80 lines that load every turn
+  in every project are the wrong home for an optional upgrade. Its content-version stamp does not
+  move.
+- No new agent, command, or mode. The `code-refuter` role is unchanged — what changes is who may
+  execute it.
+
 ## [1.19.9] — 2026-07-26
 
 **Verify-after-fix on v1.19.8: the three fixes hold, three minor issues came in with them.**

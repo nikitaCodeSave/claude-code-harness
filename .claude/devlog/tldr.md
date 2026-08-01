@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #35 · 2026-08-01 · Cross-vendor ревьюер отгружается скиллом, а гейт — механикой
+
+**Tags:** verification, plugin-surface, evidence, release
+
+В лаборатории закрепился новый компонент: Codex CLI, подключённый MCP-сервером, как независимый judge для silent-wrong класса. Провенанс — lab devlog #127: один защитный bash-хук, семь раундов find→fix→refute, 60+ дефектов; из 16 находок первого раунда реальными оказались 5 — и…
+
+[→ entries/0035-cross-vendor-revyuer-otgruzhaetsya-skillom-a-geyt-mekhanikoy.md](entries/0035-cross-vendor-revyuer-otgruzhaetsya-skillom-a-geyt-mekhanikoy.md)
+
+---
+
 ## #34 · 2026-07-26 · Шаги релиза живут в скилле, CLAUDE.md только указывает
 
 **Tags:** harness, docs

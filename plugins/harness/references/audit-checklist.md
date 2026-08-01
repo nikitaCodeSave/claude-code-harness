@@ -167,6 +167,19 @@ or re-run before proposing edits to its machinery.
   edited by an audit — if its stamp is older than the canon,
   report it and offer the guarded refresh (diff + timestamped backup + explicit approval;
   `practice-baseline.md`, "Keeping installed copies current").
+- **`codex-peer` re-sync — only if a copy already exists.** If `skills/codex-peer/SKILL.md` is
+  present (project, or the user profile at `<config-dir>/skills/`), compare its `codex-peer
+  content-version` stamp against the canonical block in `references/codex-peer-skill.md` and offer
+  the same diff-first re-sync; a hand-adapted copy (pinned model/effort/local defaults) is
+  deliberate, preserve it. The profile copy is reported, never edited by an audit. **An existing
+  copy is itself the opt-in**, so re-sync it on its stamp whether or not a server is registered
+  right now — a temporarily unregistered server is not a reason to let the file rot, and removing
+  it is the operator's call, not the audit's. **Absent is not a finding**: delivery is gated by the
+  single condition `bootstrap-checklist.md` Phase 2b states in full (**a Codex MCP server is
+  already registered**, per `claude mcp list`; `codex` on PATH alone does not count). Offer
+  delivery only on a positive; on a negative, say nothing about it at all and do not load the
+  reference. It is an optional upgrade for operators who already run a second vendor, never a gap
+  to close by acquiring one.
 - **Orphan sweep on a corrective re-sync**: when a re-sync **removes or corrects** baseline
   content (not just bumps the header), `git diff` the superseded lines and grep the project tree
   (`skills/`, `rules/`, `CLAUDE.md`, `docs/`) for references to the now-dead content. A corrected

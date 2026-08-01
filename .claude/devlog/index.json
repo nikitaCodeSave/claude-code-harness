@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
     }
   },
-  "generated_at": "2026-07-26T06:29:21Z",
-  "entry_count": 34,
+  "generated_at": "2026-08-01T19:22:13Z",
+  "entry_count": 35,
   "entries": [
     {
       "id": 1,
@@ -491,6 +491,21 @@
       "supersedes": null,
       "path": "entries/0034-shagi-reliza-zhivut-v-skille-claude-md-tolko-ukazyvaet.md",
       "preview": "/doctor прошёлся по операторскому окружению и по dev-harness'у этого репо. Почти всё оказалось чистым: нативная установка без остатков npm, все конфиги парсятся, три агента в plugins/harness/agents/ валидны, авто-режим уже дефолт, версия совпадает с каналом latest, медленных…"
+    },
+    {
+      "id": 35,
+      "date": "2026-08-01",
+      "title": "Cross-vendor ревьюер отгружается скиллом, а гейт — механикой",
+      "tags": [
+        "verification",
+        "plugin-surface",
+        "evidence",
+        "release"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0035-cross-vendor-revyuer-otgruzhaetsya-skillom-a-geyt-mekhanikoy.md",
+      "preview": "В лаборатории закрепился новый компонент: Codex CLI, подключённый MCP-сервером, как независимый judge для silent-wrong класса. Провенанс — lab devlog #127: один защитный bash-хук, семь раундов find→fix→refute, 60+ дефектов; из 16 находок первого раунда реальными оказались 5 — и…"
     }
   ]
 }

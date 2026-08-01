@@ -152,6 +152,29 @@ parser/rewriter of untrusted input, a guard/validator, an invariant-preserving r
 `.claude/audits/<slug>/AUDIT-REFUTER.json`. Cheap enough to run per-change — which is exactly where
 it earns its place, because that class passes the author's own tests while being wrong.
 
+**Cross-vendor variant of Tier 1 — only if you already run a second-vendor CLI.** A same-family
+refuter is fresh but not foreign: trained as the author was, it inherits a share of the author's
+blind spots. A reviewer from another vendor does not. Codex CLI can act as an MCP server, so one
+user-scope line reaches it —
+`claude mcp add -s user -t stdio codex_peer -- "$(command -v codex)" mcp-server` — after which the
+kit delivers the discipline for using it as a skill, on request: **"set up the cross-vendor
+refuter"** (`references/codex-peer-skill.md`; your profile is written only with your explicit
+approval).
+
+Two questions that are easy to conflate, kept apart deliberately:
+
+- **Should you get a second vendor for this? No.** The rung that ships is the native
+  `code-refuter`, it is sufficient, and nothing in the kit's evidence justifies a second
+  subscription. (Nor is any of this an exception to "CLI-subscription only" — that principle
+  governs how *Anthropic* models are reached, not which CLIs exist on your machine.)
+- **If one is already wired, how often should it run? As the routine executor of Tier 1, not as a
+  rare escalation** — that is where the maintainer's own practice has settled, and it is reported
+  as practice, not measured. Weigh it as you would a colleague's strong recommendation: the
+  standing evidence behind it is one controlled episode (lab devlog #127, n=1 — one component, one
+  vendor, 2026-08-01) plus daily use that began at that same episode, so it is days old, not a
+  track record. It grounds *the discipline of how to use such a reviewer*; it is not a
+  demonstration that every project needs one.
+
 **Tier 2 — the full 3-role `/external-audit` (rare escalation).** Reserve for a closed milestone ·
 a security/correctness-critical feature · an expensive irreversible delivery that "looks done".
 1. Open a **new session** (not the authoring one) at the root of the audited project.

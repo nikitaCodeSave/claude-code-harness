@@ -122,8 +122,9 @@ So the kit is as happy removing things as adding them. Point it at an existing `
 reports what's dead weight: a custom orchestrator subagent, a multi-stage pipeline, a 500-line
 `CLAUDE.md`, mid-thought blocking hooks, stale model pins.
 
-Claude Code 2.x / Opus-class-specific. It does **not** cover provider-neutral patterns for
-OpenAI/Codex/other frameworks.
+Claude Code 2.x / Opus-class-specific. It does **not** teach harness design for other agent
+frameworks — how to build agents in OpenAI/Codex/LangChain-style stacks is out of scope. An
+external CLI wired *into this harness* as an MCP server is a different thing, and is in scope.
 
 ## Learn more
 

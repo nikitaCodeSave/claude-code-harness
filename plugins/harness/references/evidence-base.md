@@ -53,6 +53,21 @@ T6–T7 anecdote does not earn a rule (see `harness-discipline.md`, single-incid
 - **Harness ROI ∝ exploration cost** (lab empirics, 22 runs / 5 tasks, May 2026): context preload
   pays off when non-obvious structure × ambiguous spec × ≥1k LoC coincide; on low-exploration
   tasks a harness is pure overhead. Grounds "skip the Phase 5 kit for libraries/one-offs."
+- **Cross-vendor refuter — an upgrade of the fresh-context rung, not a new rule** (lab empirics,
+  2026-08-01; the lab's artifacts are not shipped with the kit — this distillation is): a reviewer
+  from another model family (Codex CLI attached as an MCP server) found **5 real holes in a
+  defensive Bash guard that 109 tests, three fix commits and every same-family pass had missed** —
+  16 raw findings triaged down to those 5, across 7 find→fix→refute rounds on one target. Bounded
+  honestly: **n=1** — one component, one vendor, one episode. The second layer is the maintainer's
+  **current** practice (daily use, reported as a substantial quality/throughput gain), which is
+  practitioner preference rather than a track record: it starts at that same episode, so it is
+  days old, not months. Practice, not measurement — no control, no A/B; ~T3, the tier that already
+  grounds `practice-baseline.md`. What this supports is the *discipline* — refute-framed prompt,
+  read-only sandbox, triage rather than relay, reproduce each finding with your own failing test,
+  stop when findings stop being regressions, keep an objective differential layer beside the
+  reviewer. What it does **not** support is "always call a second vendor", nor any claim that a
+  harness without one is deficient. Delivered on consent only, behind a single mechanical gate:
+  `references/codex-peer-skill.md`, `operator-playbook.md` §6.
 - **The headline principle holds on the strongest available model.** Fable 5 (Mythos-class, a
   tier above Opus — `anthropic.com/news/claude-fable-5-mythos-5`, T1) was tested against every
   "under a capable model" invariant (a major model release is the canonical re-grounding

@@ -210,6 +210,16 @@ layer exists; a plugin install alone does not carry it. Project-side guards:
 - **Retire trigger:** drop the project embed when a global baseline is installed (Audit
   re-syncs embeds by the content-version stamp); drop the proposal-duty lines if a target
   model demonstrably proposes plan-mode/ladder steps unprompted.
+- **Cross-vendor refuter — one gate, evaluated here, no mention on a negative.** The gate, in
+  full: **a Codex MCP server is already registered** — it appears in `claude mcp list`. That single
+  probe is the gate; registrations do not all live in one config file, so a path grep answers a
+  different question. Nothing else opens it: `codex` merely present on PATH does **not**, because
+  an unwired CLI means the operator has not chosen this, and handing them the wiring line is the
+  recommendation this gate exists to prevent (they can still ask for it by name — the phrase is in
+  `operator-playbook.md` §6). Positive → read `references/codex-peer-skill.md` and follow its
+  delivery procedure. **Negative → do not mention it in any form**, including the run summary; and
+  do not load that file, since the gate is fully stated here. This step adds nothing to the
+  default shape.
 
 ## Phase 2c — Ship the workflow distillation (`.claude/docs/`)
 

@@ -1,6 +1,6 @@
 ---
 name: claude-code-harness
-description: "Use this skill when introducing, auditing, refactoring, or extending the Claude Code harness of a project — i.e. its `.claude/` directory (CLAUDE.md, settings.json, hooks/, agents/, skills/, commands/) and root CLAUDE.md. Activates on phrases like 'set up Claude Code in this project', 'design my .claude/', 'audit my Claude Code harness', 'add a hook/skill/subagent', 'how should I organize CLAUDE.md', 'what built-ins does Claude Code already have', 'should I write a custom orchestrator subagent', 'when should I use a dynamic workflow', 'why is my harness slow / brittle / token-heavy', 'extend Claude Code with X', 'set up the long-running build kit (Phase 5)', 'refresh my practice baseline'. Claude Code 2.x / Opus-class-specific — does NOT cover provider-neutral patterns for OpenAI/Codex/other frameworks. Skip when the project's `.claude/` already encodes this discipline."
+description: "Use this skill when introducing, auditing, refactoring, or extending the Claude Code harness of a project — i.e. its `.claude/` directory (CLAUDE.md, settings.json, hooks/, agents/, skills/, commands/) and root CLAUDE.md. Activates on phrases like 'set up Claude Code in this project', 'design my .claude/', 'audit my Claude Code harness', 'add a hook/skill/subagent', 'how should I organize CLAUDE.md', 'what built-ins does Claude Code already have', 'should I write a custom orchestrator subagent', 'when should I use a dynamic workflow', 'why is my harness slow / brittle / token-heavy', 'extend Claude Code with X', 'set up the long-running build kit (Phase 5)', 'refresh my practice baseline'. Claude Code 2.x / Opus-class-specific — does NOT teach harness design for other agent frameworks (building agents in OpenAI/Codex/LangChain-style stacks); an external CLI wired into *this* harness as an MCP server is in scope. Skip when the project's `.claude/` already encodes this discipline."
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls:*), Bash(tree:*), Bash(cat:*), Bash(find:*), Bash(grep:*), Bash(claude --help), Bash(claude agents:*), Bash(claude --version), Bash(claude --print:*), Bash(claude plugin list:*), Bash(git log:*), Bash(git status:*), Bash(wc:*)
 ---
 
@@ -30,8 +30,10 @@ workspace. Opinionated, and the opinion is one line:
 
 **Do NOT use when**: the operator's own harness already encodes this discipline (this skill is
 transmittable knowledge, not a self-description for a mature setup); the question is
-provider-neutral (OpenAI/Codex/MCP-without-Claude) → point to `references/evidence-base.md`
-external sources; the question is general programming/debugging.
+about building a harness *inside another framework* (OpenAI/Codex/MCP-without-Claude) → point to
+`references/evidence-base.md` external sources — an external CLI attached to *this* harness via
+MCP is in scope, not an exclusion (`references/codex-peer-skill.md`); the question is general
+programming/debugging.
 
 ## The four modes
 
@@ -115,6 +117,11 @@ already knows the kit):
 - `references/audit-checklist.md` — structured gap analysis. Read in **Audit**.
 - `references/evidence-base.md` — first-party + community sources with a T1–T7 rubric. Read when challenged or asked "where does this come from".
 - `references/operator-playbook.md` — **human-facing** lifecycle entry point (what the operator says/prepares at each stage). Point the operator to it; don't preload it as a mode input.
+- `references/codex-peer-skill.md` — the cross-vendor refuter skill the kit delivers **on consent,
+  behind one mechanical gate**: a Codex MCP server is already registered. Read it when the gate is
+  positive or when the operator asks for it by name; on a negative gate the option is not
+  mentioned at all — not in a run summary, not as a possibility. The gate condition is stated in
+  full in `bootstrap-checklist.md` Phase 2b, so evaluating it never requires loading this file.
 - `references/harness-evolution.md` — D-cycle (fold journal/audit findings into the canon) + strip revision procedure. Read when running a harness-evolution session.
 
 ## Non-negotiable principles (all modes)
@@ -196,6 +203,11 @@ exists only when committed, tagged **and pushed**: consumers install from origin
 users never receive changes.
 When the operator's global baseline (`~/.claude/CLAUDE.md` §1–8) gains a rule, re-distill
 `references/practice-baseline.md` in the same release — it is a snapshot and drifts silently otherwise.
+**The `codex-peer` block carries another vendor's call shape, so it needs a trigger, not a badge**:
+re-check it against the live `tools/list` whenever a maintainer's own call is rejected on an
+argument, or whenever that vendor's CLI is upgraded on the maintainer's machine — then bump the
+block's content-version so installed copies are offered the correction. No sighting, no re-check;
+this is the one shipped block whose facts the kit cannot verify from its own repo.
 
 **Content-gate for `project-docs/*`** (they ship **verbatim** into projects that cannot
 re-verify upstream facts): state durable principles and stable affordances only. A claim bound

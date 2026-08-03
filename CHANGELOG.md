@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.20.1] — 2026-08-03
+
+**The devlog `preview` is prose, and now the generator treats it as prose.** It carried raw inline
+markdown out of `entries/` into `tldr.md` and `index.json` one level up — where an entry-relative
+href stops resolving, and where the href spends a character budget that belongs to meaning. Found
+by an operator integrating the kit into another project, reported upstream rather than patched
+locally; the report named the broken links, and auditing the generator turned up a second, worse
+defect of the same family that was silently rewriting text.
+
+### Fixed
+
+- **Inline links in `preview` are unwrapped to their text.** `[#24](0024-….md)` resolves inside
+  `entries/` and nowhere else, so the digest a cold-entering agent reads carried links that go
+  nowhere — 3 of them in this repo's own `tldr.md`, present since 2026-07-26. Flattening also
+  returns the 280-character budget to the summary: the affected entry went from three paths and
+  one clause to three full sentences of meaning, same cap.
+- **Code spans are no longer parsed as markdown — this one was corrupting text, not just links.**
+  The bold rule paired the `**` of one code span with the `**` of the next and ate everything
+  between: entry #12, written *about* `Glob(./**)` and `Grep(./**)` being no-op permission rules,
+  displayed them as `Glob(./)` and `Grep(./)` — the misreading it exists to prevent. The paragraph
+  is now split on code spans, whose contents are passed through verbatim.
+- **`≤280 chars` is now true.** The ellipsis was appended *after* the cut, so a truncated preview
+  was 281 — a small lie in a field whose whole contract is a length.
+- **Link unwrapping handles the markdown that entries actually write**: parentheses inside a
+  destination (wiki-style URLs), a quoted title, one level of nested brackets in a label, an image
+  used as a link's label, and `\[` left literal. A destination must be whitespace-free or
+  angle-bracketed, so the prose `[0](не ссылка)` is not mistaken for a link. Reference-style links
+  and autolinks are deliberately untouched — a definition never travels with the preview, and
+  `[1][2]` in prose is the commoner reading. Every pattern stayed linear under measurement where
+  the naive one was quadratic — 192 KB of adversarial input costs under 10 ms.
+
+Entries themselves are untouched (they stay immutable and their links stay correct in place), as
+are the digest hook, the index/tldr layout, and every consumer-facing surface of the harness kit.
+
 ## [1.20.0] — 2026-08-01
 
 **A cross-vendor refuter joins the verification ladder — as a skill the kit hands over on

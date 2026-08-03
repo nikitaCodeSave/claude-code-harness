@@ -10,11 +10,11 @@
       "status": "complete | superseded | wip (default: complete)",
       "supersedes": "int|null, id of replaced entry",
       "path": "relative path from <devlog_root>",
-      "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)"
+      "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-01T19:22:13Z",
-  "entry_count": 35,
+  "generated_at": "2026-08-03T14:51:46Z",
+  "entry_count": 36,
   "entries": [
     {
       "id": 1,
@@ -180,7 +180,7 @@
       "status": "complete",
       "supersedes": null,
       "path": "entries/0012-pravila-pustyshki-v-shablone-settings-json.md",
-      "preview": "Шаблон settings.json из Phase 3 отдавал правила, которые движок парсит и никогда не матчит: Glob(./) и Grep(./) в allow. Нашлось живым прогоном, не ревью — в конфиге оператора, куда попало прямо из чеклиста. Шаблон — ровно то место, где no-op размножается в каждый проект…"
+      "preview": "Шаблон settings.json из Phase 3 отдавал правила, которые движок парсит и никогда не матчит: Glob(./**) и Grep(./**) в allow. Нашлось живым прогоном, не ревью — в конфиге оператора, куда попало прямо из чеклиста. Шаблон — ровно то место, где no-op размножается в каждый проект…"
     },
     {
       "id": 13,
@@ -477,7 +477,7 @@
       "status": "complete",
       "supersedes": null,
       "path": "entries/0033-vneshniy-sled-zakryt-kommentariy-dogonyaet-kit.md",
-      "preview": "Записи [#24](0024-lomaet-env-a-ne-uroven-matritsa-bez-kontrolya.md), [#25](0025-trigger-uroven-a-ne-env-sloy-matritsa-ne-vosproizvelas.md) и [#26](0026-potolok-prinadlezhit-opus-5-delegat-vykhodit-iz-nego-sam.md) оставляли одну и ту же открытую позицию: комментарий в…"
+      "preview": "Записи #24, #25 и #26 оставляли одну и ту же открытую позицию: комментарий в anthropics/claude-code#79798 отставал от кита. Первый апдейт (атрибуция причины и поправка к оракулам) был выложен утром; за день накопилось ещё четыре факта, два из которых опровергают то, что…"
     },
     {
       "id": 34,
@@ -506,6 +506,19 @@
       "supersedes": null,
       "path": "entries/0035-cross-vendor-revyuer-otgruzhaetsya-skillom-a-geyt-mekhanikoy.md",
       "preview": "В лаборатории закрепился новый компонент: Codex CLI, подключённый MCP-сервером, как независимый judge для silent-wrong класса. Провенанс — lab devlog #127: один защитный bash-хук, семь раундов find→fix→refute, 60+ дефектов; из 16 находок первого раунда реальными оказались 5 — и…"
+    },
+    {
+      "id": 36,
+      "date": "2026-08-03",
+      "title": "Репорт про битые ссылки вскрыл порчу текста в preview",
+      "tags": [
+        "bugfix",
+        "devlog"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0036-report-pro-bitye-ssylki-vskryl-porchu-teksta-v-preview.md",
+      "preview": "Оператор, интегрировавший кит в соседний проект, сообщил: генератор поднимает sibling-относительные ссылки из тел записей на уровень выше, в tldr.md, где они не резолвятся — и не стал править общий плагин у себя, а отдал наверх. Репорт подтвердился (3 битые ссылки в нашем же…"
     }
   ]
 }

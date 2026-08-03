@@ -45,7 +45,7 @@ SCHEMA = {
         "status": "complete | superseded | wip (default: complete)",
         "supersedes": "int|null, id of replaced entry",
         "path": "relative path from <devlog_root>",
-        "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic (≤280 chars)",
+        "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)",
     },
 }
 
@@ -124,12 +124,69 @@ def slugify_legacy(s: str, max_len: int = 60) -> str:
     return s[:max_len].rstrip("-")
 
 
+# --- Inline markdown → plain text (the preview is prose, not a markdown fragment) ---
+# Code spans are stashed behind a sentinel before anything else runs and restored at the
+# end: their contents are not markdown, and unwrapping them corrupted a real entry — the
+# bold rule paired the '**' of `Glob(./**)` with the one of `Grep(./**)` and ate the text
+# between, in the very entry written about those patterns. A sentinel rather than a plain
+# split, so markdown that WRAPS a code span (emphasis around it, a label containing it)
+# still parses in the same pass. Single and ``double`` fences, the latter first, so the
+# lone backtick a double fence exists to carry does not tear the span in half. Fixed
+# fence lengths rather than a (`+)…\1 backreference: the general form backtracks over
+# every fence length at every position and went cubic on a backtick-only input (16 KB:
+# 20 s). Deeper fences are not markdown a devlog entry writes.
+_CODE_SPAN_RE = re.compile(r"``((?:[^`]|`(?!`))+)``|`([^`]+)`")
+_SENTINEL = "\x00"
+_STASHED_RE = re.compile(_SENTINEL + r"(\d+)" + _SENTINEL)
+# A label may nest one level of brackets. A destination is whitespace-free with at most
+# one level of parens (wiki-style URLs) or <angle-bracketed>, plus an optional quoted
+# title — whitespace matters, or the prose '[0](не ссылка)' would silently lose words.
+# '\[' stays literal: escaped, not a link. Deeper nesting and reference-style links
+# ([a][b], whose definition never travels with the preview) are out of scope by choice.
+_LABEL = r"((?:[^\[\]]|\[[^\[\]]*\])*)"
+_DESTINATION = (r"\(\s*(?:<[^<>]*>|(?:[^\s()\\]|\\.|\([^()\s]*\))*)"
+                r"""(?:\s+(?:"[^"]*"|'[^']*'|\([^()]*\)))?\s*\)""")
+_IMAGE_RE = re.compile(r"(?<!\\)!\[" + _LABEL + r"\]" + _DESTINATION)
+_LINK_RE = re.compile(r"(?<!\\)\[" + _LABEL + r"\]" + _DESTINATION)
+_MAX_IMAGE_NESTING = 4
+
+
+def flatten_inline_markdown(text: str) -> str:
+    """Unwrap emphasis, images and inline links to their text; code spans keep theirs.
+
+    Links lose their href by design: the preview is lifted out of entries/ into
+    tldr.md + index.json one level up, where an entry-relative href no longer
+    resolves — and where the PREVIEW_MAX_LEN budget belongs to meaning, not paths.
+    """
+    stashed: list[str] = []
+
+    def stash(m: re.Match) -> str:
+        stashed.append(m.group(1) if m.group(1) is not None else m.group(2))
+        return f"{_SENTINEL}{len(stashed) - 1}{_SENTINEL}"
+
+    out = _CODE_SPAN_RE.sub(stash, text.replace(_SENTINEL, ""))
+    # Images first — that also unwraps an image used as a link's label; the other order
+    # would pair the link's '[' with the image's ')' and synthesize a link that was never
+    # in the input. One pass per nesting level, bounded: prose nests an image at most
+    # inside a link, and an unbounded loop is quadratic in the depth of a crafted chain.
+    for _ in range(_MAX_IMAGE_NESTING):
+        shorter = _IMAGE_RE.sub(r"\1", out)
+        if shorter == out:
+            break
+        out = shorter
+    out = _LINK_RE.sub(r"\1", out)
+    out = re.sub(r"\*\*(.+?)\*\*", r"\1", out)
+    out = re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"\1", out)
+    return _STASHED_RE.sub(lambda m: stashed[int(m.group(1))], out)
+
+
 def extract_preview(text: str) -> str:
     """First paragraph of the first '## ' section — language-agnostic
     (## Контекст / ## Context / any language; fallback: first body paragraph).
 
-    Strips frontmatter, markdown emphasis, joins folded lines into one paragraph,
-    truncates to PREVIEW_MAX_LEN at word boundary.
+    Strips frontmatter, joins folded lines into one paragraph, unwraps inline
+    markdown to plain text (flatten_inline_markdown), truncates to PREVIEW_MAX_LEN
+    at word boundary — ellipsis included in the cap.
     """
     # Strip frontmatter
     m = re.match(r"^---\n.*?\n---\n", text, re.DOTALL)
@@ -163,17 +220,18 @@ def extract_preview(text: str) -> str:
     if not paragraph:
         return ""
 
-    out = " ".join(paragraph)
-    # Strip markdown emphasis but keep content
-    out = re.sub(r"\*\*(.+?)\*\*", r"\1", out)
-    out = re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"\1", out)
-    out = re.sub(r"`([^`]+)`", r"\1", out)
+    # Unwrap markdown BEFORE the cut, so the budget is spent on meaning, not on syntax.
+    out = flatten_inline_markdown(" ".join(paragraph))
 
     if len(out) > PREVIEW_MAX_LEN:
+        # Look one char past the cap: a word ending exactly ON the boundary must be kept
+        # whole rather than discarded together with the space that follows it.
         cut = out[:PREVIEW_MAX_LEN]
         last_space = cut.rfind(" ")
         if last_space > int(PREVIEW_MAX_LEN * PREVIEW_WORD_BOUNDARY_MIN_RATIO):
             cut = cut[:last_space]
+        else:
+            cut = cut[:PREVIEW_MAX_LEN - 1]  # char-level cut, leaving room for the ellipsis
         out = cut.rstrip(",.;:- ") + "…"
     return out
 

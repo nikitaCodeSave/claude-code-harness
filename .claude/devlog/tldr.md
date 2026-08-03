@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #36 · 2026-08-03 · Репорт про битые ссылки вскрыл порчу текста в preview
+
+**Tags:** bugfix, devlog
+
+Оператор, интегрировавший кит в соседний проект, сообщил: генератор поднимает sibling-относительные ссылки из тел записей на уровень выше, в tldr.md, где они не резолвятся — и не стал править общий плагин у себя, а отдал наверх. Репорт подтвердился (3 битые ссылки в нашем же…
+
+[→ entries/0036-report-pro-bitye-ssylki-vskryl-porchu-teksta-v-preview.md](entries/0036-report-pro-bitye-ssylki-vskryl-porchu-teksta-v-preview.md)
+
+---
+
 ## #35 · 2026-08-01 · Cross-vendor ревьюер отгружается скиллом, а гейт — механикой
 
 **Tags:** verification, plugin-surface, evidence, release
@@ -32,7 +42,7 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 **Tags:** harness, docs
 
-Записи [#24](0024-lomaet-env-a-ne-uroven-matritsa-bez-kontrolya.md), [#25](0025-trigger-uroven-a-ne-env-sloy-matritsa-ne-vosproizvelas.md) и [#26](0026-potolok-prinadlezhit-opus-5-delegat-vykhodit-iz-nego-sam.md) оставляли одну и ту же открытую позицию: комментарий в…
+Записи #24, #25 и #26 оставляли одну и ту же открытую позицию: комментарий в anthropics/claude-code#79798 отставал от кита. Первый апдейт (атрибуция причины и поправка к оракулам) был выложен утром; за день накопилось ещё четыре факта, два из которых опровергают то, что…
 
 [→ entries/0033-vneshniy-sled-zakryt-kommentariy-dogonyaet-kit.md](entries/0033-vneshniy-sled-zakryt-kommentariy-dogonyaet-kit.md)
 
@@ -242,7 +252,7 @@ Phase 5 item 1 предписывал авторить init.sh каждому д
 
 **Tags:** bugfix, harness
 
-Шаблон settings.json из Phase 3 отдавал правила, которые движок парсит и никогда не матчит: Glob(./) и Grep(./) в allow. Нашлось живым прогоном, не ревью — в конфиге оператора, куда попало прямо из чеклиста. Шаблон — ровно то место, где no-op размножается в каждый проект…
+Шаблон settings.json из Phase 3 отдавал правила, которые движок парсит и никогда не матчит: Glob(./**) и Grep(./**) в allow. Нашлось живым прогоном, не ревью — в конфиге оператора, куда попало прямо из чеклиста. Шаблон — ровно то место, где no-op размножается в каждый проект…
 
 [→ entries/0012-pravila-pustyshki-v-shablone-settings-json.md](entries/0012-pravila-pustyshki-v-shablone-settings-json.md)
 

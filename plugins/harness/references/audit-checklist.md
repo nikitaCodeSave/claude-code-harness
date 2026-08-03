@@ -153,8 +153,24 @@ or re-run before proposing edits to its machinery.
   operator before overwriting** — any non-header delta is a potential hand-edit (incl.
   translations) that a verbatim re-copy would destroy; propose moving such content to CLAUDE.md
   (and features.json, if present) first. Project header newer than the canon's → update the
-  plugin, don't downgrade the files. Shipped docs **absent** on a non-MVH project (pre-v1.8
-  bootstrap or skipped Phase 2c) → finding; offer to ship them (bootstrap Phase 2c).
+  plugin, don't downgrade the files.
+- **Shipped docs absent — audit coverage per file, not presence.** On a non-MVH project (pre-v1.8
+  bootstrap or skipped Phase 2c) their absence is a finding **only where that file's duty areas are
+  uncovered** — `workflow.md`: session ritual · change sizing · verification ladder · continuity;
+  `docs-discipline.md`: doc-with-code mapping · ADR threshold · glossary · current-state discipline;
+  `testing.md`: the five invariants. A mature project may already carry all of a file's areas in its
+  own `CLAUDE.md` / `AGENTS.md` / process docs — then shipping that copy adds a competing instruction
+  for no coverage gain. Judge the files independently: one covered elsewhere doesn't excuse another.
+- **A shipped line that contradicts the project's own canon is always a finding — and the operator
+  adjudicates it, you don't.** Observed: `workflow.md`'s "session start = git log + progress" inside
+  a project whose CLAUDE.md forbids reconstructing status from Git; there the project's rule was the
+  stronger one and removing the shipped copy was right. The reverse also exists — a project rule that
+  waives a kit invariant (say, "small fixes need no test") is a *finding against the project*, and
+  deleting `testing.md` would ratify the regression. Present both readings and let the operator pick;
+  never silently resolve toward whichever text is local. Uncovered area → offer to ship that one file
+  (bootstrap Phase 2c). This governs whether a file *exists*, not whether a project may hand-evolve a
+  shipped copy — those still flow through the plugin, and the invariants they carry are extended by
+  project rules, not replaced by them.
 - **Practice-baseline re-sync**: if `.claude/rules/practice-baseline.md` exists, compare its
   `practice-baseline content-version` stamp against the canonical block's stamp in the
   installed plugin's `references/practice-baseline.md` — same content-version semantics as
@@ -260,6 +276,22 @@ or re-run before proposing edits to its machinery.
   as the harness's most expensive defect class — the operator believes a path is fenced and it is not.
 - `--dangerously-skip-permissions` or bypass mode baked into committed settings.
 - API-only features assumed (managed-agents, beta headers, `--bare`) on a CLI subscription.
+
+## 11. Ledger & intake (skip entirely when the project keeps no ledger)
+
+Only for a project running the Phase 5 kit — an absent `features.json` is a valid shape, not a
+finding. Two checks, both cheap:
+
+- **The ritual names an order the ledger cannot express.** CLAUDE.md says "highest-priority
+  incomplete feature" and no entry carries `priority` → the session picks by array order and calls
+  it priority. Remediation: add the field (`bootstrap-checklist.md` Phase 5 item 2), or reword the
+  ritual to say array order — either is honest, the mismatch is not.
+- **An open entry whose acceptance hangs on an unmade decision.** Falsifiable form: its `verify` or
+  `description` names a choice between readings ("either … or …", "TBD", "assuming X") and no
+  answer exists — not in `notes`, not in the tracker the ledger points at, not in an ADR. Check the
+  named external canon before flagging; a project that keeps decisions in Jira is compliant, not
+  undocumented. Remediation: surface the question to the operator for the *open* entries only. Do
+  **not** back-fill history — closed work's provenance lives in git and the devlog.
 
 ## Refresh execution hygiene (when applying approved findings)
 

@@ -58,7 +58,11 @@ The plugin and the behavioral baseline reach the machine/profile **separately**:
    either variant — this is discipline, not an omission.
 4. The contract (stack / acceptance of the first feature / verify mechanism / sensitive paths)
    surfaces from the conversation as you go — no upfront questionnaire is needed; just make sure
-   the dangerous paths land in `permissions.deny` as soon as they're named.
+   the dangerous paths land in `permissions.deny` as soon as they're named. The one class that does
+   *not* settle itself is a question whose answer changes what "correct" means — product semantics,
+   a trade-off with a real cost. Answer those explicitly and dated, because a session that guesses
+   one of them ships something plausible and wrong. Where the answer lands: a ledger project keeps
+   it with the feature (§3); everywhere else, an ADR or the devlog entry for the change.
 
 Step check: `claude --print "what is the project's stack?"` answers from CLAUDE.md.
 
@@ -91,6 +95,13 @@ If the project is a product built feature-by-feature (not a library/script/one-o
   is wired into the project CLAUDE.md (git log → progress → one feature → the oracle).
 - **Session end**: check by eye — is there a commit per feature, is `progress` updated, is
   `passes: true` set only for features with completed verify steps.
+- **Ratify what only you can decide.** Sessions surface questions whose answer changes what
+  "correct" means — product semantics, a trade-off with a cost. Answer them explicitly: pick one of
+  the options the session laid out (by its code, where it wrote a coded table), date it, say what
+  your answer rests on. Three answers are legitimate, and two of them create no work: `wontfix`
+  (deciding is not a promise to build) and "this only ratifies what the code already does". Deciding
+  nothing is also a choice, priced as a session that stalls or guesses. The one thing the agent must
+  not do is read your silence as agreement — it leaves the question open and works something else.
 - **A handoff note is a claim, not a fact**: if the previous session wrote "verified" — the next
   one must re-execute before relying on it.
 - **The spec's own premise is a claim, not a fact**: before building to a requirement's assumption

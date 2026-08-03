@@ -109,7 +109,11 @@ Source: `code.claude.com/docs/en/agent-teams`.
 ## Tasks / scheduling [FP]
 
 `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` — the structured session task list
-(`TodoWrite` is disabled by default in its favor). Scheduling is first-party documented
+(`TodoWrite` is disabled by default in its favor). It coordinates the run in progress and is
+machine-local — no repository file holds it (a team's shared list lives under `~/.claude/tasks/`) —
+so it is **not** the repository-owned register of commitments: obligations that outlive the run
+belong in the project's ledger (`bootstrap-checklist.md` Phase 5). Using the ledger for in-run steps
+is ceremony; using the task list as the backlog puts it outside the repo the work ships from. Scheduling is first-party documented
 (`code.claude.com/docs/en/tools-reference`, `/en/scheduled-tasks`): `CronCreate` /
 `CronList` / `CronDelete` schedule a recurring or one-shot prompt **within the current
 session** (session-scoped; restored on `--resume`/`--continue` if unexpired) — not a

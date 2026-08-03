@@ -36,6 +36,7 @@ T6–T7 anecdote does not earn a rule (see `harness-discipline.md`, single-incid
 | Multi-agent research system | `anthropic.com/engineering/multi-agent-research-system` | T1 | brief-subagents-like-a-new-colleague; effort scaling; token economics (single-agent ~4×, multi-agent ~15× chat; 80% of variance = token usage) |
 | Code review in Claude Code | `code.claude.com/docs/en/code-review` | T1 | review surfaces (`/code-review` for the working diff, `/review` for PRs, `ultrareview`); REVIEW.md severity calibration |
 | Chroma — Context Rot | `trychroma.com/research/context-rot` | T4 | universal pre-overflow degradation (corroborates context-engineering; vendor-bias caveat) |
+| GitHub Spec Kit (README, command table) | `github.com/github/spec-kit` | T4 | another vendor's spec-first flow placing `/speckit.clarify` (resolve underspecification) and `/speckit.checklist` (requirements completeness) **before** `/speckit.plan` — corroborates that the pre-implementation ambiguity gate is a real gap, not a local preference. Not a source for the kit's disposition wording |
 
 ## Empirical grounding notes (current model generation)
 

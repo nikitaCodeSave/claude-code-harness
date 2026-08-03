@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #37 · 2026-08-04 · Граница «обсуждение → обязательство» получила контракт, а не документ
+
+**Tags:** planning, ledger, audit, evidence, release
+
+Оператор указал на самую слабую часть кита: всё, что происходит ДО кода — подготовительные работы, обсуждение задачи до её попадания в бэклог, ведение очереди, фиксация. Поводом стал догфудящий проект (Greenplun-router-runtime), который за июль–август сам вырастил planning-слой…
+
+[→ entries/0037-granitsa-obsuzhdenie-obyazatelstvo-poluchila-kontrakt-a-ne-d.md](entries/0037-granitsa-obsuzhdenie-obyazatelstvo-poluchila-kontrakt-a-ne-d.md)
+
+---
+
 ## #36 · 2026-08-03 · Репорт про битые ссылки вскрыл порчу текста в preview
 
 **Tags:** bugfix, devlog

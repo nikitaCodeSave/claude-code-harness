@@ -7,6 +7,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.21.0] — 2026-08-04
+
+**The kit governed work already chosen and said nothing about how a proposal becomes work.** Every
+Phase 5 rule — one feature at a time, verify contracts, `passes` — starts after the commitment
+exists; the moment before it, where a question only the owner can answer either stalls the build or
+gets decided silently by whoever is implementing, had no contract at all. A production project that
+runs the kit had grown that layer itself and paid for it: a tracking audit found competing registers,
+a plan whose blocker was misattributed, and uncommitted operator work sitting in the tree that no
+plan owned. This release folds the transferable part in — as edits to the existing references, not a
+new governance document, and not the project's whole planning machine.
+
+### Added
+
+- **An intake contract on the ledger** (Phase 5 item 2): an open, acceptance-affecting question
+  means the feature is not ready to work — recorded as *question → dated answer → what the answer
+  rests on*, with coded options only where two readings differ in cost. The agent never ratifies on
+  the owner's behalf, a ratified decision is not automatically work (`wontfix` and "this only
+  ratifies current behavior" create no entry), and an open question blocks the implementation
+  feature but not a *bounded* spike that would answer it — otherwise the discovery is forbidden by
+  the question it exists to close. Where a tracker is the canon, the question lives there and the
+  ledger carries the ID. It carries its own retire trigger, and it is written through to
+  `features.json`'s `rules` — the working session reads the ledger, never this checklist.
+- **`priority` in the canonical ledger shape.** The session ritual has said "highest-priority
+  incomplete feature" in three places while the schema had no such field, so the order was array
+  position wearing another name. Lower runs first, ties break by array order, a missing value sorts
+  last — and greenfield's `F0` now seeds at `priority: 0`, because the entry the ritual is
+  guaranteed to land on first cannot be the one that sorts last.
+- **Audit §11 — Ledger & intake**, two falsifiable checks, skipped entirely where no ledger exists.
+  This is the reachability half: Bootstrap's edits never reach a project that was set up last year.
+- **A Phase 7 write-through check for ledger projects** — the ordering field and the intake rule
+  have to be *in* `features.json`, on the same logic as the CLAUDE.md greps beside it.
+
+### Changed
+
+- **Shipped-docs absence is audited as coverage per file, not as a missing file.** A mature project
+  may carry `workflow.md`'s duty areas in its own `AGENTS.md` and process docs; shipping the copy
+  there adds a competing instruction for no coverage gain. A shipped line that *contradicts* the
+  project's canon is always a finding — and the operator adjudicates it: the local text is not
+  automatically right (a project rule waiving a kit invariant is a finding against the project).
+  Grounded in a real case: `workflow.md`'s "session start = git log + progress" inside a project
+  whose CLAUDE.md forbids reconstructing status from Git.
+- **A gate that could not run must never read as pass** (`harness-discipline.md`). When the tool a
+  guard shells out to fails, returning "nothing found" turns it green on exactly the runs where it
+  saw nothing — a real tracking checker returns an empty change list whenever its `git status` exits
+  non-zero, so its unregistered-work check passes by construction. Error state, non-zero exit,
+  distinct from a policy violation; and a green gate proves only what it parses.
+- **The native session task list is not the repository's register of commitments**
+  (`native-capabilities.md`) — it coordinates the run and is machine-local; obligations that outlive
+  the run belong in the ledger. Using the ledger for in-run steps is ceremony; using the task list
+  as the backlog puts the backlog outside the repo the work ships from.
+- **The operator playbook names what only the operator can decide** — ratification, its two
+  no-work answers, and the fact that silence is not agreement — and scopes the "no upfront
+  questionnaire" line to exclude questions that change what "correct" means.
+- **`evidence-base.md`** catalogues GitHub Spec Kit (T4) as independent corroboration that the
+  pre-implementation ambiguity gate is a real gap — explicitly *not* a source for the kit's wording.
+
+### Not touched (deliberate)
+
+No new reference file (`harness-evolution.md` requires a fold into an existing one), no plan
+lifecycle beside `passes`/`blocked` (a second state machine over the same objects), no per-owner
+WIP limit (needs an `owner` field first), no "closed entries leave the ledger" rule (single-source,
+and it contradicts flipping `passes: true`), and **no stream object** — the double trigger drafted
+for it was circular, and the only evidence available is one project that built a workstream file
+and then deleted it.
+
 ## [1.20.1] — 2026-08-03
 
 **The devlog `preview` is prose, and now the generator treats it as prose.** It carried raw inline

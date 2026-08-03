@@ -354,13 +354,15 @@ apps* (T1). Set up:
    canonical shape verbatim** — don't reinvent field names (the recurring drift is
    `{description, steps, passes}` vs `{title, acceptance, verify}`; the one canon is `title` = one-line
    handle, `description` = the contract prose, `verify[]` = the single verification-array, never
-   `steps`/`acceptance`; `blocked`/`blocked_reason` are the optional externally-gated markers,
-   `notes` the optional narrative slot):
+   `steps`/`acceptance`; `priority` = the integer the session ritual's "highest-priority" actually
+   reads (lower runs first; ties break by array order; a missing `priority` sorts last — without the
+   field the ritual names an order the ledger cannot express); `blocked`/`blocked_reason` are the
+   optional externally-gated markers, `notes` the optional narrative slot):
 
    ```json
    {"project": "acme-api", "milestone": "v1-auth",
-    "rules": ["one feature at a time; flip passes only when verified e2e", "never edit/delete a test for green", "verify walled off outside the agent's reach -> blocked: true + blocked_reason, not a bare passes: false"],
-    "features": [{"id": "F1", "title": "Login with email + password",
+    "rules": ["one feature at a time; flip passes only when verified e2e", "never edit/delete a test for green", "verify walled off outside the agent's reach -> blocked: true + blocked_reason, not a bare passes: false", "an acceptance-affecting question only the owner can answer -> record question + dated answer in notes and work something else; never decide it yourself"],
+    "features": [{"id": "F1", "priority": 1, "title": "Login with email + password",
       "description": "POST /auth/login returns a signed JWT; a wrong password returns 401 without leaking which field failed.",
       "verify": ["pytest tests/test_auth.py::test_login_success", "pytest tests/test_auth.py::test_login_wrong_password asserts 401"],
       "passes": false, "preconditions": ["postgres up: docker compose up -d db", "TEST_DB_URL exported"]}]}
@@ -368,8 +370,9 @@ apps* (T1). Set up:
 
    **Greenfield seed — `F0`, the bootstrap's own open loop.** With no code yet the ledger is not
    empty: seed `F0` = *"get the brief → fill Stack in CLAUDE.md, replace the ARCHITECTURE.md and
-   CODE-MAP.md stubs from real code, name the oracle command"*, `passes: false`, with `verify`
-   naming the check that proves each stub is gone. The session ritual (item 4) picks the
+   CODE-MAP.md stubs from real code, name the oracle command"*, `passes: false`, `priority: 0` (it
+   has to outrank everything seeded beside it, and an entry without the field sorts last), with
+   `verify` naming the check that proves each stub is gone. The session ritual (item 4) picks the
    highest-priority incomplete feature, so `F0` is what turn one lands on — the TBDs close inside
    the loop instead of resting in the operator's memory. Without it a greenfield bootstrap hands
    over placeholders nothing is accountable for, and the harness's first act is to trust them.
@@ -388,6 +391,43 @@ apps* (T1). Set up:
    narrative (what verified green below the wall, what stays quarantined) — without a named
    slot, sessions invent ad-hoc fields or root handoff files for it (observed twice
    independently).
+   **Every rule above governs work already chosen — none of them says how a proposal becomes work.**
+   That boundary is the one the ledger cannot express on its own, and the gap has a shape: a question
+   only the owner can answer ("which of these two readings is correct?", "is this worth the cost?")
+   either stalls the build or gets silently decided by whoever is implementing. So:
+   - **An open, acceptance-affecting question means the feature is not ready to work** — not that
+     the ledger needs a new object. Record it in the feature's `notes` (or the tracker, below) as
+     *question → dated decision → what the decision rests on*: the owner's own words, a measurement,
+     a cited constraint. Where two readings carry **different costs**, lay them out as coded options
+     (`Q7-A` / `Q7-B` / `Q7-Q` · what changes · what it costs if that reading is wrong) and let the
+     owner pick one by code. Where they don't diverge in cost, question + dated answer is the whole
+     ceremony — don't manufacture a table. A plain instruction with clear acceptance needs none of
+     this: it is already accepted work (`workflow.md`'s "small → acceptance criteria only" stands).
+   - **The agent does not ratify on the owner's behalf.** Silence is not consent; a headless run
+     records the question as unanswered and moves to the next unblocked feature rather than picking.
+   - **A ratified decision is not automatically work.** `wontfix`, "this only ratifies what the code
+     already does", and "duplicate of F3" are terminal: they close the question and create **no**
+     ledger entry. Their record belongs where decisions live (devlog / ADR / the tracker), which is
+     also where a `defer` states what would reopen it.
+   - **An open question blocks the implementation feature, not a bounded spike that would answer it**
+     — otherwise the discovery is forbidden by the question it exists to close. "Bounded" is the
+     condition, not a label: reversible, no production data, no spend, and its `verify` is *producing
+     the evidence*, not shipping the behavior. A spike that needs prod access or money is itself an
+     owner decision and waits like any other.
+   - **Where the project already runs a tracker** (Jira / Linear / GitHub Issues) the question and its
+     answer live **there** and the ledger carries the ID — one editable canon, no repo-side mirror.
+     Confirm the session can actually read that tracker; an ID pointing at a canon this harness cannot
+     open is worse than a stale copy, because it reads as resolved.
+   - **Write it through to `rules`** (see the JSON above) — this contract only holds if the working
+     session sees it, and the working session does not read this checklist.
+   Retire trigger: after ~10 closed features with no question ever recorded, this project's decisions
+   are being made somewhere else — drop the rule rather than keep a ceremonial one.
+   (Provenance: a production project's owner-decision log — five ratified questions produced three
+   implementations, one no-code ratification and one `wontfix`, which is where the "a decision is not
+   work" clause comes from; the coded-options form appears there only on the two questions whose
+   readings differed in cost. The remaining outcomes are ordinary triage, not evidence from that log.
+   Independently, GitHub Spec Kit grew `/speckit.clarify` + `/speckit.checklist` as steps that run
+   before planning — `evidence-base.md`.)
    **Keep kit artifacts under `.claude/`** (`.claude/features.json`, `.claude/harness-journal.md`,
    `.claude/progress/`, `.claude/devlog/`) — only genuine product files (`CLAUDE.md`,
    build manifests) belong at the repo root. A root cluttered with control files reads as mess to
@@ -395,7 +435,11 @@ apps* (T1). Set up:
    features.json is the **single-track** ledger; a **multi-initiative** campaign keeps **one**
    roadmap carrier of its choice rather than a ledger per initiative plus a roadmap that
    mirrors them — pick one editable canon and move on (same lever as item 7: reliable scoped
-   delivery, not the data structure).
+   delivery, not the data structure). Whatever the carrier, a queued entry states its **next
+   condition** — the one thing that has to become true for it to start — not a recap of what already
+   happened; in this schema that is `blocked_reason` or `preconditions`, not a new slot. A queue that
+   narrates history has to be re-read in full to answer the only question it is asked ("what can start
+   now?"), and it rots into a second devlog.
 3. **Progress + checkpoint discipline** — a progress file, **preferably `.claude/progress/<slug>.md`**
    (keeping it under `.claude/` means state-surfacing automation finds it — the devlog
    companion plugin ships a SessionStart digest of recent devlog + active progress, and
@@ -439,7 +483,13 @@ apps* (T1). Set up:
    read feature list, pick the highest-priority incomplete feature → run the oracle → work that one
    feature. (With the devlog companion installed, its SessionStart digest already surfaces
    recent devlog + active progress — the ritual then starts from acting on that state, not
-   rediscovering it.)
+   rediscovering it.) Two checks the ritual owes the ledger: the feature it picks carries **no open
+   acceptance-affecting question** (item 2 — if it does, work the next unblocked one), and dirty
+   **code/test/ops** paths in the worktree belong to that feature or are named in its `notes` before
+   you build on them (docs and scratch files don't need an owner; source does). Unowned WIP is how a
+   session inherits someone else's half-finished work as its own progress — an organizational audit
+   found uncommitted operator work (a second comparator, green under its own focused test) sitting in
+   the tree that no feature owned and that the live plan in fact forbade.
 5. **Fresh-context Evaluator for high-stakes verification** — for silent-wrong-is-costly work, judge
    with a *separate* context (new session or subagent) that tests the running app, not an in-context
    self-recheck. *Self-preferential bias* — "models confidently praise their own work" — is exactly
@@ -546,6 +596,12 @@ ls .claude/docs/workflow.md .claude/docs/testing.md .claude/docs/docs-discipline
 # deny-rules probe and all
 # four greps apply unchanged (settings.json and CLAUDE.md are real on day zero).
 # MVH-on-request projects: only the plan-mode and change-sizing greps apply.
+
+# Phase 5 projects only — skip where there is no ledger:
+grep -ci '"priority"' .claude/features.json && grep -ci 'question' .claude/features.json
+# pass = both ≥1. The same write-through logic, one layer down: the ordering field the session ritual
+# reads and the intake rule (item 2) have to be IN the ledger. A working session reads
+# `features.json`; it never reads this checklist, so a contract left here is a contract nobody applies.
 ```
 
 Each check has a crisp criterion — "command produced output" is not a pass.

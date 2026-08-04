@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #41 · 2026-08-04 · Провенанс интейка называет измеренное, а не только источник
+
+**Tags:** evidence, evals, docs, release
+
+Ablation (#40) дал результат, который остался только в evals/results/ABLATION.md и в devlog: способность заметить owner-вопрос присутствует и без кита — во всех семи валидных прогонах, — а контракт добавляет одну форму (поле приоритета, кодированные опции с ценой ошибки…
+
+[→ entries/0041-provenans-inteyka-nazyvaet-izmerennoe-a-ne-tolko-istochnik.md](entries/0041-provenans-inteyka-nazyvaet-izmerennoe-a-ne-tolko-istochnik.md)
+
+---
+
 ## #40 · 2026-08-04 · Регресс-набор переехал в репозиторий, ablation дал неудобный ответ
 
 **Tags:** evidence, evals, test, harness

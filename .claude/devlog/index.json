@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-04T01:42:59Z",
-  "entry_count": 40,
+  "generated_at": "2026-08-04T02:03:01Z",
+  "entry_count": 41,
   "entries": [
     {
       "id": 1,
@@ -583,6 +583,21 @@
       "supersedes": null,
       "path": "entries/0040-regress-nabor-pereekhal-v-repozitoriy-ablation-dal-neudobnyy.md",
       "preview": "У кита не было собственного оракула: правила проверялись разовыми прогонами, которые жили в /tmp и умирали вместе с сессией. Цена этого видна на этой же неделе — v1.21.1 уехала в origin с перевёрнутым правилом, и нашлось оно отдельной проверкой, а не перед релизом."
+    },
+    {
+      "id": 41,
+      "date": "2026-08-04",
+      "title": "Провенанс интейка называет измеренное, а не только источник",
+      "tags": [
+        "evidence",
+        "evals",
+        "docs",
+        "release"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0041-provenans-inteyka-nazyvaet-izmerennoe-a-ne-tolko-istochnik.md",
+      "preview": "Ablation (#40) дал результат, который остался только в evals/results/ABLATION.md и в devlog: способность заметить owner-вопрос присутствует и без кита — во всех семи валидных прогонах, — а контракт добавляет одну форму (поле приоритета, кодированные опции с ценой ошибки…"
     }
   ]
 }

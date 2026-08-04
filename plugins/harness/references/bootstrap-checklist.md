@@ -420,7 +420,10 @@ apps* (T1). Set up:
    log — five ratified questions gave three implementations, one no-code ratification and one
    `wontfix`, and its two coded-option tables both sit on cost-divergent questions. The owner answered
    all five, so that log grounds the gate, not the "settle it yourself" side. Spec Kit's pre-planning
-   `/speckit.clarify` + `/speckit.checklist` — `evidence-base.md`.)
+   `/speckit.clarify` + `/speckit.checklist` — `evidence-base.md`. **What this contract is worth,
+   measured:** an ablation on one fixture (7 valid runs, `evals/results/ABLATION.md`) found the
+   *ability* to spot an owner-only question present without the kit in every run — what the contract
+   adds is one shape for it, so treat it as standardising the form, not as teaching the behavior.)
    **Keep kit artifacts under `.claude/`** (`.claude/features.json`, `.claude/harness-journal.md`,
    `.claude/progress/`, `.claude/devlog/`) — only genuine product files (`CLAUDE.md`,
    build manifests) belong at the repo root. A root cluttered with control files reads as mess to

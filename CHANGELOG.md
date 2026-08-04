@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.21.3] — 2026-08-04
+
+**The kit got an oracle of its own, and the first thing it measured was uncomfortable.** Three
+releases shipped today against live sessions as the only check, and one of them (1.21.1) reached
+`origin` with an inverted rule. A regression set now lives in the repository, and the first ablation
+it ran says the intake contract standardises a form rather than teaching a behavior — so the text
+now says that too.
+
+### Added
+
+- **`evals/` — a regression set for the kit's own rules** (dev-harness; the plugin itself is
+  unchanged by it). `./evals/run.sh mech` is seconds and free — run it before every release;
+  `sessions` runs four read-only scenarios in ~8 minutes. It carries fixtures for the four failure
+  modes worth guarding: ceremony on an unambiguous spec, a false §11 finding on a project with no
+  ledger, an owner decision taken by the session, and an implementation renamed "spike" to slip a
+  gate. Criteria are declared in `evals/criteria.md` *before* each run, and the mechanical suite
+  includes the control that matters — a half-migrated ledger on which the previous Phase 7 greps
+  reported green.
+
+### Changed
+
+- **The intake contract's provenance now states what was measured, not only where it came from.**
+  An ablation over one fixture (7 valid runs, arms differing only in whether the kit's files were
+  reachable) found the ability to spot an owner-only question present in *every* run, kit or no kit;
+  what the kit adds is a single shape — the priority field, coded options carrying the cost of being
+  wrong, terminal outcomes kept out of the ledger. The contract is worth keeping on those grounds and
+  should be described on them. Full write-up, including the contamination that makes this a lower
+  bound: `evals/results/ABLATION.md`.
+
+### Not changed (deliberate)
+
+The rule itself. One measurement on one fixture, with the operator's own behavioural baseline
+present in both arms, adjusts how the kit *describes* a component — it does not retire one. The
+clean arm needs a profile with its own credentials, and the first-party
+`claude plugin eval --ablation with-without` would do it far more cheaply once it leaves early access.
+
 ## [1.21.2] — 2026-08-04
 
 **The 1.21.1 compression moved a decision right from the owner to the session, in the same item that

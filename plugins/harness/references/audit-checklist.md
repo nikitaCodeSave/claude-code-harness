@@ -282,16 +282,18 @@ or re-run before proposing edits to its machinery.
 Only for a project running the Phase 5 kit — an absent `features.json` is a valid shape, not a
 finding. Two checks, both cheap:
 
-- **The ritual names an order the ledger cannot express.** CLAUDE.md says "highest-priority
-  incomplete feature" and no entry carries `priority` → the session picks by array order and calls
-  it priority. Remediation: add the field (`bootstrap-checklist.md` Phase 5 item 2), or reword the
-  ritual to say array order — either is honest, the mismatch is not.
-- **An open entry whose acceptance hangs on an unmade decision.** Falsifiable form: its `verify` or
-  `description` names a choice between readings ("either … or …", "TBD", "assuming X") and no
-  answer exists — not in `notes`, not in the tracker the ledger points at, not in an ADR. Check the
-  named external canon before flagging; a project that keeps decisions in Jira is compliant, not
-  undocumented. Remediation: surface the question to the operator for the *open* entries only. Do
-  **not** back-fill history — closed work's provenance lives in git and the devlog.
+- **Ritual and ledger disagree about ordering, either direction.** The ritual says "highest-priority"
+  and no entry carries `priority` (so array order wears its name), *or* `priority` sits there unread,
+  *or* it is on some entries and not others — half-migrated is worst, since "missing sorts last"
+  buries whatever predates it. Fix any one way — field on every entry, ritual reworded to array
+  order, or field dropped; the mismatch is the finding. (Both directions seen on real ledgers.)
+- **An open entry whose acceptance hangs on an unmade decision.** Falsifiable form: a choice between
+  readings ("either … or …", "TBD", "assuming X") the acceptance depends on, unanswered anywhere.
+  **Follow the pointers** — the question usually sits a hop or two out, in what `preconditions`/
+  `notes` name; an audit that greps only `verify`/`description` scores clean on a project whose next
+  step is in fact waiting on its owner (measured: the blocking question sat three hops out). Check
+  every named canon before flagging — decisions kept in Jira or a gate file are compliant, not
+  missing. Surface *open* entries only; closed work's provenance is in git and the devlog.
 
 ## Refresh execution hygiene (when applying approved findings)
 

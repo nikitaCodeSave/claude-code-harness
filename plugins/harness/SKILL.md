@@ -169,7 +169,7 @@ already knows the kit):
 | docs/ARCHITECTURE.md + docs/CODE-MAP.md | real content from the code read | 2 files |
 | (no custom subagents/hooks/skills) | built-ins cover it | — |
 ## Offered — practice baseline (Phase 2b): project embed `.claude/rules/practice-baseline.md` (~80 lines, default) or guarded user-global CLAUDE.md merge (opt-in); operator decides
-## Sustained build (Phase 5) adds — oracle (reuse the project's entry point; author scripts/init.sh only if none exists) · .claude/features.json · progress+devlog conventions
+## Sustained build (Phase 5) adds — oracle (reuse the project's entry point; author scripts/init.sh only if none exists) · .claude/features.json (`priority` on every entry + the intake rule in `rules`: an acceptance-affecting question only the owner can answer is recorded, never decided by the session) · progress+devlog conventions
 ## Greenfield (no code yet) — ARCHITECTURE/CODE-MAP ship as labelled stubs, never invented facts; on a sustained build the ledger seeds `F0` "get the brief → fill Stack / ARCHITECTURE / CODE-MAP / name the oracle", `passes: false` (no Phase 5 → no ledger: the stub marker carries the trigger)
 ## Minimal MVH (CLAUDE.md + settings only) — explicit operator request only
 ## Deferred until justified — subagents (evidence) · hooks (recurring pain) · skills (≥3× repeat)

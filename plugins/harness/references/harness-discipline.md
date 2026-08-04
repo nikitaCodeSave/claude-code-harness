@@ -61,13 +61,11 @@ hooks are deterministic (100%). But: **block at submit, not mid-thought.** `Stop
 corrosive. Note Claude Code overrides a Stop hook after 8 consecutive blocks — a blocking gate
 is a backstop, not a cage.
 
-**A gate that could not run must never read as pass.** When the tool it shells out to fails — git
-missing, an unexpected non-zero exit, a parse it didn't anticipate — returning "nothing found" makes
-the guard green on exactly the runs where it saw nothing (a real tracking checker returns an empty
-change list whenever its `git status` exits non-zero, so its unregistered-work check passes by
-construction). Surface it as an error state with a non-zero exit, distinct from a policy violation.
-And a green gate proves only what it parses: name what it does *not* check, or its silence gets read
-as coverage.
+**A gate that could not run must never read as pass.** When the tool it shells out to fails, returning
+"nothing found" makes the guard green on exactly the runs where it saw nothing — a real tracking
+checker returns an empty change list whenever its `git status` exits non-zero, so its unregistered-work
+check passes by construction. Error state, non-zero exit, distinct from a policy violation. And a green
+gate proves only what it parses: name what it does *not* check, or its silence reads as coverage.
 
 ## Action-skills vs reference-skills
 

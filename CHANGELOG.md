@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.21.1] — 2026-08-04
+
+**1.21.0 shipped a contract and doubled the length of the checklist item that carries it.** Four
+live runs — a bootstrap on Node, an audit of a mature Python project, and two purpose-built probes
+(a Python project with a deliberately airtight spec, a 40-line Go CLI with no ledger and two planted
+defects) — showed the contract works and let the prose be cut against evidence instead of taste.
+The ledger item is back from 94 lines to 72; `bootstrap-checklist.md` net −21 lines, and the kit's
+own retire-bias applied to text written a day earlier.
+
+### Fixed
+
+- **The intake audit stopped at the ledger entry and scored clean on projects that are in fact
+  waiting on their owner.** Measured on a real project: the blocking question sat three hops out,
+  in the plan that the entry's `preconditions` pointed to. The check now follows the pointers, and
+  says so — an audit that greps only `verify`/`description` is the false-negative it was meant to
+  prevent.
+- **`priority` had one failure mode and the check saw only the other.** It caught "the ritual
+  promises an order the ledger can't express" and walked past its mirror — the field present but
+  read by nothing, or set on some entries and not others. Half-migrated is the worst state, because
+  "missing sorts last" buries exactly the entries that predate the migration; the canonical shape
+  now says set it on all entries in one pass or none, and the audit reads both directions.
+- `Q7-A`-style options, the tracker branch and the write-through note lost the sentences that
+  restated them. What survives is what the runs exercised: cost picks the form (diverging readings
+  get coded options, converging ones you settle yourself and say why), silence is not consent in a
+  headless run, a decision is not automatically work, and an open question blocks the implementation
+  feature but never a *bounded* spike.
+- **The queue's "next condition" rule is gone entirely** — `blocked_reason` already carries "what
+  unblocks it, and who" one paragraph above. It was a second name for an existing field, which is
+  the duplication this kit treats as a defect.
+
+### Changed
+
+- Reading a tracker is now a testable step (`gh issue view`; MCP for Jira/Linear), not advice: an
+  ID nobody can open reads as resolved when it is merely unreachable.
+- The Bootstrap output template names the ledger's intake rule and `priority`, so an operator sees
+  them in the plan rather than discovering them in the file.
+
 ## [1.21.0] — 2026-08-04
 
 **The kit governed work already chosen and said nothing about how a proposal becomes work.** Every

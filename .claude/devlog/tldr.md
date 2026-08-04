@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #38 · 2026-08-04 · Четыре прогона сократили текст, написанный днём раньше
+
+**Tags:** evidence, planning, ledger, audit, cleanup, release
+
+v1.21.0 отгрузила intake-контракт и заодно удвоила пункт чеклиста, который его несёт: item 2 вырос с 47 до 94 строк. Кит наказывает за раздувание не из эстетики — в длинном списке правил соседние строки читаются хуже. Долг был назван в тот же день и не закрыт, потому что резать…
+
+[→ entries/0038-chetyre-progona-sokratili-tekst-napisannyy-dnem-ranshe.md](entries/0038-chetyre-progona-sokratili-tekst-napisannyy-dnem-ranshe.md)
+
+---
+
 ## #37 · 2026-08-04 · Граница «обсуждение → обязательство» получила контракт, а не документ
 
 **Tags:** planning, ledger, audit, evidence, release

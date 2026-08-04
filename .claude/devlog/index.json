@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-03T22:39:31Z",
-  "entry_count": 37,
+  "generated_at": "2026-08-04T00:05:53Z",
+  "entry_count": 38,
   "entries": [
     {
       "id": 1,
@@ -535,6 +535,23 @@
       "supersedes": null,
       "path": "entries/0037-granitsa-obsuzhdenie-obyazatelstvo-poluchila-kontrakt-a-ne-d.md",
       "preview": "Оператор указал на самую слабую часть кита: всё, что происходит ДО кода — подготовительные работы, обсуждение задачи до её попадания в бэклог, ведение очереди, фиксация. Поводом стал догфудящий проект (Greenplun-router-runtime), который за июль–август сам вырастил planning-слой…"
+    },
+    {
+      "id": 38,
+      "date": "2026-08-04",
+      "title": "Четыре прогона сократили текст, написанный днём раньше",
+      "tags": [
+        "evidence",
+        "planning",
+        "ledger",
+        "audit",
+        "cleanup",
+        "release"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0038-chetyre-progona-sokratili-tekst-napisannyy-dnem-ranshe.md",
+      "preview": "v1.21.0 отгрузила intake-контракт и заодно удвоила пункт чеклиста, который его несёт: item 2 вырос с 47 до 94 строк. Кит наказывает за раздувание не из эстетики — в длинном списке правил соседние строки читаются хуже. Долг был назван в тот же день и не закрыт, потому что резать…"
     }
   ]
 }

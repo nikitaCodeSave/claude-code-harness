@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go build:*)",
+      "Bash(go test:*)",
+      "Bash(go vet:*)",
+      "Read(./**)",
+      "Glob(./**)",
+      "Edit(./**)"
+    ],
+    "deny": [
+      "Write(./secrets/**)"
+    ]
+  }
+}

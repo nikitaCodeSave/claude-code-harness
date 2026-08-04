@@ -1,0 +1,70 @@
+    },
+    {
+      "id": "F4",
+      "priority": 4,
+      "title": "billable rounding to 15-minute units",
+      "description": "Durations printed by report are billable durations: whole numbers of quarter-hours. The rounding mode and the level at which rounding is applied are fixed by Q1 and Q2 below and are not yet answered.",
+      "verify": [
+        "pytest tests/test_rounding.py::test_every_printed_duration_is_a_whole_quarter_hour -- holds under any Q1/Q2 answer; authorable now",
+        "pytest tests/test_rounding.py::test_rounding_mode_goldens -- exact expected values supplied by the Q1 answer; the README's 7-minute and 53-minute cases are both asserted",
+        "pytest tests/test_rounding.py::test_rounding_granularity -- four 7-minute entries on one task assert the total fixed by the Q2 answer",
+        "ruff check ."
+      ],
+      "passes": false,
+      "preconditions": ["editable install present: `pip install -e .`"],
+      "notes": "NOT READY TO WORK -- two open owner questions, asked 2026-08-04, unanswered. Q1 (rounding mode; cost-divergent -> coded options). Q1-A round each duration UP to the next quarter (7min -> 0:15, 53min -> 1:00; standard consultancy billing; if wrong, systematic over-billing -- eight 5-minute entries bill 2:00 for 40 minutes of work and the client disputes the invoice). Q1-B round to the NEAREST quarter, half up (7min -> 0:00, 53min -> 1:00; if wrong, short entries bill zero and the consultant silently loses the time). Q1-C round DOWN (7min -> 0:00, 53min -> 0:45; if wrong, systematic under-billing). The README example disambiguates nothing: 7 and 53 minutes come out a whole quarter-hour under all three. Q2 (granularity; cost-divergent -> coded options). Q2-A round each entry, Q2-B round the per-task total for the range, Q2-C round only the TOTAL line. Four 7-minute entries bill 1:00 under Q1-A+Q2-A and 0:30 under Q1-A+Q2-B. Both answers rest on how this owner's clients are invoiced today; no reading of the README settles either, and no bounded spike can answer a billing-policy preference. The goldens above cannot be authored before the answers land."
+    },
+    {
+      "id": "F5",
+      "priority": 5,
+      "title": "date attribution for entries that span midnight",
+      "description": "An entry started at 23:00 and stopped at 01:00 carries two dates, so --from/--to filtering has no defined answer for it. Which day (or days) it bills to is fixed by Q3 below and is not yet answered.",
+      "verify": [
+        "pytest tests/test_midnight.py::test_entry_spanning_midnight -- a 23:00-01:00 entry reports under the day fixed by the Q3 answer",
+        "pytest tests/test_midnight.py::test_range_edge_with_spanning_entry -- a range ending on the earlier day includes exactly the share Q3 assigns it, and the other day's share is absent (negative case)",
+        "ruff check ."
+      ],
+      "passes": false,
+      "preconditions": ["editable install present: `pip install -e .`"],
+      "notes": "NOT READY TO WORK -- open owner question Q3, asked 2026-08-04, unanswered. Q3 (which date a midnight-spanning entry bills to; cost-divergent -> coded options). Q3-A the start date owns the whole entry (23:00-01:00 bills entirely to the earlier day; simplest, and one entry stays one object as the storage spec requires; if wrong, a range ending at that midnight under-reports by the spill while the next range over-reports it). Q3-B split at midnight into per-day durations (each day bills what was worked in it; if wrong, it contradicts `one object per entry` and every report has to re-derive the split at read time). The overall total is identical either way -- the divergence is which invoice the time lands on, which is exactly what --from/--to exists to decide. The answer rests on whether the owner's clients are billed by session or by calendar day. F3 is scoped to non-spanning entries so it stays workable; whichever answer lands, this entry either ratifies F3's implicit bucketing or changes it with tests."
+    },
+    {
+      "id": "F6",
+      "priority": 6,
+      "title": "report --weekly groups the same numbers by week",
+      "description": "`worklog report --weekly` groups the billable numbers by week and prints one line per week alongside the per-task lines. The week boundary (Q4) and the output arrangement including partial weeks at the range edges (Q5) are not yet answered.",
+      "verify": [
+        "pytest tests/test_weekly.py::test_weekly_groups_by_week -- entries in two calendar weeks produce two week lines whose sum equals the plain report TOTAL for the same range",
+        "pytest tests/test_weekly.py::test_week_boundary -- an entry on the boundary day fixed by the Q4 answer lands in the expected week and is absent from the adjacent one (negative case)",
+        "pytest tests/test_weekly.py::test_weekly_layout -- arrangement of week lines vs per-task lines, and partial-week handling, as fixed by the Q5 answer",
+        "ruff check ."
+      ],
+      "passes": false,
+      "preconditions": ["editable install present: `pip install -e .`"],
+      "notes": "NOT READY TO WORK -- one open owner question with options, one cheap one, and two internal dependencies. Q4 (week boundary; cost-divergent -> coded options), asked 2026-08-04, unanswered. Q4-A ISO weeks starting Monday (matches date.isocalendar(), no bespoke arithmetic; if wrong, every weekend entry lands one week off and weekly invoices are wrong at both edges). Q4-B weeks starting Sunday (US payroll convention; same failure mirrored). The answer rests on the owner's invoicing period. Q5 (layout), asked 2026-08-04, unanswered -- NOT cost-divergent, so no options table: the numbers are identical either way. Does --weekly print per-week total lines followed by the existing per-task lines, or per-task lines nested under each week heading; and is a week the range only partially covers printed as a partial week or dropped? Question plus its dated answer is the whole ceremony here. Internal dependencies beyond the questions: this feature regroups `the same numbers`, so it cannot start until F4 fixes the rounding semantics and F5 fixes date attribution -- a Sunday-to-Monday entry needs both answers before a week total means anything."
+    }
+  ]
+}
+```
+
+## Не готовы к работе
+
+**F4 — billable rounding.** Два owner-вопроса, оба денежные, оба с кодированными вариантами, потому что цена ошибки расходится:
+- **Q1 (режим округления).** README говорит «rounded to 15-minute units» и приводит 7 и 53 минуты — но этот пример ничего не различает: и вверх (0:15 / 1:00), и к ближайшему (0:00 / 1:00), и вниз (0:00 / 0:45) дают целое число четвертей часа. То есть фраза «spec fixes deliberately» фиксирует гранулярность, а не направление.
+- **Q2 (уровень округления).** Округлять каждую запись, итог по задаче или только TOTAL. Четыре записи по 7 минут — это 1:00 или 0:30. Разница уходит прямо в счёт клиенту.
+
+Спайком это не закрывается: вопрос не про факт системы, а про биллинговую политику владельца.
+
+**F5 — записи через полночь.** Q3: спека даёт `start`/`stop` и «даты включительно с обоих концов», но у записи 23:00→01:00 две даты. A — вся запись на день старта (сохраняет «one object per entry»), B — деление по полуночи. Общая сумма одинакова, различается *в какой счёт* попадёт время — то есть ровно то, ради чего существует `--from/--to`.
+
+**F6 — `--weekly`.** Q4 (понедельник по ISO или воскресенье) — денежный, с вариантами: сдвиг границы переносит выходные записи в соседнюю неделю. Q5 (раскладка вывода и неполные недели на краях диапазона) — **без** таблицы вариантов, потому что числа не меняются, меняется только расположение; здесь вопрос + датированный ответ и есть вся церемония. Плюс внутренняя зависимость: F6 группирует «те же числа», поэтому не стартует, пока не закрыты F4 и F5.
+
+## Что готово и почему нет `blocked: true`
+
+Работать можно с F1 → F2 → F3 в этом порядке (у F2 и F3 зависимость чисто последовательная, её снимает сам порядок ledger, а не владелец). F3 остаётся рабочим намеренно: все его фикстуры кратны 15 минутам и не пересекают полночь, поэтому его goldens переживут любой ответ на Q1–Q3.
+
+Ни одна запись не помечена `blocked: true` — этот маркер по канону для случая, когда **verify** физически недоступен агенту (прод-креды, чужой сервис). Здесь `pytest` и `ruff` доступны полностью; недоступен *ответ*, а он живёт в `notes` как «вопрос → датированный ответ → на чём ответ держится». Смешать эти два состояния — значит потерять различие между «сессия не может проверить» и «сессия не имеет права решать».
+
+Два места, где я решил сам и написал почему (в `notes` F1 и F2): форма хранения (README требует одновременно «one object per entry» и «append-only» — совместимо только если полный объект дописывается на `stop`, а открытая запись живёт в `~/.worklog/open.json`) и поведение `stop` без открытой записи (exit 2 по симметрии с задокументированной ошибкой `start`). Ни то, ни другое не двигает ни одну биллинговую цифру.
+
+Дальше по Phase 5 остаётся: `scripts/init.sh` как oracle (ветка (c): установка + pytest + ruff, с пофайловым резолвом `.venv/bin/<tool>` → PATH), `.claude/progress/v1-billable-report.md`, session-start ритуал и строка про continuity в `CLAUDE.md`. Скажи — разверну это на диск вместе с `features.json`.

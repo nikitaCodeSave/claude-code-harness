@@ -1,0 +1,3 @@
+{"project":"x","rules":["one feature at a time","the open question about pagination is recorded below"],
+ "features":[{"id":"F1","priority":1,"title":"a","description":"d","verify":["v"],"passes":false},
+             {"id":"F2","title":"b","description":"d","verify":["v"],"passes":false}]}

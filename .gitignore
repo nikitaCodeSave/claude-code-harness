@@ -15,6 +15,9 @@
 !/.gitignore
 !/.gitattributes
 
+# --- Regression evals for the kit (dev harness, not shipped) ---
+!/evals/
+
 # --- Dev harness for developing THIS repo (curated only) ---
 !/.claude/
 /.claude/*
@@ -35,3 +38,7 @@ settings.local.json
 __pycache__/
 .pytest_cache/
 .DS_Store
+
+# eval-прогоны: сырые выводы кладутся вручную; git-каталоги фикстур — никогда
+evals/results/*.tmp
+evals/fixtures/**/.git/

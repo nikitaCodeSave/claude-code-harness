@@ -1,0 +1,146 @@
+Прочитал README, `pyproject.toml`, `src/worklog/cli.py`, `tests/test_smoke.py` и Phase 5 чек-листа. Ничего на диск не писал.
+
+Три решения, которые определили форму леджера:
+
+- **`F0` не нужен.** Это не greenfield: есть коммит, стек назван в README (Python 3.12 / pytest / ruff), код читаем. `F0` — это seed для «0 файлов», здесь он был бы пустой формальностью.
+- **Оракул — ветка (c):** два гейта (`pytest` + `ruff check .`) плюс подготовка окружения (`pip install -e .`, разрешение `pytest`/`ruff` по-отдельности: `.venv/bin/<tool>`, иначе PATH) → один `scripts/init.sh`, а не файл в корне. Базовая линия уже зелёная (`test_smoke.py` проходит, `main()` — заглушка, но её никто не вызывает), так что ловушка «pytest exit 5 на пустом наборе» здесь не срабатывает.
+- **Ни у одной записи нет `blocked: true`.** `blocked` — это про verify, отгороженный от агента (прод-креды, чужой сервис). Здесь стена другая: не отвечен вопрос по acceptance. Канон кита разводит эти механизмы, и вопрос живёт в `notes`, а не в `blocked_reason`.
+
+```json
+{
+  "project": "worklog",
+  "milestone": "v0.1-billable-report",
+  "rules": [
+    "one feature at a time; flip passes only when verified e2e",
+    "never edit/delete a test for green",
+    "verify walled off outside the agent's reach -> blocked: true + blocked_reason, not a bare passes: false",
+    "an acceptance-affecting question only the owner can answer -> record it in that entry's notes as question -> dated answer -> what the answer rests on, then work the next feature; never decide it yourself (this project has no tracker: notes are the decision canon)",
+    "these numbers go on client invoices: never invent an expected duration to make a test green -- an expected value not derivable from README.md comes from the owner"
+  ],
+  "features": [
+    {
+      "id": "F1",
+      "priority": 1,
+      "title": "`worklog start` opens an entry",
+      "description": "Appends exactly one JSON object to ~/.worklog/entries.jsonl: the task name verbatim (case-sensitive) and a local wall-clock start timestamp, no stop field. Creates ~/.worklog/ when missing. Starting while an entry is open is an error: exit 2, message `an entry is already open`, and nothing is appended. The storage root resolves through a single helper so tests can redirect it.",
+      "verify": [
+        "pytest tests/test_start.py::test_start_appends_one_open_entry -- file contains exactly 1 line; task string byte-identical to the argument; start present; no stop key",
+        "pytest tests/test_start.py::test_start_while_open_exits_2 -- exit code 2, message `an entry is already open`, file still contains exactly 1 line",
+        "pytest tests/test_start.py::test_task_names_are_case_sensitive -- `Review` and `review` produce two distinct entries",
+        "ruff check ."
+      ],
+      "passes": false,
+      "preconditions": [
+        "pip install -e . ; pytest and ruff resolved per-tool (.venv/bin/<tool> if present, else PATH)",
+        "tests redirect the storage root away from the real ~/.worklog -- never write to the developer's home"
+      ]
+    },
+    {
+      "id": "F2",
+      "priority": 2,
+      "title": "`worklog stop` closes the open entry",
+      "description": "Writes a local wall-clock stop timestamp into the currently open entry and exits 0. With no entry open: exit 2, message `no entry is open`, file unchanged.",
+      "verify": [
+        "pytest tests/test_stop.py::test_stop_closes_the_open_entry -- still exactly 1 line; that object now carries stop >= start",
+        "pytest tests/test_stop.py::test_stop_without_open_entry_exits_2 -- exit code 2, message `no entry is open`, file byte-identical before and after",
+        "pytest tests/test_stop.py::test_stop_adds_no_line -- line count unchanged, all earlier lines byte-identical",
+        "ruff check ."
+      ],
+      "passes": false,
+      "preconditions": [
+        "pip install -e . ; pytest and ruff resolved per-tool (.venv/bin/<tool> if present, else PATH)",
+        "tests redirect the storage root away from the real ~/.worklog -- never write to the developer's home"
+      ],
+      "notes": "Two readings settled here; neither is an owner question. (1) Storage: README fixes BOTH `one object per entry` AND `append-only`. Appending a separate stop record would break the first, so `append-only` can only mean entries are added, never deleted or reordered -- stop updates its own object in place. Settled by elimination, not by preference. (2) The no-open-entry error: README fixes only the start-side error (exit 2, `an entry is already open`); this mirrors it. Exit code and message wording are shape-of-message decisions."
+    },
+    {
+      "id": "F3",
+      "priority": 3,
+      "title": "`worklog report --from --to` prints per-task totals and a TOTAL line",
+      "description": "One line per task with its summed duration, then a TOTAL line. Durations render as H:MM (`1:05`, `12:00`; hours not zero-padded). --from/--to are inclusive on both ends and OPTIONAL -- omitted means all entries (settled: README specifies the empty case using the bare `worklog report` form). No entries in range: print `no entries`, exit 0. SCOPE LIMIT: every fixture entry starts and stops on the same calendar date (cross-midnight attribution is F6, undecided) and every fixture duration is an exact multiple of 15 minutes, so the expected numbers are identical under every reading of Q1. This feature introduces NO rounding rule -- keep duration computation separate from rendering so F4 can insert rounding wherever Q1 lands.",
+      "verify": [
+        "pytest tests/test_report.py::test_one_line_per_task_then_total -- tasks of 0:30 and 1:00 print two task lines plus a TOTAL of 1:30",
+        "pytest tests/test_report.py::test_range_is_inclusive_on_both_ends -- an entry dated --from and one dated --to are both counted; the day before --from is not",
+        "pytest tests/test_report.py::test_no_entries_in_range -- stdout is `no entries`, exit code 0",
+        "pytest tests/test_report.py::test_hmm_format -- 65 minutes renders `1:05`, 720 minutes renders `12:00`",
+        "pytest tests/test_report.py::test_open_entry_contributes_nothing -- an entry with no stop is absent from the output",
+        "ruff check ."
+      ],
+      "passes": false,
+      "preconditions": [
+        "pip install -e . ; pytest and ruff resolved per-tool (.venv/bin/<tool> if present, else PATH)",
+        "tests redirect the storage root away from the real ~/.worklog -- never write to the developer's home"
+      ],
+      "notes": "Ready to work ONLY under the scope limit above. A session that wants to assert a 7- or 53-minute total must stop: that number is Q1 (F4), not a judgement call. Also settled here, not an owner question: an entry with no stop has no duration and contributes nothing -- a duration needs both ends, and counting it would make the report depend on wall-clock now; the workflow answer is `stop` then `report`."
+    },
+    {
+      "id": "F4",
+      "priority": 4,
+      "title": "Billable durations round to 15-minute units",
+      "description": "Raw durations become billable durations in whole quarter-hours. NOT READY: rounding direction and rounding granularity are acceptance-affecting and undecided -- see Q1. Holds under every reading: every duration the report prints is a whole number of quarter-hours. Does NOT hold under every reading: the value of any individual case, including README's own 7-minute and 53-minute examples.",
+      "verify": [
+        "pytest tests/test_rounding.py::test_every_printed_duration_is_a_multiple_of_15_minutes -- property over many entry lengths; true under every reading of Q1",
+        "pytest tests/test_rounding.py::test_seven_minute_entry and ::test_fifty_three_minute_entry -- expected values come from Q1's answer; do not invent them",
+        "pytest tests/test_rounding.py::test_three_seven_minute_entries_on_one_task -- discriminates per-entry from per-task-total rounding; expected value comes from Q1's answer",
+        "ruff check ."
+      ],
+      "passes": false,
+      "preconditions": [
+        "pip install -e . ; pytest and ruff resolved per-tool (.venv/bin/<tool> if present, else PATH)",
+        "tests redirect the storage root away from the real ~/.worklog -- never write to the developer's home"
+      ],
+      "notes": "Q1 (open, raised 2026-08-04) -- how does a raw duration become a billable one? Two axes, four codes. Q1-A: round each ENTRY UP to the next quarter (7min -> 0:15, 53min -> 1:00). Q1-B: round each ENTRY to the NEAREST quarter, half up (7min -> 0:00, 53min -> 1:00). Q1-C: round the per-TASK TOTAL up. Q1-D: round the per-TASK TOTAL to nearest. Cost if the reading is wrong: three 7-minute entries on one task bill 0:45 under Q1-A, 0:00 under Q1-B, 0:30 under Q1-C, 0:15 under Q1-D -- README says consultants bill clients directly off these numbers, so a wrong reading is a wrong invoice already sent. Answer: -- (unanswered). What the answer rests on: the owner's billing policy with clients. README fixes only that the result is a whole number of quarter-hours; nothing in the repo settles direction or granularity, and no bounded spike can produce the evidence -- it is a policy choice, not a discoverable fact."
+    },
+    {
+      "id": "F5",
+      "priority": 5,
+      "title": "`worklog report --weekly` groups the same numbers by week",
+      "description": "Prints one line per week alongside the per-task lines. NOT READY on two counts: the numbers are F4's (Q1), and the week boundary is undecided (Q2).",
+      "verify": [
+        "pytest tests/test_weekly.py::test_per_week_lines_accompany_the_per_task_lines -- both blocks present in one run",
+        "pytest tests/test_weekly.py::test_entries_land_in_the_expected_week -- boundary fixture: one entry on a Sunday, one on the following Monday; the grouping comes from Q2's answer",
+        "pytest tests/test_weekly.py::test_week_only_partially_covered_by_the_range -- comes from Q2's answer",
+        "pytest tests/test_weekly.py::test_weekly_lines_sum_to_the_overall_total -- must hold under every reading of Q2",
+        "ruff check ."
+      ],
+      "passes": false,
+      "preconditions": [
+        "pip install -e . ; pytest and ruff resolved per-tool (.venv/bin/<tool> if present, else PATH)",
+        "tests redirect the storage root away from the real ~/.worklog -- never write to the developer's home"
+      ],
+      "notes": "Q2 (open, raised 2026-08-04) -- where does a week start, and what happens to a week the --from/--to range covers only partially? Q2-A: ISO-8601 weeks, Mon-Sun, labelled by ISO week number. Q2-B: Sun-Sat weeks. Q2-C: rolling 7-day windows anchored at --from. Orthogonal to the choice: a partially covered week reports only the hours inside the range (truncate) or the whole week's hours (spill outside the range). Cost if the reading is wrong: a Sunday's hours move between two invoice lines, and a truncate/spill mistake makes the weekly lines disagree with the TOTAL line on the same page. Answer: -- (unanswered). What the answer rests on: how the owner's clients read a weekly invoice; not derivable from the repo. SETTLED here, not an owner question: the layout (per-task block, then per-week block, then TOTAL) -- shape of output, changes no number. Depends on F4: `the same numbers` are the rounded ones."
+    },
+    {
+      "id": "F6",
+      "priority": 6,
+      "title": "Attribution of an entry that spans midnight",
+      "description": "An entry that starts before and stops after midnight crosses a --from/--to edge and possibly a week boundary. NOT READY: undecided -- see Q3. Until it is answered, F3 and F5 are specified only for entries that start and stop on the same calendar date.",
+      "verify": [
+        "pytest tests/test_midnight.py::test_entry_spanning_midnight_inside_the_range -- one entry 23:40 -> 00:20; the per-day/per-task attribution comes from Q3's answer",
+        "pytest tests/test_midnight.py::test_entry_spanning_the_range_edge -- entry starts the day before --from and stops on --from; comes from Q3's answer",
+        "ruff check ."
+      ],
+      "passes": false,
+      "preconditions": [
+        "pip install -e . ; pytest and ruff resolved per-tool (.venv/bin/<tool> if present, else PATH)",
+        "tests redirect the storage root away from the real ~/.worklog -- never write to the developer's home"
+      ],
+      "notes": "Q3 (open, raised 2026-08-04) -- is a midnight-spanning entry attributed whole to its start date, whole to its stop date, or split at midnight across the two days? The readings do not differ in implementation cost, so no option table: the question and its dated answer are the whole ceremony. Cost if wrong: rare but silent -- an overnight session lands on the wrong invoice day, or on a --from/--to edge drops out of the report entirely, with no error to signal it. Answer: -- (unanswered). What the answer rests on: whether the owner bills overnight work by the day it started or by the clock; README's `no timezone conversion, everything is local wall-clock` fixes the timestamps, not the attribution. Interacts with Q1: splitting at midnight creates two sub-durations, and whether each rounds separately follows from Q1's granularity axis."
+    }
+  ]
+}
+```
+
+## Не готовы к работе
+
+**F4 — округление до 15 минут.** Q1: не решены две оси — направление (вверх / к ближайшему) и гранулярность (по записи / по сумме задачи). Разброс не косметический: три записи по 7 минут дают 0:45 / 0:00 / 0:30 / 0:15 в зависимости от прочтения. README фиксирует только то, что результат — целое число четвертей часа, и намеренно приводит 7 и 53 минуты — то есть ровно те два числа, на которых прочтения расходятся. Это платёжная политика владельца, а не факт, который можно откопать: bounded spike здесь бесполезен, поэтому в `rules` нет ветки про спайк.
+
+**F5 — `--weekly`.** Две причины сразу. Q2: граница недели (ISO Mon–Sun / Sun–Sat / скользящие 7 дней от `--from`) плюс поведение частично покрытой недели (обрезать по диапазону или отдать неделю целиком) — и то и другое меняет числа в счёте. Плюс зависимость от F4: «те же числа» — это округлённые числа, так что даже с ответом на Q2 фича ждёт Q1. Вёрстку блоков я решил сам и это записал: она не меняет ни одной цифры.
+
+**F6 — записи через полночь.** Q3: относить целиком к дате старта, к дате стопа или резать по полуночи. Здесь прочтения не расходятся по цене реализации, поэтому таблицы опций нет — вопрос и датированный ответ и есть вся церемония. Опасность в тихости: ночная запись уезжает на соседний день счёта или на краю `--from` исчезает из отчёта вообще, без единой ошибки. Q3 сцеплен с Q1: если резать по полуночи, появляются два огрызка, и округляются ли они порознь — следует из оси гранулярности Q1.
+
+**Готовы сейчас: F1, F2, F3** — с одной оговоркой по F3. Он готов только внутри своего scope limit: фикстуры в пределах одних суток и длительности, кратные 15 минутам, — на таких числах все прочтения Q1 совпадают, поэтому структуру отчёта (строки по задачам, TOTAL, инклюзивный диапазон, `no entries` → exit 0, формат H:MM) можно закрыть, не решая Q1. Сессия, которой захочется проверить 53-минутную запись, обязана остановиться.
+
+Что я решил сам и почему — записано в `notes` соответствующих записей, чтобы это не выглядело умолчанием: формат хранения при `stop` (README фиксирует и «one object per entry», и «append-only» — отдельная стоп-запись ломает первое, значит «append-only» = записи только добавляются, а `stop` дописывает своё поле; решено исключением, а не вкусом), код и текст ошибки `stop` без открытой записи (зеркало единственного зафиксированного в спеке случая), опциональность `--from/--to` (README сам использует голый `worklog report`), незакрытая запись не попадает в отчёт, и вёрстка `--weekly`.
+
+Ничего не записано на диск. Если нужно развернуть Phase 5 целиком — кроме леджера это `scripts/init.sh` как оракул, ритуал старта сессии и строка про continuity в `CLAUDE.md`, `.claude/progress/<slug>.md`; скажите, и я это сделаю.

@@ -1,0 +1,2 @@
+{"project":"x","rules":["one feature at a time"],
+ "features":[{"id":"F1","title":"a","description":"d","verify":["a question of taste"],"passes":false}]}

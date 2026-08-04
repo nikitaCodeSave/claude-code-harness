@@ -1,0 +1,3 @@
+{"project":"x","rules":["an acceptance-affecting question only the owner can answer -> record question + dated answer where this project keeps decisions; never decide it yourself"],
+ "features":[{"id":"F1","priority":1,"title":"a","description":"d","verify":["v"],"passes":false},
+             {"id":"F2","priority":2,"title":"b","description":"d","verify":["v"],"passes":false}]}

@@ -1,0 +1,3 @@
+{"project":"x","rules":["one feature at a time","never edit a test for green"],
+ "features":[{"id":"F1","priority":1,"title":"a","description":"d","verify":["v"],"passes":false},
+             {"id":"F2","title":"b","description":"d","verify":["v"],"passes":false}]}

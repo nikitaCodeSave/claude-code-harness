@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #40 · 2026-08-04 · Регресс-набор переехал в репозиторий, ablation дал неудобный ответ
+
+**Tags:** evidence, evals, test, harness
+
+У кита не было собственного оракула: правила проверялись разовыми прогонами, которые жили в /tmp и умирали вместе с сессией. Цена этого видна на этой же неделе — v1.21.1 уехала в origin с перевёрнутым правилом, и нашлось оно отдельной проверкой, а не перед релизом.
+
+[→ entries/0040-regress-nabor-pereekhal-v-repozitoriy-ablation-dal-neudobnyy.md](entries/0040-regress-nabor-pereekhal-v-repozitoriy-ablation-dal-neudobnyy.md)
+
+---
+
 ## #39 · 2026-08-04 · Сокращение перевернуло правило, и это поймал чужой контекст
 
 **Tags:** evidence, verification, ledger, audit, release

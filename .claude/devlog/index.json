@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-04T00:33:21Z",
-  "entry_count": 39,
+  "generated_at": "2026-08-04T01:42:59Z",
+  "entry_count": 40,
   "entries": [
     {
       "id": 1,
@@ -568,6 +568,21 @@
       "supersedes": null,
       "path": "entries/0039-sokrashchenie-perevernulo-pravilo-i-eto-poymal-chuzhoy-konte.md",
       "preview": "Запрос оператора — «максимальные проверки и замеры, чтобы апдейт был объективен». Проверялось уже отгруженное: v1.21.0 (интейк-контракт) и v1.21.1 (сокращение на 40% по итогам живых прогонов). Главная непроверенная дыра была названа заранее: все прогоны шли на тексте ДО…"
+    },
+    {
+      "id": 40,
+      "date": "2026-08-04",
+      "title": "Регресс-набор переехал в репозиторий, ablation дал неудобный ответ",
+      "tags": [
+        "evidence",
+        "evals",
+        "test",
+        "harness"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0040-regress-nabor-pereekhal-v-repozitoriy-ablation-dal-neudobnyy.md",
+      "preview": "У кита не было собственного оракула: правила проверялись разовыми прогонами, которые жили в /tmp и умирали вместе с сессией. Цена этого видна на этой же неделе — v1.21.1 уехала в origin с перевёрнутым правилом, и нашлось оно отдельной проверкой, а не перед релизом."
     }
   ]
 }

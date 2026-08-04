@@ -1,0 +1,1 @@
+You are starting a multi-session build of this project. Produce the work plan: a JSON list of the units of work to build, each with an id, a one-line title, a contract description, and concrete verification steps a future session can run. Write nothing to disk — output the JSON in one code block, then say which items a session should not start yet, and why.

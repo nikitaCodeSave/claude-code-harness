@@ -1,0 +1,70 @@
+    {
+      "id": "F5",
+      "priority": 5,
+      "title": "Missing input file exits 1",
+      "description": "When INPUT.csv does not exist the tool exits with code 1 and prints 'input not found: PATH' to stderr, where PATH is the argument exactly as given. Nothing on stdout; with -o, no output file is created.",
+      "verify": [
+        "pytest tests/test_errors.py::test_missing_input_exit_1 - exit code is exactly 1 and stderr equals 'input not found: nope.csv'",
+        "pytest tests/test_errors.py::test_missing_input_path_verbatim - a relative path argument is echoed back unchanged, not resolved to an absolute path",
+        "pytest tests/test_errors.py::test_missing_input_no_output_file - with -o out.json, out.json does not exist afterwards",
+        "pytest tests/test_errors.py::test_missing_input_stdout_empty - stdout is empty"
+      ],
+      "passes": false,
+      "notes": "Out of this entry's contract: a path that exists but is a directory, or exists but is unreadable. The spec names 'missing' only. If one shows up in the nightly pipeline it becomes its own entry with its own question - it is not a silent extension of exit 1."
+    },
+    {
+      "id": "F6",
+      "priority": 6,
+      "title": "Completely empty input (no header row)",
+      "description": "Behaviour for a zero-byte input file, or one with no header line at all. The settled spec covers 'header present, zero data rows' (F3) but says nothing about an input with no header - which is exactly what a truncated or failed upstream job produces.",
+      "verify": [
+        "pending Q1 - the check is either 'stdout is [] and exit 0' or 'exit 2 with a message on stderr'. It cannot be written before the answer without inventing the contract."
+      ],
+      "passes": false,
+      "notes": "Q1 (asked 2026-08-04, unanswered): what does csv2json do with a zero-byte / header-less input? Cost diverges, so coded options. Q1-A: emit [] and exit 0, treating 'no rows' uniformly with F3 - the nightly pipeline then sees a successful run with an empty result, so an upstream job that silently produced nothing is indistinguishable from a legitimately empty day. Q1-B: exit 2 with 'input has no header row' on stderr - the pipeline alerts, at the cost that a legitimately empty extract now pages someone. Only the owner of the nightly pipeline can pick, because the cost lands in their alerting, not in this code. If the answer is 'not v1', close this entry with no code and record the decision."
+    },
+    {
+      "id": "F7",
+      "priority": 7,
+      "title": "Non-UTF-8 input is an error",
+      "description": "An input file that is not valid UTF-8 aborts the run with a non-zero exit and a message on stderr; nothing is written to stdout or to the -o target. The spec settles THAT it is an error; it does not settle WHICH exit code, and in this tool exit codes are contract (1 = missing input, 2 = row mismatch), read by the nightly pipeline.",
+      "verify": [
+        "pytest tests/test_errors.py::test_invalid_utf8_nonzero_exit - a file containing the byte sequence b'\\xff\\xfe' inside a cell exits non-zero (settled)",
+        "pytest tests/test_errors.py::test_invalid_utf8_no_output - stdout is empty and the -o target is neither created nor modified (settled)",
+        "pending Q2 - the assertion on the exact exit code and message cannot be written before the answer"
+      ],
+      "passes": false,
+      "notes": "Q2 (asked 2026-08-04, unanswered): which exit code does an invalid-UTF-8 input return? Cost diverges through the pipeline's branching, so coded options. Q2-A: reuse 2 as 'malformed input' - the pipeline keeps two codes, but can no longer separate an encoding failure from a shape failure in its retry logic. Q2-B: a new code 3 - distinguishable, at the cost of a pipeline change to handle a code it has never seen. Q2-C: reuse 1 - we consider this the wrong reading, since 1 currently means 'the file is not there' and reusing it makes 'missing' untestable; recorded so the owner sees it was weighed. Settled here, not an owner question: the message wording ('input is not valid UTF-8: PATH') - shape of a message. The two settled halves ARE implementable today, but do not start them: they would land tests asserting an exit code Q2 may change, and rewriting a green test to match a later answer is the pattern rule 2 exists to prevent."
+    },
+    {
+      "id": "F8",
+      "priority": 8,
+      "title": "Nested output: group rows under a column's value",
+      "description": "The pipeline team asked for 'support for nested output' - grouping data rows under a key taken from one of the columns. The request exists; the contract does not. Nothing here is implementable yet.",
+      "verify": [
+        "pending Q3, Q4, Q5, Q6 - the output shape itself is undecided, so there is no expected document to assert against"
+      ],
+      "passes": false,
+      "notes": "All asked 2026-08-04, all unanswered. Q3 - what is the grouped output shape? Cost diverges (every downstream consumer parses it, and changing it after the nightly pipeline reads it is a breaking change), so coded options. Q3-A: an object keyed by group value, {\"east\": [row, row]} - cheapest lookup-by-key, but it breaks v1's 'output is always an array' invariant, so consumers must branch on the flag. Q3-B: an array of group objects, [{\"group\": \"east\", \"rows\": [row]}] - keeps the top-level array; consumers scan to find a group. Q3-C: as B but the group key is named after the source column, [{\"region\": \"east\", \"rows\": [row]}] - self-describing, but then the output schema changes with the --group-by argument. || Q4: does the grouping column stay inside each row object, or is it removed once lifted to the group level? Duplication versus a lossy row. || Q5: what happens to rows whose group value is empty? v1 settled that an empty cell is \"\" and never null, so \"\" is a legitimate value and not a sentinel - its own \"\" group, dropped, or exit 2. || Q6: is this v1 scope at all? The settled spec does not list it; 'not v1' closes this entry with NO code, and the decision is recorded rather than left standing as a passes:false entry. || Settled here, not owner questions: the flag spelling (--group-by COLUMN) and its behaviour when the named column is absent (exit 2, like any other malformed request) - both are naming, and both wait on Q3 anyway. || No bounded spike is proposed: the missing artefact is a decision, not evidence. There is nothing to run that would produce the answer, so a 'spike' here would just be someone picking the shape."
+    }
+  ]
+}
+```
+
+## Не готовы к работе — 3 записи
+
+**F6 — пустой (нулевой длины) файл на входе.** Спека закрывает «есть заголовок, нет строк данных» (это F3) и молчит о файле без заголовка. Расхождение по цене реальное и лежит **не в коде, а в алертинге ночного пайплайна**: `[]` + exit 0 делает сорванный upstream-джоб неотличимым от честно пустого дня; exit 2 будит дежурного на легитимно пустой выгрузке. Владелец пайплайна — единственный, кто может это выбрать. Записано как Q1-A/Q1-B.
+
+**F7 — вход не в UTF-8.** Спека говорит «это ошибка», но не назначает код возврата, хотя всем остальным классам ошибок коды назначены явно (1 и 2) — то есть коды здесь контракт, который пайплайн читает. Два settled-пункта (ненулевой выход, ничего не записано) реализуемы уже сейчас, но начинать их нельзя: тест зафиксирует код, который Q2 может изменить, а переписывание зелёного теста под поздний ответ — ровно то, что запрещает правило «never edit/delete a test for green». Записано как Q2-A/B/C.
+
+**F8 — вложенный (сгруппированный) вывод.** README сам называет это неурегулированным, и дыр там четыре, а не одна: форма вывода (Q3, с кодированными вариантами — она ломает или сохраняет инвариант «всегда массив»), судьба колонки группировки (Q4), поведение строк с пустым значением группы (Q5, острое именно потому, что v1 решил считать `""` полноценным значением, а не sentinel), и вообще v1-ли это (Q6 — ответ «не v1» закрывает запись без единой строки кода).
+
+Ни одна из трёх **не помечена `blocked: true`** — и это осознанно: `blocked` в каноне значит «verify физически недостижим для агента» (прод-креды, сервис только у оператора). Здесь verify достижим, отсутствует решение. Такие вещи живут в `notes`, а ритуал сессии их пропускает по правилу 5. Спутать эти два состояния — значит потерять различие между «нельзя проверить» и «нечего проверять».
+
+## Чего Phase 5 требует помимо этого файла
+
+- `scripts/init.sh` — оракул (ветка (c)); он же добавляет `[project.optional-dependencies] dev = ["pytest", "ruff"]`, потому что сейчас оба инструмента не объявлены нигде.
+- `.claude/progress/<slug>.md` + эпизодический слой (девлог либо дисциплинированные commit-сообщения — носитель надо выбрать один и назвать его в CLAUDE.md).
+- **Разрыв, который стоит назвать явно:** Phase 5 висит на Phase 2, которой в проекте нет. Нет `CLAUDE.md` — значит session-start ритуалу и указателю на оракул физически негде жить, и `features.json` останется файлом, который никто не открывает. Поэтому F0 создаёт хотя бы корневой `CLAUDE.md`; полный default shape (`settings.json`, `.claude/docs/`, `docs/ARCHITECTURE.md`, `docs/CODE-MAP.md`) я в эту заявку не тянул — это отдельное решение с вашей стороны.
+
+На диск не записано ничего, включая plan-файл.

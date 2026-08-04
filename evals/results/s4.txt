@@ -1,0 +1,70 @@
+      "description": "Each line item takes its rate from rates.json and its currency from rates.json, one line item per task with hours and an amount. A task with no matching rate is an error: exit 2, naming that task on stderr, before anything is written to ./out/.",
+      "verify": [
+        "pytest tests/test_rates.py::test_rate_applied - each fixture line item carries the rate from rates.json and the amount computed by the F2 money core",
+        "pytest tests/test_rates.py::test_missing_rate - exit code is exactly 2, stderr names the offending task, and ./out/ gains no file",
+        "pytest tests/test_rates.py::test_missing_rate_is_not_partial - the missing rate is detected before any output is produced, so a later failure cannot leave a half-written invoice",
+        "grep -rn for a hardcoded currency literal in src/invoicer/ returns no hit"
+      ],
+      "passes": false,
+      "preconditions": [
+        "F3 fixtures landed - the rates.json schema is pinned"
+      ]
+    },
+    {
+      "id": "F6",
+      "priority": 6,
+      "title": "Invoice number INV-YYYY-MM-<client-slug>",
+      "description": "The invoice number is INV-YYYY-MM-<client-slug> derived from the requested month and the client. The assertion that it appears inside the written file is format-dependent and lands with F7; this feature covers only the derivation and its unit contract.",
+      "verify": [
+        "pytest tests/test_number.py::test_number_format - for month 2026-03 and the fixture client the number equals the expected INV-2026-03-<slug> string exactly",
+        "pytest tests/test_number.py::test_month_echoed - the month segment is the requested month, zero-padded, never derived from an entry date"
+      ],
+      "passes": false,
+      "preconditions": [
+        "F3 fixtures landed",
+        "Q2 answered - see notes; this feature is not ready to work while it is open"
+      ],
+      "notes": "OPEN OWNER QUESTION Q2 (raised 2026-08-04, not yet put to the owner; answer: unanswered). Does rates.json carry an explicit client slug, or must the slug be derived from a display name - and by exactly what rule (case, spaces, punctuation, non-ASCII)? Why the owner and not the session: the invoice number is a durable identifier the client's accounting department keys on, and a guessed transform makes every invoice ever issued wrong in a way that is client-facing to correct. Cost does not diverge between the readings, so this is a plain question with a dated answer - no coded options table. If F3's fixtures show an explicit slug field in rates.json, Q2 is answered by the artifact and closes without an owner round-trip; record that as the dated answer with the fixture as what it rests on."
+    },
+    {
+      "id": "F7",
+      "priority": 7,
+      "title": "Write the invoice file into ./out/",
+      "description": "invoicer build --month YYYY-MM writes the invoice into ./out/ and exits 0, with the invoice number appearing inside the file and the line items carrying hours, amount and currency in the agreed format.",
+      "verify": [
+        "invoicer build --month 2026-03 against the fixtures exits 0 and writes into ./out/ exactly the artifact set the answer to Q1 names",
+        "the invoice number string from F6 appears inside the written file",
+        "the written file matches, byte for byte, a golden sample the owner confirms their importer accepts",
+        "a second run over the same month is idempotent - it does not append to or duplicate the previous artifact"
+      ],
+      "passes": false,
+      "blocked": true,
+      "blocked_reason": "The output format is undecided (Q1). Unblocked by the client's accounting department, via the project owner, naming the format their importer accepts - ideally by handing over a sample file it already ingests, or its importer spec.",
+      "preconditions": [
+        "F2, F4, F5 and F6 green - the domain model is complete before anything is serialised"
+      ],
+      "notes": "OPEN OWNER QUESTION Q1 (raised 2026-08-04, not yet put to the owner; answer: unanswered). Which format does the importer accept? The readings diverge sharply in cost and in what they commit us to, so they get codes: Q1-A CSV - stdlib csv, no new dependency, cheapest to build and to change internally, but the column order and header row become part of the contract and still need naming. Q1-B XLSX - adds an openpyxl dependency and a typing decision (amounts as numeric cells or as text; a text amount can silently break their arithmetic on import). Q1-C PDF plus a machine-readable sidecar - heaviest, needs a rendering dependency, and it contradicts the spec sentence 'writes one invoice file into ./out/', so choosing it reopens what ./out/ contains and what exit 0 means. What it costs if the reading is wrong: the importer rejects the file, and per the README whatever shipped first is already the contract, so a wrong pick is not a refactor - it waits on the client's release cycle. No bounded spike is available to the session: every probe that would answer Q1 empirically means sending a file to the real importer, which is the irreversible act itself, and the only non-shipping evidence (a sample the importer already accepts, or its documented spec) has to come from the owner. Do not pre-build a format-abstraction layer while Q1 is open - the domain model in F2 through F6 is already the seam, and a speculative renderer interface is scaffolding for a shape nobody has named."
+    }
+  ]
+}
+```
+
+## Что брать следующей сессии: **F1**
+
+**Почему именно она:**
+
+1. **Это единственная запись, у которой все входы внутри репозитория.** F3 ждёт реальные `entries.jsonl` / `rates.json` от владельца, F6 упирается в Q2, F7 заблокирована Q1, а F4/F5 сидят за F3. F1 не зависит ни от одного внешнего ответа — её можно закрыть сегодня.
+
+2. **Без оракула поле `verify` во всех остальных записях — это обещание, а не проверка.** Phase 5 называет runnable oracle главным долгоживущим рычагом: сессия закрывает цикл сама, вместо «выглядит готовым». Пока нет одной команды, возвращающей вердикт, флип `passes` в любой записи — это суждение автора о собственной работе.
+
+3. **Зелёный baseline нужен на нулевом дне.** `tests/test_smoke.py` уже делает набор непустым — это важно именно для pytest: на пустом наборе он выходит с кодом 5, и наивный `pytest || fail` в оракуле прочитал бы пустоту как провал. Оракул, красный с первого дня, весь остальной билд шлёт ложный сигнал.
+
+4. **F1 заодно ставит на место сам ритуал** — строку про оракул, порядок старта сессии и continuity-обязанность в `CLAUDE.md`. Слой, описанный только в чек-листе, рабочая сессия никогда не увидит.
+
+**Чего следующая сессия делать не должна:** трогать формат вывода (F7), даже «просто чтобы что-то писалось в `./out/`». Это самая заметная дыра и самое сильное искушение, но первый же файл, дошедший до importer'а, становится контрактом, который нельзя менять вне релизного цикла клиента. Решение — за владельцем; сессия фиксирует Q1 и работает следующую незаблокированную запись.
+
+**Две вещи вне JSON, о которых стоит знать:**
+- `features.json` — только одна из трёх опор Phase 5. Оракул (`scripts/init.sh`) и `CLAUDE.md` с ритуалом — вторая, `.claude/progress/invoicer.md` + devlog — третья. Обе занесены в `verify` F1, чтобы они не остались конвенцией, которую никто не выполнил.
+- Спецификация фиксирует «два знака после запятой» безусловно. Если в `rates.json` когда-нибудь появится валюта с нулём знаков (JPY), это станет вопросом к владельцу — сейчас гипотетика, поэтому в леджер не вносил.
+
+Ничего не записано на диск, включая план-файл — по вашему условию.

@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-04T00:05:53Z",
-  "entry_count": 38,
+  "generated_at": "2026-08-04T00:33:21Z",
+  "entry_count": 39,
   "entries": [
     {
       "id": 1,
@@ -552,6 +552,22 @@
       "supersedes": null,
       "path": "entries/0038-chetyre-progona-sokratili-tekst-napisannyy-dnem-ranshe.md",
       "preview": "v1.21.0 отгрузила intake-контракт и заодно удвоила пункт чеклиста, который его несёт: item 2 вырос с 47 до 94 строк. Кит наказывает за раздувание не из эстетики — в длинном списке правил соседние строки читаются хуже. Долг был назван в тот же день и не закрыт, потому что резать…"
+    },
+    {
+      "id": 39,
+      "date": "2026-08-04",
+      "title": "Сокращение перевернуло правило, и это поймал чужой контекст",
+      "tags": [
+        "evidence",
+        "verification",
+        "ledger",
+        "audit",
+        "release"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0039-sokrashchenie-perevernulo-pravilo-i-eto-poymal-chuzhoy-konte.md",
+      "preview": "Запрос оператора — «максимальные проверки и замеры, чтобы апдейт был объективен». Проверялось уже отгруженное: v1.21.0 (интейк-контракт) и v1.21.1 (сокращение на 40% по итогам живых прогонов). Главная непроверенная дыра была названа заранее: все прогоны шли на тексте ДО…"
     }
   ]
 }

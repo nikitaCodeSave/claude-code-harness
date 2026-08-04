@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.21.2] — 2026-08-04
+
+**The 1.21.1 compression moved a decision right from the owner to the session, in the same item that
+forbids exactly that.** A cross-vendor refutation of the shipped diff caught it, and re-running the
+two regression scenarios on the compressed text confirmed the rest held. Cutting text against
+evidence works; cutting it without a second pair of eyes on the *result* is how a rule inverts while
+reading fine.
+
+### Fixed
+
+- **`Cost picks the form` had become `you settle yourself`** — one paragraph below a `rules` line
+  that says *never decide it yourself*, and against the same duty in `SKILL.md` and the operator
+  playbook. Cost decides whether the question needs a coded options table; it never decides who
+  answers. An owner question reaches the owner either way; what a session settles on its own is
+  what was never an owner question — implementation detail, naming, the shape of a message.
+- **The bounded-spike exception was wide enough to drive an implementation through.** "Its `verify`
+  produces evidence" is true of every feature ever written; the clause that made it a *condition*
+  rather than a label — evidence rather than shipped behavior — had been compressed out. A
+  reversible product change renamed "spike" is still the change.
+- **The Phase 7 ledger check passed on the state the checklist calls the worst one.** `grep -c
+  '"priority"'` returns ≥1 for a half-migrated ledger, and any sentence containing the word
+  "question" satisfied the intake grep. It now counts: every entry carries `priority`, and the rule
+  itself is present. Verified against a real project's ledger, where it reports `PARTIAL/NONE` — the
+  drift the greps scored green.
+- **Removing the queue's "next condition" rule in 1.21.1 was wrong.** `blocked_reason` is defined
+  for a verify walled off outside the agent's reach and `preconditions` for operator-provided
+  services — neither covers an internal dependency or a pending decision. Restored as one line.
+- **The audit's coverage test invited its own false negative.** It listed each shipped file's duty
+  areas from memory; every one of those files carries cross-cutting rules past its headline list, so
+  an equivalence judged from the list could bless deleting a file whose invariants nothing replaces.
+  It now walks the canon file's own sections, and where coverage is arguable rather than
+  demonstrated, the file stays.
+- Provenance no longer claims the production log *chose* the coded-options form by cost — it shows
+  the correlation, and its owner answered all five questions, so it grounds the gate and not the
+  settle-it-yourself side. Spec Kit's commands are named correctly (`/speckit.clarify`,
+  `/speckit.checklist`). The `~10 features` retire trigger is gone: nothing counted it, the
+  inference didn't hold, and the kit calls an unrunnable expiry marker inert.
+- `F0` reserves `priority: 0` with everything else seeded from `1` — the schema allows negatives, so
+  "sorts first" was a convention the text hadn't stated.
+
 ## [1.21.1] — 2026-08-04
 
 **1.21.0 shipped a contract and doubled the length of the checklist item that carries it.** Four

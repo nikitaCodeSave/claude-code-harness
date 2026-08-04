@@ -155,12 +155,14 @@ or re-run before proposing edits to its machinery.
   (and features.json, if present) first. Project header newer than the canon's → update the
   plugin, don't downgrade the files.
 - **Shipped docs absent — audit coverage per file, not presence.** On a non-MVH project (pre-v1.8
-  bootstrap or skipped Phase 2c) their absence is a finding **only where that file's duty areas are
-  uncovered** — `workflow.md`: session ritual · change sizing · verification ladder · continuity;
-  `docs-discipline.md`: doc-with-code mapping · ADR threshold · glossary · current-state discipline;
-  `testing.md`: the five invariants. A mature project may already carry all of a file's areas in its
-  own `CLAUDE.md` / `AGENTS.md` / process docs — then shipping that copy adds a competing instruction
-  for no coverage gain. Judge the files independently: one covered elsewhere doesn't excuse another.
+  bootstrap or skipped Phase 2c) their absence is a finding **only where that file's duties are
+  uncovered**. Establish that by walking the canon file's own sections against the project's docs —
+  not from a remembered summary of them: each of `workflow.md` / `testing.md` / `docs-discipline.md`
+  carries cross-cutting rules past its headline list, and an equivalence judged from the headline
+  alone will bless deleting a file whose invariants nothing replaces. A mature project may genuinely
+  carry all of one file's duties in its own `CLAUDE.md` / `AGENTS.md` / process docs — then shipping
+  that copy adds a competing instruction for no coverage gain. Judge the files independently, and
+  where coverage is arguable rather than demonstrated, the file stays.
 - **A shipped line that contradicts the project's own canon is always a finding — and the operator
   adjudicates it, you don't.** Observed: `workflow.md`'s "session start = git log + progress" inside
   a project whose CLAUDE.md forbids reconstructing status from Git; there the project's rule was the

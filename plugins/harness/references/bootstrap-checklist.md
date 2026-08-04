@@ -361,7 +361,7 @@ apps* (T1). Set up:
 
    ```json
    {"project": "acme-api", "milestone": "v1-auth",
-    "rules": ["one feature at a time; flip passes only when verified e2e", "never edit/delete a test for green", "verify walled off outside the agent's reach -> blocked: true + blocked_reason, not a bare passes: false", "an acceptance-affecting question only the owner can answer -> record question + dated answer in notes and work something else; never decide it yourself"],
+    "rules": ["one feature at a time; flip passes only when verified e2e", "never edit/delete a test for green", "verify walled off outside the agent's reach -> blocked: true + blocked_reason, not a bare passes: false", "an acceptance-affecting question only the owner can answer -> record question + dated answer where this project keeps decisions (this entry's notes, or the tracker it names) and work something else; never decide it yourself"],
     "features": [{"id": "F1", "priority": 1, "title": "Login with email + password",
       "description": "POST /auth/login returns a signed JWT; a wrong password returns 401 without leaking which field failed.",
       "verify": ["pytest tests/test_auth.py::test_login_success", "pytest tests/test_auth.py::test_login_wrong_password asserts 401"],
@@ -370,8 +370,8 @@ apps* (T1). Set up:
 
    **Greenfield seed — `F0`, the bootstrap's own open loop.** With no code yet the ledger is not
    empty: seed `F0` = *"get the brief → fill Stack in CLAUDE.md, replace the ARCHITECTURE.md and
-   CODE-MAP.md stubs from real code, name the oracle command"*, `passes: false`, `priority: 0` (it
-   has to outrank everything seeded beside it, and an entry without the field sorts last), with
+   CODE-MAP.md stubs from real code, name the oracle command"*, `passes: false`, `priority: 0` —
+   reserve `0` for it and seed everything else from `1`, since it has to land first — with
    `verify` naming the check that proves each stub is gone. The session ritual (item 4) picks the
    highest-priority incomplete feature, so `F0` is what turn one lands on — the TBDs close inside
    the loop instead of resting in the operator's memory. Without it a greenfield bootstrap hands
@@ -394,25 +394,33 @@ apps* (T1). Set up:
    **The rules above govern work already chosen; none says how a proposal becomes one.** The gap that
    costs: a question only the owner can answer makes that feature **not ready to work** — record it in
    its `notes` as *question → dated answer → what the answer rests on*, work the next unblocked one.
-   - **Cost picks the form.** Readings that differ in cost get coded options (`Q7-A` / `Q7-B` · what
-     changes · what it costs if that reading is wrong) for the owner to pick by code; readings that
-     don't, you settle yourself and say why. A plain instruction with clear acceptance is already
-     accepted work — no question, no ceremony (`workflow.md`'s "small → acceptance only" stands).
-   - **Headless especially, silence is not consent** — record the question unanswered, don't pick.
+   - **Cost picks the form, never the authority.** An owner-only question reaches the owner either
+     way: readings that differ in cost get coded options (`Q7-A` / `Q7-B` · what changes · what it
+     costs if that reading is wrong) to pick by code; readings that don't, the question and its dated
+     answer are the whole ceremony — don't manufacture a table. What you settle yourself is what is
+     *not* an owner question — implementation detail, naming, the shape of a message — and you say
+     why. A plain instruction with clear acceptance is already accepted work (`workflow.md`'s
+     "small → acceptance only" stands).
+   - **The session never ratifies for the owner**, and headless is where that bites: silence is not
+     consent, so record the question unanswered and work something else rather than picking.
    - **A decision is not automatically work** — `wontfix`, "ratifies current behavior", "duplicate of
      F3" close a question and create no entry; that record belongs with decisions (devlog / ADR /
      tracker), which is also where a deferral names what would reopen it.
    - **It blocks the implementation feature, not a bounded spike that would answer it** — else the
-     discovery is forbidden by the question it exists to close. Bounded = reversible, no production
-     data, no spend, `verify` produces evidence. A spike needing prod or spend waits like any decision.
+     discovery is forbidden by the question it exists to close. Bounded is a condition, not a label:
+     reversible, no production data, no spend, and its `verify` *produces the evidence* rather than
+     shipping the behavior — a reversible product change renamed "spike" is still the change. One
+     needing prod access or spend waits like any other decision.
    - **Where a tracker is the canon**, question and answer live there and the ledger keeps the ID —
      but test that the session can open it (`gh issue view`; MCP for Jira/Linear), or it reads as
      resolved when it is merely unreachable.
    The `rules` line above is what carries this to the working session, which reads the ledger and never
-   this checklist. Drop the rule if ~10 features close without a question surfacing — the decisions are
-   being made elsewhere. (Provenance: a production owner-decision log — five ratified questions gave
-   three implementations, one no-code ratification, one `wontfix`, and coded options only where cost
-   diverged; Spec Kit's pre-planning `/clarify` + `/checklist` — `evidence-base.md`.)
+   this checklist — so the bounded-spike and tracker branches hold only where the session was told
+   them; put whichever the project needs into `rules` too. (Provenance: a production owner-decision
+   log — five ratified questions gave three implementations, one no-code ratification and one
+   `wontfix`, and its two coded-option tables both sit on cost-divergent questions. The owner answered
+   all five, so that log grounds the gate, not the "settle it yourself" side. Spec Kit's pre-planning
+   `/speckit.clarify` + `/speckit.checklist` — `evidence-base.md`.)
    **Keep kit artifacts under `.claude/`** (`.claude/features.json`, `.claude/harness-journal.md`,
    `.claude/progress/`, `.claude/devlog/`) — only genuine product files (`CLAUDE.md`,
    build manifests) belong at the repo root. A root cluttered with control files reads as mess to
@@ -420,7 +428,9 @@ apps* (T1). Set up:
    features.json is the **single-track** ledger; a **multi-initiative** campaign keeps **one**
    roadmap carrier of its choice rather than a ledger per initiative plus a roadmap that
    mirrors them — pick one editable canon and move on (same lever as item 7: reliable scoped
-   delivery, not the data structure).
+   delivery, not the data structure). Whatever the carrier, a queued entry says what has to become
+   true for it to start rather than recapping what already happened — `blocked_reason` covers only an
+   externally walled verify, so an internal dependency or a pending decision still needs saying.
 3. **Progress + checkpoint discipline** — a progress file, **preferably `.claude/progress/<slug>.md`**
    (keeping it under `.claude/` means state-surfacing automation finds it — the devlog
    companion plugin ships a SessionStart digest of recent devlog + active progress, and
@@ -577,10 +587,12 @@ ls .claude/docs/workflow.md .claude/docs/testing.md .claude/docs/docs-discipline
 # four greps apply unchanged (settings.json and CLAUDE.md are real on day zero).
 # MVH-on-request projects: only the plan-mode and change-sizing greps apply.
 
-# Phase 5 projects only — skip where there is no ledger:
-grep -ci '"priority"' .claude/features.json && grep -ci 'question' .claude/features.json
-# pass = both ≥1 — the same write-through logic one layer down: the ordering field and the intake rule
-# (item 2) have to be IN the ledger, which is what a working session reads.
+# Phase 5 projects with a JSON ledger — skip where there is none (a .md ledger: check by eye):
+python3 -c 'import json;d=json.load(open(".claude/features.json"));p=[f.get("priority") for f in d["features"]];print("priority:", "all" if p and all(v is not None for v in p) else "PARTIAL/NONE"); print("intake rule:", any("owner can answer" in r for r in d.get("rules",[])))'
+# pass = "all" + True. Counting is the point: `grep -c '"priority"'` returns ≥1 on the half-migrated
+# ledger item 2 calls the worst state, and any sentence containing "question" would satisfy a grep for
+# the intake rule. Same write-through logic as the CLAUDE.md greps, one layer down — the ordering field
+# and the rule have to be IN the ledger, which is what a working session reads.
 ```
 
 Each check has a crisp criterion — "command produced output" is not a pass.

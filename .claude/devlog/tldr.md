@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #39 · 2026-08-04 · Сокращение перевернуло правило, и это поймал чужой контекст
+
+**Tags:** evidence, verification, ledger, audit, release
+
+Запрос оператора — «максимальные проверки и замеры, чтобы апдейт был объективен». Проверялось уже отгруженное: v1.21.0 (интейк-контракт) и v1.21.1 (сокращение на 40% по итогам живых прогонов). Главная непроверенная дыра была названа заранее: все прогоны шли на тексте ДО…
+
+[→ entries/0039-sokrashchenie-perevernulo-pravilo-i-eto-poymal-chuzhoy-konte.md](entries/0039-sokrashchenie-perevernulo-pravilo-i-eto-poymal-chuzhoy-konte.md)
+
+---
+
 ## #38 · 2026-08-04 · Четыре прогона сократили текст, написанный днём раньше
 
 **Tags:** evidence, planning, ledger, audit, cleanup, release

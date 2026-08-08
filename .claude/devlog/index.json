@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-08T19:49:09Z",
-  "entry_count": 43,
+  "generated_at": "2026-08-08T19:56:23Z",
+  "entry_count": 44,
   "entries": [
     {
       "id": 1,
@@ -627,6 +627,20 @@
       "supersedes": null,
       "path": "entries/0043-pochinennyy-bag-zasluzhivaet-udaleniya-a-ne-ogovorki-o-sovme.md",
       "preview": "В v1.21.4 из native-capabilities.md ушли ~110 строк про смерть WebSearch на effort xhigh/max — баг починен. Перед тегом свежий рефутер задал справедливый вопрос: а читатель на запиненном старом клиенте? Ответ, который я дал, был неверным по роли документа — я вернул версионные…"
+    },
+    {
+      "id": 44,
+      "date": "2026-08-08",
+      "title": "Запись перестала рассказывать саму себя",
+      "tags": [
+        "docs",
+        "discipline",
+        "release"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0044-zapis-perestala-rasskazyvat-samu-sebya.md",
+      "preview": "v1.21.5 сняла из записи про WebSearch версии, но оставила сюжет: механику несуществующего бага, как его перемеряли, какой рефутер что доказал и три раунда, в которых сама запись была неверна. Оператор указал на конкретный абзац — «для чего эти архаизмы?». Верно…"
     }
   ]
 }

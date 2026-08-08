@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.21.6] — 2026-08-08
+
+**The entry stopped narrating itself.** v1.21.5 removed the version numbers from the `WebSearch`
+episode but kept its story — the mechanism of a bug that no longer exists, how it was re-measured,
+which refuter proved what, and three rounds of the entry being wrong. De-versioned archaeology is
+still archaeology. What a reader needs from a native-capability inventory is the rule that holds
+now; the rest is what the changelog and devlog are for.
+
+### Removed
+
+- **The `WebSearch`-at-`xhigh` narrative**, entirely. The one live rule it wrapped — thinking off
+  caps you at `high`, enforced per request — was already stated one bullet above it.
+- **The "cautionary tale" framing** around the measurement lessons, and the `settings`-overrides-
+  `--effort` trap restated inside it, which the Precedence bullet already covers.
+
+### Changed
+
+- **Two durable facts promoted out of the episode into standalone bullets**: a parent sees only a
+  delegate's final text (with how to scan `tool_result` records, and why `isApiErrorMessage` is
+  the wrong filter), and the four measurement rules — oracle independent of the claim, vary the
+  variable the conclusion names, label a table with the load path measured, confirm the negative.
+  The duplicate restatement of delegate effort inheritance is gone; that lever is documented once,
+  where it belongs.
+
 ## [1.21.5] — 2026-08-08
 
 **A fixed bug earns a deletion, not a compatibility clause.** v1.21.4 removed a hundred lines about

@@ -235,49 +235,25 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
   its `agentType`) — and that is a **weak** oracle: it separates tiers only across several runs
   on a task substantial enough to spend on (above). The transcript's own per-message effort field
   (announced v2.1.212) was **not** observed in headless session JSONL.
+- **A parent sees only a delegate's final text, never its `tool_result`s.** A delegate can fail a
+  tool, keep working, and return success-shaped prose — nothing surfaces. To know, scan
+  `<session-dir>/subagents/agent-*.jsonl` (`isSidechain` is not a usable subagent marker), where a
+  failed tool carries `is_error: true` on the `tool_result` itself. Scan those records, **not**
+  `isApiErrorMessage`: that flag marks an assistant message wrapping an API error and a tool-level
+  failure never produces one, so a filter built on it reports clean.
+- **Measuring effort is where harness claims go wrong** — four rules, each paid for by a wrong
+  entry in this file. Confirm a setting took hold **by an oracle the claim does not depend on**.
+  **Vary the variable the conclusion names**; a row that holds it constant cannot support a causal
+  claim, however many times it is repeated. **Label a table with the load path actually measured.**
+  Read the oracle off `--output-format stream-json` rather than hunting a transcript path (slugs
+  fold `_` to `-`, and a wrong path returns a confident, empty "no failures") — and confirm the
+  *negative*: no error signature proves nothing until the same scan shows the tool was called.
 - **What to know before you raise effort on Opus 5** [FP,
   `platform.claude.com/docs/en/about-claude/models/whats-new-opus-5`]:
   - *Thinking is on by default*, and disabling it is accepted **only at effort `high` or below** —
     `thinking: {"type":"disabled"}` with `xhigh`/`max` returns 400, enforced per request. Also:
     with thinking disabled the model can write a tool call into its text output instead of
     emitting a `tool_use` block, so the tool never runs and nothing errors.
-  - *Raising the tier is safe for server tools again — but the mechanism is worth knowing.* For
-    several releases a server-tool sub-request carried the *calling context's* effort while omitting
-    the thinking config, so any `xhigh`/`max` caller got `400 output_config.effort 'xhigh' is not
-    supported when thinking is disabled` **inside the tool call** — the run continued and simply
-    came back with a whole source tier missing. Fixed client-side; re-measured on the exact
-    configurations that used to fail (settings `effortLevel: xhigh` on `claude-opus-5[1m]`,
-    `--effort max` on `claude-opus-5`), and independently re-measured by a fresh-context refuter
-    that first reproduced the old failure on a superseded client to prove its oracle could go red
-    (`.claude/audits/websearch-fix-1-21-4/`): search returns real results. What remains is the API
-    rule itself — **turn thinking off and you are capped at `high`** — and it now fails fast on the
-    whole request instead of silently inside a tool.
-  - *Two properties of that episode outlive it, because they are structural.* **A parent sees only
-    a delegate's final text, never its `tool_result`s** — a delegate can fail a tool, keep going,
-    and report success-shaped prose; if you need to know, scan
-    `<session-dir>/subagents/agent-*.jsonl` (`isSidechain` is not a usable subagent marker), where
-    a failed tool is marked `is_error: true` on the `tool_result` itself. Scan `tool_result`
-    records, **not** `isApiErrorMessage` — that flag marks an assistant message wrapping an API
-    error, and a tool-level failure never produces one, so a filter built on it reports clean. And **`effort:` on the delegate is a real dial**: the
-    sub-request carries the *delegate's* effective level, not the session's — with one blind spot,
-    `CLAUDE_CODE_EFFORT_LEVEL` outranks agent frontmatter, so under an env pin only a `model:` pin
-    survives. A delegate that declares nothing **inherits the session's level**.
-  - *Method warning — this entry is the cautionary tale, and it is about measurement, not about
-    that bug.* An `env`-block level in `settings.json` overrides the `--effort` flag, so a probe
-    that *sets* `xhigh` on the command line while the file pins something else measures the file:
-    a whole matrix of green runs can mean "never actually left `high`". The entry was wrong in
-    both directions across three rounds — greens that re-measurement returned 12/12 red, and right
-    conclusions shipped on evidence that could not support them (a "delegate inherits the session"
-    claim whose 20 rows all held the session at one tier, and a table headed "agent frontmatter"
-    whose rows had in fact been measured through a different load path — **label a table with the
-    path actually measured**). **What caught it was a fresh-context
-    refuter, not a third self-check** — the author had already reviewed the same diff and passed
-    it. Four rules follow. Confirm a setting took hold **by an oracle the claim does not depend
-    on**. **Vary the variable the conclusion names**; a row that holds it constant cannot support a
-    causal claim, however many times it is repeated. Read the oracle off `--output-format
-    stream-json` rather than hunting a transcript path (slugs fold `_` to `-`; a wrong path returns
-    a confident, empty "no failures"). And confirm the *negative* — no error signature proves
-    nothing until the same scan shows the tool was called at all.
   - *`max_tokens` is a hard cap on thinking **plus** response text.* First-party guidance: at
     `xhigh`/`max` set it large "so the model has room to think and act across subagents and tool
     calls" (in Claude Code: `CLAUDE_CODE_MAX_OUTPUT_TOKENS`). A budget sized for `high` can end

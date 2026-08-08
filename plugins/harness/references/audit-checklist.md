@@ -29,6 +29,13 @@ or re-run before proposing edits to its machinery.
   version, model-assignment IDs), historical notes ("survived the last generation transition"),
   source citations, verbatim user quotes.
   Rule of thumb: *behavioral binding → de-version; honest "when/against-what" sourcing → keep.*
+- **A fixed bug earns a deletion, not a compatibility clause.** The tempting move when a documented
+  failure mode disappears is to date the fix and keep the old workaround "for readers on an older
+  client". Don't: a live doc describes the current slice, and a compatibility matrix is how it
+  turns into a changelog nobody re-verifies. The workaround goes, the fix needs no version, and the
+  structural residue (what the episode taught about measurement, or about a surface that is still
+  there) is the only part that stays. History belongs to the changelog and devlog, which are frozen
+  records and already have it.
 - **When de-staling, edit only the ACTIVE layer — never frozen records.** A grep for the stale
   string typically hits three kinds of file: (a) **active** harness components and live docs
   (`.claude/skills|rules|agents`, root `CLAUDE.md`, `docs/ARCHITECTURE.md` etc.) — fix these;

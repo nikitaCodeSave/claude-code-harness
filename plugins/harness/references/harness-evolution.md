@@ -16,8 +16,8 @@ community). So the strip revision compares a *delta* rather than "everything fro
 canon carries one provenance stamp — its last grounding point:
 
 <!-- harness-refresh-ledger
-last-grounded: CC v2.1.224 (headline WebSearch/effort finding re-verified on 2.1.226) · Claude 5 family (Opus 5 default on Max/Team-Premium/Enterprise, Sonnet 5, Fable 5) · 2026-08-08
-sources-checked: changelog delta 2.1.221→2.1.224 · claude.com/blog (context-engineering rules for Claude 5, AI-native SDLC security, agent-harness 3 patterns) · anthropic.com/engineering (how-we-contain-claude) · platform.claude.com (prompting Opus 5, what's-new Opus 5) · arXiv (2607.14275 context-quality preflight, 2606.14249 HarnessX) · live binary + runtime probes (WebSearch at xhigh/max on opus-5 and opus-5[1m], thinking-off 400, /doctor scope) · fresh-context refuter that bracketed the WebSearch fix to v2.1.222 by re-running the probe on a 2.1.220 binary (`.claude/audits/websearch-fix-1-21-4/`) · prior full sweep (docs sub-agents/plugins-reference/commands/hooks/memory/model-config) grounded at CC v2.1.210 / 2026-07-15
+last-grounded: CC v2.1.226 · Claude 5 family (Opus 5 default on Max/Team-Premium/Enterprise, Sonnet 5, Fable 5) · 2026-08-08
+sources-checked: changelog delta 2.1.221→2.1.224 · claude.com/blog (context-engineering rules for Claude 5, AI-native SDLC security, agent-harness 3 patterns) · anthropic.com/engineering (how-we-contain-claude) · platform.claude.com (prompting Opus 5, what's-new Opus 5) · arXiv (2607.14275 context-quality preflight, 2606.14249 HarnessX) · live binary + runtime probes (WebSearch at xhigh/max on opus-5 and opus-5[1m], thinking-off 400, /doctor scope) · fresh-context refuter with its own probes on the current client, red-controlled against a superseded one (`.claude/audits/websearch-fix-1-21-4/`) · prior full sweep (docs sub-agents/plugins-reference/commands/hooks/memory/model-config) grounded at CC v2.1.210 / 2026-07-15
 -->
 
 The stamp is updated at the end of each strip revision (the external-intake pass below). The

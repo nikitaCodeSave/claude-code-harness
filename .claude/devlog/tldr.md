@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #43 · 2026-08-08 · Починенный баг заслуживает удаления, а не оговорки о совместимости
+
+**Tags:** docs, discipline, release
+
+В v1.21.4 из native-capabilities.md ушли ~110 строк про смерть WebSearch на effort xhigh/max — баг починен. Перед тегом свежий рефутер задал справедливый вопрос: а читатель на запиненном старом клиенте? Ответ, который я дал, был неверным по роли документа — я вернул версионные…
+
+[→ entries/0043-pochinennyy-bag-zasluzhivaet-udaleniya-a-ne-ogovorki-o-sovme.md](entries/0043-pochinennyy-bag-zasluzhivaet-udaleniya-a-ne-ogovorki-o-sovme.md)
+
+---
+
 ## #42 · 2026-08-08 · Баг, о котором кит предупреждал сто строк, оказался починен
 
 **Tags:** docs, evidence, external-intake, release

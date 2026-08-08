@@ -120,12 +120,6 @@ never sees a delegate's `tool_result`s, only its final text, so neither surfaces
   `printenv CLAUDE_CODE_EFFORT_LEVEL` is empty — a declared level holds against every user-side
   layer except that one. Above both sits the org ceiling, which this kit has not measured.
 
-  **On a client at or below CC 2.1.220 there is a second, harsher reason to declare it:** at
-  `xhigh`/`max` a delegate's `WebSearch` failed inside the tool call and the delegate reported
-  success-shaped prose with a whole source tier missing. Fixed in v2.1.222 — still reproducible
-  below it, so if your clients are pinned, keep a research delegate at `high` or below, or pin
-  `model: claude-sonnet-5` (`native-capabilities.md`, Effort §).
-
 ```yaml
 ---
 name: web-researcher

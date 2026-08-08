@@ -58,10 +58,9 @@ omit CLAUDE.md + git context; both are one-shot (no resume). First-party subagen
 you should not rebuild by hand: the **in-session forked subagent `/subtask`** (inherits the
 full conversation, reuses the prompt cache) — **`/fork` is no longer this**: since v2.1.212 it
 copies the conversation into a *background* session with its own row in `claude agents`, so a
-harness step that expected an in-session fork must say `/subtask`. (It does **not** get its own
-worktree — an earlier reading here said so and did not survive a binary check on 2.1.226: `/fork`
-and `/subtask` delegate to the same helper, which spawns the background agent with an empty
-worktree result, and the command's own registered description is "keep working here".) Frontmatter
+harness step that expected an in-session fork must say `/subtask`. It does **not** get its own
+worktree (binary-verified: `/fork` and `/subtask` delegate to the same helper, which spawns the
+background agent with an empty worktree result). Frontmatter
 `maxTurns`, `isolation: worktree` (auto-cleaned branch-off), and `memory: user|project|local`
 (**persistent per-agent memory** under `~/.claude/agent-memory/`). Disable a built-in via
 `permissions.deny: ["Agent(Explore)"]`; `Agent(x,y)` allowed-type lists are **enforced**, and
@@ -246,16 +245,12 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
     several releases a server-tool sub-request carried the *calling context's* effort while omitting
     the thinking config, so any `xhigh`/`max` caller got `400 output_config.effort 'xhigh' is not
     supported when thinking is disabled` **inside the tool call** — the run continued and simply
-    came back with a whole source tier missing (regression at v2.1.207; upstream
-    anthropics/claude-code **#76689**, **#79798**, family of **#68797**). **Fixed client-side, and
-    the fix is version-gated — it landed in v2.1.222.** Re-measured on the exact configurations
-    that used to fail (settings `effortLevel: xhigh` on `claude-opus-5[1m]`, `--effort max` on
-    `claude-opus-5`): search returns real results on 2.1.222 / 2.1.224 / 2.1.226, while **2.1.220
-    still reproduces the failure today** against the same account and settings (2026-08-08,
-    fresh-context refuter; 2.1.221 not tested). So on a client at or below 2.1.220 the old
-    workaround still applies: keep a research delegate at `effort: high` or below, or pin
-    `model: claude-sonnet-5` / `claude-fable-5`. What remains is the API rule
-    itself — **turn thinking off and you are capped at `high`** — and it now fails fast on the
+    came back with a whole source tier missing. Fixed client-side; re-measured on the exact
+    configurations that used to fail (settings `effortLevel: xhigh` on `claude-opus-5[1m]`,
+    `--effort max` on `claude-opus-5`), and independently re-measured by a fresh-context refuter
+    that first reproduced the old failure on a superseded client to prove its oracle could go red
+    (`.claude/audits/websearch-fix-1-21-4/`): search returns real results. What remains is the API
+    rule itself — **turn thinking off and you are capped at `high`** — and it now fails fast on the
     whole request instead of silently inside a tool.
   - *Two properties of that episode outlive it, because they are structural.* **A parent sees only
     a delegate's final text, never its `tool_result`s** — a delegate can fail a tool, keep going,
@@ -463,7 +458,7 @@ correctly refuses injection-shaped instructions found in a working directory.
   the **update cache key** — pushing new commits without bumping it ships nothing to
   installed users. Releases pin via `{name}--v{version}` git tags; `claude plugin validate`
   requires plugin.json and the marketplace entry to agree, and installs record the resolved
-  `gitCommitSha` (binary-verified, 2.1.210). Distribution is no longer git/npm-only: an **`archive` source** installs a
+  `gitCommitSha` (binary-verified). Distribution is no longer git/npm-only: an **`archive` source** installs a
   plugin from a zip over HTTPS with optional SHA-256 pinning. `/plugin install` refreshes a stale
   marketplace catalog and retries before reporting "not found", and plugins installed via
   `/plugin` **activate immediately when it is safe** instead of always demanding

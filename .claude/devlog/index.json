@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-08T19:41:17Z",
-  "entry_count": 42,
+  "generated_at": "2026-08-08T19:49:09Z",
+  "entry_count": 43,
   "entries": [
     {
       "id": 1,
@@ -613,6 +613,20 @@
       "supersedes": null,
       "path": "entries/0042-bag-o-kotorom-kit-preduprezhdal-sto-strok-okazalsya-pochinen.md",
       "preview": "Очередной strip revision (external-intake pass) против CC v2.1.224 и Opus 5 как дефолтной Opus-модели. Самая большая единичная запись в native-capabilities.md — матрицы «WebSearch умирает на effort xhigh/max» — описывала поведение, которого больше нет: фикс клиентский…"
+    },
+    {
+      "id": 43,
+      "date": "2026-08-08",
+      "title": "Починенный баг заслуживает удаления, а не оговорки о совместимости",
+      "tags": [
+        "docs",
+        "discipline",
+        "release"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0043-pochinennyy-bag-zasluzhivaet-udaleniya-a-ne-ogovorki-o-sovme.md",
+      "preview": "В v1.21.4 из native-capabilities.md ушли ~110 строк про смерть WebSearch на effort xhigh/max — баг починен. Перед тегом свежий рефутер задал справедливый вопрос: а читатель на запиненном старом клиенте? Ответ, который я дал, был неверным по роли документа — я вернул версионные…"
     }
   ]
 }

@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.21.5] — 2026-08-08
+
+**A fixed bug earns a deletion, not a compatibility clause.** v1.21.4 removed a hundred lines about
+`WebSearch` dying at effort `xhigh`/`max`, then — prompted by a refuter's fair question about
+readers on a pinned client — put a version scaffold back: the release the fix landed in, the
+release that still fails, upstream issue numbers, and the old workaround preserved "for clients
+below it". That is the kit becoming a changelog. A live doc carries the current slice; history is
+what the changelog and devlog are for, and they are frozen records that already hold it.
+
+### Changed
+
+- **The `WebSearch` entry states the fix without dating it**, and cites the independent refuter
+  (`.claude/audits/websearch-fix-1-21-4/`) for the part that matters — its oracle was proven able
+  to go red before a green was trusted. The fix-version, the still-broken-version and the upstream
+  issue numbers are gone.
+- **`harness-discipline.md` no longer carries a workaround for superseded clients.** The mechanic
+  it teaches — declare a delegate's tools and effort, because both default to inheritance — stands
+  on its own.
+- **`/fork` and plugin `gitCommitSha` state what is true now**, dropping "an earlier reading here
+  said otherwise" and the version on a binary-verification stamp.
+- **Refresh-ledger reads the current client**, and describes the refuter by method rather than by
+  the version numbers it bracketed.
+
+### Added
+
+- **`audit-checklist.md` §1 gains the detector for exactly this mistake** — when a documented
+  failure mode disappears, delete the workaround rather than dating the fix and keeping a
+  compatibility matrix; keep only the structural residue.
+
 ## [1.21.4] — 2026-08-08
 
 **A bug the kit warned about for a hundred lines turned out to be fixed.** The refresh pass ran

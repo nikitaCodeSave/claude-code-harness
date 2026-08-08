@@ -1,4 +1,4 @@
-<!-- shipped-by: claude-code-harness v1.18.0 — do not hand-evolve in the project;
+<!-- shipped-by: claude-code-harness v1.21.4 — do not hand-evolve in the project;
      improvements flow through the plugin (re-synced on audit). Project-specific
      facts live in CLAUDE.md (and features.json, if present), not here. -->
 
@@ -91,7 +91,7 @@ Run the rungs in order; escalate by stakes — and **name the chosen rung to the
 | Rung | When | How |
 |---|---|---|
 | Self-verify | always | oracle green + lint/types + end-to-end check of the actual behavior ("looks done" ≠ "is done") |
-| `/code-review` | substantive diff | run it yourself at the end of the change (it reviews the working diff; `/review` is PR-review — verify the surface exists in your session's `/`-autocomplete) |
+| `/code-review` | substantive diff | run it yourself at the end of the change (it reviews the working diff or a PR; `/review` is simply its alias — verify the surface exists in your session's `/`-autocomplete) |
 | Fresh-context second opinion | high-stakes, "looks done", silent-wrong-is-costly; **per-change** for silent-wrong-prone components (parsers/rewriters of untrusted input, guards/validators, invariant refactors) | separate session or subagent prompted to **refute**, not confirm — the author anchors on its own solution. For the silent-wrong class, prefer a refuter **initiated outside the authoring session** (fresh session / external audit) over a subagent you spawn: a self-commissioned evaluator partly inherits your framing (one passed a denylist that an external pass then broke with Unicode-obfuscated input). Also usable UPSTREAM on a large/irreversible design decision before you freeze it — grill it to kill ≥1 alternative with a concrete failure scenario or cost |
 | External audit | milestone closed / security-correctness-critical / irreversible | operator opens a **new** session and runs `/claude-code-harness:external-audit <scope>` (requires the claude-code-harness plugin; without it — a fresh session prompted to refute, the rung above); executed evidence beats read evidence |
 

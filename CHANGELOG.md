@@ -7,6 +7,90 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.21.4] — 2026-08-08
+
+**A bug the kit warned about for a hundred lines turned out to be fixed.** The refresh pass ran
+against CC v2.1.224, and the largest single entry in `native-capabilities.md` — the matrices
+documenting `WebSearch` dying at effort `xhigh`/`max` — described something that no longer happens.
+Re-measured on the exact configurations that used to fail, search returns results. The entry is now
+a dozen lines instead of a hundred, keeping the parts that outlive the bug: a parent never sees a
+delegate's `tool_result`s, `effort:` on a delegate is a real dial with one env-shaped blind spot,
+and the measurement lessons that episode paid for. A fresh-context refuter then bracketed the fix
+to a version — so the entry names one, and the old workaround survives for clients below it.
+
+### Changed
+
+- **`native-capabilities.md` re-grounded to CC v2.1.224 / Opus 5 as the default Opus model.**
+  The `WebSearch`-at-`xhigh` block collapsed from ~110 lines to its durable residue; effort tiers,
+  `/fast` and adaptive thinking no longer name superseded model versions.
+- **`/review` is now documented as an alias of `/code-review`** — the older "`/review` = PR only,
+  `/code-review` = working diff" split is gone, and a level typed once is reused.
+- **The 200-spawns-per-session subagent cap is documented as removed**; concurrency and depth caps
+  stand. A harness that `/clear`-ed to work around it can drop that.
+- **Cross-session messaging documented as a first-class surface** (`SendMessage` + `ListAgents`
+  across machines) together with its native guard rails — no relayed user authority, classifier on
+  dispatch, `crossSessionInbound` / `dialogExpiry` — and the first-party incident that motivates
+  treating access to another agent as equal to that agent's privileges.
+- **Version pins pulled out of every file except `native-capabilities.md`**, per the kit's own rule
+  that a currency pin duplicated in two places goes stale in one of them silently. Provenance-shaped
+  references (dated grounding stamps, "not re-measured since the previous generation") are kept —
+  `audit-checklist.md` §1 now states that distinction with model-neutral examples.
+- **`harness-discipline.md` no longer prescribes the workaround as the default.** What stays is the
+  mechanic underneath — a delegate that declares no `effort:` inherits the session's level, and
+  `CLAUDE_CODE_EFFORT_LEVEL` overrides frontmatter in both directions — plus one clause keeping the
+  old recipe alive for clients at or below CC 2.1.220, where the bug still reproduces.
+- **The `WebSearch` fix is dated, not asserted as timeless**: it landed in CC v2.1.222 (regression
+  at v2.1.207; upstream issue numbers restored as provenance). A reader on a pinned older client is
+  told the tier is still unsafe there rather than being handed a fix they do not have.
+- **Refresh-ledger stamped at CC v2.1.224 · Claude 5 family · 2026-08-08**, listing what the pass
+  actually checked, including the refuter's version bracketing.
+
+### Verification
+
+A cross-vendor reviewer (Codex) was given the before/after pair of the two most-changed files and
+asked what durable knowledge the deletion dropped. It returned five findings, all accepted and
+fixed: the lost `isApiErrorMessage` caveat (that flag never marks a tool-level failure, so a filter
+built on it reports clean), the lost measurement lesson "label a table with the load path actually
+measured", an imprecise claim that a delegate's tools and effort have "no default" (the default is
+inheritance), a surviving "`/review` is PR-review" in `harness-discipline.md` and
+`project-docs/workflow.md`, and an ambiguity about whose effort a server-tool sub-request carries.
+
+A **fresh-context refuter** then attacked the headline claim itself with its own probes
+(`.claude/audits/websearch-fix-1-21-4/`), reading `tool_use`/`tool_result` records rather than final
+text and proving its scan could go red three ways before trusting a green. The claim stands and is
+now better supported than when it shipped: the refuter re-ran the probe on a **2.1.220** binary and
+reproduced the original failure the same day, same account, same settings — which both dates the
+fix (v2.1.222) and retroactively vindicates the deleted matrices as a real finding. Two secondary
+claims did not survive and were corrected before release: the fix was written as unconditional
+(now version-gated), and "`/fork` gets its own worktree" was refuted by a binary check — `/fork`
+and `/subtask` share a helper that spawns with an empty worktree result.
+
+### Fixed
+
+- **`/fork` no longer described as getting its own worktree.** The claim did not survive a binary
+  check on 2.1.226; the command's own description is "keep working here".
+- **Provenance restored where de-versioning went too far**: the upstream issue numbers and the
+  regression version for the `WebSearch` episode, and the `(binary-verified, 2.1.210)` stamp on the
+  plugin `gitCommitSha` sentence — dated sourcing, not behavioral binding.
+
+### Added
+
+- **`/doctor` documented as the native harness audit** — dead skills/MCP/plugins measured against
+  context cost via real usage counters, CLAUDE.md dedup and rightsizing, migration of always-loaded
+  guidance into lazy skills, slow-hook detection — plus the budget fact that the skill listing is
+  capped near ~1% of the context window and truncates past it, degrading routing. A hand-written
+  "audit my `.claude/`" script duplicates a built-in.
+- **Plugin distribution beyond git/npm**: `archive` source (zip over HTTPS, optional SHA-256
+  pinning), immediate activation after `/plugin install`, `"."` accepted as a `skills` path.
+- **Isolation and permission hardening**: worktree isolation now covers Bash in every session type;
+  hidden-command permission bypasses (zsh `[[ ]]`, invisible-Unicode padding), workflow `import()`
+  sandbox escape and trailing-slash sandbox deny bypasses are closed natively; sandbox credential
+  **masking** (`mode: "mask"`) documented.
+- **New first-party sources in `evidence-base.md`**: the Claude 5 context-engineering rules
+  (>80% of Claude Code's system prompt removed with no measurable loss), Prompting Opus 5
+  (over-instructed verification is a cost, not a safeguard), the AI-native SDLC security post,
+  the containment post, and the three harness-design patterns.
+
 ## [1.21.3] — 2026-08-04
 
 **The kit got an oracle of its own, and the first thing it measured was uncomfortable.** Three

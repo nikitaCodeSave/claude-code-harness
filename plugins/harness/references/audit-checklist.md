@@ -24,9 +24,10 @@ or re-run before proposing edits to its machinery.
   behavioral invariant must not bind to a release, or it goes stale every upgrade. A major model
   release is the canonical re-grounding trigger: re-test such invariants before they survive.
 - **But keep version refs that are provenance, not behavior** — stripping them loses information:
-  dated grounding stamps ("grounded for Opus 4.8 / CC vX, late May 2026"), un-re-measured findings
-  ("4.7-era eval, not re-run"), config facts (effort default per version, model-assignment IDs),
-  historical notes ("survived the 4.7→4.8 transition"), source citations, verbatim user quotes.
+  dated grounding stamps ("grounded for <model> / CC vX, <month>"), un-re-measured findings
+  ("eval from the previous model generation, not re-run"), config facts (effort default per
+  version, model-assignment IDs), historical notes ("survived the last generation transition"),
+  source citations, verbatim user quotes.
   Rule of thumb: *behavioral binding → de-version; honest "when/against-what" sourcing → keep.*
 - **When de-staling, edit only the ACTIVE layer — never frozen records.** A grep for the stale
   string typically hits three kinds of file: (a) **active** harness components and live docs
@@ -116,6 +117,18 @@ or re-run before proposing edits to its machinery.
 
 - Over 200 lines? Storing content that belongs in `docs/` or `.claude/rules/`?
 - Lines that don't change behavior (would removing them cause a mistake?) → cut.
+- **A constant, limit or toggle named here outranks nothing — check it against the doc that owns
+  it.** The always-loaded file states a number; a live design doc later turns that number into a
+  setting; nothing fails, and the session keeps reading the older claim as law every turn. Observed
+  in the field: a project's CLAUDE.md listed `ANSWER_ROW_CAP = 12` under **"non-negotiable
+  invariants"** while its own `GUARDRAILS.md` had already made it `CHAT_ROW_CAP`, an `.env`
+  setting — so the agent argued against changing what the owner had deliberately made
+  configurable, citing the operator's own file. Grep the always-loaded layer for `= <number>`,
+  named limits and feature flags, and diff each against its owning doc. **The fix is not to
+  refresh the number** — it is to delete it and leave one line naming the owner ("limits and
+  toggles are defined by X, not by this file"), because a number here will go stale again.
+  Distinct from §1: that detector catches version pins, this one catches an authority conflict
+  between two current docs.
 - Rules Claude already follows without instruction → delete; rules that must hold every time →
   convert to a hook.
 - **Evidence-backed keeps, not cruft**: the kit's own deliverables — `.claude/rules/practice-baseline.md`
@@ -268,7 +281,7 @@ or re-run before proposing edits to its machinery.
 - Destructive commands in `allow` rather than `ask`/`deny`; secret paths not denied for `Read`.
 - **Dead file rules — a line that reads as a guard and enforces nothing.** The file-permission checks
   match only `Read(path)` and `Edit(path)`: `Glob(path)`, `Write(path)` and `NotebookEdit(path)` are
-  parsed, never matched, and warn at startup (v2.1.210+); `Grep(path)` never warns at all. Run the
+  parsed, never matched, and warn at startup; `Grep(path)` never warns at all. Run the
   Phase 7 dead-rule check from `bootstrap-checklist.md` and read its output — *including* the
   untrusted-workspace line, without which the check reports clean while every `allow` rule is inert.
   Two blind spots it cannot cover, so grep for them by hand: `Grep(` in the settings file, and a

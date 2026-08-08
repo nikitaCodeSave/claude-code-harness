@@ -26,8 +26,8 @@ Stack-agnostic. Re-verify the environment with `claude --version`.
 claude --version            # confirm the line; primitives drift by minor version
 # Built-in subagent TYPES you must NOT recreate (Explore / Plan / general-purpose /
 # statusline-setup / claude-code-guide) are catalogued in references/native-capabilities.md.
-# Live: /context ("Custom Agents") or ls .claude/agents/ — the /agents wizard was removed in
-# v2.1.198. NOT `claude agents` (that CLI lists running sessions, not types).
+# Live: /context ("Custom Agents") or ls .claude/agents/ — the /agents wizard is gone.
+# NOT `claude agents` (that CLI lists running sessions, not types).
 ls -la                      # repo shape
 ls -la .claude/ 2>/dev/null # confirm empty / absent
 git log --oneline 2>/dev/null | wc -l             # project age (0 + stderr-fatal on a fresh repo is fine)
@@ -268,7 +268,7 @@ Tune to what actually exists. If the project uses MCP, gate it via `enabledMcpjs
 **Two rules cover every file tool: `Read(path)` and `Edit(path)` are the only forms the file-permission
 checks match.** `Read(./**)` already governs Grep and Glob; `Edit(./**)` already governs Write and
 NotebookEdit. Giving one of *those* tools a path of its own is the no-op — `Glob(path)`, `Write(path)`,
-`NotebookEdit(path)` are parsed, never matched, and warn at startup (v2.1.210+); live on 2.1.211 a
+`NotebookEdit(path)` are parsed, never matched, and warn at startup; measured live, a
 `deny: Write(./s/**)` let the file be created anyway. `Grep(path)` never warns at all — the warning
 list is hardcoded and omits it — so nothing tells you it isn't doing what you meant; write `Read(path)`
 and the question doesn't arise. (`MultiEdit` is gone as a tool: "matches no known tool".) A **bare**
@@ -277,7 +277,7 @@ and is not a typo. Dead rules are worse than absent ones — they read as protec
 nothing, and a template is the one place a no-op propagates into every project that copies it.
 
 On the **deny** side the two are not interchangeable: a `Read` deny also blocks Edit on that path
-(v2.1.208+) but never reaches Write or NotebookEdit, so a path nothing may read *or* change needs both
+but never reaches Write or NotebookEdit, so a path nothing may read *or* change needs both
 — hence the `Read(./secrets/**)` + `Edit(./secrets/**)` pair above. Neither reaches a subprocess that
 opens the file itself (a Python/Node script); for OS-level enforcement, enable the sandbox.
 
@@ -536,7 +536,8 @@ apps* (T1). Set up:
 
 Keep it minimal and **strip as the model improves**: *"find the simplest solution possible, and only
 increase complexity when needed"* (T1). On a major model release, re-test whether each kit component
-still earns its place (e.g. Opus 4.6 removed sprint-decomposition that 4.5 needed) before keeping it.
+still earns its place — first-party precedent: a model generation made sprint-decomposition
+unnecessary, and over 80% of Claude Code's own system prompt was removed with no measurable loss.
 
 ## Phase 6 — Stop
 

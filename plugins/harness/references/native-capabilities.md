@@ -1,7 +1,7 @@
 # Native capabilities — what Claude Code already does
 
-Working inventory as of **Claude Code v2.1.220 / the Claude 5 family (Fable 5, Sonnet 5,
-Opus 5) model generation** (July 2026). Default model is account-type-dependent [FP,
+Working inventory as of **Claude Code v2.1.224 / the Claude 5 family (Fable 5, Sonnet 5,
+Opus 5) model generation** (August 2026). Default model is account-type-dependent [FP,
 `model-config`]: **Opus 5** (`claude-opus-5`, v2.1.219+ — now *the* default Opus model;
 1M context, $5/$25 MTok, knowledge cutoff May 2026) on Max / Team Premium / Enterprise PAYG;
 **Sonnet 5** (v2.1.197+) on Pro / Team Standard / Enterprise seats; Fable 5 is the default on
@@ -24,10 +24,9 @@ Enterprise) unless flagged **API-only** or plan-gated.
 ## Built-in subagents (5)
 
 The five built-in subagent **types** you must not recreate (source:
-`code.claude.com/docs/en/sub-agents`). Since **v2.1.198 `/agents` no longer opens the
-interactive wizard** — running it prints a reminder to ask Claude or edit `.claude/agents/`
-directly; inspect configured agents via **`/context`** ("Custom Agents"; `/doctor` flags
-duplicate names, v2.1.205+). Do **not** confuse either with the CLI subcommand
+`code.claude.com/docs/en/sub-agents`). **`/agents` no longer opens an interactive
+wizard** — running it prints a reminder to ask Claude or edit `.claude/agents/` directly;
+inspect configured agents via **`/context`** ("Custom Agents"; `/doctor` flags duplicate names). Do **not** confuse either with the CLI subcommand
 `claude agents` ("Manage background agents" = list running *sessions*), which does not
 enumerate types:
 
@@ -51,14 +50,18 @@ Subagents can nest — **depth 3 by default** (v2.1.219; nesting was turned *off
 v2.1.217, and the older 5-level figure predates that), tunable via
 `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (`=1` disables nesting). Fan-out has **native caps** —
 do not re-encode them as a guard hook: **20 concurrent subagents**
-(`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`, v2.1.217), **200 spawns per session**
-(`CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION`, v2.1.212 — reset by `/clear`), **200 WebSearch calls
-per session** (`CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`, v2.1.212). Only Explore and Plan
+(`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`) and **200 WebSearch calls per session**
+(`CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`). The former **200-spawns-per-session** cap has been
+**removed** — a long session no longer starts refusing new agents (concurrency and depth still
+apply), so a harness that worked around it by `/clear`-ing can drop that workaround. Only Explore and Plan
 omit CLAUDE.md + git context; both are one-shot (no resume). First-party subagent primitives
 you should not rebuild by hand: the **in-session forked subagent `/subtask`** (inherits the
 full conversation, reuses the prompt cache) — **`/fork` is no longer this**: since v2.1.212 it
 copies the conversation into a *background* session with its own row in `claude agents`, so a
-harness step that expected an in-session fork must say `/subtask` — frontmatter
+harness step that expected an in-session fork must say `/subtask`. (It does **not** get its own
+worktree — an earlier reading here said so and did not survive a binary check on 2.1.226: `/fork`
+and `/subtask` delegate to the same helper, which spawns the background agent with an empty
+worktree result, and the command's own registered description is "keep working here".) Frontmatter
 `maxTurns`, `isolation: worktree` (auto-cleaned branch-off), and `memory: user|project|local`
 (**persistent per-agent memory** under `~/.claude/agent-memory/`). Disable a built-in via
 `permissions.deny: ["Agent(Explore)"]`; `Agent(x,y)` allowed-type lists are **enforced**, and
@@ -170,9 +173,8 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
 
 ## Effort, fast, thinking [FP] (`code.claude.com/docs/en/model-config`)
 
-- Tiers: `low`, `medium`, `high`, `xhigh`, `max` — effort is supported on Fable 5,
-  Opus 4.7+ and Sonnet 5 (live `/effort` dialog, verified 2026-07-15). **Default = `high`**
-  (`xhigh` on Opus 4.7).
+- Tiers: `low`, `medium`, `high`, `xhigh`, `max` — effort is supported across the Claude 5
+  family and the Opus 4.x generation (live `/effort` dialog). **Default = `high`**.
 - **How to set it — session-wide** (binary- and schema-verified 2026-07-25 on v2.1.220):
   - `effortLevel` in settings — enum `low` | `medium` | `high` | `xhigh` **only**. `max` is
     session-only (use `/effort`); an out-of-enum value here is swallowed by a `.catch()` rather
@@ -234,119 +236,53 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
   its `agentType`) — and that is a **weak** oracle: it separates tiers only across several runs
   on a task substantial enough to spend on (above). The transcript's own per-message effort field
   (announced v2.1.212) was **not** observed in headless session JSONL.
-- **Two traps when you raise effort on Opus 5** [FP,
+- **What to know before you raise effort on Opus 5** [FP,
   `platform.claude.com/docs/en/about-claude/models/whats-new-opus-5`]:
   - *Thinking is on by default*, and disabling it is accepted **only at effort `high` or below** —
     `thinking: {"type":"disabled"}` with `xhigh`/`max` returns 400, enforced per request. Also:
     with thinking disabled the model can write a tool call into its text output instead of
     emitting a `tool_use` block, so the tool never runs and nothing errors.
-  - *The open client-side bug this collides with — **`WebSearch` dies at `xhigh` and `max`***
-    (anthropics/claude-code **#76689**, **#79798**, family
-    of **#68797**; all open as of 2026-07-26). The server-tool sub-request carries the session's
-    **current effort** while **omitting** the thinking config, so the API answers `400
-    output_config.effort 'xhigh' is not supported when thinking is disabled on this model`.
-    **The trigger is the tier, not how the tier was set** — re-measured 2026-07-26 on CC 2.1.220,
-    Linux CLI, one prompt, oracle read straight off `--output-format stream-json`, plus a control
-    that `WebSearch` was called at all:
-
-    | effective tier | how it was raised | `WebSearch` |
-    | --- | --- | --- |
-    | `high` | `--effort high`, `claude-opus-5[1m]` | **ok 0/2** — returned 7 results |
-    | `xhigh` | `effortLevel` in settings, `claude-opus-5` | fails 3/3 |
-    | `xhigh` | `effortLevel` in settings, `claude-opus-5[1m]` | fails 4/4 |
-    | `xhigh` | `--effort xhigh` (settings also said `xhigh` — confounded, see below) | fails 3/3 |
-    | `max` | `--effort max` | fails 2/2 |
-    | `xhigh` | `CLAUDE_CODE_EFFORT_LEVEL` (env) — settings also said `xhigh`, confounded | fails 2/2 |
-
-    Every rejection in the 14 re-measured runs quotes the tier actually in force — `'xhigh'` ×24
-    and `'max'` ×4, two per run — so none of those rows rests on an assumed level. Each row is a
-    **session-level** measurement: the env row too, re-run with the same prompt and oracle rather
-    than borrowed from a delegate. That env row shows only that the effective tier was `xhigh`,
-    not that the environment variable is what set it — the same confound as the flag row. What
-    the *env mechanism* does own is carried by the delegate matrix below, where `effort: high` in
-    frontmatter fails under an env pin and succeeds without one: only the env layer explains
-    that. **Mechanism
-    independence rests on the two unconfounded flag rows, not on the `--effort xhigh` row**, which
-    agreed with the settings value and therefore proves nothing on its own: `--effort high`
-    overrode settings' `xhigh` *downward* (`CLAUDE_EFFORT` read `high`, search restored) and
-    `--effort max` overrode it *upward* (the 400 quotes `'max'`). Both directions are the flag
-    winning. `ultracode` resolves to `xhigh` — first-party strings in the 2.1.220 binary say so
-    verbatim ("Ultracode runs at xhigh effort") — so it inherits the failure without a separate
-    run. Client-side thinking blocks are present in the
-    failing runs too, so nothing looks wrong locally. Reported on Opus 4.8; transcript-scan
-    in #76689 puts the regression at v2.1.207. Three properties make it a harness problem, not a nuisance: **(a)** neither
-    `alwaysThinkingEnabled` nor `MAX_THINKING_TOKENS` works around it; **(b)** it lands mostly in
-    **subagents** (8 of 10 reported failures) — a research delegate keeps running and returns a
-    report with a whole source tier missing; **(c)** it is **silent to the caller, though not
-    unflagged**. The `tool_result` itself is marked: `is_error: true`, body prefixed
-    `API Error: 400 …` — verified on 30 of 30 failing runs, session-level and delegate-level
-    alike, so a scan of `tool_result` records finds it. What is missing is an assistant-level
-    API-error record, so a filter on `isApiErrorMessage` ("true when this assistant message wraps
-    an API error") does not see it — and, decisively, **a parent sees only a delegate's final
-    text, never its `tool_result`s**. That is where the silence actually lives: the delegate
-    knows it failed and the parent cannot tell. **The ceiling is Opus 5's, and the escape is per-delegate** — two further matrices,
-    same day, same oracle.
-
-    *Which model is affected.* As the **session** model at `xhigh` and `max`,
-    `claude-sonnet-5` and `claude-fable-5` searched cleanly — 0/8 failures, real results in
-    every run — where `claude-opus-5` and `claude-opus-5[1m]` failed. The tier rule belongs to
-    Opus 5, not to Claude Code: Sonnet 5 and Fable 5 keep search **at `xhigh` and `max`** — the
-    two tiers that break Opus 5. Their lower tiers were not run (they are safe on Opus too).
-
-    *What a delegate needs in order to search.* Session on `claude-opus-5` at `xhigh`, delegate
-    asked for one `WebSearch` call and nothing else. Every row below was measured through
-    **YAML frontmatter in `.claude/agents/*.md`** — the path this table prescribes:
-
-    | agent frontmatter | ran on | `WebSearch` |
-    | --- | --- | --- |
-    | `effort: high` | opus-5 | ✅ 2/2 |
-    | `model: claude-sonnet-5` | sonnet-5 | ✅ 2/2 |
-    | *nothing declared* | opus-5 | ❌ 2/2 |
-    | `effort: xhigh` | opus-5 | ❌ 2/2 |
-    | `tools:` narrowed, `WebSearch` omitted | sonnet-5 | ❌ 2/2 — tool absent, never called |
-    | `effort: high`, session pinned by **`CLAUDE_CODE_EFFORT_LEVEL`** | opus-5 | ❌ 2/2 |
-    | `model: claude-sonnet-5`, session pinned by **env** | sonnet-5 | ✅ 2/2 |
-
-    The same seven rows were also run through `--agents` (programmatic definitions), with
-    identical outcomes — so the rule is a property of the agent definition, not of one load path.
-    A **plugin-shipped** agent honours `effort:` too (`effort: high` in a plugin agent's
-    frontmatter searched 2/2 from an `xhigh` session).
-
-    So the per-delegate `effort:` dial **does** save you — correcting an earlier reading in this
-    file — because the sub-request carries the *delegate's* effective level, not the session's.
-    Its one blind spot is the env layer: `CLAUDE_CODE_EFFORT_LEVEL` outranks agent frontmatter,
-    so `effort: high` never takes hold there and only the model pin survives. A delegate that
-    declares nothing **inherits the session's level** — the discriminating control is a varied
-    session: the same undeclared delegate fails 2/2 from an `xhigh` session and searches 2/2 from
-    a `high` one, which a fixed model default could not produce. For a **built-in** delegate the
-    Agent tool's per-call `model` override is the same escape, measured: `general-purpose`
-    spawned plainly from an `xhigh` session failed 2/2, and with `model: sonnet` on the call it
-    searched 2/2. `WebFetch` is unaffected **as the upstream thread reports** — not re-measured
-    here. The prescriptive form of this — what to put in an
-    agent you spawn for research — is in `harness-discipline.md` (Subagents §). Detection: grep transcripts
-    for the signature, and glob **one level deeper** than the session file —
-    `<session-dir>/subagents/agent-*.jsonl` (`isSidechain` is not a usable subagent marker).
-    **Method warning, and this entry is the cautionary tale — twice over.** An `env`-block level
-    in `settings.json` overrides the `--effort` flag, so a probe that *sets* `xhigh` on the
-    command line while the file pins something else measures the file — a whole matrix of green
-    runs can mean "never actually left `high`". This entry has since been wrong in both
-    directions: a first matrix varied only mechanisms that all break and reached the right
-    conclusion by accident; a second one produced green rows for settings, flag and `ultracode`
-    that re-measurement could not reproduce at all — the settings and flag rows came back 12/12
-    red where 10 passes had been claimed — greens with no independent check that the level had
-    ever taken hold. A third round then shipped the right conclusions on insufficient evidence:
-    the "delegate inherits the session's level" claim held the session at `xhigh` in all 20 rows,
-    so it could not distinguish inheritance from a fixed default, and a table headed "agent
-    frontmatter" carried five rows measured through a different load path. **What caught that was
-    a fresh-context refuter, not a third self-check** — the author had already reviewed the same
-    diff and passed it. Four rules follow. Confirm the level took hold **by an oracle the claim
-    does not depend on** — here the API error names the tier it rejected, so a failing run states
-    its own effort. **Vary the variable the conclusion names**; a row that holds it constant
-    cannot support a causal claim, however many times it is repeated. Read the oracle off
-    `--output-format stream-json` rather than hunting a transcript path (slugs fold
-    `_` to `-`; a wrong path returns a confident, empty "no failures"). And confirm the
-    *negative* — no error signature proves nothing until the same scan shows `WebSearch` was
-    called at all.
+  - *Raising the tier is safe for server tools again — but the mechanism is worth knowing.* For
+    several releases a server-tool sub-request carried the *calling context's* effort while omitting
+    the thinking config, so any `xhigh`/`max` caller got `400 output_config.effort 'xhigh' is not
+    supported when thinking is disabled` **inside the tool call** — the run continued and simply
+    came back with a whole source tier missing (regression at v2.1.207; upstream
+    anthropics/claude-code **#76689**, **#79798**, family of **#68797**). **Fixed client-side, and
+    the fix is version-gated — it landed in v2.1.222.** Re-measured on the exact configurations
+    that used to fail (settings `effortLevel: xhigh` on `claude-opus-5[1m]`, `--effort max` on
+    `claude-opus-5`): search returns real results on 2.1.222 / 2.1.224 / 2.1.226, while **2.1.220
+    still reproduces the failure today** against the same account and settings (2026-08-08,
+    fresh-context refuter; 2.1.221 not tested). So on a client at or below 2.1.220 the old
+    workaround still applies: keep a research delegate at `effort: high` or below, or pin
+    `model: claude-sonnet-5` / `claude-fable-5`. What remains is the API rule
+    itself — **turn thinking off and you are capped at `high`** — and it now fails fast on the
+    whole request instead of silently inside a tool.
+  - *Two properties of that episode outlive it, because they are structural.* **A parent sees only
+    a delegate's final text, never its `tool_result`s** — a delegate can fail a tool, keep going,
+    and report success-shaped prose; if you need to know, scan
+    `<session-dir>/subagents/agent-*.jsonl` (`isSidechain` is not a usable subagent marker), where
+    a failed tool is marked `is_error: true` on the `tool_result` itself. Scan `tool_result`
+    records, **not** `isApiErrorMessage` — that flag marks an assistant message wrapping an API
+    error, and a tool-level failure never produces one, so a filter built on it reports clean. And **`effort:` on the delegate is a real dial**: the
+    sub-request carries the *delegate's* effective level, not the session's — with one blind spot,
+    `CLAUDE_CODE_EFFORT_LEVEL` outranks agent frontmatter, so under an env pin only a `model:` pin
+    survives. A delegate that declares nothing **inherits the session's level**.
+  - *Method warning — this entry is the cautionary tale, and it is about measurement, not about
+    that bug.* An `env`-block level in `settings.json` overrides the `--effort` flag, so a probe
+    that *sets* `xhigh` on the command line while the file pins something else measures the file:
+    a whole matrix of green runs can mean "never actually left `high`". The entry was wrong in
+    both directions across three rounds — greens that re-measurement returned 12/12 red, and right
+    conclusions shipped on evidence that could not support them (a "delegate inherits the session"
+    claim whose 20 rows all held the session at one tier, and a table headed "agent frontmatter"
+    whose rows had in fact been measured through a different load path — **label a table with the
+    path actually measured**). **What caught it was a fresh-context
+    refuter, not a third self-check** — the author had already reviewed the same diff and passed
+    it. Four rules follow. Confirm a setting took hold **by an oracle the claim does not depend
+    on**. **Vary the variable the conclusion names**; a row that holds it constant cannot support a
+    causal claim, however many times it is repeated. Read the oracle off `--output-format
+    stream-json` rather than hunting a transcript path (slugs fold `_` to `-`; a wrong path returns
+    a confident, empty "no failures"). And confirm the *negative* — no error signature proves
+    nothing until the same scan shows the tool was called at all.
   - *`max_tokens` is a hard cap on thinking **plus** response text.* First-party guidance: at
     `xhigh`/`max` set it large "so the model has room to think and act across subagents and tool
     calls" (in Claude Code: `CLAUDE_CODE_MAX_OUTPUT_TOKENS`). A budget sized for `high` can end
@@ -357,11 +293,11 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
 - `ultracode` is a **setting, not a tier**: sends `xhigh` *plus* auto dynamic-workflow
   orchestration for substantive tasks; session-only.
 - `/fast` — faster output (up to ~2.5×), **not** an effort downgrade; **Opus 5 and Opus 4.8
-  only since v2.1.219** (Opus 4.7 was dropped from fast mode); research preview
+  only** — older Opus models are not in fast mode; research preview
   (`code.claude.com/docs/en/fast-mode`), billed **via usage credits outside subscription rate
   limits** ($10/$50 MTok) — never "free on the plan".
 - `ultrathink` — one-turn deeper-reasoning keyword (in-context only).
-- Adaptive thinking (Opus 4.7+; always-on for Fable 5) triggers reasoning only when the turn
+- Adaptive thinking (always-on for Fable 5) triggers reasoning only when the turn
   needs it — do **not** try to manage a thinking budget from the harness.
 
 ## /goal [FP] (`code.claude.com/docs/en/goal`)
@@ -381,11 +317,10 @@ classic audit offender, see `audit-checklist.md` §3). The surfaces:
   comments, `--fix` applies findings to the working tree. Local, free, codebase-aware —
   **the default rung for any substantive change** [FP, `/en/commands`]. Since v2.1.218 it runs
   as a **background subagent** (review work no longer fills the conversation).
-- **`/review`** — bundled skill: fast single-pass, **read-only review of a GitHub pull
-  request** (no argument → lists PRs via `gh` and asks which to review). It does *not*
-  review your working diff — the binary itself redirects: "for your working diff use
-  /code-review". The multi-agent PR review at a chosen effort is also `/code-review
-  <level> <pr#>` (v2.1.202).
+- **`/review`** — now simply an **alias of `/code-review`**, which reviews the current diff
+  *or* a PR (`/code-review <level> <pr#>`). Called without a level it reuses the last level you
+  typed; `/code-review ultra` runs the deep cloud review. The older split ("`/review` = PR only")
+  no longer holds.
 - **`/security-review`** — bundled skill: security review of the pending changes on the
   current branch.
 - **`/code-review ultra`** (alias `/ultrareview`; CLI: `claude ultrareview [target]`,
@@ -423,6 +358,35 @@ Review surfaces are profile-dependent like any tool: bundled skills/plugins can 
 or blocklisted per-user (`~/.claude/plugins/blocklist.json`). **Verify a surface exists in
 the live session (`/`-autocomplete) before routing a remediation to it** — detect, then
 prescribe. Where review sits in the verification ladder — see `harness-discipline.md`.
+
+## /doctor — the native harness audit [FP]
+
+`/doctor` (alias `/checkup`) is a **health-check of the harness itself**, not just of the install,
+and it is the reason a hand-written "audit my `.claude/`" script is duplicated obvyazka. Read-only
+first, then it proposes fixes and asks before applying (its write proposals touch **user/local
+scope only** — never checked-in files). What it covers:
+
+- **Install and settings** — duplicate/leftover installs, PATH, unparseable settings, broken or
+  colliding agent definitions (the same ground `claude doctor` prints read-only).
+- **Dead weight against context cost** — skills, MCP servers and plugins that cost context but are
+  never used, read off real usage counters (`skillUsage` / `pluginUsage` in `~/.claude.json`) and a
+  scan of recent transcripts across *all* your projects, then offers to disable them. This is the
+  retire half of a skill lifecycle, natively.
+- **CLAUDE.md rightsizing** — dedupes local memory files against checked-in ones and trims what a
+  session could derive from the codebase (directory layouts, tech-stack lists, architecture
+  overviews) while keeping gotchas, rationale and non-standard conventions; proposes migrating
+  always-loaded guidance into lazy skills and nested CLAUDE.md files.
+- **Slow hooks and context-heavy extensions**, version currency, making auto mode the default
+  permission mode, and pre-approving frequently denied read-only commands.
+
+One budget fact it encodes, worth knowing on its own: **the skill listing is budgeted at ~1% of the
+context window — when the summed descriptions exceed it, entries get truncated and skill routing
+degrades**, which bites before raw token cost does. The practices behind the CLAUDE.md checks are
+first-party [BLOG, `claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models`].
+
+A neighbouring bundled tool: the **`claude-api` skill carries a `prompt-audit` subcommand** —
+it audits prompts and tool descriptions for patterns written for older models, which is exactly the
+"instructions tuned for older models constrain newer ones" failure this file exists to prevent.
 
 ## Memory [FP] (`code.claude.com/docs/en/memory`)
 
@@ -499,7 +463,11 @@ correctly refuses injection-shaped instructions found in a working directory.
   the **update cache key** — pushing new commits without bumping it ships nothing to
   installed users. Releases pin via `{name}--v{version}` git tags; `claude plugin validate`
   requires plugin.json and the marketplace entry to agree, and installs record the resolved
-  `gitCommitSha` (binary-verified, 2.1.210).
+  `gitCommitSha` (binary-verified, 2.1.210). Distribution is no longer git/npm-only: an **`archive` source** installs a
+  plugin from a zip over HTTPS with optional SHA-256 pinning. `/plugin install` refreshes a stale
+  marketplace catalog and retries before reporting "not found", and plugins installed via
+  `/plugin` **activate immediately when it is safe** instead of always demanding
+  `/reload-plugins`. A plugin may declare `"."` as its `skills` path (root-level `SKILL.md`).
 
 ## Output styles [FP] (`code.claude.com/docs/en/output-styles`)
 
@@ -556,11 +524,29 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
   hide files from Glob/Grep; `acceptEdits` prompts before writing code-executing config
   files (`.npmrc` / `.bazelrc` / `.pre-commit-config.yaml` / `.devcontainer/` …) and shell
   startup files.
-- Cross-session `SendMessage` relays carry no user authority — receivers refuse relayed
-  permission requests.
+- **Cross-session messaging is a shipped surface**: sessions can message each other across your
+  machines (`SendMessage` + **`ListAgents`** to discover them; macOS/Linux). Its guard rails, all
+  native: a relay **carries no user authority** (receivers refuse relayed permission requests),
+  outbound messages pass the permission classifier before dispatch, `crossSessionInbound` holds
+  messages addressed to a permission-bypassed session for your approval (`dialogExpiry` bounds the
+  wait), and a failed delivery is now reported as an error instead of "Message sent". Treat access
+  to another agent as equivalent to that agent's privileges — first-party incident: an
+  incident-response agent asked a second Claude over Slack to push a fix on its own initiative.
 - `fallbackModel` setting (ordered list) / `--fallback-model` — automatic model fallback,
   including interactive sessions. Managed settings can pin an allowed version range
   (`requiredMinimumVersion` / `requiredMaximumVersion`).
+- **Isolation is enforced for Bash too, in every session type**: a worktree-isolated session (and
+  its subagents) can no longer run destructive git commands against the main checkout — isolation
+  covers file edits *and* shell. Related hardening you get for free (so do not hand-roll it):
+  crafted Bash commands can no longer hide parts of themselves from the permission check
+  (zsh `[[ ]]` conditionals, tab/invisible-Unicode padding of the approval dialog), an agent
+  definition's `bypassPermissions` no longer overrides an org policy that disables it, workflow
+  scripts can no longer escape their sandbox via dynamic `import()`, and a sandbox `denyRead`/
+  `denyWrite` entry written with a trailing slash is no longer silently bypassable.
+- Sandboxed credentials can be **masked rather than denied** (`mode: "mask"` on Linux/WSL —
+  sandboxed commands read a sentinel while the proxy substitutes the real value on egress;
+  `extract` regexes, `decode: "jwt"` with `maskClaims`, `awsPairs`/`sigv4` re-signing; needs
+  `network.tlsTerminate`, honoured only from user/managed/`--settings` scope).
 - **`--safe-mode`** / `CLAUDE_CODE_SAFE_MODE` — start with all customizations (CLAUDE.md,
   plugins, skills, hooks, MCP) disabled: the clean A/B baseline for "model vs harness"
   questions (used by the audit and strip rituals). `disableBundledSkills` /

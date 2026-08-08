@@ -97,41 +97,47 @@ for grunt scans (current mapping: Fable 5/Opus-class lead, Sonnet-class reasonin
 Haiku-class grunt — a config fact, re-map at each model generation; Fable ≈2× Opus price,
 so no blanket lead-switch without evidence of lift).
 
-**A delegate that must search the web needs two things declared — neither is the default.**
-This is the most expensive place to be silently crippled: the delegate keeps working and returns
-a confident report with a whole source tier missing. Two independent ways to lose `WebSearch`,
-both measured (`native-capabilities.md`, Effort §):
+**Declare a delegate's tools and its effort — the defaults are inheritance, and inheritance is
+often not what you meant.** Omit `tools:` and the delegate inherits everything; omit `effort:` and
+it inherits the session's level. Both silently: a delegate that lacks a tool reports having no such
+tool rather than failing, and one running at the wrong tier just costs or under-thinks. The parent
+never sees a delegate's `tool_result`s, only its final text, so neither surfaces on its own.
 
 - **The tool.** Narrowing `tools:` without listing `WebSearch` removes it outright — the
   delegate does not error, it reports having no such tool. Either omit `tools:` entirely
   (inherits everything) or name `WebSearch` explicitly. The allowlist is asymmetric: an extra
   name is dropped silently, a missing one costs the capability.
-- **The effort tier.** On Opus 5, `xhigh`/`max` kill `WebSearch`, and a delegate that declares
-  no `effort:` inherits the session's level. From a deep session, give a research delegate
-  either `effort: high` (or below, keeping the session model) or `model: claude-sonnet-5` /
-  `claude-fable-5`, which keep search at `xhigh` and `max` — the two tiers that break Opus 5.
-  Where the session level arrives through `CLAUDE_CODE_EFFORT_LEVEL`, frontmatter `effort:` is
-  overridden **in both directions** — it cannot lower an env `xhigh`, and an env `low` drags a
-  delegate declared `xhigh` down to `low` (2/2 each way). Under an env pin only the model pin
-  survives. Both halves measured on the frontmatter path.
+- **The effort tier.** A delegate that declares no `effort:` **inherits the session's level** —
+  so a grunt scan spawned from a deep session runs (and bills) deep, and a verifier spawned from
+  a cheap one runs shallow. Declare the level wherever it matters. One blind spot:
+  `CLAUDE_CODE_EFFORT_LEVEL` overrides frontmatter `effort:` **in both directions** — it cannot be
+  lowered from a declaration, and an env `low` drags a delegate declared `xhigh` down to `low`
+  (2/2 each way). Under an env pin only a `model:` pin survives. Both halves measured on the
+  frontmatter path; the rule belongs to the agent definition rather than to one load path (the
+  same rows through `--agents` and through a plugin-shipped agent behave identically).
 
-  The same asymmetry bites a delegate you *want* deep: an agent declaring `effort: xhigh` runs at
-  whatever the env says. Before an audit or verification pass whose whole value is depth, confirm
+  So before an audit or verification pass whose whole value is depth, confirm
   `printenv CLAUDE_CODE_EFFORT_LEVEL` is empty — a declared level holds against every user-side
   layer except that one. Above both sits the org ceiling, which this kit has not measured.
+
+  **On a client at or below CC 2.1.220 there is a second, harsher reason to declare it:** at
+  `xhigh`/`max` a delegate's `WebSearch` failed inside the tool call and the delegate reported
+  success-shaped prose with a whole source tier missing. Fixed in v2.1.222 — still reproducible
+  below it, so if your clients are pinned, keep a research delegate at `high` or below, or pin
+  `model: claude-sonnet-5` (`native-capabilities.md`, Effort §).
 
 ```yaml
 ---
 name: web-researcher
 description: Searches the web and returns a sourced summary.
 tools: WebSearch, WebFetch, Read
-model: claude-sonnet-5     # or drop this line and use: effort: high
+effort: high
 ---
 ```
 
-For a **built-in** delegate (`general-purpose`) there is no frontmatter to edit — the Agent
-tool's per-call `model` override is the escape, and it is measured: spawned plainly from an
-`xhigh` session it failed 2/2; with `model: sonnet` on the call it searched 2/2.
+For a **built-in** delegate (`general-purpose`) there is no frontmatter to edit — the Agent tool's
+per-call `model` override is the only dial it exposes (it never takes effort per call; a dynamic
+workflow's `agent(prompt, {effort})` does).
 
 ## Single-agent first; bounded fan-out only when scope exceeds one context
 
@@ -163,7 +169,7 @@ default; document, don't enable. **No PM→Architect→Dev→QA pipelines** — 
 signal, and you become the verification loop." (*Best practices*, T1.) Enforcement ladder,
 cheapest first: in-prompt check → `/goal` condition (re-checked every turn) → **Stop hook**
 (deterministic gate) → **`/code-review`** (built-in, local, free — run it on substantive
-changes; it reviews the working diff, while `/review` is PR-review — surfaces catalogued in
+changes; it reviews the working diff or a PR, and `/review` is simply its alias — surfaces catalogued in
 `native-capabilities.md`) → fresh-context second opinion — a **single refuter** (the
 `code-refuter` role or a new session) by default, the full 3-role `/external-audit` (or a
 workflow) only as a rare milestone/irreversible escalation. This top rung is opt-in for most work but

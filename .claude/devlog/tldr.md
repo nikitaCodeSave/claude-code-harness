@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #42 · 2026-08-08 · Баг, о котором кит предупреждал сто строк, оказался починен
+
+**Tags:** docs, evidence, external-intake, release
+
+Очередной strip revision (external-intake pass) против CC v2.1.224 и Opus 5 как дефолтной Opus-модели. Самая большая единичная запись в native-capabilities.md — матрицы «WebSearch умирает на effort xhigh/max» — описывала поведение, которого больше нет: фикс клиентский…
+
+[→ entries/0042-bag-o-kotorom-kit-preduprezhdal-sto-strok-okazalsya-pochinen.md](entries/0042-bag-o-kotorom-kit-preduprezhdal-sto-strok-okazalsya-pochinen.md)
+
+---
+
 ## #41 · 2026-08-04 · Провенанс интейка называет измеренное, а не только источник
 
 **Tags:** evidence, evals, docs, release

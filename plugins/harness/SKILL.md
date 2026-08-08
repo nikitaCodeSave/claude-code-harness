@@ -39,8 +39,8 @@ programming/debugging.
 
 ### Mode 1: Bootstrap (empty `.claude/`)
 Read `references/bootstrap-checklist.md`. Run `claude --version` first (the built-in subagent
-types you must not recreate are catalogued in `references/native-capabilities.md`; since
-v2.1.198 `/agents` no longer opens a wizard — inspect configured agents via `/context`
+types you must not recreate are catalogued in `references/native-capabilities.md`;
+`/agents` no longer opens a wizard — inspect configured agents via `/context`
 ("Custom Agents") or `.claude/agents/` directly; the CLI `claude agents` lists running
 background sessions, not types). Default shape is **production-grade regardless of project size** — which means
 conventions + documents, not machinery, so it does not contradict the headline principle:

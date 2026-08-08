@@ -1,0 +1,150 @@
+{
+  "role": "code-refuter (fresh context)",
+  "scope": "uncommitted v1.21.4 diff in /home/nikita/PROJECTS/claude-code-harness (git diff, HEAD = 9ccaf2d)",
+  "date": "2026-08-08",
+  "default_posture": "refuted unless proven",
+  "overall_verdict": "headline claim STANDS (strongly), two secondary claims refuted/needing qualification",
+  "environment": {
+    "claude_version_live": "2.1.226",
+    "versions_available_locally": ["2.1.222", "2.1.223", "2.1.224", "2.1.225", "2.1.226"],
+    "version_downloaded_for_control": "2.1.220 (https://downloads.claude.ai/claude-code-releases/2.1.220/linux-x64/claude, into scratchpad only — the operator's install was NOT touched)",
+    "CLAUDE_CODE_EFFORT_LEVEL_env": "UNSET (printenv exit 1)",
+    "user_settings_env_block": "no CLAUDE_CODE_EFFORT_LEVEL — the flag-vs-env confound documented in the file does not apply here",
+    "user_settings_effortLevel": "xhigh",
+    "repo_settings": "no .claude/settings.json or settings.local.json in this repo — user settings govern",
+    "note": "probes launched with `env -u CLAUDE_EFFORT ...` so the parent session's exported CLAUDE_EFFORT could not contaminate the child's oracle"
+  },
+  "oracle": {
+    "tool_called_control": "every probe reads tool_use / tool_result records straight off --output-format stream-json --verbose; a run counts as green only if a WebSearch tool_use exists AND its tool_result has is_error=false AND carries real result links",
+    "level_control": "each probe first runs `printenv CLAUDE_EFFORT` through the Bash tool inside the measured session — an oracle independent of the WebSearch claim",
+    "red_control_1_tool_level": "prompt forcing `exit 7` → scan surfaced tool_result is_error=true while the run's own result record said is_error=false. The scan can show red where the final text is green.",
+    "red_control_2_api_level": "MAX_THINKING_TOKENS=0 + --effort xhigh on claude-opus-5 → whole request died with `API Error: 400 output_config.effort 'xhigh' is not supported when thinking is disabled on this model`, is_api_error_message=true, api_error_status=400. The 400 signature grep fires when the needle is present.",
+    "red_control_3_the_actual_bug": "the same WebSearch probe run on the 2.1.220 binary TODAY, same account, same settings, same model, reproduced the bug exactly — see claim 2"
+  },
+  "claims": [
+    {
+      "id": 1,
+      "claim": "native-capabilities.md L243-251: the WebSearch-dies-at-xhigh/max bug no longer reproduces; re-measured on settings effortLevel:xhigh / claude-opus-5[1m] and --effort max / claude-opus-5, search returns real results",
+      "verdict": "STANDS",
+      "confidence": "high",
+      "measurements": [
+        {"config": "settings effortLevel:xhigh, model claude-opus-5[1m], CC 2.1.226, headless", "runs": "2/2 green", "CLAUDE_EFFORT_read_in_session": "xhigh", "websearch_tool_use": "present", "tool_result_is_error": false, "400_signature_hits": 0, "logs": "logs/websearch-probe-scans.txt (p1a, p1b), logs/new-2.1.226-websearch-PASS.jsonl"},
+        {"config": "--effort max, model claude-opus-5, CC 2.1.226, headless", "runs": "2/2 green", "CLAUDE_EFFORT_read_in_session": "max", "websearch_tool_use": "present", "tool_result_is_error": false, "400_signature_hits": 0, "logs": "logs/websearch-probe-scans.txt (p2a, p2b)"},
+        {"config": "settings effortLevel:xhigh, claude-opus-5[1m], CC 2.1.224 — the exact version the diff is grounded on", "runs": "1/1 green", "CLAUDE_EFFORT_read_in_session": "xhigh", "logs": "logs/websearch-probe-scans.txt (p224)"},
+        {"config": "settings effortLevel:xhigh, claude-opus-5[1m], CC 2.1.222", "runs": "1/1 green", "logs": "logs/websearch-probe-scans.txt (old222)"},
+        {"config": "IN-BAND: this refuter subagent itself — claude-opus-5[1m], inherited session level xhigh (CLAUDE_EFFORT=xhigh in its Bash subprocess), delegate path", "runs": "1/1 green", "note": "the old delegate matrix predicted 'undeclared delegate from an xhigh session fails 2/2'; it searched cleanly"}
+      ],
+      "why_the_negative_is_trusted": "the same scan, the same day, the same account returns RED on 2.1.220 (claim 2) and RED on a forced tool failure and RED on the thinking-off 400 — so a null 400-signature is a measurement, not a blind method"
+    },
+    {
+      "id": 2,
+      "claim": "same sentence: 'Fixed client-side'",
+      "verdict": "STANDS — and this refuter supplied the control the pass did not have",
+      "confidence": "high",
+      "evidence": "CC 2.1.220 binary, downloaded fresh and run today against the same API/account/settings/model/prompt: WebSearch tool_use present, tool_result is_error=TRUE, body `API Error: 400 output_config.effort 'xhigh' is not supported when thinking is disabled on this model`, 400-signature hits = 2, while the run itself finished subtype=success is_error=false. Same probe on 2.1.222/2.1.224/2.1.226 = green. Server-side state is identical across those runs, so the delta is in the client.",
+      "logs": "logs/old-2.1.220-websearch-FAIL.jsonl, logs/websearch-probe-scans.txt (old220)",
+      "bonus": "this also retroactively vindicates the deleted matrices — the old finding was real, not a measurement artifact"
+    },
+    {
+      "id": 3,
+      "claim": "implicit: the fix is unconditional, so harness-discipline.md can drop the workaround ('give a research delegate effort: high or model: claude-sonnet-5')",
+      "verdict": "REFUTED as written — the fix is version-gated and the text carries no version",
+      "severity": "medium",
+      "evidence": "fix window bracketed to 2.1.221–2.1.222: 2.1.220 red (1/1), 2.1.222 green (1/1). 2.1.221 not tested (binary not retained locally). The new native-capabilities.md text says only 'Fixed client-side' with no 'as of vX', and harness-discipline.md now has no residual guidance at all.",
+      "impact": "the kit is read by projects on pinned/older clients. A reader on <=2.1.220 is told the tier is safe, the workaround is gone, and the failure mode is silent to the parent by the kit's own analysis.",
+      "suggested_fix": "one clause: 'fixed in CC >= 2.1.222 (2.1.220 still fails; measured 2026-08-08)'. This is exactly the 'keep version refs that are provenance' rule the diff itself restates in audit-checklist.md §1."
+    },
+    {
+      "id": 4,
+      "claim": "method: the level under test actually took hold (not the settings-overrides-flag trap the file warns about)",
+      "verdict": "STANDS",
+      "evidence": "CLAUDE_CODE_EFFORT_LEVEL unset in env; no env block entry in ~/.claude/settings.json; no repo-level settings file; every probe self-reported its level through `printenv CLAUDE_EFFORT` inside the measured session (xhigh / xhigh / max / max / xhigh / xhigh / xhigh) — an oracle independent of the WebSearch claim. Parent's exported CLAUDE_EFFORT was stripped with `env -u` so the child could not echo it back."
+    },
+    {
+      "id": 5,
+      "claim": "the doc is grounded at 'Claude Code v2.1.224'",
+      "verdict": "STANDS with a caveat — stale on arrival",
+      "evidence": "live install is 2.1.226 (auto-updated 2026-08-08 15:28, same day as the devlog entry). Re-verified the headline claim on BOTH 2.1.224 and 2.1.226, so the conclusion is not version-fragile. The refresh-ledger stamp `CC v2.1.224 · 2026-08-07` ships one release behind the operator's own environment.",
+      "severity": "low"
+    },
+    {
+      "id": 6,
+      "claim": "native-capabilities.md: 'The former 200-spawns-per-session cap has been removed — a long session no longer starts refusing new agents (concurrency and depth still apply)'",
+      "verdict": "STANDS — binary-verified",
+      "evidence": "2.1.222 binary contains `function Ann(){return te.CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION??sIy}` with `sIy=200` and the user-facing string `Subagent spawn limit reached (${n} of ${m} agents spawned)…ask the user to raise CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION`. In 2.1.226 the accessor and the message are GONE (grep count for 'Subagent spawn limit reached' = 0); the env-var name survives only as a leftover entry in a settings-key allowlist array (8 occurrences in 2.1.220/2.1.222 → 3 in 2.1.226). The two caps the text keeps are still live: `lJu(){return te.CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS??pn_}` with `pn_=20` and `cJu(){…MAX_WEB_SEARCHES_PER_SESSION??fn_}` with `fn_=200`.",
+      "method_control": "grep of a known-present needle ('Claude Code' = 814 hits, 'CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS' = 5) proved the strings extraction works on this Bun SEA before any absence was called"
+    },
+    {
+      "id": 7,
+      "claim": "native-capabilities.md + harness-discipline.md + project-docs/workflow.md: '/review is now simply an alias of /code-review, which reviews the current diff or a PR; the older \"/review = PR only\" split no longer holds'",
+      "verdict": "STANDS in substance — measured live",
+      "evidence": "In a throwaway git repo with one uncommitted regression (`return a+b` → `return a-b`), `/review` on 2.1.226 reviewed the WORKING DIFF and reported `m.py:2 — add now returns a-b; every caller gets subtraction instead of the sum`. It did not list PRs and did not error. So the old '/review = PR review only' text is genuinely obsolete.",
+      "caveat_and_self_correction": "`/review` disappeared from the session's registered `slash_commands` list in 2.1.223 (present in 2.1.220/2.1.222, absent 2.1.223→2.1.226). I initially read that as removal; it is not decisive — the known-live deprecated alias `/ultrareview` is also absent from that list, so aliases are simply not enumerated there. Worth knowing for the kit's own rule 'verify a surface in /-autocomplete': an alias will not show up there.",
+      "unverified_sub_claim": "'Called without a level it reuses the last level you typed' — supported by binary strings ('typing a level (for example `/code-review high`) changes it'), not exercised live."
+    },
+    {
+      "id": 8,
+      "claim": "native-capabilities.md: '/fork … copies the conversation into a background session with its own row in `claude agents` **and its own worktree** (it no longer works in the original session's checkout)'",
+      "verdict": "REFUTED (static evidence); live confirmation not obtainable headlessly",
+      "severity": "medium",
+      "evidence": "`/fork` (`BBb`) and `/subtask` (`UBb`) both delegate to the same helper `ykn`, and that helper spawns the background agent with `getWorktreeResult: async()=>({})` — an empty worktree result, i.e. no worktree is created on this path at all. The command's own registered description in 2.1.226 is `Copy this conversation into a new background session and keep working here` — no mention of isolation or a checkout change.",
+      "not_verified": "a live `/fork` run: the command refuses before the first conversation turn ('Cannot fork before the first conversation turn'), which a single-shot `claude --print` cannot get past. An attempted run in a throwaway repo produced no worktree and no branch (`git worktree list` showed only the main checkout), but the stream shows the command never executed, so that run is NOT evidence.",
+      "recommendation": "drop 'and its own worktree (it no longer works in the original session's checkout)' unless it can be shown interactively"
+    },
+    {
+      "id": 9,
+      "claim": "native-capabilities.md: plugins can be installed from an `archive` source — a zip over HTTPS with optional SHA-256 pinning",
+      "verdict": "STANDS — binary-verified",
+      "evidence": "2.1.226 strings: `plugin archive sha256 mismatch`, `Using archive sha256 version for `, `The archive was not installed. Verify the sha256 in the marketplace entry, or that the URL serves the intended file.`"
+    },
+    {
+      "id": 10,
+      "claim": "new '/doctor — the native harness audit' section, incl. 'the skill listing is budgeted at ~1% of the context window — when the summed descriptions exceed it, entries get truncated and skill routing degrades'",
+      "verdict": "STANDS — binary-verified, near-verbatim",
+      "evidence": "2.1.226 string: `- The skill listing is budgeted at ~1% of the context window; when summed descriptions exceed it, entries get truncated and skill routing degrades — so a bloated listing matters even before raw token cost does.` Backing settings also present: per-skill description cap (default 1536 chars) and `Fraction of the context window (in characters) reserved for the skill listing sent to Claude (default: 0.01 = 1%)`. `/checkup` alias present; `skillUsage`/`pluginUsage` counters exist in the state layer (`skillUsage[name] = {usageCount, lastUsedAt}` with a 7-day half-life decay used for ranking) — so 'read off real usage counters' is real."
+    },
+    {
+      "id": 11,
+      "claim": "isolation/permission hardening bullets (worktree isolation now covers Bash; zsh `[[ ]]` and invisible-Unicode permission bypasses closed; workflow `import()` sandbox escape closed; trailing-slash sandbox deny bypass closed; agent-definition bypassPermissions no longer overrides org policy)",
+      "verdict": "NOT VERIFIED — changelog-derived, not refuted",
+      "reason": "these are absence-of-bug claims; confirming them means writing exploit probes against the operator's live permission layer, which is out of scope for a read-only audit. No contradicting evidence found."
+    },
+    {
+      "id": 12,
+      "claim": "cross-session messaging surface (`SendMessage` + `ListAgents`, `crossSessionInbound`, `dialogExpiry`) and sandbox credential masking (`mode: \"mask\"`, `maskClaims`, `awsPairs`, `network.tlsTerminate`)",
+      "verdict": "STANDS at the surface-exists level — binary-verified by name",
+      "evidence": "2.1.226 strings counts: ListAgents 9, crossSessionInbound 16, dialogExpiry 4, tlsTerminate 22, maskClaims 12, awsPairs 25, prompt-audit 11 (the claude-api skill subcommand). Semantics of each were not exercised."
+    },
+    {
+      "id": 13,
+      "claim": "'plugins installed via /plugin activate immediately when it is safe' and 'a plugin may declare \".\" as its skills path'",
+      "verdict": "NOT VERIFIED",
+      "reason": "no supporting string surfaced in a targeted grep; the /reload-plugins prompts that remain cover other paths (untrusted workspace, manual edits). Shallow search — treat as changelog-derived, not as refuted."
+    },
+    {
+      "id": 14,
+      "claim": "durable knowledge survived the ~110-line deletion",
+      "verdict": "MOSTLY STANDS — two provenance losses",
+      "independently_reverified_from_the_reproduced_failure": "the retained detection rules are correct. In the 2.1.220 red run: the WebSearch `tool_result` carried `is_error: true` with the `API Error: 400 …` body; NO assistant record carried `is_api_error_message` (all six assistant records: absent); the run's own result record said `subtype=success is_error=false api_error_status=none`. Exactly the 'scan tool_result, not isApiErrorMessage' rule the diff keeps.",
+      "lost": [
+        "the upstream issue numbers (#76689, #79798, #68797) and the regression version (v2.1.207) — the only handles for re-checking the episode upstream; audit-checklist.md §1, restated in this same diff, says to keep provenance-shaped version refs",
+        "the fixed-in version (never added) — see claim 3",
+        "'(binary-verified, 2.1.210)' stripped from the plugin gitCommitSha sentence — same §1 rule, opposite direction: that stamp is provenance, not a behavioral binding"
+      ],
+      "correctly_dropped_as_moot": [
+        "Sonnet 5 / Fable 5 stay green at xhigh/max (escape hatch for a bug that no longer exists)",
+        "alwaysThinkingEnabled / MAX_THINKING_TOKENS don't work around it",
+        "'8 of 10 reported failures land in subagents'",
+        "WebFetch unaffected (was never re-measured anyway)"
+      ]
+    }
+  ],
+  "not_checked": [
+    "CC 2.1.221 — the one release inside the fix window; binary not retained locally and not downloaded",
+    "whether the fix also covers WebFetch and other server tools at xhigh/max (only WebSearch was probed)",
+    "org-policy / managed-settings effort ceiling (the file already marks this unmeasured)",
+    "the hardening bullets in claim 11 (deliberately — would require adversarial probes against the live permission layer)",
+    "evals/run.sh mech, which the devlog cites as verification (out of scope for this role; no repo state was executed or modified)"
+  ],
+  "actions_taken_on_repo": "none besides creating this audit directory and its logs/. No file in plugins/, no commit, no push, no settings change. The operator's Claude Code install was not modified — 2.1.220 was fetched into the session scratchpad and run from there."
+}

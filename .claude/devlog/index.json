@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-08T19:56:23Z",
-  "entry_count": 44,
+  "generated_at": "2026-08-08T20:15:44Z",
+  "entry_count": 45,
   "entries": [
     {
       "id": 1,
@@ -641,6 +641,21 @@
       "supersedes": null,
       "path": "entries/0044-zapis-perestala-rasskazyvat-samu-sebya.md",
       "preview": "v1.21.5 сняла из записи про WebSearch версии, но оставила сюжет: механику несуществующего бага, как его перемеряли, какой рефутер что доказал и три раунда, в которых сама запись была неверна. Оператор указал на конкретный абзац — «для чего эти архаизмы?». Верно…"
+    },
+    {
+      "id": 45,
+      "date": "2026-08-08",
+      "title": "Пять агентов документации проверили инвентарь: три правки, четыре ложные тревоги",
+      "tags": [
+        "docs",
+        "verification",
+        "evidence",
+        "release"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0045-pyat-agentov-dokumentatsii-proverili-inventar-tri-pravki-che.md",
+      "preview": "Оператор попросил детальную верификацию кита совместно с агентом документации Claude Code. Пять claude-code-guide параллельно: четыре по зонам native-capabilities.md (сабагенты/workflows; hooks/effort/review/doctor; memory/skills/MCP/plugins; settings/permissions), пятый — по…"
     }
   ]
 }

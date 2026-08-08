@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #45 · 2026-08-08 · Пять агентов документации проверили инвентарь: три правки, четыре ложные тревоги
+
+**Tags:** docs, verification, evidence, release
+
+Оператор попросил детальную верификацию кита совместно с агентом документации Claude Code. Пять claude-code-guide параллельно: четыре по зонам native-capabilities.md (сабагенты/workflows; hooks/effort/review/doctor; memory/skills/MCP/plugins; settings/permissions), пятый — по…
+
+[→ entries/0045-pyat-agentov-dokumentatsii-proverili-inventar-tri-pravki-che.md](entries/0045-pyat-agentov-dokumentatsii-proverili-inventar-tri-pravki-che.md)
+
+---
+
 ## #44 · 2026-08-08 · Запись перестала рассказывать саму себя
 
 **Tags:** docs, discipline, release

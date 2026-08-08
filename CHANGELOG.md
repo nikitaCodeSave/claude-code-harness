@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.21.7] — 2026-08-08
+
+**Five documentation agents audited the inventory; three claims moved, and the rest held under
+live probes.** A doc-verification sweep read `native-capabilities.md` and the whole kit against
+the official Claude Code reference for v2.1.226. Every high-severity "contradiction" it raised
+was then tested here rather than accepted — and each one dissolved, while three quieter findings
+were real.
+
+### Fixed
+
+- **Version pin moved to v2.1.226.** The kit's single version-pinned document had drifted a
+  release behind its own refresh ledger — exactly the silent staleness the pin exists to prevent.
+- **Ultrareview economics corrected to ~$5–25 per run** (first-party docs now state a wider range
+  than the kit carried), with the research-preview status and the free-run rules that matter:
+  the three Pro/Max runs are a one-time allotment and a stopped run still consumes one.
+- **`/fork` carries its conditional**: with agent view turned off, `/subtask` does not exist and
+  `/fork` starts the forked subagent instead. A harness step that hard-codes one command name
+  breaks on the other configuration.
+
+### Verification
+
+Four claims were probed live on 2.1.226 rather than taken from a reviewer's reading, and all four
+held: a `deny: Write(./s/**)` rule still lets the file be written and warns at startup, while
+`Grep(path)` warns not at all; an out-of-enum `permissions.defaultMode` still discards the entire
+settings file with nothing printed (differential oracle: the same file's `language` key stops
+applying); `sandbox.network.strictAllowlist` and `"."` as a plugin `skills` path are both present
+in the binary with the documented semantics. First-party docs also confirm the removal of the
+per-session subagent spawn cap outright ("no limit on the total number of subagents Claude can
+spawn over a session").
+
 ## [1.21.6] — 2026-08-08
 
 **The entry stopped narrating itself.** v1.21.5 removed the version numbers from the `WebSearch`

@@ -1,6 +1,6 @@
 # Native capabilities — what Claude Code already does
 
-Working inventory as of **Claude Code v2.1.224 / the Claude 5 family (Fable 5, Sonnet 5,
+Working inventory as of **Claude Code v2.1.226 / the Claude 5 family (Fable 5, Sonnet 5,
 Opus 5) model generation** (August 2026). Default model is account-type-dependent [FP,
 `model-config`]: **Opus 5** (`claude-opus-5`, v2.1.219+ — now *the* default Opus model;
 1M context, $5/$25 MTok, knowledge cutoff May 2026) on Max / Team Premium / Enterprise PAYG;
@@ -58,9 +58,12 @@ omit CLAUDE.md + git context; both are one-shot (no resume). First-party subagen
 you should not rebuild by hand: the **in-session forked subagent `/subtask`** (inherits the
 full conversation, reuses the prompt cache) — **`/fork` is no longer this**: since v2.1.212 it
 copies the conversation into a *background* session with its own row in `claude agents`, so a
-harness step that expected an in-session fork must say `/subtask`. It does **not** get its own
-worktree (binary-verified: `/fork` and `/subtask` delegate to the same helper, which spawns the
-background agent with an empty worktree result). Frontmatter
+harness step that expected an in-session fork must say `/subtask`. One conditional worth knowing:
+**with agent view turned off `/subtask` does not exist and `/fork` starts the forked subagent
+instead** — a harness that hard-codes one name breaks on the other configuration. Neither gets a
+worktree of its own (binary-verified: both delegate to the same helper, which spawns the
+background agent with an empty worktree result); worktree isolation is the separate frontmatter
+field below. Frontmatter
 `maxTurns`, `isolation: worktree` (auto-cleaned branch-off), and `memory: user|project|local`
 (**persistent per-agent memory** under `~/.claude/agent-memory/`). Disable a built-in via
 `permissions.deny: ["Agent(Explore)"]`; `Agent(x,y)` allowed-type lists are **enforced**, and
@@ -296,8 +299,9 @@ classic audit offender, see `audit-checklist.md` §3). The surfaces:
   current branch.
 - **`/code-review ultra`** (alias `/ultrareview`; CLI: `claude ultrareview [target]`,
   `--json`, `--timeout` default 30 min) — cloud-hosted multi-agent review of the current
-  branch or a PR. First-party economics (`code.claude.com/docs/en/ultrareview`, Jun 2026):
-  typically **5–10 min, ~$5–20/run via usage credits**; 3 free runs on Pro/Max (one-time).
+  branch or a PR — research preview. First-party economics
+  (`code.claude.com/docs/en/ultrareview`): typically **5–10 min, ~$5–25/run via usage credits**;
+  3 free runs on Pro/Max (one-time allotment, no refresh; a stopped run still consumes one).
   Reserve it for high-stakes gates (security-sensitive change, migration, payment path);
   `/code-review` covers the everyday case. Boundary vs the kit's `/external-audit`:
   `ultrareview` is a paid cloud **diff/PR review** — reach for it when the change itself is

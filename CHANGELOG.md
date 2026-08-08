@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.21.8] — 2026-08-08
+
+**One line for a policy that can turn the whole harness off.** The doc-verification sweep surfaced
+a managed setting the kit did not cover; it earns its place not as an enterprise reference entry
+but because it changes a design decision.
+
+### Added
+
+- **`strictPluginOnlyCustomization` in `native-capabilities.md`** — a managed policy blocking
+  non-plugin customization for `skills`/`agents`/`hooks`/`mcp`, with the two consequences that
+  matter: shipping a harness as a plugin is the only form that survives it, and "my skill is
+  invisible" inside a managed org is a policy fact to rule out before debugging the config. The
+  surrounding managed-only keys are deliberately left out — the kit documents the design fork,
+  not the admin surface.
+
 ## [1.21.7] — 2026-08-08
 
 **Five documentation agents audited the inventory; three claims moved, and the rest held under

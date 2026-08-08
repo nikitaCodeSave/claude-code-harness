@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-08T20:15:44Z",
-  "entry_count": 45,
+  "generated_at": "2026-08-08T20:30:48Z",
+  "entry_count": 46,
   "entries": [
     {
       "id": 1,
@@ -656,6 +656,20 @@
       "supersedes": null,
       "path": "entries/0045-pyat-agentov-dokumentatsii-proverili-inventar-tri-pravki-che.md",
       "preview": "Оператор попросил детальную верификацию кита совместно с агентом документации Claude Code. Пять claude-code-guide параллельно: четыре по зонам native-capabilities.md (сабагенты/workflows; hooks/effort/review/doctor; memory/skills/MCP/plugins; settings/permissions), пятый — по…"
+    },
+    {
+      "id": 46,
+      "date": "2026-08-08",
+      "title": "Политика, способная выключить весь harness, получила одну строку",
+      "tags": [
+        "docs",
+        "native-capabilities",
+        "release"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0046-politika-sposobnaya-vyklyuchit-ves-harness-poluchila-odnu-st.md",
+      "preview": "Верификация #45 нашла в бинаре managed-настройку strictPluginOnlyCustomization, которой кит не покрывал. Она блокирует не-плагинные источники кастомизации для четырёх поверхностей — ~/.claude/{skills,agents,hooks,mcp}/, проектные .claude/{surface}/, hooks в settings.json…"
     }
   ]
 }

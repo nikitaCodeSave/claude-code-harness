@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #46 · 2026-08-08 · Политика, способная выключить весь harness, получила одну строку
+
+**Tags:** docs, native-capabilities, release
+
+Верификация #45 нашла в бинаре managed-настройку strictPluginOnlyCustomization, которой кит не покрывал. Она блокирует не-плагинные источники кастомизации для четырёх поверхностей — ~/.claude/{skills,agents,hooks,mcp}/, проектные .claude/{surface}/, hooks в settings.json…
+
+[→ entries/0046-politika-sposobnaya-vyklyuchit-ves-harness-poluchila-odnu-st.md](entries/0046-politika-sposobnaya-vyklyuchit-ves-harness-poluchila-odnu-st.md)
+
+---
+
 ## #45 · 2026-08-08 · Пять агентов документации проверили инвентарь: три правки, четыре ложные тревоги
 
 **Tags:** docs, verification, evidence, release

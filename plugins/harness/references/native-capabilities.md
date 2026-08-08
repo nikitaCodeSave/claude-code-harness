@@ -522,6 +522,13 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
   sandboxed commands read a sentinel while the proxy substitutes the real value on egress;
   `extract` regexes, `decode: "jwt"` with `maskClaims`, `awsPairs`/`sigv4` re-signing; needs
   `network.tlsTerminate`, honoured only from user/managed/`--settings` scope).
+- **A managed policy can switch off non-plugin customization entirely** —
+  `strictPluginOnlyCustomization` (binary-verified; absent from the public settings page) blocks
+  `~/.claude/{surface}/`, the project's `.claude/{surface}/`, `settings.json` hooks and `.mcp.json`
+  for any of `skills` · `agents` · `hooks` · `mcp`, while plugin-provided and managed sources keep
+  loading. Two consequences for a harness: **shipping it as a plugin is the only form that survives
+  the policy**, and "my skill is invisible / my hook never fires" inside a managed org is a policy
+  fact to rule out before debugging the config.
 - **`--safe-mode`** / `CLAUDE_CODE_SAFE_MODE` — start with all customizations (CLAUDE.md,
   plugins, skills, hooks, MCP) disabled: the clean A/B baseline for "model vs harness"
   questions (used by the audit and strip rituals). `disableBundledSkills` /

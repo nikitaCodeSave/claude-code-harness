@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.23.3] — 2026-08-29
+
+### Fixed
+
+- **The refresh ledger now records the refute pass.** `harness-evolution.md` requires the stamp to
+  be updated at the end of a revision; two releases had gone through nine first-party pages,
+  refuted five behavioural assertions and run three live probes without any of it reaching
+  `sources-checked` — so the next intake cycle would have re-asked the same questions. The entry
+  names the pages, the probes, and the one claim that stayed unverified.
+
 ## [1.23.2] — 2026-08-29
 
 **The second half of the same audit.** Where 1.23.1 fixed assertions that had gone stale, this one

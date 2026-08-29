@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-29T16:31:17Z",
-  "entry_count": 51,
+  "generated_at": "2026-08-29T16:37:20Z",
+  "entry_count": 52,
   "entries": [
     {
       "id": 1,
@@ -745,6 +745,20 @@
       "supersedes": null,
       "path": "entries/0051-orakul-postavlennyy-ne-v-tom-meste-kit-proveryal-spavn-a-yav.md",
       "preview": "Вторая половина того же аудита пятью свежими контекстами (первая — #50, релиз v1.23.1). Если 1.23.1 чинила утверждения, которые протухли, то 1.23.2 чинит утверждения, которые кит проверил негодным методом — включая одно, помеченное в тексте как binary-verified."
+    },
+    {
+      "id": 52,
+      "date": "2026-08-29",
+      "title": "Сверка внедрения: три пропуска после двух релизов",
+      "tags": [
+        "harness",
+        "audit",
+        "verification"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0052-sverka-vnedreniya-tri-propuska-posle-dvukh-relizov.md",
+      "preview": "После v1.23.1 и v1.23.2 оператор спросил прямо: все ли рекомендации аудита реализованы. Вопрос правильный по форме — «внесено» это утверждение автора о своей же работе, и проверять его надо тем же способом, что и всё остальное сегодня: грепом по дереву с иглой, а не памятью."
     }
   ]
 }

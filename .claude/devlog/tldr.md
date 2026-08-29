@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #57 · 2026-08-29 · Четыре запрета удалены: модель соблюдает их без инструкции
+
+**Tags:** harness, strip-revision, empirics, project-docs
+
+Оператор поставил задачу убрать архаизмы и отсылки к действиям, которых модель без харнеса и так не совершила бы. Это буквально Pass 2 strip-ревизии, описанный в harness-evolution.md: перечислить компоненты с допущением «модель не умеет X», перепроверить допущение, удалить то…
+
+[→ entries/0057-chetyre-zapreta-udaleny-model-soblyudaet-ikh-bez-instruktsii.md](entries/0057-chetyre-zapreta-udaleny-model-soblyudaet-ikh-bez-instruktsii.md)
+
+---
+
 ## #56 · 2026-08-29 · Четыре верификатора на 470 утверждений: девятнадцать оказались неверными
 
 **Tags:** harness, verification, currency, evidence

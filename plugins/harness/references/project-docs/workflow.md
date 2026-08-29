@@ -1,4 +1,4 @@
-<!-- shipped-by: claude-code-harness v1.23.5 — do not hand-evolve in the project;
+<!-- shipped-by: claude-code-harness v1.25.0 — do not hand-evolve in the project;
      improvements flow through the plugin (re-synced on audit). Project-specific
      facts live in CLAUDE.md, not here. -->
 
@@ -61,7 +61,6 @@ goes almost straight to Plan — the full gate set is the exception, not a ritua
 
 - Work test-first by default: write the failing test, commit it, then implement until green
   (red→green is the default, not dogma — see `testing.md` rule 2 for what actually matters).
-  Never weaken or delete a test to get green.
 - One feature per cycle; call it done only after **every** verification step ran, negative cases
   included. When verification hits a wall outside your reach (missing creds, an operator-only
   service, a third-party dependency), say so explicitly — **"blocked on X, and here is who
@@ -132,8 +131,9 @@ pruned back to current state):
 
 ## Production posture (day 0, not "later")
 
-- Secrets: never committed, never echoed into code/logs/tests/replies; secret-bearing paths
-  get `permissions.deny` entries the moment they are named.
+- Secrets: **never echoed into code, logs, tests or replies** — not even when asked for a debug
+  line, because the line outlives the debugging session. Secret-bearing paths get
+  `permissions.deny` entries the moment they are named.
 - Known limitations (retention, scale ceilings, missing hardening) are **written down** in
   `docs/ARCHITECTURE.md` as conscious decisions — an undocumented limitation is a future
   incident, a documented one is a backlog item.

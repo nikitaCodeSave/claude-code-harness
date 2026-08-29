@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-29T17:51:38Z",
-  "entry_count": 56,
+  "generated_at": "2026-08-29T18:10:26Z",
+  "entry_count": 57,
   "entries": [
     {
       "id": 1,
@@ -819,6 +819,21 @@
       "supersedes": null,
       "path": "entries/0056-chetyre-verifikatora-na-470-utverzhdeniy-devyatnadtsat-okaza.md",
       "preview": "Оператор поставил задачу довести харнес до безошибочного состояния, истина — в документации и статьях. Абсолют недостижим (за день дважды «исправление» оказалось регрессом), но систематическая сверка выполнима. Четыре свежих контекста поделили поверхность: две половины…"
+    },
+    {
+      "id": 57,
+      "date": "2026-08-29",
+      "title": "Четыре запрета удалены: модель соблюдает их без инструкции",
+      "tags": [
+        "harness",
+        "strip-revision",
+        "empirics",
+        "project-docs"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0057-chetyre-zapreta-udaleny-model-soblyudaet-ikh-bez-instruktsii.md",
+      "preview": "Оператор поставил задачу убрать архаизмы и отсылки к действиям, которых модель без харнеса и так не совершила бы. Это буквально Pass 2 strip-ревизии, описанный в harness-evolution.md: перечислить компоненты с допущением «модель не умеет X», перепроверить допущение, удалить то…"
     }
   ]
 }

@@ -111,7 +111,7 @@ should already have what it needs to run the project.
 <typecheck>
 <dev server, if any>
 ​```
-Done = these exit 0. Do not report a change as finished on a partial run.
+Done = these exit 0.
 
 ## Stack
 - Language + version · framework + version · package manager · test runner · lint/format.
@@ -148,7 +148,7 @@ Done = these exit 0. Do not report a change as finished on a partial run.
   and the full flow — `.claude/docs/workflow.md`.
 - When blocked, escalate instead of improvising: after two failed attempts at the same thing,
   stop and report what you tried and what you need — <a decision from the owner / a credential /
-  a service that is down>. Never invent a workaround for a missing permission or credential.
+  a service that is down>.
 - Doc-with-code: a change updates its matching doc in the same commit — mapping table in
   `.claude/docs/docs-discipline.md`.
 - Continuity: a feature / fix / config or API change / architectural decision closes with an

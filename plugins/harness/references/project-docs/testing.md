@@ -1,4 +1,4 @@
-<!-- shipped-by: claude-code-harness v1.17.4 — do not hand-evolve in the project;
+<!-- shipped-by: claude-code-harness v1.25.0 — do not hand-evolve in the project;
      improvements flow through the plugin (re-synced on audit). Stack-specific
      commands live in CLAUDE.md, not here. -->
 
@@ -25,8 +25,6 @@ Cross-cutting:
 
 - **Green baseline from session 0**: the suite runs green before feature work starts; an
   oracle that is red on day 0 emits false-alarm signal until fixed.
-- **Never weaken or edit a test just to make it pass.** Removing/relaxing tests to get green
-  is falsified verification.
 - **Mock only the genuinely external boundary** (third-party API, network, clock) — never
   your own unbuilt internals.
 - **"Tests pass" is evidence to open, not a done-claim**: verify the feature end-to-end the

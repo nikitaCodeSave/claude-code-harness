@@ -79,7 +79,7 @@ Compare the delta *from the refresh ledger*, not "everything from scratch". Sour
    relevant one into `native-capabilities.md` (it must not fall behind live `claude --version`).
 2. **First-party docs / blog** (code.claude.com/docs, anthropic.com / claude.com) → shifts in
    defaults (effort, model-config), new canonical patterns.
-3. **external-sources catalog** → new essays / arXiv per the T1–T7 rubric.
+3. **`evidence-base.md` source catalog** → new essays / arXiv per the T1–T7 rubric.
 4. Run each finding through the D-cycle gate (`kit-gap` with multi-source · `single-incident` ·
    `noise`). An external signal **is not privileged**: "an article came out / a flag appeared"
    does not become an invariant as a single-incident; the fold is a point-edit of a specific

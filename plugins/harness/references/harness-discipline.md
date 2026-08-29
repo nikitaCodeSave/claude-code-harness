@@ -135,8 +135,8 @@ workflow's `agent(prompt, {effort})` does).
 
 **Read a delegate's actual model and effort off `/tasks`** rather than inferring them: the agent
 detail dialogs print both per subagent. That is the cheap oracle for "did my declaration hold" —
-and the answer changed shape recently, because `CLAUDE_CODE_SUBAGENT_MODEL` now *defaults* the
-delegate model instead of overriding it, so a definition's `model:` wins where it used to lose
+and it is worth running, because `CLAUDE_CODE_SUBAGENT_MODEL` **overrides** both a definition's
+`model:` and a per-spawn model — a declaration you wrote can lose to an env pin you forgot
 (`native-capabilities.md`, Built-in subagents §).
 
 ## Single-agent first; bounded fan-out only when scope exceeds one context

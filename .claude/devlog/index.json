@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-29T13:59:31Z",
-  "entry_count": 49,
+  "generated_at": "2026-08-29T16:01:27Z",
+  "entry_count": 50,
   "entries": [
     {
       "id": 1,
@@ -715,6 +715,21 @@
       "supersedes": null,
       "path": "entries/0049-agents-md-ne-chitaetsya-i-eto-izmereno-a-ne-vzyato-iz-doki.md",
       "preview": "Аудит кита против внешнего среза (first-party best-practices и memory, спека AGENTS.md под Agentic AI Foundation, разбор GitHub по 2500+ репозиториям, Fowler о harness engineering) дал семь зазоров. Оператор снял два (guardrails, observability) и попросил закрыть остальные с…"
+    },
+    {
+      "id": 50,
+      "date": "2026-08-29",
+      "title": "Пять свежих аудиторов: дорого стоят не пины, а утверждения о поведении",
+      "tags": [
+        "harness",
+        "audit",
+        "currency",
+        "fresh-context"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0050-pyat-svezhikh-auditorov-dorogo-stoyat-ne-piny-a-utverzhdeniy.md",
+      "preview": "Сразу после v1.23.0 оператор поставил цель: harness без архаизмов и мёртвых правил, по практикам индустрии. Запущено пять независимых аудиторов свежим контекстом, каждому — установка опровергать, а не подтверждать, и жёсткий фильтр против генерического чек-листа (CI, Docker…"
     }
   ]
 }

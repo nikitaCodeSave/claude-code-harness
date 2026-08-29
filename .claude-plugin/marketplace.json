@@ -12,7 +12,7 @@
     {
       "name": "claude-code-harness",
       "source": "./plugins/harness",
-      "description": "Designs, bootstraps, audits, and extends a Claude Code harness (.claude/ + root CLAUDE.md). Bootstrap / Audit / Extend / Explain modes + long-running build kit.",
+      "description": "Designs, bootstraps, audits, and extends a Claude Code harness (.claude/ + root CLAUDE.md). Bootstrap / Audit / Extend / Explain modes. Ships a skill and its references — no agents, no commands, no hooks.",
       "category": "workflow",
       "keywords": ["claude-code", "harness", "plugin-development", "bootstrap", "audit"]
     },

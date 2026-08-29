@@ -93,8 +93,10 @@ T6–T7 anecdote does not earn a rule (see `harness-discipline.md`, single-incid
   tier above Opus — `anthropic.com/news/claude-fable-5-mythos-5`, T1) was tested against every
   "under a capable model" invariant (a major model release is the canonical re-grounding
   trigger, SKILL.md Maintenance): a more capable model still needs the *right* harness — the
-  long-running spine (runnable oracle + progress/handoff + feature ledger, from *Effective
-  harnesses for long-running agents*, T1), not *more* machinery. This is the published
+  long-running spine (runnable oracle + progress/handoff, from *Effective harnesses for
+  long-running agents*, T1), not *more* machinery. That source also names a feature ledger; the
+  kit does **not** carry one — a session that closes its own loop against a real command is what
+  the ledger protected, and the generated variant was retired in v1.23.0. This is the published
   progressive-simplification stance — *"find the simplest solution possible, and only increase
   complexity when needed"*; strip scaffolding as models improve (*Harness design for
   long-running apps*, T1). The kit encodes that spine as two lines an operator acts on — name a

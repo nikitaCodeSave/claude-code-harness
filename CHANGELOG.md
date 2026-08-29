@@ -7,6 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.23.1] — 2026-08-29
+
+**Five independent fresh-context auditors were pointed at the kit with an instruction to refute,
+and the expensive findings were all the same shape: a claim about Claude Code that was true when
+written and had silently gone false.** The kit's own §1 tests version *pins* for staleness; it
+never tested *behavioural assertions*, which is where every one of these lived. No surface
+changed — this release only makes the kit stop asserting things that are not so.
+
+### Fixed
+
+- **`CLAUDE_CODE_SUBAGENT_MODEL` is an override, not a default.** The kit claimed the opposite —
+  that v2.1.251 turned it into a default an agent definition's `model:` could beat — and
+  `audit-checklist.md` acted on that claim, telling auditors to *move a load-bearing pin into the
+  agent definitions*, which would silently break it. First-party `model-config` is unambiguous:
+  it "overrides the per-invocation `model` parameter and the subagent definition's `model`
+  frontmatter", and `agent-teams` ranks it first in the precedence list. The documented way to
+  stand it down is the literal value **`inherit`**, which the kit did not mention at all. Fixed in
+  `native-capabilities.md`, `harness-discipline.md` and `audit-checklist.md`. Note the shape of
+  the failure: `native-capabilities.md`'s own agent-teams section carried the correct precedence
+  all along, so the kit contradicted itself — exactly what §1's drift detector exists to catch,
+  never having been pointed at the kit.
+- **The task-list tools are off by default on the current model generation.** The kit described
+  the previous generation's arrangement (`TodoWrite` disabled in favour of the Task tools). Since
+  v2.1.233 *none* of `TodoWrite` / `TaskCreate` / `TaskGet` / `TaskUpdate` / `TaskList` reach
+  Opus 4.8 / Sonnet 5 / Fable 5 / Mythos 5 without an opt-in
+  (`CLAUDE_CODE_ENABLE_TODO_TOOLS=1`, or naming them in `--tools` / `--allowedTools`), and
+  "without them, Claude adds nothing to the task list while it works". The consequence is
+  structural, so it is now stated: a harness layer that treated the task list as its in-flight
+  memory tier has an **empty tier**, and in-flight state belongs on disk.
+- **`/code-review` starts itself again since v2.1.246.** The kit's "review is invoke-only — the
+  rung has to be pulled" was written against v2.1.215 and is now false for `/code-review`
+  (it stays true for `/verify` and `/deep-research`). Added the documented way back to typed-only:
+  `skillOverrides: {"code-review": "user-invocable-only"}`.
+- **Workflow-spawned agents do not "always run in `acceptEdits`".** They inherit the tool
+  allowlist and follow the ordinary subagent permission rules: a parent in
+  `acceptEdits`/`bypassPermissions` wins and cannot be overridden, a parent in auto mode is
+  inherited and makes frontmatter `permissionMode` a no-op, otherwise the definition's mode, else
+  the session's. A false claim about permissions is the worst kind in a document whose job is to
+  say "do not write your own guard".
+- **Background `&` is not classifier ground.** Both the "classifier absorbed more of the prompt
+  surface" note and the retired-guard rationale listed `&` among the checks the auto-mode
+  classifier adjudicates. It is a separate circuit breaker the classifier *cannot* approve, so it
+  always reaches the operator as a prompt. Verified against `claude auto-mode defaults`, which
+  carries no rule for `&` (nor for `mkfs`, `dd`, or a fork bomb — that part was right).
+- **`strictPluginOnlyCustomization` is documented, and granular.** Dropped the "absent from the
+  public settings page" aside and recorded that a policy can lock `skills` / `agents` / `hooks` /
+  `mcp` separately.
+- **Six dangling `§N` references into the deleted `practice-baseline.md`.** Three carried
+  meaning: `audit-checklist.md` asserted "the baseline §6 already ship[s]" — false since v1.23.0 —
+  and `native-capabilities.md` justified a prohibition with "§7 is covered natively", pointing at
+  nothing. They survived review because the maintainer's own `~/.claude/CLAUDE.md` still uses that
+  numbering, so the references resolve on one machine and nowhere else.
+- **`marketplace.json` still advertised the retired "long-running build kit"** — the text a
+  consumer reads *before* installing, and out of sync with `plugin.json`. Its description now
+  matches what ships: a skill and its references, no agents, no commands, no hooks.
+- **`evidence-base.md` listed a feature ledger as part of the long-running spine** that "a more
+  capable model still needs", while `operator-playbook.md` records the ledger as retired
+  scaffolding. Left as-is, the next D-cycle would have read a T1-grounded `kit-gap` for a
+  component this kit had just deleted, and re-added it.
+- `harness-evolution.md` pointed the intake pass at an "external-sources catalog" that has never
+  existed in this repository; the catalog lives in `evidence-base.md`. `audit-checklist.md:25`
+  cited §7 for a retire rule that lives in §5.
+
+### Added
+
+- `Bash(claude mcp list:*)` in `SKILL.md`'s `allowed-tools` — the skill names that command as the
+  authoritative gate for MCP presence but never declared it.
+
 ## [1.23.0] — 2026-08-29
 
 **The kit stops shipping machinery: the 3-role external audit is retired in favour of native

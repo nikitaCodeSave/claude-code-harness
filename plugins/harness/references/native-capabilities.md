@@ -69,9 +69,9 @@ field below. **Since v2.1.232 the Agent tool takes `subagent_type: "fork"` and f
 default**: such a delegate inherits the full conversation *and the prompt cache*, which makes it
 the cheap way to hand off a side task that needs everything you already know — the briefing cost
 that makes a fresh delegate expensive is simply absent. The same release made non-teammate agent
-spawns in interactive sessions **background by default**. Note the boundary against §8-style
-verification: a fork inherits the author's framing by construction, so it is the wrong shape for
-an independent refuter and the right one for "keep working on what we were just doing". Frontmatter
+spawns in interactive sessions **background by default**. Note the boundary against
+independent verification: a fork inherits the author's framing by construction, so it is the wrong
+shape for an independent refuter and the right one for "keep working on what we were just doing". Frontmatter
 `maxTurns`, `isolation: worktree` (auto-cleaned branch-off), `memory: user|project|local`
 (**persistent per-agent memory** under `~/.claude/agent-memory/`), and `experimental.cacheTtl`
 (`"5m"` / `"1h"`, v2.1.248 — a per-agent prompt-cache TTL used when no subagent TTL setting is
@@ -80,12 +80,13 @@ Disable a built-in via
 `permissions.deny: ["Agent(Explore)"]`; `Agent(x,y)` allowed-type lists are **enforced**, and
 background subagents **prompt for permission in the main session** rather than auto-denying (v2.1.186).
 
-**`CLAUDE_CODE_SUBAGENT_MODEL` changed meaning in v2.1.251** — it now sets the *default*
-subagent model, and an agent definition's `model:` or an explicit per-spawn model **takes
-precedence over it**. Before that it overrode everything. A harness that pinned delegate models
-through this variable was silently re-layered by the upgrade: what it used to force it now only
-suggests. Check any harness relying on it, and prefer the agent definition's own `model:` when
-the pin must hold.
+**`CLAUDE_CODE_SUBAGENT_MODEL` outranks everything else** — it sets the model for all subagents,
+agent teams and workflow agents, and per first-party docs it **overrides both the per-invocation
+`model` parameter and the subagent definition's `model:` frontmatter**. The documented way to
+step out of the way is the literal value **`inherit`**, which restores normal model resolution.
+Consequence for a harness: an env pin here silently outranks every `model:` you write in an
+agent definition — read a delegate's actual model off `/tasks` rather than assuming the
+definition won.
 
 ## Dynamic workflows — the bounded fan-out primitive [FP/BLOG]
 
@@ -100,8 +101,11 @@ bare word "workflow" does not trigger a run (asking in your own words does); a `
 - Constructs: loops, conditionals, `pipeline()`, `parallel()`, `phase()`, `agent()` (with
   output schemas), arguments, budgets, retries.
 - Caps: **up to 16 concurrent agents** (fewer on low-CPU machines), **1,000 agents total per run**.
-- Spawned agents always run in `acceptEdits` and inherit your tool allowlist. The script
-  itself has no filesystem/shell access — only the agents do.
+- Spawned agents inherit your tool allowlist and follow the **ordinary subagent permission
+  rules** — a parent in `acceptEdits`/`bypassPermissions` wins and cannot be overridden, a parent
+  in auto mode is inherited and makes frontmatter `permissionMode` a no-op, otherwise the
+  definition's mode, else the session's. The script itself has no filesystem/shell access — only
+  the agents do.
 - Resumable **within the same session** (cached agent results); a fresh session restarts it.
 - Manage with `/workflows`; bundled `/deep-research <question>` (needs WebSearch) — **invoke-only
   since v2.1.218: Claude no longer starts it on its own.** Saved workflows live in
@@ -173,8 +177,15 @@ Source: `code.claude.com/docs/en/agent-teams`.
 
 ## Tasks / scheduling [FP]
 
-`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` — the structured session task list
-(`TodoWrite` is disabled by default in its favor). It coordinates the run in progress and is
+`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` — the structured session task list.
+**On the current model generation they are off by default, and so is `TodoWrite`**: since
+v2.1.233 none of the five reach Opus 4.8 / Sonnet 5 / Fable 5 / Mythos 5 or later unless you
+opt in (`CLAUDE_CODE_ENABLE_TODO_TOOLS=1`, or naming them in `--tools` / `--allowedTools`),
+because those models track multi-step work without a written checklist and the definitions cost
+context. Consequence for a harness: **a session on a current model writes nothing to the task
+list**, so any layer that treated it as the in-flight memory tier has an empty tier — put
+in-flight state on disk instead. On older models (e.g. Opus 4.7) the four Task tools are on by
+default. When present, it coordinates the run in progress and is
 machine-local (a team's shared list lives under `~/.claude/tasks/`), so it is **not** the
 repository-owned register of commitments: what outlives the run belongs in the repo, in whatever
 carrier the project keeps commitments in. Using the task list as the backlog puts the backlog
@@ -401,11 +412,14 @@ independent evaluator is not the same thing as telling the author to check itsel
 nagging — the "remember to verify" line in CLAUDE.md and the "then verify with a subagent" tail
 on a task prompt. Same model generation also delegates to subagents more readily on its own.
 
-**Review is invoke-only — the rung has to be pulled.** Since v2.1.215 Claude no longer runs
-`/verify` or `/code-review` on its own (`/deep-research` joined them in v2.1.218). A
-verification ladder that assumed "the model will reach for review on a substantive change" is
-now a ladder with a missing rung: the call has to come from the operator, a CLAUDE.md duty
-line, a slash command, or a hook. Prefer the deterministic carriers when it must happen every
+**`/code-review` can start itself again; `/verify` and `/deep-research` cannot.** Since
+**v2.1.246** Claude may run `/code-review` on its own — ask for a review in plain language and
+it runs the skill without the command being typed, and a scheduled task with `/code-review` as
+its prompt runs it too. (Before that it self-started only where an Anthropic feature flag
+enabled it.) To keep it typed-only while leaving the command available, set
+`skillOverrides: {"code-review": "user-invocable-only"}`. `/verify` and `/deep-research` remain
+invoke-only, so a ladder resting on those rungs still needs a carrier: the operator, a CLAUDE.md
+duty line, a slash command, or a hook. Prefer the deterministic carriers when it must happen every
 time (`harness-discipline.md`, verification ladder).
 
 Review surfaces are profile-dependent like any tool: bundled skills/plugins can be disabled
@@ -604,7 +618,7 @@ before authoring a style for "shorter answers", that need is now shipped).
 to the end of the system prompt, and it **omits Claude Code's built-in software-engineering instructions
 (how to scope changes, write comments, verify work, security) unless `keep-coding-instructions: true`** is
 in frontmatter. The flag **defaults to `false`** — so a custom style authored for "still coding, just
-different voice" will silently strip the §5/§8 verification & scoping disciplines unless the author sets it.
+different voice" will silently strip the built-in verification & scoping disciplines unless the author sets it.
 Rule: any custom output style used while still doing software work **must** carry `keep-coding-instructions: true`;
 omit it only for genuinely non-coding roles (writing/data assistant). Before authoring one, check the built-ins
 cover the need. Frontmatter: `name`, `description`, `keep-coding-instructions` (default `false`),
@@ -700,7 +714,8 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
   code style, data-handling reminders and behavioural instructions belong in the managed CLAUDE.md.
   A rule written on the wrong side of that line is either unenforceable or unreadable.
 - **A managed policy can switch off non-plugin customization entirely** —
-  `strictPluginOnlyCustomization` (binary-verified; absent from the public settings page) blocks
+  `strictPluginOnlyCustomization` — granular, so a policy can lock `skills` / `agents` / `hooks` /
+  `mcp` separately — blocks
   `~/.claude/{surface}/`, the project's `.claude/{surface}/`, `settings.json` hooks and `.mcp.json`
   for any of `skills` · `agents` · `hooks` · `mcp`, while plugin-provided and managed sources keep
   loading. Two consequences for a harness: **shipping it as a plugin is the only form that survives
@@ -714,8 +729,8 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
 - **Native destructive-command block + auto-mode classifier (v2.1.183/193).** Destructive git
   and IaC are blocked **out of the box** — `git reset --hard` / `checkout -- .` / `clean -fd` /
   `stash drop`, `commit --amend` of another author's commit, `terraform` / `pulumi` / `cdk destroy`.
-  **Do not re-encode these as custom DENY rules** — §7 is covered natively; a manual guard here is
-  redundant obvyazka. The auto-mode classifier is now **diagnosable and configurable**: the denial
+  **Do not re-encode these as custom DENY rules** — this ground is covered natively; a manual
+  guard here is redundant obvyazka. The auto-mode classifier is now **diagnosable and configurable**: the denial
   reason surfaces in the transcript, a toast, and `/permissions` → recent denials (v2.1.193); keys
   `autoMode.classifyAllShell` + `autoMode.{allow, soft_deny, hard_deny, environment}` with
   `$defaults` inheritance; the classifier defaults to Sonnet 5 for external sessions,
@@ -725,9 +740,11 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
   "hooks are deterministic enforcement", above). **Since v2.1.207 `autoMode` is no longer read
   from the repo-resident `.claude/settings.local.json`** — put these keys in `~/.claude/settings.json`. `!`-commands now auto-provoke a model response by default — revert with
   `respondToBashCommands: false`.
-- **The classifier absorbed more of the prompt surface (v2.1.218).** The dangerous-`rm`,
-  background-`&` and suspicious-Windows-path checks **no longer open a permission dialog** —
-  the auto-mode classifier adjudicates them; and plan mode under auto no longer prompts for
+- **The classifier absorbed more of the prompt surface (v2.1.218).** The dangerous-`rm` and
+  suspicious-Windows-path checks **no longer open a permission dialog** — the auto-mode
+  classifier adjudicates them. Background `&` is **not** in that set: it is a separate circuit
+  breaker the classifier cannot approve, so it still reaches the operator as a prompt. Plan mode
+  under auto no longer prompts for
   Bash the static analyzer can't prove read-only. Consequence for a harness: fewer of these
   reach the operator as a prompt, so a project rule that *counts on the dialog appearing*
   should become a `deny`/`ask` rule or a hook (which still floors the decision, above).

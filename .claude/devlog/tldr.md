@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #50 · 2026-08-29 · Пять свежих аудиторов: дорого стоят не пины, а утверждения о поведении
+
+**Tags:** harness, audit, currency, fresh-context
+
+Сразу после v1.23.0 оператор поставил цель: harness без архаизмов и мёртвых правил, по практикам индустрии. Запущено пять независимых аудиторов свежим контекстом, каждому — установка опровергать, а не подтверждать, и жёсткий фильтр против генерического чек-листа (CI, Docker…
+
+[→ entries/0050-pyat-svezhikh-auditorov-dorogo-stoyat-ne-piny-a-utverzhdeniy.md](entries/0050-pyat-svezhikh-auditorov-dorogo-stoyat-ne-piny-a-utverzhdeniy.md)
+
+---
+
 ## #49 · 2026-08-29 · AGENTS.md не читается — и это измерено, а не взято из доки
 
 **Tags:** harness, docs, external-audit, agents-md

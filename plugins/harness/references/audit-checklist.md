@@ -22,7 +22,7 @@ or re-run before proposing edits to its machinery.
 **`/doctor` (alias `/checkup`) is the first pass, not a competitor to this file.** It covers,
 natively and against real usage data, several sections' worth of ground: unparseable settings and
 colliding agent definitions, skills/MCP servers/plugins that cost context but are never used
-(read off `skillUsage` / `pluginUsage` counters and a transcript scan — the retire half of §7),
+(read off `skillUsage` / `pluginUsage` counters and a transcript scan — the retire half of §5),
 CLAUDE.md rightsizing against §4's altitude question, slow hooks (§6), version currency (§1), and
 server-managed-settings load failures. Run it, read its proposals, and **do not re-derive by hand
 what it already reported** — hand-walking ground the tool covers is exactly the duplicated-obvyazka
@@ -194,7 +194,7 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   block ends a line with the word ("…verification ladder, continuity"), so the bare grep scores 1 on a
   CLAUDE.md that has the pointer and no duty — it misses most of the population it is meant to find.
   The anchor demands the word as a label at line start (duty bullet or a `## Continuity` heading).
-  The project may keep a devlog, ship `.claude/docs/workflow.md`, and carry the baseline's §6 — and
+  The project may keep a devlog and ship `.claude/docs/workflow.md` — and
   still never tell a working session that a feature/fix/config change/decision closes with an episodic
   entry, or name the carrier. Finding: the layer then holds only while the operator watches; entries
   stop the first session nobody reminds. **Common on projects bootstrapped before v1.17.0** — the
@@ -202,7 +202,7 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   write-through grep tested three other tokens (found by a clean-environment bootstrap run,
   2026-07-17). Remediation: add the duty line from `bootstrap-checklist.md` Phase 2 — trigger +
   carrier + `.claude/progress/<slug>.md` + pointer to `.claude/docs/workflow.md`, three lines. Do
-  **not** restate the depth `workflow.md` §Continuity and the baseline §6 already ship; a 14-line
+  **not** restate the depth `.claude/docs/workflow.md` §Continuity already ships; a 14-line
   continuity section in CLAUDE.md is this finding's over-correction, not its fix (a heading-shaped
   section passes the anchored grep — it has the duty, in the wrong shape; that is a §4 altitude
   finding, not this one).
@@ -340,10 +340,11 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   operator believes `deny` contains an adversarial path needs the sandbox, or `--restricted` where
   the need is "read and reason, never execute" — a shipped flag beats an allowlist reinvented out
   of deny rules. Keeping the client current is part of this finding, not separate from it.
-- **A delegate-model pin through `CLAUDE_CODE_SUBAGENT_MODEL`.** Its meaning changed in v2.1.251
-  from override to default, so an existing pin now loses to any agent definition's `model:` and to
-  per-spawn overrides. If the pin is load-bearing, move it into the agent definitions and verify
-  on `/tasks`, which prints each subagent's actual model and effort.
+- **A delegate-model pin through `CLAUDE_CODE_SUBAGENT_MODEL`.** It **overrides** every agent
+  definition's `model:` and every per-spawn model, so a harness that also writes `model:` into its
+  agent files has two pins and only one of them decides. Either drop the env pin, or set it to the
+  documented `inherit` to let the definitions decide. Verify on `/tasks`, which prints each
+  subagent's actual model and effort.
 
 ## Refresh execution hygiene (when applying approved findings)
 

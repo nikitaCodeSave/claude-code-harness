@@ -1,7 +1,7 @@
 ---
 name: claude-code-harness
 description: "Use this skill when introducing, auditing, refactoring, or extending the Claude Code harness of a project — i.e. its `.claude/` directory (CLAUDE.md, settings.json, hooks/, agents/, skills/, commands/) and root CLAUDE.md. Activates on phrases like 'set up Claude Code in this project', 'design my .claude/', 'audit my Claude Code harness', 'add a hook/skill/subagent', 'how should I organize CLAUDE.md', 'what built-ins does Claude Code already have', 'should I write a custom orchestrator subagent', 'when should I use a dynamic workflow', 'why is my harness slow / brittle / token-heavy', 'extend Claude Code with X'. Claude Code 2.x / Opus-class-specific — does NOT teach harness design for other agent frameworks (building agents in OpenAI/Codex/LangChain-style stacks); an external CLI wired into *this* harness as an MCP server is in scope. Skip when the project's `.claude/` already encodes this discipline."
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls:*), Bash(tree:*), Bash(cat:*), Bash(find:*), Bash(grep:*), Bash(claude --help), Bash(claude agents:*), Bash(claude --version), Bash(claude --print:*), Bash(claude plugin list:*), Bash(git log:*), Bash(git status:*), Bash(wc:*)
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls:*), Bash(tree:*), Bash(cat:*), Bash(find:*), Bash(grep:*), Bash(claude --help), Bash(claude agents:*), Bash(claude --version), Bash(claude --print:*), Bash(claude plugin list:*), Bash(claude mcp list:*), Bash(git log:*), Bash(git status:*), Bash(wc:*)
 ---
 
 # Claude Code Harness

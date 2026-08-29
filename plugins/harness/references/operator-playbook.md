@@ -138,7 +138,7 @@ The whole maintenance ritual: `/plugin update` → in each active project, say
 ## 6. Independent verification — two tiers (fresh context, not self-recheck)
 
 The lever is an independent *fresh context* that judges the deliverable — not a second pass in the
-authoring one, which anchors on its own solution (baseline §8). It comes in two weights; reach for
+authoring one, which anchors on its own solution. It comes in two weights; reach for
 the light one by default and the heavy one rarely. Both beat a self-orchestrated Evaluator (one the
 author commissions inherits the author's framing). A fresh-context check earns its keep even on
 *accepted* code — it has caught HIGH defects in features that were already green.

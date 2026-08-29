@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #53 · 2026-08-29 · Последнее непроверенное закрыто своими же субагентами
+
+**Tags:** harness, audit, evidence, checklist
+
+После сверки внедрения (#52) в ките оставалось ровно одно утверждение, помеченное в CHANGELOG как неподтверждённое: форензика транскриптов субагентов. Оракул для него лежал прямо под рукой — в этой же сессии отработали пять делегатов, и их транскрипты никуда не делись.
+
+[→ entries/0053-poslednee-neproverennoe-zakryto-svoimi-zhe-subagentami.md](entries/0053-poslednee-neproverennoe-zakryto-svoimi-zhe-subagentami.md)
+
+---
+
 ## #52 · 2026-08-29 · Сверка внедрения: три пропуска после двух релизов
 
 **Tags:** harness, audit, verification

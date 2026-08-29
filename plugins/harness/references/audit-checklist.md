@@ -36,8 +36,21 @@ duplicates a built-in (§3), a pipeline over-reach (§8), lab-vs-starter conflat
 provenance (§1). Record what `/doctor` already fixed
 in the report's "Out of scope" so the operator sees one audit, not two.
 
-## 1. Stale model / version pins
+## 1. Stale model / version pins — and stale *assertions*
 
+- **Start with the assertions, not the pins.** A version number at least announces its own age; a
+  sentence of the form "X no longer works", "Y is invoke-only", "Z always runs in mode M",
+  "neither gets a W" was true when written, carries no date, and goes false in silence. For each
+  such claim ask two things: *what would I run to see this today*, and *does the oracle that
+  established it cover what the sentence asserts* — a probe taken at spawn time cannot settle a
+  property the runtime creates later, and a `--help` listing cannot settle what a subcommand does.
+  Where the two scopes cannot be made to match, narrow the claim to what was actually measured.
+  A harness that grepped only for version pins will pass this section while its behavioural
+  assertions rot; that failure mode produced five wrong claims in one kit in a single audit.
+- **Point the duplicate-drift detector at this repository too.** Below, §2 catches two live copies
+  of one fact drifting apart — it is just as effective on the harness you are auditing as on the
+  project it describes, and the copy that is right is usually the one nobody reads. Grep for the
+  name of the mechanism, not for the sentence you remember writing.
 - Does any file pin a **specific model version in behavioral prose** (e.g. "under Opus 4.X the
   model does Y", "Opus 4.X picks a sane stack")? De-version it to "a capable model" — a
   behavioral invariant must not bind to a release, or it goes stale every upgrade. A major model

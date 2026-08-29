@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-29T16:37:20Z",
-  "entry_count": 52,
+  "generated_at": "2026-08-29T16:42:59Z",
+  "entry_count": 53,
   "entries": [
     {
       "id": 1,
@@ -759,6 +759,21 @@
       "supersedes": null,
       "path": "entries/0052-sverka-vnedreniya-tri-propuska-posle-dvukh-relizov.md",
       "preview": "После v1.23.1 и v1.23.2 оператор спросил прямо: все ли рекомендации аудита реализованы. Вопрос правильный по форме — «внесено» это утверждение автора о своей же работе, и проверять его надо тем же способом, что и всё остальное сегодня: грепом по дереву с иглой, а не памятью."
+    },
+    {
+      "id": 53,
+      "date": "2026-08-29",
+      "title": "Последнее непроверенное закрыто своими же субагентами",
+      "tags": [
+        "harness",
+        "audit",
+        "evidence",
+        "checklist"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0053-poslednee-neproverennoe-zakryto-svoimi-zhe-subagentami.md",
+      "preview": "После сверки внедрения (#52) в ките оставалось ровно одно утверждение, помеченное в CHANGELOG как неподтверждённое: форензика транскриптов субагентов. Оракул для него лежал прямо под рукой — в этой же сессии отработали пять делегатов, и их транскрипты никуда не делись."
     }
   ]
 }

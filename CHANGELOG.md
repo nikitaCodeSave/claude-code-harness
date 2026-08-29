@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.23.4] — 2026-08-29
+
+### Changed
+
+- **`audit-checklist.md` §1 now audits behavioural *assertions*, not only version pins.** A
+  version number announces its own age; a sentence like "X no longer works" or "Z always runs in
+  mode M" carries no date and goes false in silence. The section now asks two questions of each
+  such claim — what would I run to see this today, and does the oracle that established it cover
+  what the sentence asserts — and tells the auditor to point the duplicate-drift detector at the
+  harness itself, since the copy that is right is usually the one nobody reads. Grounded in five
+  wrong claims found in this kit in one audit, plus three cases where the kit contradicted itself.
+
 ## [1.23.3] — 2026-08-29
 
 ### Fixed
@@ -74,15 +86,16 @@ fixes assertions the kit had never verified properly — including one it labell
   was already version-bound (`/review` was a separate command before v2.1.223). The durable half —
   verify the surface exists in your `/`-autocomplete — stays.
 
-### Not verified
+### Verification note
 
-Stated here rather than left implicit: the **subagent-transcript forensics**
-(`<session-dir>/subagents/agent-<id>.jsonl`, the `.meta.json` `agentType`, `is_error` on the
-`tool_result`, the false-clean `isApiErrorMessage` filter) is the one claim in this release's scope
-that neither a first-party source nor a live probe confirmed. It is plausible and consistent with
-"only the final result comes back", but it is unproven. `--safe-mode` and
-`strictPluginOnlyCustomization`, which were in the same bucket when the audit started, are now
-confirmed.
+Everything asserted in this release is now backed by a first-party source or a live probe. The
+last open item — **subagent-transcript forensics** — was closed after the fact against this
+session's own five delegates: the path `<session-dir>/subagents/agent-<id>.jsonl` and its
+`.meta.json` (carrying `agentType`, and also `model`, `permissionMode`, `taskKind`) exist as
+described; `is_error: true` appears on `tool_result` records in three of the five transcripts;
+and `isApiErrorMessage` appears **zero** times across all five — so a filter built on it would
+have reported clean while tool failures sat in the same files, exactly the false-clean the text
+warns about.
 
 ## [1.23.1] — 2026-08-29
 

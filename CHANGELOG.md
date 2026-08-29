@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.26.0] — 2026-08-29
+
+**The doc-with-code rule was generating a documentation tax, so it now sits inside a rule that
+decides whether a document should exist at all.** Field evidence from a production Text-to-SQL
+repository running this discipline: 55% of its 1369 commits touched only `.md`/`.json`, 63k lines
+of prose stood against 100k lines of code and 35k lines of tests — and *no live document was
+actually stale*. The failure mode is not drift; it is that keeping prose true costs a write on
+every change, forever, while the same claims already had an executable oracle.
+
+### Added
+
+- **`project-docs/docs-discipline.md` rule 0 — "oracle before prose".** Before writing or updating
+  a document, check whether the claim can be pinned by a test, a type, a schema or a linter; if it
+  can, that oracle *is* the documentation. A document carries only what code cannot state: a
+  ratified decision with its date, a measured reason with its number, a deliberate retention of
+  code with no caller, an explicit non-claim. Prose restating a schema, a module table or an
+  import graph is deleted rather than refreshed. Order of pinning: test → type/schema → checked
+  rule → prose.
+- The repository-visible symptom is named so it can be checked: `.md`-only commits outstripping
+  code commits is a tax, not discipline.
+- **The test applies to a claim, not to a file.** A duplicate document almost always holds a few
+  lines that exist nowhere else — typically a prohibition on an *action*, which types and tests
+  cannot express because they constrain values. Deleting the file loses them silently; the rule
+  now requires a line-by-line pass and an independent fresh-context review for deletions of this
+  class. Measured while producing this release: a cross-vendor reviewer recovered four such
+  claims from four documents that had already been read in full before deletion.
+
+### Changed
+
+- **Rule 1 (doc-with-code) is now scoped by rule 0**: a structural change updates the *boundary
+  test* in the same commit, and a document only where the claim has no oracle. The mapping table's
+  first two rows route to the test instead of `ARCHITECTURE.md`/`CODE-MAP.md`.
+- **`CODE-MAP.md` is re-labelled a navigation aid, not a contract.** Once a boundary test exists it
+  is the canonical import graph; the map is kept as a short index or deleted, and is no longer
+  maintained against the diff.
+- `project-docs/docs-discipline.md` re-stamped to v1.26.0 — projects carrying an older copy pick
+  the change up on their next audit re-sync.
+
 ## [1.25.0] — 2026-08-29
 
 **Four shipped prohibitions were removed because the model already obeys them without being

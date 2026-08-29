@@ -353,11 +353,12 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   operator believes `deny` contains an adversarial path needs the sandbox, or `--restricted` where
   the need is "read and reason, never execute" — a shipped flag beats an allowlist reinvented out
   of deny rules. Keeping the client current is part of this finding, not separate from it.
-- **A delegate-model pin through `CLAUDE_CODE_SUBAGENT_MODEL`.** It **overrides** every agent
-  definition's `model:` and every per-spawn model, so a harness that also writes `model:` into its
-  agent files has two pins and only one of them decides. Either drop the env pin, or set it to the
-  documented `inherit` to let the definitions decide. Verify on `/tasks`, which prints each
-  subagent's actual model and effort.
+- **A delegate-model pin through `CLAUDE_CODE_SUBAGENT_MODEL`.** Its meaning changed in v2.1.251
+  from override to *default*, so an existing pin now **loses** to any agent definition's `model:`
+  and to a per-spawn model: what it used to force it now only suggests. If the pin is
+  load-bearing, move it into the agent definitions. Verify on `/tasks`, which prints each
+  subagent's actual model and effort — and note that the `model-config` page still documents the
+  old override semantics, so `/tasks` beats both documents.
 
 ## Refresh execution hygiene (when applying approved findings)
 

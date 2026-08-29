@@ -62,12 +62,14 @@ full conversation, reuses the prompt cache) — **`/fork` is no longer this**: s
 copies the conversation into a *background* session with its own row in `claude agents`, so a
 harness step that expected an in-session fork must say `/subtask`. One conditional worth knowing:
 **with agent view turned off `/subtask` does not exist and `/fork` starts the forked subagent
-instead** — a harness that hard-codes one name breaks on the other configuration. **Worktrees differ between the two, and the difference is late-bound**: a `/fork`ed background
-copy is instructed to "create a worktree of its own **before making code changes**" — lazily, at
-its first write, not at spawn — except where it edits in place (outside a git repository with no
-`WorktreeCreate` hook). Agent view likewise moves each dispatched session into its own worktree.
+instead** — a harness that hard-codes one name breaks on the other configuration. **Worktrees differ between the two, and the isolation is an explicit act, not a property of the
+spawn.** A `/fork`ed background copy **starts in the original checkout with its edits blocked**
+and is instructed to call **`EnterWorktree`** before changing code; isolation exists only once
+that call succeeds. Three cases skip it: `worktree.bgIsolation: "none"` (lets background sessions
+edit the working copy directly, for repos where worktrees are impractical), outside a git
+repository with no `WorktreeCreate` hook, and a copy already moved out of a hook-created worktree.
 `/subtask`, the in-session form, shares the session's checkout. Do not read a spawn-time probe as
-evidence here: an empty worktree field at T0 is exactly what a lazily-created worktree looks like,
+evidence here: an empty worktree field at T0 is what a not-yet-called `EnterWorktree` looks like,
 so the observation cannot support a claim about the agent's whole life. For a delegate that must
 be isolated *by construction* rather than by instruction, the `isolation: worktree` frontmatter
 field below is still the deterministic lever. **Since v2.1.232 the Agent tool takes `subagent_type: "fork"` and forking is on by
@@ -85,13 +87,16 @@ Disable a built-in via
 `permissions.deny: ["Agent(Explore)"]`; `Agent(x,y)` allowed-type lists are **enforced**, and
 background subagents **prompt for permission in the main session** rather than auto-denying (v2.1.186).
 
-**`CLAUDE_CODE_SUBAGENT_MODEL` outranks everything else** — it sets the model for all subagents,
-agent teams and workflow agents, and per first-party docs it **overrides both the per-invocation
-`model` parameter and the subagent definition's `model:` frontmatter**. The documented way to
-step out of the way is the literal value **`inherit`**, which restores normal model resolution.
-Consequence for a harness: an env pin here silently outranks every `model:` you write in an
-agent definition — read a delegate's actual model off `/tasks` rather than assuming the
-definition won.
+**`CLAUDE_CODE_SUBAGENT_MODEL` sets the *default* subagent model, and v2.1.251 is what made it
+so** — the release note is explicit: "Changed `CLAUDE_CODE_SUBAGENT_MODEL` to set the default
+subagent model rather than override everything: an agent definition's `model:` and an explicit
+per-spawn model now take precedence over it." So the order is **per-spawn model ▸ definition's
+`model:` ▸ this variable ▸ the parent's model**, and `inherit` disables the default outright.
+A harness that pinned delegate models through this variable was silently re-layered by the
+upgrade: what it used to force it now only suggests. **Note the source conflict** — the
+`model-config` settings page still describes the pre-2.1.251 override semantics, and the
+changelog for the version you are running is the newer of the two. Read a delegate's actual model
+off `/tasks` rather than trusting either document.
 
 ## Dynamic workflows — the bounded fan-out primitive [FP/BLOG]
 
@@ -159,8 +164,9 @@ a restart. Headless `-p` and SDK sessions never spawn teammates regardless.
 - **Display**: `teammateMode` — `in-process` (**the default since v2.1.179**, any terminal) /
   `auto` / `tmux` / `iterm2` (needs the `it2` CLI); `--teammate-mode` flag is experimental and
   absent from `--help`.
-- **Model**: `CLAUDE_CODE_SUBAGENT_MODEL` ▸ the spawn prompt ▸ the subagent definition's
-  `model` (in-process only) ▸ the lead's model. `teammateDefaultModel` was **removed in
+- **Model**: the spawn prompt ▸ the subagent definition's `model` (in-process only) ▸
+  `CLAUDE_CODE_SUBAGENT_MODEL` as the default ▸ the lead's model (order per the v2.1.251 release
+  note; the `agent-teams` page still lists the variable first). `teammateDefaultModel` was **removed in
   v2.1.234** and a leftover value is ignored. Teammates inherit the lead's **effort**.
 - **Permissions**: teammates start with the lead's mode and cannot be given per-teammate modes
   at spawn; their prompts surface in the lead session. One designed exception — a teammate's
@@ -758,10 +764,11 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
   "hooks are deterministic enforcement", above). **Since v2.1.207 `autoMode` is no longer read
   from the repo-resident `.claude/settings.local.json`** — put these keys in `~/.claude/settings.json`. `!`-commands now auto-provoke a model response by default — revert with
   `respondToBashCommands: false`.
-- **The classifier absorbed more of the prompt surface (v2.1.218).** The dangerous-`rm` and
-  suspicious-Windows-path checks **no longer open a permission dialog** — the auto-mode
-  classifier adjudicates them. Background `&` is **not** in that set: it is a separate circuit
-  breaker the classifier cannot approve, so it still reaches the operator as a prompt. Plan mode
+- **The classifier absorbed more of the prompt surface (v2.1.218).** The dangerous-`rm`,
+  background-`&` and suspicious-Windows-path checks **no longer open a permission dialog** — the
+  auto-mode classifier adjudicates them (the binary's circuit-breaker table marks all three
+  `classifierRouted`; `dangerousRemoval` is additionally `bypassImmune`, the other two are not).
+  Plan mode
   under auto no longer prompts for
   Bash the static analyzer can't prove read-only. Consequence for a harness: fewer of these
   reach the operator as a prompt, so a project rule that *counts on the dialog appearing*

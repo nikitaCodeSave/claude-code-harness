@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #54 · 2026-08-29 · Ревьюер другого вендора откатил две мои правки: доки отстали от changelog
+
+**Tags:** harness, cross-vendor, regression, evidence
+
+Весь дневной аудит (#50–#53, релизы v1.23.1–1.23.4) провели пять свежих контекстов того же вендора, что и автор. По выбору оператора дифф v1.23.0..v1.23.4 отдали Codex через MCP — ревьюеру другого вендора, у которого другие слепые пятна.
+
+[→ entries/0054-revyuer-drugogo-vendora-otkatil-dve-moi-pravki-doki-otstali.md](entries/0054-revyuer-drugogo-vendora-otkatil-dve-moi-pravki-doki-otstali.md)
+
+---
+
 ## #53 · 2026-08-29 · Последнее непроверенное закрыто своими же субагентами
 
 **Tags:** harness, audit, evidence, checklist

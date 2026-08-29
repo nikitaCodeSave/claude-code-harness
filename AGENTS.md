@@ -69,3 +69,13 @@ whether a claim is true of the current Claude Code, whether it contradicts anoth
 repo, and whether a document that ships verbatim smuggled in a perishable fact. Where a claim rests
 on a measurement, check that the oracle is independent of the claim and that the run varied the
 variable the conclusion names.
+
+**Grep the whole tree for the mechanism's name, not for the sentence you remember writing.** Facts
+here live in several files at once — a reference, a checklist item, the skill's own table — and an
+edit that fixes one copy leaves the others asserting the opposite, silently. Three such
+contradictions were found in a single external audit (`CLAUDE_CODE_SUBAGENT_MODEL`, `REVIEW.md`,
+where a side-effecting ritual belongs), and in every case the correct copy already existed in the
+repository; it simply was not the copy a reader reaches. So: before changing a claim, `grep -rn`
+the identifier across `plugins/` and fix every hit or note why a hit is legitimately different.
+After changing it, grep again — the third contradiction in that audit survived a targeted edit
+because the search had been for meaning rather than for the name.

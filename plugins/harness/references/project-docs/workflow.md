@@ -1,4 +1,4 @@
-<!-- shipped-by: claude-code-harness v1.23.2 — do not hand-evolve in the project;
+<!-- shipped-by: claude-code-harness v1.23.5 — do not hand-evolve in the project;
      improvements flow through the plugin (re-synced on audit). Project-specific
      facts live in CLAUDE.md, not here. -->
 
@@ -92,7 +92,7 @@ Run the rungs in order; escalate by stakes — and **name the chosen rung to the
 | Rung | When | How |
 |---|---|---|
 | Self-verify | always | oracle green + lint/types + end-to-end check of the actual behavior ("looks done" ≠ "is done") |
-| `/code-review` | substantive diff | run it yourself at the end of the change (it reviews the working diff or a PR — verify the surface exists in your session's `/`-autocomplete) |
+| `/code-review` | substantive diff | run it yourself at the end of the change (it reviews the working diff or a PR; `/review` is its alias — verify the surface exists in your session's `/`-autocomplete) |
 | Fresh-context second opinion | high-stakes, "looks done", silent-wrong-is-costly; **per-change** for silent-wrong-prone components (parsers/rewriters of untrusted input, guards/validators, invariant refactors) | separate session or subagent prompted to **refute**, not confirm — the author anchors on its own solution. For the silent-wrong class, prefer a refuter **initiated outside the authoring session** (fresh session / external audit) over a subagent you spawn: a self-commissioned evaluator partly inherits your framing (one passed a denylist that an external pass then broke with Unicode-obfuscated input). Also usable UPSTREAM on a large/irreversible design decision before you freeze it — grill it to kill ≥1 alternative with a concrete failure scenario or cost |
 | External audit | milestone closed / security-correctness-critical / irreversible | pick by what carries the risk: **the change** → `/code-review ultra` (cloud fleet over the branch or PR, paid); **the deliverable** → the operator opens a **new** session that audits the scope and **executes** the live stack. Executed evidence beats read evidence — a reader-only pass once called golden numbers "unproven" that an executing pass re-derived exactly |
 

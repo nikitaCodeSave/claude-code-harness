@@ -18,7 +18,7 @@ canon carries one provenance stamp — its last grounding point:
 <!-- harness-refresh-ledger
 last-grounded: CC v2.1.251 · Claude 5 family (Opus 5 default on Max/Team-Premium/Enterprise-PAYG and, since 2.1.251, seat-based Enterprise; Sonnet 5, Fable 5) · 2026-08-29
 sources-checked: changelog delta 2.1.227→2.1.251 (local cache, functional Added/Changed/Removed sweep) · code.claude.com/docs/en/whats-new weeks 32-34 · code.claude.com/docs/en/agent-teams (full re-read — TeamCreate/TeamDelete removed in 2.1.178, named-subagent-becomes-teammate, teammateMode, model precedence) · code.claude.com/docs/en/hooks (31 documented vs 33 in binary) · live binary strings-probe on 2.1.251 (PreModelSwitch/PostModelSwitch, CLAUDE_CODE_RESTRICTED, CLAUDE_CODE_SUBAGENT_MODEL, promptCacheTtl/subagentPromptCacheTtl, modelPicker, ANTHROPIC_DEFAULT_MODEL, teammateMode) · industry (OpenAI open-sourced the Codex harness under Apache-2.0 on 2026-08-20; arXiv 2608.23552 Prime Agent, 2608.17528 Agent Lightning v1.0) · prior grounding at CC v2.1.226 / 2026-08-08
-refute-pass 2026-08-29 (v1.23.1–1.23.2, five fresh-context auditors): model-config · sub-agents · tools-reference · code-review · permission-modes · settings-reference · skills · agent-view · claude-directory — five behavioural assertions refuted (SUBAGENT_MODEL precedence, task-tool availability, /code-review self-start, workflow-agent permission mode, background-& handling); live probes: `claude auto-mode defaults` (no rule for `&`/mkfs/dd/fork-bomb), permission-rule warnings on a seeded settings file (`Grep(path)` silent, `MultiEdit` double-warns), `claude agents --json` field names. Unverified: subagent-transcript forensics
+refute-pass 2026-08-29 (v1.23.1–1.23.5, five same-vendor auditors + one cross-vendor): docs pages model-config · sub-agents · tools-reference · code-review · permission-modes · settings-reference · skills · agent-view · claude-directory; live probes: permission-rule warnings on a seeded settings file (`Grep(path)` silent, `MultiEdit` double-warns), `claude agents --json` field names, subagent-transcript forensics on five delegates. **Two of that pass's conclusions were then reverted by the cross-vendor reviewer against the local changelog cache**: `CLAUDE_CODE_SUBAGENT_MODEL` is a default (not an override) per the 2.1.251 note, and background `&` *is* classifier-routed per 2.1.218 — the docs pages had gone stale relative to the changelog, and `claude auto-mode defaults` does not enumerate circuit breakers. Lesson recorded in the D-cycle: when a docs page and the changelog of the running version disagree, the changelog wins
 -->
 
 The stamp is updated at the end of each strip revision (the external-intake pass below). The
@@ -79,7 +79,12 @@ Compare the delta *from the refresh ledger*, not "everything from scratch". Sour
 1. **CC changelog** since the ledger version → new hooks / tools / flags / commands. Fold each
    relevant one into `native-capabilities.md` (it must not fall behind live `claude --version`).
 2. **First-party docs / blog** (code.claude.com/docs, anthropic.com / claude.com) → shifts in
-   defaults (effort, model-config), new canonical patterns.
+   defaults (effort, model-config), new canonical patterns. **When a docs page and the changelog
+   of the version you are running disagree, the changelog wins** — a page describes a steady state
+   and is updated by hand; a release note is written when the behaviour changes. Two claims were
+   fixed in the wrong direction on 2026-08-29 because a settings page still carried pre-upgrade
+   semantics and was treated as the newer source. The changelog cache is local
+   (`~/.claude/cache/changelog.md`), so this check costs a grep, not a fetch.
 3. **`evidence-base.md` source catalog** → new essays / arXiv per the T1–T7 rubric.
 4. Run each finding through the D-cycle gate (`kit-gap` with multi-source · `single-incident` ·
    `noise`). An external signal **is not privileged**: "an article came out / a flag appeared"

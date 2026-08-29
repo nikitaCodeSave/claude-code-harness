@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-29T16:42:59Z",
-  "entry_count": 53,
+  "generated_at": "2026-08-29T17:04:34Z",
+  "entry_count": 54,
   "entries": [
     {
       "id": 1,
@@ -774,6 +774,21 @@
       "supersedes": null,
       "path": "entries/0053-poslednee-neproverennoe-zakryto-svoimi-zhe-subagentami.md",
       "preview": "После сверки внедрения (#52) в ките оставалось ровно одно утверждение, помеченное в CHANGELOG как неподтверждённое: форензика транскриптов субагентов. Оракул для него лежал прямо под рукой — в этой же сессии отработали пять делегатов, и их транскрипты никуда не делись."
+    },
+    {
+      "id": 54,
+      "date": "2026-08-29",
+      "title": "Ревьюер другого вендора откатил две мои правки: доки отстали от changelog",
+      "tags": [
+        "harness",
+        "cross-vendor",
+        "regression",
+        "evidence"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0054-revyuer-drugogo-vendora-otkatil-dve-moi-pravki-doki-otstali.md",
+      "preview": "Весь дневной аудит (#50–#53, релизы v1.23.1–1.23.4) провели пять свежих контекстов того же вендора, что и автор. По выбору оператора дифф v1.23.0..v1.23.4 отдали Codex через MCP — ревьюеру другого вендора, у которого другие слепые пятна."
     }
   ]
 }

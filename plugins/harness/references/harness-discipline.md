@@ -97,6 +97,15 @@ for grunt scans (current mapping: Fable 5/Opus-class lead, Sonnet-class reasonin
 Haiku-class grunt — a config fact, re-map at each model generation; Fable ≈2× Opus price,
 so no blanket lead-switch without evidence of lift).
 
+**Ask for the report on disk and a summary in the reply.** A delegate's returned text is subject
+to a size ceiling, and a long report is truncated at the point it happens to reach — so the parent
+gets the beginning of an analysis and no way to know what was cut. The findings that were ranked
+last, which for a refutation pass is often the coverage statement and the list of what could *not*
+be verified, are exactly the part that disappears. Instruct the delegate to write the full report
+to a named file and return the path plus one line per finding. Recovering a truncated report by
+asking for the tail costs a round-trip each time and re-reads a context the delegate has already
+paid for.
+
 **Declare a delegate's tools and its effort — the defaults are inheritance, and inheritance is
 often not what you meant.** Omit `tools:` and the delegate inherits everything; omit `effort:` and
 it inherits the session's level. Both silently: a delegate that lacks a tool reports having no such
@@ -127,9 +136,12 @@ never sees a delegate's `tool_result`s, only its final text, so neither surfaces
   instead — that one holds. (`permissions.disableBypassPermissionsMode` likewise voids a
   frontmatter `bypassPermissions`.) Same failure shape as the two above: the declaration is
   accepted, silently outranked, and nothing in the transcript says so.
-- **The model.** `CLAUDE_CODE_SUBAGENT_MODEL` overrides both a definition's `model:` and a
-  per-spawn model; `inherit` is the documented way to stand it down. Read what actually applied
-  off `/tasks`, which prints each delegate's model and effort.
+- **The model.** Here the declaration *wins*, and that is recent: since v2.1.251
+  `CLAUDE_CODE_SUBAGENT_MODEL` sets a **default** that a definition's `model:` and a per-spawn
+  model both override (`inherit` disables it entirely). A harness that pinned delegate models
+  through the variable had them silently demoted by that upgrade. Read what actually applied off
+  `/tasks` — the settings page still describes the old override behaviour, so the transcript
+  beats the document.
 
 ```yaml
 ---
@@ -146,9 +158,10 @@ workflow's `agent(prompt, {effort})` does).
 
 **Read a delegate's actual model and effort off `/tasks`** rather than inferring them: the agent
 detail dialogs print both per subagent. That is the cheap oracle for "did my declaration hold" —
-and it is worth running, because `CLAUDE_CODE_SUBAGENT_MODEL` **overrides** both a definition's
-`model:` and a per-spawn model — a declaration you wrote can lose to an env pin you forgot
-(`native-capabilities.md`, Built-in subagents §).
+and it is worth running, because the layering here changed under everyone in v2.1.251:
+`CLAUDE_CODE_SUBAGENT_MODEL` went from override to **default**, so a pin that used to force a
+delegate's model now loses to any `model:` in its definition (`native-capabilities.md`,
+Built-in subagents §).
 
 ## Single-agent first; bounded fan-out only when scope exceeds one context
 

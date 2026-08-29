@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.23.5] — 2026-08-29
+
+**A cross-vendor reviewer reverted two of yesterday's "fixes" — they were regressions.** Five
+fresh-context auditors of the same vendor as the author had agreed on both, and both were wrong
+in the same way: a documentation page was treated as newer than the changelog of the version
+actually running. The kit had it right in v1.23.0 and lost it in v1.23.1.
+
+### Fixed
+
+- **`CLAUDE_CODE_SUBAGENT_MODEL` is a *default*, not an override — restored.** The v2.1.251
+  release note is explicit: "Changed `CLAUDE_CODE_SUBAGENT_MODEL` to set the default subagent
+  model rather than override everything: an agent definition's `model:` and an explicit per-spawn
+  model now take precedence over it." The `model-config` settings page still documents the old
+  override semantics, and v1.23.1 rewrote four places to match the page. Order restored to
+  **per-spawn ▸ definition's `model:` ▸ the variable ▸ parent**, with the source conflict named in
+  the text so the next reader does not repeat the trade.
+- **Background `&` is classifier-routed — restored.** The v2.1.218 note puts it in the same set as
+  dangerous-`rm` and suspicious-Windows-path, and nothing since reverses it; the binary's
+  circuit-breaker table marks all three `classifierRouted`, with only `dangerousRemoval`
+  additionally `bypassImmune`. The probe that produced the wrong claim — `&` absent from
+  `claude auto-mode defaults` — shows only that no *configurable policy rule* names it, which is
+  not the same question. That is the very failure this release's predecessor added a rule against.
+- **`/fork` worktree mechanics corrected a second time.** Isolation is an explicit act, not a
+  lazy side effect of the first write: the background copy starts in the original checkout **with
+  its edits blocked** and is instructed to call `EnterWorktree`. Three cases skip it entirely,
+  including `worktree.bgIsolation: "none"`, which the kit did not mention.
+- **`evidence-base.md` no longer claims a verification command replaces a feature ledger.** The
+  guarantees were split, not substituted: a runnable command answers "does what exists behave",
+  while completeness, priority and blocked state belong to the project's own tracker. The ledger
+  was retired as a second store to maintain, not because something subsumed it.
+- **`/review` is its alias — restored in `project-docs/workflow.md`.** Removing it as a
+  perishable fact cost real usefulness in a file that ships verbatim, and the alias holds in the
+  running version.
+
+### Changed
+
+- **The intake pass now ranks sources.** When a docs page and the changelog of the version you are
+  running disagree, **the changelog wins** — a page describes a steady state and is hand-updated;
+  a release note is written when the behaviour changes. The changelog cache is local, so the check
+  costs a grep. Grounded in the two reverts above, not in one incident.
+
 ## [1.23.4] — 2026-08-29
 
 ### Changed

@@ -66,8 +66,7 @@ does not trust the demo project until you accept the dialog once.
 | A gap report on an existing `.claude/` | **"audit my Claude Code harness"** |
 | To record what you just changed and why, for the next session | **"запиши в devlog"** / **`/devlog:devlog`** |
 | To know whether Claude Code already does X natively, before you build it | **"can Claude Code already do X?"** |
-| The multi-session product-build spine (oracle, feature ledger, progress) | **"set up the long-running build kit (Phase 5)"** |
-| Independent verification of a finished deliverable | **`/claude-code-harness:external-audit <scope>`** in a fresh session |
+| Independent verification of a finished deliverable | a **fresh session** told to refute and to execute the stack — or `/code-review ultra` when the change itself is the risk |
 | To call it explicitly — in your own words, in your own language | **`/claude-code-harness:claude-code-harness настрой мне харнесс, друг`** |
 
 The phrases are examples, not incantations. The skill reads intent, so anything that means the
@@ -78,11 +77,13 @@ same thing works — and if you'd rather not rely on that, the last row calls it
 - **In your repo**: root `CLAUDE.md`, `.claude/settings.json`, workflow docs under `.claude/docs/`,
   and real `docs/ARCHITECTURE.md` + `docs/CODE-MAP.md`. Custom subagents, hooks, skills, and
   commands are deliberately **not** created — see the opinion below.
-- **Outside your repo**: nothing, unless you say yes. The one thing you're ever offered is the
-  practice baseline (a behavioral layer for how Claude works). By default it lands in the project
-  at `.claude/rules/practice-baseline.md` — in git, reviewable, deletable. Merging it into your
-  global `~/.claude/CLAUDE.md` happens only if you explicitly approve, after seeing the diff, with
-  a timestamped backup written first.
+- **If you already have an `AGENTS.md`** (the cross-vendor standard Codex, Cursor and Copilot
+  read), it stays the source of truth: the kit bridges to it with an `@AGENTS.md` import or a
+  symlink instead of writing a second file that says the same thing differently. Claude Code does
+  not read `AGENTS.md` on its own — a repo that has only that file starts a Claude session with no
+  project instructions at all, which we measured rather than assumed.
+- **Outside your repo**: nothing. The kit writes to your project and nowhere else — no profile
+  edits, no global memory merges, no hooks installed behind your back.
 
 ## The devlog companion: your project's memory
 
@@ -131,9 +132,10 @@ external CLI wired *into this harness* as an MCP server is a different thing, an
 - [Operator playbook](plugins/harness/references/operator-playbook.md) — the human-facing
   lifecycle: what to say at each stage, what to prepare between sessions, and how to stay current
   (`/plugin update` → "audit my Claude Code harness" → approve the offered re-syncs).
-- [What ships](plugins/harness/) — the skill entry point (`SKILL.md`), on-demand references
-  (bootstrap/audit checklists, native capabilities, evidence base, harness discipline), and the
-  3-role external-audit pass (`agents/` + `commands/external-audit.md`).
+- [What ships](plugins/harness/) — the skill entry point (`SKILL.md`) and on-demand references
+  (bootstrap/audit checklists, native capabilities, evidence base, harness discipline). No agents,
+  no commands, no hooks: everything the kit used to ship as machinery is now a native surface it
+  routes to.
 - [The devlog plugin](plugins/devlog/) — the `/devlog:devlog` skill, the `devlog-reindex`
   regenerator, and the session-start digest hook.
 

@@ -17,6 +17,25 @@ a completed run's records falsifies history. When the task is still live, the se
 normally; when it is complete (or you're unsure), say so and ask whether the loop is being retired
 or re-run before proposing edits to its machinery.
 
+## 0.5 Run the native audit first — then audit what it cannot see
+
+**`/doctor` (alias `/checkup`) is the first pass, not a competitor to this file.** It covers,
+natively and against real usage data, several sections' worth of ground: unparseable settings and
+colliding agent definitions, skills/MCP servers/plugins that cost context but are never used
+(read off `skillUsage` / `pluginUsage` counters and a transcript scan — the retire half of §7),
+CLAUDE.md rightsizing against §4's altitude question, slow hooks (§6), version currency (§1), and
+server-managed-settings load failures. Run it, read its proposals, and **do not re-derive by hand
+what it already reported** — hand-walking ground the tool covers is exactly the duplicated-obvyazka
+this kit exists to prevent.
+
+What it does **not** do, and why the rest of this file still runs: its write proposals touch
+**user/local scope only**, never checked-in files, so every finding about the repo's own committed
+harness is yours; and it has no view of the judgment-shaped items — a custom subagent that
+duplicates a built-in (§3), a pipeline over-reach (§8), lab-vs-starter conflation (§9), dead
+*file-path* permission rules (§10), or whether a stale pin is a behavioral binding or honest
+provenance (§1). Record what `/doctor` already fixed
+in the report's "Out of scope" so the operator sees one audit, not two.
+
 ## 1. Stale model / version pins
 
 - Does any file pin a **specific model version in behavioral prose** (e.g. "under Opus 4.X the
@@ -104,7 +123,11 @@ or re-run before proposing edits to its machinery.
   / `claude-code-guide`? The classic offender is a custom `orchestrator` — the main thread is the
   orchestrator; `general-purpose` is the deep delegate.
 - Any custom hook/skill/command reimplementing something now native (dynamic workflows,
-  `/goal`, auto memory, `/deep-research`)?
+  `/goal`, auto memory, `/deep-research`, `/batch` for a mechanical multi-file sweep)?
+- **A bootstrap ritual that re-walks what `/init` now does.** With `CLAUDE_CODE_NEW_INIT=1` the
+  built-in explores the codebase with a subagent, asks follow-ups, folds in other agents' rule
+  files and shows a proposal before writing. A project-local skill or command that reproduces that
+  discovery is duplicated obvyazka — keep only the parts `/init` does not do.
 - A hand-rolled `sync-docs` skill/agent (classify the diff → update the matching docs)
   duplicates the **kit-shipped** docs-discipline rule 1 ("doc-with-code") rather than a native
   surface — same disposition as the custom code-reviewer below: retire toward the rule, moving
@@ -112,16 +135,35 @@ or re-run before proposing edits to its machinery.
   where the rule is absent, and gets retired once the rule arrives — the main thread does
   this natively.)
 - A custom `code-reviewer` subagent or hand-rolled review pipeline — review is shipped:
-  `/code-review` (working diff, the local default), `/review` (PR), `/security-review`,
-  `claude ultrareview` (cloud, high-stakes). Retire the custom agent; route to the built-ins
-  (see `native-capabilities.md`, "Code review"). **Carve-out:** the kit's own
-  `/claude-code-harness:external-audit` roles (`evidence-executor` / `process-auditor` /
-  `code-refuter`) are not a review pipeline to retire — they are the verification ladder's
-  external-audit rung (executed evidence + process audit + adjudication, wider than diff
-  review); don't flag them under this item.
+  `/code-review` (the working diff *or* a PR — the local default; `/review` is simply its alias),
+  `/security-review`, `/code-review ultra` (alias `/ultrareview`; cloud, high-stakes). Retire the
+  custom agent; route to the built-ins (see `native-capabilities.md`, "Code review"). **No
+  carve-out — including for roles this kit itself used to ship.** It carried a 3-role external
+  audit (`evidence-executor` / `process-auditor` / `code-refuter`) until v1.23.0 and retired it
+  under this very item: a fleet of adversarial reviewers is shipped as `/code-review ultra`, and
+  the independence that made the rung worth having comes from the *fresh context*, not from role
+  files. The escalation is now "open a new session and tell it to refute" — no orchestration to
+  maintain, nothing to keep in sync with the review surfaces.
 
-## 4. CLAUDE.md altitude
+## 4. CLAUDE.md altitude and shape
 
+- **`AGENTS.md` present but not bridged** — the highest-value finding in a repo that uses more than
+  one agent. Claude Code reads `CLAUDE.md`, not `AGENTS.md`: with only the latter, a Claude session
+  starts with **no project instructions** (measured with an `InstructionsLoaded` hook —
+  `native-capabilities.md`, Memory §). Worse than absent is **duplicated**: a hand-written CLAUDE.md
+  that paraphrases AGENTS.md drifts, and the agent reading the stale copy cannot tell. Remediation
+  is one line — `@AGENTS.md` at the top of CLAUDE.md, or a symlink — with any Claude-specific
+  content *below* the import.
+- **Shape, not just size** (grounded in the 2,500-repository analysis, `evidence-base.md`): are the
+  executable commands in an **early** section with real flags, or buried after prose? Are boundaries
+  written as three tiers (**Always / Ask first / Never**), and do the Never/Ask tiers match
+  `settings.json` permissions — prose steering and settings enforcing the *same* line? Is the stack
+  named with versions? A file can be under 200 lines and still fail all three.
+- **A CLAUDE.md that reads as generated and was never cut.** Tell: directory trees, dependency
+  lists, architecture overviews, framework tutorials — everything derivable from the repo. Two 2026
+  studies measured such files making agents *worse* (`evidence-base.md`), so this is a real
+  finding, not a style note. Remediation: run `/doctor`'s trim, then pass by hand with one question
+  per line — would a new teammate have to be told this?
 - Over 200 lines? Storing content that belongs in `docs/` or `.claude/rules/`?
 - Lines that don't change behavior (would removing them cause a mistake?) → cut.
 - **A constant, limit or toggle named here outranks nothing — check it against the doc that owns
@@ -138,8 +180,8 @@ or re-run before proposing edits to its machinery.
   between two current docs.
 - Rules Claude already follows without instruction → delete; rules that must hold every time →
   convert to a hook.
-- **Evidence-backed keeps, not cruft**: the kit's own deliverables — `.claude/rules/practice-baseline.md`
-  (Phase 2b embed), the shipped `.claude/docs/{workflow,testing,docs-discipline}.md` (Phase 2c)
+- **Evidence-backed keeps, not cruft**: the kit's own deliverables — the shipped
+  `.claude/docs/{workflow,testing,docs-discipline}.md` (Phase 2c)
   and the Working style duty lines (**plan-mode self-entry · verification ladder · change-sizing ·
   continuity · doc-with-code**) — are transcript-grounded (sessions without them proposed zero ladder
   rungs and coded nontrivial work plan-free). Don't flag them under §4/§5 — and note the neighbouring
@@ -156,7 +198,7 @@ or re-run before proposing edits to its machinery.
   still never tell a working session that a feature/fix/config change/decision closes with an episodic
   entry, or name the carrier. Finding: the layer then holds only while the operator watches; entries
   stop the first session nobody reminds. **Common on projects bootstrapped before v1.17.0** — the
-  checklist described the layer in Phase 5 and never asked CLAUDE.md to name it, while the
+  checklist described the layer elsewhere and never asked CLAUDE.md to name it, while the
   write-through grep tested three other tokens (found by a clean-environment bootstrap run,
   2026-07-17). Remediation: add the duty line from `bootstrap-checklist.md` Phase 2 — trigger +
   carrier + `.claude/progress/<slug>.md` + pointer to `.claude/docs/workflow.md`, three lines. Do
@@ -172,7 +214,7 @@ or re-run before proposing edits to its machinery.
   offer re-sync, but **diff the project copy against the current canon and show the diff to the
   operator before overwriting** — any non-header delta is a potential hand-edit (incl.
   translations) that a verbatim re-copy would destroy; propose moving such content to CLAUDE.md
-  (and features.json, if present) first. Project header newer than the canon's → update the
+  first. Project header newer than the canon's → update the
   plugin, don't downgrade the files.
 - **Shipped docs absent — audit coverage per file, not presence.** On a non-MVH project (pre-v1.8
   bootstrap or skipped Phase 2c) their absence is a finding **only where that file's duties are
@@ -193,18 +235,11 @@ or re-run before proposing edits to its machinery.
   (bootstrap Phase 2c). This governs whether a file *exists*, not whether a project may hand-evolve a
   shipped copy — those still flow through the plugin, and the invariants they carry are extended by
   project rules, not replaced by them.
-- **Practice-baseline re-sync**: if `.claude/rules/practice-baseline.md` exists, compare its
-  `practice-baseline content-version` stamp against the canonical block's stamp in the
-  installed plugin's `references/practice-baseline.md` — same content-version semantics as
-  shipped-docs (the stamp advances only when the block's text changes). **Read both files
-  from disk**: the stamp is an HTML comment, stripped from the context-injected copy. Canon
-  newer → offer re-sync, diff-first (a non-stamp delta is a potential hand-edit to preserve).
-  Unstamped embed (pre-v1.16 install, or hand-adapted) → treat the copy as a hand-edit: diff
-  against the current block, show the delta, offer a stamped re-install. A **global** copy in
-  the user CLAUDE.md (`<config-dir>/CLAUDE.md`, §2's active-config-dir resolution) is never
-  edited by an audit — if its stamp is older than the canon,
-  report it and offer the guarded refresh (diff + timestamped backup + explicit approval;
-  `practice-baseline.md`, "Keeping installed copies current").
+- **A `.claude/rules/practice-baseline.md` from a pre-v1.23.0 bootstrap** is now an orphan: the
+  kit no longer ships or re-syncs that block. It is not a defect — the operator's behavioral layer
+  is legitimate wherever they keep it — but say so, so nobody waits for a re-sync that will never
+  come. Their choice: keep it as a project-owned rule, or fold it into their own
+  `~/.claude/CLAUDE.md` and delete the embed. Never edit a global copy from an audit.
 - **`codex-peer` re-sync — only if a copy already exists.** If `skills/codex-peer/SKILL.md` is
   present (project, or the user profile at `<config-dir>/skills/`), compare its `codex-peer
   content-version` stamp against the canonical block in `references/codex-peer-skill.md` and offer
@@ -213,7 +248,7 @@ or re-run before proposing edits to its machinery.
   copy is itself the opt-in**, so re-sync it on its stamp whether or not a server is registered
   right now — a temporarily unregistered server is not a reason to let the file rot, and removing
   it is the operator's call, not the audit's. **Absent is not a finding**: delivery is gated by the
-  single condition `bootstrap-checklist.md` Phase 2b states in full (**a Codex MCP server is
+  single condition `SKILL.md`'s reference map states in full (**a Codex MCP server is
   already registered**, per `claude mcp list`; `codex` on PATH alone does not count). Offer
   delivery only on a positive; on a negative, say nothing about it at all and do not load the
   reference. It is an optional upgrade for operators who already run a second vendor, never a gap
@@ -298,24 +333,17 @@ or re-run before proposing edits to its machinery.
   as the harness's most expensive defect class — the operator believes a path is fenced and it is not.
 - `--dangerously-skip-permissions` or bypass mode baked into committed settings.
 - API-only features assumed (managed-agents, beta headers, `--bare`) on a CLI subscription.
-
-## 11. Ledger & intake (skip entirely when the project keeps no ledger)
-
-Only for a project running the Phase 5 kit — an absent `features.json` is a valid shape, not a
-finding. Two checks, both cheap:
-
-- **Ritual and ledger disagree about ordering, either direction.** The ritual says "highest-priority"
-  and no entry carries `priority` (so array order wears its name), *or* `priority` sits there unread,
-  *or* it is on some entries and not others — half-migrated is worst, since "missing sorts last"
-  buries whatever predates it. Fix any one way — field on every entry, ritual reworded to array
-  order, or field dropped; the mismatch is the finding. (Both directions seen on real ledgers.)
-- **An open entry whose acceptance hangs on an unmade decision.** Falsifiable form: a choice between
-  readings ("either … or …", "TBD", "assuming X") the acceptance depends on, unanswered anywhere.
-  **Follow the pointers** — the question usually sits a hop or two out, in what `preconditions`/
-  `notes` name; an audit that greps only `verify`/`description` scores clean on a project whose next
-  step is in fact waiting on its owner (measured: the blocking question sat three hops out). Check
-  every named canon before flagging — decisions kept in Jira or a gate file are compliant, not
-  missing. Surface *open* entries only; closed work's provenance is in git and the devlog.
+- **A deny rule doing the job of a sandbox.** Path denies fence honest mistakes; they have never
+  reached a subprocess that opens the file itself, and enforcement gaps in the client (symlink
+  paths, tool-specific matching) have been real and have been fixed release by release
+  (`native-capabilities.md`, Settings §). So grade the *claim* as well as the rule: a harness whose
+  operator believes `deny` contains an adversarial path needs the sandbox, or `--restricted` where
+  the need is "read and reason, never execute" — a shipped flag beats an allowlist reinvented out
+  of deny rules. Keeping the client current is part of this finding, not separate from it.
+- **A delegate-model pin through `CLAUDE_CODE_SUBAGENT_MODEL`.** Its meaning changed in v2.1.251
+  from override to default, so an existing pin now loses to any agent definition's `model:` and to
+  per-spawn overrides. If the pin is load-bearing, move it into the agent definitions and verify
+  on `/tasks`, which prints each subagent's actual model and effort.
 
 ## Refresh execution hygiene (when applying approved findings)
 

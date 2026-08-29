@@ -133,6 +133,12 @@ For a **built-in** delegate (`general-purpose`) there is no frontmatter to edit 
 per-call `model` override is the only dial it exposes (it never takes effort per call; a dynamic
 workflow's `agent(prompt, {effort})` does).
 
+**Read a delegate's actual model and effort off `/tasks`** rather than inferring them: the agent
+detail dialogs print both per subagent. That is the cheap oracle for "did my declaration hold" —
+and the answer changed shape recently, because `CLAUDE_CODE_SUBAGENT_MODEL` now *defaults* the
+delegate model instead of overriding it, so a definition's `model:` wins where it used to lose
+(`native-capabilities.md`, Built-in subagents §).
+
 ## Single-agent first; bounded fan-out only when scope exceeds one context
 
 The default for typical coding is one main thread. For bounded fan-out, **dynamic workflows**
@@ -155,7 +161,11 @@ privilege separation against prompt injection (*A harness for every task*, first
 Apply whenever a workflow ingests content you didn't write.
 
 Agent teams (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`) remain experimental and off by
-default; document, don't enable. **No PM→Architect→Dev→QA pipelines** — that is the anti-pattern, not the goal.
+default; document, don't enable. One consequence to state when an operator does turn them on:
+**the flag changes ordinary delegation** — a subagent Claude names on its own then launches as a
+teammate, so a team forms during work nobody framed as team work, at teammate token cost
+(`native-capabilities.md`, Agent teams §). **No PM→Architect→Dev→QA pipelines** — that is the
+anti-pattern, not the goal.
 
 ## Give Claude a verification loop it can close itself
 
@@ -164,9 +174,11 @@ signal, and you become the verification loop." (*Best practices*, T1.) Enforceme
 cheapest first: in-prompt check → `/goal` condition (re-checked every turn) → **Stop hook**
 (deterministic gate) → **`/code-review`** (built-in, local, free — run it on substantive
 changes; it reviews the working diff or a PR, and `/review` is simply its alias — surfaces catalogued in
-`native-capabilities.md`) → fresh-context second opinion — a **single refuter** (the
-`code-refuter` role or a new session) by default, the full 3-role `/external-audit` (or a
-workflow) only as a rare milestone/irreversible escalation. This top rung is opt-in for most work but
+`native-capabilities.md`) → fresh-context second opinion — **a new session prompted to refute** by default, and
+**`/code-review ultra`** (alias `/ultrareview`: a cloud fleet of bug-hunting agents, paid) or a
+cross-vendor reviewer at a milestone / irreversible gate. The kit ships no audit roles of its
+own: a hand-rolled 3-role pipeline is the machinery this file tells everyone else not to build,
+and the shipped surfaces now cover the rung. This top rung is opt-in for most work but
 **per-change, not occasional, for silent-wrong-prone components** — output that looks plausible
 and passes the author's own tests yet is wrong under edge/adversarial input (parsers,
 guards/validators, invariant-preserving refactors); in-context self-check systematically misses

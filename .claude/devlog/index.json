@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-08T20:30:48Z",
-  "entry_count": 46,
+  "generated_at": "2026-08-29T13:59:31Z",
+  "entry_count": 49,
   "entries": [
     {
       "id": 1,
@@ -670,6 +670,51 @@
       "supersedes": null,
       "path": "entries/0046-politika-sposobnaya-vyklyuchit-ves-harness-poluchila-odnu-st.md",
       "preview": "Верификация #45 нашла в бинаре managed-настройку strictPluginOnlyCustomization, которой кит не покрывал. Она блокирует не-плагинные источники кастомизации для четырёх поверхностей — ~/.claude/{skills,agents,hooks,mcp}/, проектные .claude/{surface}/, hooks в settings.json…"
+    },
+    {
+      "id": 47,
+      "date": "2026-08-29",
+      "title": "Кит учил вызывать tool'ы, которых больше нет",
+      "tags": [
+        "docs",
+        "native-capabilities",
+        "external-intake",
+        "release"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0047-kit-uchil-vyzyvat-tool-y-kotorykh-bolshe-net.md",
+      "preview": "Ledger стоял на CC v2.1.226 (8 августа), живой клиент — v2.1.251. Двадцать пять релизов дельты, из них три недели пришлись на период, когда Anthropic выпускал по несколько версий в неделю. Внешний интейк по процедуре harness-evolution.md Pass 1."
+    },
+    {
+      "id": 48,
+      "date": "2026-08-29",
+      "title": "Кит перестал везти машинерию: три роли и две фазы удалены",
+      "tags": [
+        "harness",
+        "cleanup",
+        "release",
+        "breaking"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0048-kit-perestal-vezti-mashineriyu-tri-roli-i-dve-fazy-udaleny.md",
+      "preview": "Интейк (#47) закрыл дельту фактов, но оператор поставил задачу шире: удалять обязательно и максимально приближаться к дефолтному бэкенду Claude Code. Порог сменился — раньше компонент оставался, если нативное перекрывало его лишь частично; теперь остаётся только то, чему…"
+    },
+    {
+      "id": 49,
+      "date": "2026-08-29",
+      "title": "AGENTS.md не читается — и это измерено, а не взято из доки",
+      "tags": [
+        "harness",
+        "docs",
+        "external-audit",
+        "agents-md"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0049-agents-md-ne-chitaetsya-i-eto-izmereno-a-ne-vzyato-iz-doki.md",
+      "preview": "Аудит кита против внешнего среза (first-party best-practices и memory, спека AGENTS.md под Agentic AI Foundation, разбор GitHub по 2500+ репозиториям, Fowler о harness engineering) дал семь зазоров. Оператор снял два (guardrails, observability) и попросил закрыть остальные с…"
     }
   ]
 }

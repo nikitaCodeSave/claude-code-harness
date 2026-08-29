@@ -2,15 +2,12 @@
 
 Procedure for introducing Claude Code to a project with no `.claude/`. Two shapes:
 
-- **Default — production-grade bootstrap:** root `CLAUDE.md` + `settings.json` + offered
-  practice baseline (Phase 2b, operator decides) + the shipped workflow distillation in
-  `.claude/docs/` (Phase 2c) +
+- **Default — production-grade bootstrap:** root `CLAUDE.md` + `settings.json` + the shipped
+  workflow distillation in `.claude/docs/` (Phase 2c) +
   `docs/ARCHITECTURE.md` & `docs/CODE-MAP.md` written from the code actually read. Projects are
   written for production releases from day 0 **regardless of size** — a full professional flow
   is cheaper to lay down at bootstrap than to retrofit (operator directive, 2026-06; the
-  retrofit that motivated it cost a full session). For a product built feature-by-feature
-  across many sessions, also establish the long-running spine in Phase 5 (Anthropic's
-  published long-running-harness playbook).
+  retrofit that motivated it cost a full session).
 - **Minimal (MVH) — only on explicit operator request:** root `CLAUDE.md` + `settings.json`,
   nothing else. Use when the operator explicitly asks for a minimal setup (throwaway
   experiment, one-off script) — not as a silent default.
@@ -35,13 +32,32 @@ git log --oneline --since="3 months ago" 2>/dev/null | wc -l  # active vs dorman
 ls "${CLAUDE_CONFIG_DIR:-$(echo ~)/.claude}"      # user-level config already present — always the
 # ACTIVE config dir ($CLAUDE_CONFIG_DIR when set and non-empty, else <home>/.claude; non-bash shells apply the
 # same rule their own way). Absent dir = empty layer, a valid answer, not an error.
+ls AGENTS.md .cursor/rules .cursorrules .github/copilot-instructions.md 2>/dev/null  # another agent got here first
 ```
+
+**If the repo already carries `AGENTS.md`, that is the source of truth and CLAUDE.md becomes a
+bridge, not a rewrite.** `AGENTS.md` is the cross-vendor standard (Codex, Cursor, Copilot);
+**Claude Code does not read it** — measured with an `InstructionsLoaded` hook, a repo holding only
+`AGENTS.md` starts a Claude session with *no* project instructions
+(`native-capabilities.md`, Memory §). Two bridges, both keeping one file authoritative: make
+`CLAUDE.md` start with `@AGENTS.md` and put Claude-specific lines below it, or symlink
+`CLAUDE.md -> AGENTS.md` when there is nothing Claude-specific to add. Do **not** author a second
+instruction file that paraphrases the first: two files drift, and the agent reading the stale one
+has no way to know.
+
+**Decide up front what `/init` does and what you do.** With `CLAUDE_CODE_NEW_INIT=1` the built-in
+runs an interactive multi-phase flow — asks which artifacts to set up, explores the codebase with a
+subagent, asks follow-ups, and shows a reviewable proposal before writing. It also folds in
+`AGENTS.md` and other agents' rule files. That covers the *discovery and drafting* this checklist
+used to do by hand. Let it: run `/init` for the draft, then spend your effort on the parts it does
+not do — the permission model (Phase 3), the shipped distillation (Phase 2c), and the ruthless cut
+described in Phase 2. Reimplementing its discovery by hand is the built-in duplication this kit
+exists to prevent.
 
 Detect the stack from manifests (`package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod` …),
 the test/lint commands, the task runner, CI presence. **Also read the project's intent** (README /
-the operator's stated goal): is this a *sustained, multi-session product build* (→ default shape
-+ Phase 5 kit) or a small/one-off/library (→ default shape without Phase 5)? A capable model reads
-all this itself — you are confirming, not teaching it. **Write nothing in Phase 0.**
+the operator's stated goal) — it shapes what goes in CLAUDE.md, not which phases run. A capable
+model reads all this itself — you are confirming, not teaching it. **Write nothing in Phase 0.**
 
 **Greenfield — 0 files, 0 commits — is a detected state, not a blocker.** "No manifests, no code,
 no history" is a valid answer to every probe above: record it as the detected state and continue.
@@ -49,11 +65,8 @@ Nothing downstream requires a stack to exist *yet*; it requires the harness to b
 knowing one. An explicit operator request for the full harness on an empty repo is **informed
 consent — deploy it, don't argue the project is too small to need one**: laying the flow down at
 file zero is the cheapest it will ever be, and the retrofit is what costs a session. When intent is
-genuinely undeterminable (no README, no stated goal, nothing to read), ask once — sustained product
-build or one-off? — and if there is no one to answer, default to the **default shape plus Phase 5**
-(the two named shapes are "default shape" = Phase 1's table, and "default shape + Phase 5" for a
-sustained build; "full harness", when an operator says it, means the latter — confirm rather than
-guess when someone is there to ask).
+genuinely undeterminable (no README, no stated goal, nothing to read), record that and deploy the
+default shape — Phase 1's table is the whole answer, so there is nothing to guess.
 
 ## Phase 1 — Propose the default shape
 
@@ -64,9 +77,8 @@ sessions where the operator is present.
 
 | File | Create now? |
 |---|---|
-| `CLAUDE.md` (root) | **yes** — project entry-point indexer |
+| `CLAUDE.md` (root) | **yes** — project entry-point indexer. If `AGENTS.md` exists: `@AGENTS.md` import or symlink, never a paraphrase |
 | `.claude/settings.json` | **yes** — permissions + minimal env |
-| practice baseline (Phase 2b) | **offer, operator decides** — project embed `.claude/rules/practice-baseline.md` (default) or guarded user-global CLAUDE.md merge (opt-in); skip if a loaded layer already carries it |
 | `.claude/docs/` (Phase 2c) | **yes** — shipped distillation: `workflow.md` + `testing.md` + `docs-discipline.md`, copied verbatim from the kit |
 | `docs/ARCHITECTURE.md` + `docs/CODE-MAP.md` | **yes** — real content from the code read in Phase 0, never boilerplate; greenfield (no code to read) → labelled stubs, never invented facts (MVH-on-request: skip) |
 | `.claude/agents/` | **no** — built-ins cover it; defer until evidence |
@@ -75,11 +87,15 @@ sessions where the operator is present.
 | `.claude/commands/` | **no** — defer until requested |
 | `.mcp.json` | only if there is a clear external-tool need |
 
-Defaulting to "no" on the machinery rows is the discipline, not timidity. (Phase 5 adds a small,
-named, opt-in set of *conventions + artifacts* — not hooks/pipelines — and only for a sustained
-build.)
+Defaulting to "no" on the machinery rows is the discipline, not timidity.
 
 ## Phase 2 — Write `CLAUDE.md` (root), ≤ 200 lines
+
+**Order matters, and the evidence is external**: across 2,500+ repositories the files that changed
+agent behavior put **executable commands in an early section**, wrote boundaries as three tiers,
+named the stack with versions, and showed style with real code instead of prose. The template
+below is in that order — commands before philosophy — because a session that stops reading early
+should already have what it needs to run the project.
 
 ```markdown
 # <project> — instructions for Claude Code
@@ -87,12 +103,30 @@ build.)
 ## Project context (3–5 lines)
 <What it is, who uses it, what "done" usually looks like. No marketing prose.>
 
+## Commands
+​```bash
+<install>        # exact invocation, with the flags you actually use
+<test>           # and the single-test form: pytest tests/test_x.py::test_y
+<lint / format>
+<typecheck>
+<dev server, if any>
+​```
+Done = these exit 0. Do not report a change as finished on a partial run.
+
 ## Stack
-- Language / framework / package manager / test runner / lint — one line each.
+- Language + version · framework + version · package manager · test runner · lint/format.
+  Name versions: "React 18 + TypeScript 5.4, Vite" beats "React and TypeScript".
 
 ## Conventions
-<Only project-specific divergences from stack defaults. "We use PEP 8" is useless;
-"we mock HTTP with respx, not unittest.mock" is useful.>
+<Only project-specific divergences from stack defaults, shown as code where possible.
+"We use PEP 8" is useless; "we mock HTTP with respx, not unittest.mock" is useful.>
+
+## Boundaries
+- **Always**: <run the test command before saying done · update the doc its diff touches>
+- **Ask first**: <schema migrations · anything under infra/ · new dependencies>
+- **Never**: <commit secrets · edit files under vendor/ · push to main>
+  ^ mirror the Never/Ask tiers into settings.json permissions (Phase 3) — prose steers,
+    settings enforce, and the two should not disagree.
 
 ## Working style
 - Think first: state assumptions; if multiple readings exist, ask; if unclear, stop and name it.
@@ -112,6 +146,9 @@ build.)
   session/subagent prompted to refute — high-stakes or "looks done") → external audit
   (irreversible / security-critical). Recommend one; the operator decides. Rung semantics
   and the full flow — `.claude/docs/workflow.md`.
+- When blocked, escalate instead of improvising: after two failed attempts at the same thing,
+  stop and report what you tried and what you need — <a decision from the owner / a credential /
+  a service that is down>. Never invent a workaround for a missing permission or credential.
 - Doc-with-code: a change updates its matching doc in the same commit — mapping table in
   `.claude/docs/docs-discipline.md`.
 - Continuity: a feature / fix / config or API change / architectural decision closes with an
@@ -120,7 +157,29 @@ build.)
   `.claude/progress/<slug>.md` current. Layers and triggers — `.claude/docs/workflow.md`.
 - Big/long tasks: give the full task spec up front in one well-specified turn, decompose into
   independently-verifiable slices, and run at `high`/`xhigh` effort for long-horizon / async work.
+- When compacting, preserve the list of modified files, the commands already run and their
+  results, and any decision the operator ratified.
+
+## Reference materials
+- docs/ARCHITECTURE.md / docs/CODE-MAP.md / docs/ADR/ / .claude/rules/ (only those that exist)
+- .claude/docs/workflow.md — flow: session ritual, plan, verification ladder, continuity
+- .claude/docs/testing.md · .claude/docs/docs-discipline.md — invariants (shipped by the kit)
+- .claude/devlog/entries/ — episodic record, one entry per change (the first entry creates the
+  directory; index.json / tldr.md there are generated — never hand-edit them)
+  ^ only when the devlog IS this project's carrier; where the carrier is disciplined commit
+  messages, drop this line — pointing at a directory the project will never grow is the same
+  dangling-pointer noise the MVH note calls out.
 ```
+
+**Whatever wrote the draft — `/init`, this template, or you — the next step is cutting it.** Two
+2026 studies measured LLM-authored instruction files making agents *worse*: −2% success at +23%
+cost in one, reduced success in 5 of 8 settings and +2.45–3.92 steps per task in the other. Both
+traced it to the same thing: the generated file restated what the model derives from the repository
+anyway. So pass over every line once with one question — **would a new teammate have to be told
+this, or can it be read off the code?** Directory layouts, dependency lists, framework tutorials
+and architecture overviews go; gotchas, non-obvious behavior, version pins and conventions that
+differ from tool defaults stay. `/doctor` runs the same cut mechanically on a checked-in CLAUDE.md
+and is worth a pass here.
 
 MVH-on-request: drop the ladder-semantics, doc-with-code and continuity duty lines together with
 the `.claude/docs/` + `.claude/devlog/` Reference-materials lines — rules pointing at files that
@@ -141,29 +200,7 @@ them, sessions never proposed a single ladder rung and coded nontrivial integrat
 
 **Front-load full paths.** Whenever CLAUDE.md names a file, give its full repo-relative path —
 `apps/web/src/app/page.tsx`, not "the homepage component". Concrete paths save a discovery
-tool-call; this applies to `Critical commands` and `Reference materials` too.
-
-Then add these sections (kept short):
-
-```markdown
-## Critical commands
-​```bash
-<install> / <test> / <lint> / <dev server if any>
-​```
-
-## What NOT to do
-- <specific recurring trap, e.g. "don't edit migrations after merge">
-
-## Reference materials
-- docs/ARCHITECTURE.md / docs/CODE-MAP.md / docs/ADR/ / .claude/rules/ (only those that exist)
-- .claude/docs/workflow.md — flow: session ritual, plan, verification ladder, continuity
-- .claude/docs/testing.md · .claude/docs/docs-discipline.md — invariants (shipped by the kit)
-- .claude/devlog/entries/ — episodic record, one entry per change (the first entry creates the
-  directory; index.json / tldr.md there are generated — never hand-edit them)
-  ^ only when the devlog IS this project's carrier; where the carrier is disciplined commit
-  messages, drop this line — pointing at a directory the project will never grow is the same
-  dangling-pointer noise the MVH note calls out.
-```
+tool-call; this applies to `Commands` and `Reference materials` too.
 
 **Root `docs/` is part of the default shape**: write `docs/ARCHITECTURE.md` (module map, data
 flow, external services — from the code actually read in Phase 0, never boilerplate) and
@@ -183,43 +220,9 @@ files are still written — as stubs carrying the heading skeleton the real cont
 a marker saying what they are: `> Stub — no code exists yet. Fill from the first modules that land
 (bootstrap <date>).` A labelled stub is legible state; the next session sees exactly what is
 missing and what fills it. An invented one is a lie the next session trusts. **Name the fill
-trigger inside the marker, and name one that exists**: on a sustained build the trigger is the
-`F0` ledger feature (Phase 5, item 2) — cite it. Where Phase 5 is *not* deployed (a greenfield
-library / one-off), there is no ledger: the marker itself is the trigger, so let it say what
-lands ("fill from the first modules that land") and **do not cite a `features.json` this project
-will never have**. A stub pointing at a file that does not exist is the noise the MVH note above
-forbids, wearing an accountability costume.
-
-## Phase 2b — Transmit the practice baseline
-
-Read `references/practice-baseline.md` and follow its delivery procedure — it is the single
-source for detection (all memory layers, four outcomes including rule-conflict), the
-project-embed default, and the guarded global merge (explicit opt-in: diff preview,
-timestamped backup, budget check, headless never). The kit's artifacts assume this behavior
-layer exists; a plugin install alone does not carry it. Project-side guards:
-- **Dedupe against Working style.** If the baseline lands (in any layer) or already exists,
-  trim the project Working style block to the project-specific deltas — don't double-load the same
-  prose from two layers. **The deltas are: plan-mode duty · verification-ladder · change-sizing ·
-  continuity · doc-with-code.** These five survive the trim *because Phase 7 greps for them* — they
-  are the write-through evidence that the duty reached the project, and the baseline carrying the
-  same idea one layer up is not a substitute (that is exactly the union-of-layers reasoning Phase 7
-  rejects: the union answers correctly while the project file is missing the line). Trim the
-  *general* prose the baseline already states — think-first, simplicity, surgical changes, red→green
-  — not these. A session that trims a delta passes Phase 2b and fails Phase 7; that contradiction is
-  the bug, not the session.
-- **Retire trigger:** drop the project embed when a global baseline is installed (Audit
-  re-syncs embeds by the content-version stamp); drop the proposal-duty lines if a target
-  model demonstrably proposes plan-mode/ladder steps unprompted.
-- **Cross-vendor refuter — one gate, evaluated here, no mention on a negative.** The gate, in
-  full: **a Codex MCP server is already registered** — it appears in `claude mcp list`. That single
-  probe is the gate; registrations do not all live in one config file, so a path grep answers a
-  different question. Nothing else opens it: `codex` merely present on PATH does **not**, because
-  an unwired CLI means the operator has not chosen this, and handing them the wiring line is the
-  recommendation this gate exists to prevent (they can still ask for it by name — the phrase is in
-  `operator-playbook.md` §6). Positive → read `references/codex-peer-skill.md` and follow its
-  delivery procedure. **Negative → do not mention it in any form**, including the run summary; and
-  do not load that file, since the gate is fully stated here. This step adds nothing to the
-  default shape.
+trigger inside the marker, and name one that exists** — the marker itself is the trigger, so let
+it say what lands ("fill from the first modules that land"). A stub pointing at a file that does
+not exist is the noise the MVH note above forbids, wearing an accountability costume.
 
 ## Phase 2c — Ship the workflow distillation (`.claude/docs/`)
 
@@ -239,7 +242,7 @@ plugin proposed zero ladder rungs). Division of labor: CLAUDE.md carries the ~pe
 lines; `.claude/docs/` carries the on-demand depth; the plugin remains the canon.
 
 Rules: copy verbatim — do **not** hand-adapt the content to the project (project facts belong
-in CLAUDE.md/features.json; verbatim copies keep re-sync a trivial diff). The provenance header
+in CLAUDE.md; verbatim copies keep re-sync a trivial diff). The provenance header
 is the update channel: Audit compares the `shipped-by` version against the installed plugin and
 offers a re-sync when the plugin is newer. MVH-on-request: skip this phase.
 
@@ -301,252 +304,20 @@ credential-file write that prompt-discipline had missed.
 Only if there are *non-negotiable* invariants the model must respect even when inconvenient
 (e.g. "PII fields must never be logged"). Each rule ≤ 30 lines, prescriptive, referenced from
 CLAUDE.md. If it needs more than 30 lines it is guidance — put it in `docs/CONVENTIONS.md`.
-One sanctioned exception: `.claude/rules/practice-baseline.md` (Phase 2b default, ~80 lines) —
-a transmitted behavioral layer, not a project invariant; retired if the baseline goes global.
-
-## Phase 5 — Long-running build kit (only for a sustained, multi-session product build)
-
-Skip this for libraries, scripts, and short tasks — deploying it there is the over-scaffolding the
-headline principle forbids. Deploy it when the project is a product built feature-by-feature over
-many sessions: this is the regime where a capable model's lead is largest, and where "looks done",
-context anxiety, and loss of coherence (the three failure modes in *Harness design for long-running
-apps*, T1) actually bite. It is **conventions + a few prepared artifacts**, not hooks or pipelines.
-Source: *Effective harnesses for long-running agents* (T1) and *Harness design for long-running
-apps* (T1). Set up:
-
-1. **Runnable oracle + env init** — **one named command that returns a verdict**, covering app start
-   + basic end-to-end / test verification. The single most important long-horizon enabler: the agent
-   closes its own loop against it instead of "looks done". *"Run verification tests at session start
-   to catch undocumented bugs."*
-   **The oracle is a command, not a file — don't author a script by default.** Take the first branch
-   that fits:
-   (a) **an entry point already exists** (`make check`, `npm test`, `just check`, `tox`) → **that is
-   the oracle**; name it in CLAUDE.md and stop. A second entry point re-running the same gates is a
-   drift source — authoring one anyway is this phase's recurring over-scaffolding.
-   (b) **verification is a single well-known command** → document the one-liner in CLAUDE.md,
-   **create no file**.
-   (c) **no entry point, and verification is multi-gate** (tests + lint + format + app boot) **or
-   needs env prep** (venv, docker, exported vars) → author **one** script at **`scripts/init.sh`**
-   (or the project's own `bin/`/`tools/` convention) and point CLAUDE.md at it. **Not the repo
-   root** — a bespoke harness script among the build manifests reads as clutter to the operator,
-   and only (c) earns a file at all.
-   For web apps, wire **browser automation** (Playwright/Puppeteer
-   MCP) so the evaluator can *"click through the running application the way a user would."*
-   For non-web products define a **domain oracle** instead: golden inputs → expected outputs,
-   **negative cases included** (a negative golden case has caught a latent donor-code bug that
-   every positive test missed).
-   **Greenfield exception — you cannot name an oracle for a stack that does not exist.** At 0 files
-   there is no runner to configure and no entry point to reuse: the oracle is a labelled TBD in
-   CLAUDE.md, `F0` carries it (its `verify` is what makes it real), and Phase 7's oracle run is N/A
-   by construction. Do **not** author a `scripts/init.sh` against a guessed stack — that is the
-   invented-fact ban in script form. Everything below applies at `F0`, not at bootstrap.
-   **Session 0 establishes a green baseline:** add any missing test/lint config + one trivial passing
-   test (and a no-empty-tests guard, **per runner**: vitest — `--passWithNoTests`; pytest has no such
-   flag and **exits 5 on an empty suite** — that exit 5 is non-zero, so a naive `pytest || fail` in
-   the oracle mis-reports an empty suite as a failure; the guard *is* the one trivial smoke test that
-   makes the suite non-empty; jest — `--passWithNoTests`) so the oracle runs *green* from the first
-   session — an oracle that is red on day 0 emits false-alarm signal until fixed.
-   **Python venv — resolve each tool independently, never a blanket `.venv/bin/` prefix on the whole
-   command.** For each of `pytest` / `ruff` / `mypy` / `pip`: use `.venv/bin/<tool>` if it exists, else
-   the tool on `PATH` (`PYTEST=.venv/bin/pytest; [ -x "$PYTEST" ] || PYTEST=pytest`). A blanket prefix
-   breaks the moment one tool is installed global-only or venv-only; per-tool resolution survives both.
-2. **Feature spec as a checkable list** — a `features.json` (or `.md`) of small features. **Copy this
-   canonical shape verbatim** — don't reinvent field names (the recurring drift is
-   `{description, steps, passes}` vs `{title, acceptance, verify}`; the one canon is `title` = one-line
-   handle, `description` = the contract prose, `verify[]` = the single verification-array, never
-   `steps`/`acceptance`; `priority` = the integer the ritual's "highest-priority" reads (lower first,
-   ties by array order, missing sorts last — so set it on **all** entries in one pass or none: a
-   half-migrated field buries exactly what predates it); `blocked`/`blocked_reason` are the optional
-   externally-gated markers, `notes` the optional narrative slot):
-
-   ```json
-   {"project": "acme-api", "milestone": "v1-auth",
-    "rules": ["one feature at a time; flip passes only when verified e2e", "never edit/delete a test for green", "verify walled off outside the agent's reach -> blocked: true + blocked_reason, not a bare passes: false", "an acceptance-affecting question only the owner can answer -> record question + dated answer where this project keeps decisions (this entry's notes, or the tracker it names) and work something else; never decide it yourself"],
-    "features": [{"id": "F1", "priority": 1, "title": "Login with email + password",
-      "description": "POST /auth/login returns a signed JWT; a wrong password returns 401 without leaking which field failed.",
-      "verify": ["pytest tests/test_auth.py::test_login_success", "pytest tests/test_auth.py::test_login_wrong_password asserts 401"],
-      "passes": false, "preconditions": ["postgres up: docker compose up -d db", "TEST_DB_URL exported"]}]}
-   ```
-
-   **Greenfield seed — `F0`, the bootstrap's own open loop.** With no code yet the ledger is not
-   empty: seed `F0` = *"get the brief → fill Stack in CLAUDE.md, replace the ARCHITECTURE.md and
-   CODE-MAP.md stubs from real code, name the oracle command"*, `passes: false`, `priority: 0` —
-   reserve `0` for it and seed everything else from `1`, since it has to land first — with
-   `verify` naming the check that proves each stub is gone. The session ritual (item 4) picks the
-   highest-priority incomplete feature, so `F0` is what turn one lands on — the TBDs close inside
-   the loop instead of resting in the operator's memory. Without it a greenfield bootstrap hands
-   over placeholders nothing is accountable for, and the harness's first act is to trust them.
-
-   All features seed at `passes: false`. Work **one feature at a time**; flip
-   `passes` only when verified. *"It is unacceptable to remove or edit tests."* Write verification
-   steps as **explicit contracts** (what is required vs defaulted, negative cases included) —
-   vague steps make each session take silent micro-decisions. Add `preconditions` (services/env
-   the operator must provide, e.g. a live DB container) so a session checks them before starting.
-   When a feature's verify is walled off outside the agent's reach (prod creds, an operator-only
-   service, a third-party approval), the session records `"blocked": true, "blocked_reason":
-   "<what unblocks it, and who>"` beside `passes: false` — `passes` alone cannot distinguish
-   "not done yet" from "cannot proceed here", and without the marker every later session
-   re-attempts the wall. Sessions work the next unblocked feature; the operator scans
-   `blocked_reason`s between sessions. The optional free-text `notes` field carries the
-   narrative (what verified green below the wall, what stays quarantined) — without a named
-   slot, sessions invent ad-hoc fields or root handoff files for it (observed twice
-   independently).
-   **The rules above govern work already chosen; none says how a proposal becomes one.** The gap that
-   costs: a question only the owner can answer makes that feature **not ready to work** — record it in
-   its `notes` as *question → dated answer → what the answer rests on*, work the next unblocked one.
-   - **Cost picks the form, never the authority.** An owner-only question reaches the owner either
-     way: readings that differ in cost get coded options (`Q7-A` / `Q7-B` · what changes · what it
-     costs if that reading is wrong) to pick by code; readings that don't, the question and its dated
-     answer are the whole ceremony — don't manufacture a table. What you settle yourself is what is
-     *not* an owner question — implementation detail, naming, the shape of a message — and you say
-     why. A plain instruction with clear acceptance is already accepted work (`workflow.md`'s
-     "small → acceptance only" stands).
-   - **The session never ratifies for the owner**, and headless is where that bites: silence is not
-     consent, so record the question unanswered and work something else rather than picking.
-   - **A decision is not automatically work** — `wontfix`, "ratifies current behavior", "duplicate of
-     F3" close a question and create no entry; that record belongs with decisions (devlog / ADR /
-     tracker), which is also where a deferral names what would reopen it.
-   - **It blocks the implementation feature, not a bounded spike that would answer it** — else the
-     discovery is forbidden by the question it exists to close. Bounded is a condition, not a label:
-     reversible, no production data, no spend, and its `verify` *produces the evidence* rather than
-     shipping the behavior — a reversible product change renamed "spike" is still the change. One
-     needing prod access or spend waits like any other decision.
-   - **Where a tracker is the canon**, question and answer live there and the ledger keeps the ID —
-     but test that the session can open it (`gh issue view`; MCP for Jira/Linear), or it reads as
-     resolved when it is merely unreachable.
-   The `rules` line above is what carries this to the working session, which reads the ledger and never
-   this checklist — so the bounded-spike and tracker branches hold only where the session was told
-   them; put whichever the project needs into `rules` too. (Provenance: a production owner-decision
-   log — five ratified questions gave three implementations, one no-code ratification and one
-   `wontfix`, and its two coded-option tables both sit on cost-divergent questions. The owner answered
-   all five, so that log grounds the gate, not the "settle it yourself" side. Spec Kit's pre-planning
-   `/speckit.clarify` + `/speckit.checklist` — `evidence-base.md`. **What this contract is worth,
-   measured:** an ablation on one fixture (7 valid runs, `evals/results/ABLATION.md`) found the
-   *ability* to spot an owner-only question present without the kit in every run — what the contract
-   adds is one shape for it, so treat it as standardising the form, not as teaching the behavior.)
-   **Keep kit artifacts under `.claude/`** (`.claude/features.json`, `.claude/harness-journal.md`,
-   `.claude/progress/`, `.claude/devlog/`) — only genuine product files (`CLAUDE.md`,
-   build manifests) belong at the repo root. A root cluttered with control files reads as mess to
-   the operator and obscures what's product vs harness; point CLAUDE.md at the `.claude/` paths.
-   features.json is the **single-track** ledger; a **multi-initiative** campaign keeps **one**
-   roadmap carrier of its choice rather than a ledger per initiative plus a roadmap that
-   mirrors them — pick one editable canon and move on (same lever as item 7: reliable scoped
-   delivery, not the data structure). Whatever the carrier, a queued entry says what has to become
-   true for it to start rather than recapping what already happened — `blocked_reason` covers only an
-   externally walled verify, so an internal dependency or a pending decision still needs saying.
-3. **Progress + checkpoint discipline** — a progress file, **preferably `.claude/progress/<slug>.md`**
-   (keeping it under `.claude/` means state-surfacing automation finds it — the devlog
-   companion plugin ships a SessionStart digest of recent devlog + active progress, and
-   personal hooks conventionally look there too; a root
-   `claude-progress.txt` stays invisible to such tooling), updated each session (state, decisions,
-   remaining work, next steps); a one-line `Quick state — <facts>` heading keeps it scannable
-   at session start. **Also keep an episodic record** — a project devlog
-   (`.claude/devlog/entries/`, one entry per feature/decision) or, where the project already
-   keeps "what changed and why" in disciplined commit messages, lean on that: the layer is the
-   requirement, the carrier is a default, not a mandate. **Whichever carrier you settle on, the
-   per-turn duty line naming it belongs in CLAUDE.md's Working style (Phase 2) — write it there,
-   not only here.** A layer described in this checklist and nowhere in the project is a layer the
-   working session never hears about: that is precisely how bootstraps that followed this file to
-   the letter shipped a CLAUDE.md with zero mention of continuity. Phase 7's `continuity` grep is
-   the gate on it. For the runnable devlog carrier
-   (a `/devlog:devlog` skill + a `devlog-reindex` index/digest regenerator + a SessionStart
-   digest that auto-surfaces recent devlog and active progress at session start), install the
-   companion plugin from this same marketplace: `/plugin install devlog@claude-code-harness`.
-   It's optional — the layer, not the tool, is what's required. **Detect before installing it,
-   the same way Phase 2b detects before delivering the baseline:** hooks and skills from every
-   layer *merge, never override*, so an operator who already runs a personal `SessionStart`
-   digest or keeps a user-level `skills/devlog/` gets both — the same state twice, in two formats,
-   ahead of turn one, with no error to signal it. Resolve the **active config dir** first —
-   `CLAUDE_CONFIG_DIR` if set and non-empty, else `<home>/.claude`; resolve it with whatever your shell
-   supports (bash: `echo "${CLAUDE_CONFIG_DIR:-$(echo ~)/.claude}"`) and hand file tools the
-   resolved literal (Read/Glob don't expand `$VAR`) — then check `<resolved>/settings.json`
-   hooks and `<resolved>/skills/`. Checking the default path while the variable points elsewhere
-   detects someone else's profile; an absent dir is a valid "no carrier", not an error.
-   On overlap, name it and let the operator pick one carrier. A
-   detect gate that guards ~80 lines of prose while waving through a hook that fires every
-   session has it backwards. The episodic layer is separate from
-   in-flight progress and is what makes state legible to the human operator, not only to the
-   agent. Number sessions sequentially. **Git commit per feature** with a descriptive message. Files are the authoritative
-   handoff state — they survive compaction and a fresh-session reset (which the long-running-apps
-   guidance prefers over compaction alone). **A handoff note is a claim, not a fact: re-verify it.**
-   When a progress/next-step note asserts "verified" or names a ready fix, the consuming session
-   must re-run it before relying on it — a fix asserted but never executed is a looks-done trap
-   (a handoff "NFKC closes both cases" once proved wrong on execution: it missed zero-width chars).
-   Phrase queued fixes as *"reproduce → close"*, not as finished solutions.
-4. **Session-start ritual** (put it in CLAUDE.md): `pwd` → read git log + progress file →
-   read feature list, pick the highest-priority incomplete feature → run the oracle → work that one
-   feature. (With the devlog companion installed, its SessionStart digest already surfaces
-   recent devlog + active progress — the ritual then starts from acting on that state, not
-   rediscovering it.) Two checks the ritual owes the ledger: the feature it picks carries **no open
-   acceptance-affecting question** (item 2), and dirty **code/test/ops** paths belong to that feature
-   or are named in its `notes` before you build on them (docs and scratch files need no owner; source
-   does). Unowned WIP is how a session inherits someone else's half-finished work as its own progress
-   — an audit found an operator's uncommitted comparator, green under its own test, owned by no plan
-   and forbidden by the live one.
-5. **Fresh-context Evaluator for high-stakes verification** — for silent-wrong-is-costly work, judge
-   with a *separate* context (new session or subagent) that tests the running app, not an in-context
-   self-recheck. *Self-preferential bias* — "models confidently praise their own work" — is exactly
-   why author ≠ evaluator. Opt-in; skip for typo/single-file/doc work. Name this option in CLAUDE.md
-   in one line so it's discoverable when a high-stakes feature lands. Per-change, not occasional,
-   for silent-wrong-prone components (parsers, guards, invariant refactors); opt-in elsewhere.
-   Worth running periodically
-   on *accepted* features too, not only flagged ones — a fresh-context audit of an already-green
-   feature has caught a HIGH defect the author's oracle missed; have the audit write its findings
-   as actionable items straight into the progress file's next steps (they then close in one
-   red→green cycle). Two refinements learned the hard way:
-   - **External beats self-ordered.** An Evaluator the author session spawns itself partially
-     inherits that session's framing — it closed the holes *it* was thinking about but missed a
-     whole class (a self-ordered security Evaluator passed a denylist that a fully-external audit
-     then broke via Unicode-obfuscated input). For security/correctness-critical features, prefer
-     an evaluator initiated *outside* the author session (a fresh operator session or a separate
-     audit pass), not a subagent the author orchestrates.
-   - **The auditor must execute, not just read.** A reader-only audit (git + files) reached a
-     harsher, partly-wrong verdict than one that ran the live stack: it flagged golden test
-     numbers as "unproven" while an executing audit re-derived them against the real system and
-     they matched exactly. So (a) the verifying audit should run the artifact, and (b) capture
-     **provenance** for golden/e2e expectations — store the source query's actual output beside
-     the test, so correctness is legible from the artifact instead of requiring a live re-run.
-
-6. **Docs depth for the long build** — `docs/ARCHITECTURE.md` + `docs/CODE-MAP.md` already
-   exist from the default shape (Phase 2); for a sustained build additionally keep them
-   load-bearing: deep architecture prose lives there (CLAUDE.md stays an indexer and links it),
-   conscious limitations are recorded as decisions, and the first operational procedure
-   (deploy / recovery / data migration) opens `docs/RUNBOOKS/`.
-
-7. **Scope a campaign's protocol to its directory (multi-campaign / large-feature regime).** When
-   a project runs more than one multi-session campaign — or one big feature area — do **not** grow
-   root CLAUDE.md with every campaign's conventions (that taxes every turn project-wide). Give the
-   campaign its own directory with a **nested `CLAUDE.md`** carrying its protocol; it is delivered
-   **deterministically and scoped** — only when a session works on files in that directory (reliable
-   mechanism, not `paths:` frontmatter — see `native-capabilities.md` Memory §). Skeleton:
-   `campaigns/<slug>/{CLAUDE.md, spec.md, backlog.md, archive/}`. The campaign `CLAUDE.md` states:
-   the **single entry-point** (point at `.claude/progress/<slug>.md` from item 3 — do **not** invent
-   a second progress file), backlog discipline, the one-feature-at-a-time + verify cycle, and the
-   **lifecycle rule** below. Write it as a legitimate convention, never an injection-shaped imperative.
-   - **Lifecycle live→archive (anti-fragmentation).** Superseded specs/audits/execution-prompts move
-     into `<campaign>/archive/`; the live layer stays small. Accumulated dead weight + duplicate
-     editable canons are exactly what makes a multi-session campaign illegible (real case: campaign
-     state fragmented across 4–6 places and formats, two hand-edited backlog canons that drifted).
-   - **Don't force a single backlog canon.** Keeping the task-list in one editable file is simpler,
-     but it is *not* a required invariant: under a capable model a markdown canon + a generated/mirror
-     JSON stay consistent **when the protocol is reliably delivered** (A/B: drift=0 across N=3 dual-canon
-     runs, even without re-stating the rule each session). The lever is reliable scoped delivery, not
-     the data structure — pick one editable canon for simplicity and move on; don't build mirror-sync
-     machinery.
-
-Keep it minimal and **strip as the model improves**: *"find the simplest solution possible, and only
-increase complexity when needed"* (T1). On a major model release, re-test whether each kit component
-still earns its place — first-party precedent: a model generation made sprint-decomposition
-unnecessary, and over 80% of Claude Code's own system prompt was removed with no measurable loss.
 
 ## Phase 6 — Stop
 
-No hooks, agents, skills, or commands yet. The default shape (indexer + settings + offered
-baseline + shipped `.claude/docs/` + `docs/ARCHITECTURE.md`/`CODE-MAP.md`) is the harness most
-projects need forever; for a sustained build, Phase 5's conventions are the spine — still no
-custom subagents/hooks until a trigger earns them.
+No hooks, agents, skills, or commands yet. The default shape (indexer + settings + shipped
+`.claude/docs/` + `docs/ARCHITECTURE.md`/`CODE-MAP.md`) is the harness most projects need
+forever — still no custom subagents/hooks until a trigger earns them.
 
 ## Phase 7 — Verify
+
+**Run `/doctor` first** (alias `/checkup`) — the native setup checkup catches unparseable
+settings, colliding agent definitions, slow hooks, version currency and context-heavy extensions
+without any of the checks below. The rest of this phase is the write-through evidence `/doctor`
+has no view of: whether *this project's* files got the duties, and whether its permission rules
+are live rather than merely present.
 
 ```bash
 claude --print "ok" </dev/null 2>&1 >/dev/null | grep -E '^(Permission |Ignoring .*permissions\.allow)'
@@ -564,10 +335,14 @@ claude --print "ok" </dev/null 2>&1 >/dev/null | grep -E '^(Permission |Ignoring
 claude --print "what is the project's stack?"  # pass = answer matches CLAUDE.md, not a guess
 claude --print "what files are you not allowed to touch here?"  # pass = names the deny/ask rules from settings.json
 grep -ci "plan mode" CLAUDE.md && grep -ci "fresh-context" CLAUDE.md && grep -ci "size the change" CLAUDE.md \
-  && grep -ciE '^#{0,4} *-? *\*{0,2}Continuity' CLAUDE.md
+  && grep -ciE '^#{0,4} *-? *\*{0,2}Continuity' CLAUDE.md \
+  && grep -cE '^#{1,4} *Commands' CLAUDE.md && grep -cE '^#{1,4} *Boundaries' CLAUDE.md
 ls .claude/docs/workflow.md .claude/docs/testing.md .claude/docs/docs-discipline.md docs/ARCHITECTURE.md docs/CODE-MAP.md
-# pass = all four greps ≥1 (plan-mode duty + verification ladder + change-sizing + continuity duty landed
-# in CLAUDE.md) and all five shipped/authored docs exist. This is the write-through check — it catches
+# pass = all six greps ≥1 (plan-mode duty + verification ladder + change-sizing + continuity duty +
+# a Commands section + a three-tier Boundaries section landed in CLAUDE.md) and all five
+# shipped/authored docs exist. The last two are anchored as headings because that is the shape the
+# 2,500-repository analysis found load-bearing: commands early and executable, boundaries in three
+# tiers. A file with the commands buried in prose passes a word-grep and fails the reader. This is the write-through check — it catches
 # instructions that stayed in the kit's references instead of landing in the project (e.g. a skipped
 # evaluator line, or — the case that earned the fourth token — a CLAUDE.md naming no continuity duty
 # at all, while the depth sat shipped and unreferenced in `.claude/docs/workflow.md`).
@@ -581,31 +356,22 @@ ls .claude/docs/workflow.md .claude/docs/testing.md .claude/docs/docs-discipline
 # entry"), so a phrase-token false-fails correct bootstraps — it was tried and scored 0 on all three.
 # The anchor is carrier-agnostic: it passes whether the carrier is a devlog or disciplined commits.
 # It is mechanical on purpose: a behavioral probe (`claude --print "what happens next
-# after a feature?"`) is contaminated by the operator's global baseline once Phase 2b installs
-# it — the union of layers answers correctly even when the project file is missing the lines.
-# Greenfield: the stack probe above and the oracle run below are **N/A by construction** — the stack is
-# a labelled TBD, so nothing exists for an answer to match and no oracle command exists to run. Record
-# them as N/A-by-construction, not "skipped" — due when the stack lands (on a sustained build that is
-# `F0`; without Phase 5 there is no ledger, so name the due date in the stub marker instead). The
-# deny-rules probe and all
+# after a feature?"`) is contaminated by the operator's own global memory layers — their union
+# answers correctly even when the project file is missing the lines.
+# Greenfield: the stack probe above and the verify run below are **N/A by construction** — the stack is
+# a labelled TBD, so nothing exists for an answer to match and no verify command exists to run. Record
+# them as N/A-by-construction, not "skipped" — due when the stack lands; name that in the stub marker.
+# The deny-rules probe and all
 # four greps apply unchanged (settings.json and CLAUDE.md are real on day zero).
 # MVH-on-request projects: only the plan-mode and change-sizing greps apply.
-
-# Phase 5 projects with a JSON ledger — skip where there is none (a .md ledger: check by eye):
-python3 -c 'import json;d=json.load(open(".claude/features.json"));p=[f.get("priority") for f in d["features"]];print("priority:", "all" if p and all(v is not None for v in p) else "PARTIAL/NONE"); print("intake rule:", any("owner can answer" in r for r in d.get("rules",[])))'
-# pass = "all" + True. Counting is the point: `grep -c '"priority"'` returns ≥1 on the half-migrated
-# ledger item 2 calls the worst state, and any sentence containing "question" would satisfy a grep for
-# the intake rule. Same write-through logic as the CLAUDE.md greps, one layer down — the ordering field
-# and the rule have to be IN the ledger, which is what a working session reads.
 ```
 
 Each check has a crisp criterion — "command produced output" is not a pass.
 
-If an oracle command was named (`make check`, `pytest -q`, `scripts/init.sh`), **run it once and
-confirm it actually executes**
-(the oracle must be real, not aspirational) — a runnable check the agent can close the loop against
-is the difference between long-horizon autonomy and drift. Running it will prompt for permission
-on first use — expected first-run approval; don't skip the run because of the prompt.
+If CLAUDE.md names a verification command (`make check`, `pytest -q`), **run it once and confirm it
+actually executes** — a runnable check the agent can close its own loop against is the difference
+between long-horizon autonomy and drift, and one that only exists on paper is worse than none.
+Running it will prompt for permission on first use — expected; don't skip the run because of it.
 
 ## Phase 8 — Record the bootstrap
 
@@ -614,8 +380,7 @@ The bootstrap writes its own first episodic entry **in the carrier the Phase 2 d
 `.claude/devlog/entries/0001-*.md`, or, where the project's carrier is disciplined commit messages,
 the bootstrap commit itself. The content is the bootstrap itself — what was detected (including
 "greenfield"), what shape was deployed, what was deliberately deferred, what is still a labelled
-stub. (Phase 5 item 3 elaborates the carrier choice for a sustained build; this phase does not
-depend on Phase 5 having run — the duty, and therefore the carrier, is Phase 2's.)
+stub. The carrier is the one Phase 2's duty line names.
 
 Four things fall out of that one action, which is why it is a phase and not a nicety: the *why* of
 this harness lands in the episodic layer instead of evaporating with the session that chose it;
@@ -633,7 +398,7 @@ someone finally tries to use it. MVH-on-request: skip.
 | The same multi-step ritual typed 3×+ | a skill (`disable-model-invocation` if side-effecting) |
 | Something must happen every time | a hook (block at submit, never mid-write) |
 | "Claude claims done when it isn't" | verification ladder: in-prompt check → `/goal` → Stop hook (deterministic gate on mechanical tests/lint/types) → `/code-review` on substantive change → fresh-context second opinion (next row) |
-| High-stakes deliverable where silent-wrong is costly (security, migration, untrusted-input parser, invariant refactor) | a **fresh-context** Evaluator (separate subagent or a new session) — see Phase 5, item 5. The lever is the fresh, un-anchored context, not an in-context "re-check yourself" pass — per-change for this class, not one-time |
+| High-stakes deliverable where silent-wrong is costly (security, migration, untrusted-input parser, invariant refactor) | a **fresh session** told to refute, or `/code-review ultra` when the change itself is the risk. The lever is the fresh, un-anchored context, not an in-context "re-check yourself" pass — per-change for this class, not one-time |
 | Codebase-scale sweep / migration / trust-critical audit that exceeds one context | route to a **dynamic workflow** (keyword `ultracode`) — do not build a custom pipeline |
 | External service (DB, browser, monitoring) | an MCP server in `.mcp.json` |
 
@@ -641,6 +406,5 @@ someone finally tries to use it. MVH-on-request: skip.
 
 ❌ a custom orchestrator subagent · ❌ five hooks "for hygiene" · ❌ a 600-line copied CLAUDE.md ·
 ❌ a prescriptive language/stack preset the model didn't need · ❌ a blocking Stop hook on day one ·
-❌ `--dangerously-skip-permissions` · ❌ deploying the Phase 5 kit on a library/one-off (over-scaffolding) ·
-❌ treating bootstrap as one-shot (the harness evolves; the starting state is the default shape —
+❌ `--dangerously-skip-permissions` · ❌ treating bootstrap as one-shot (the harness evolves; the starting state is the default shape —
 documents and conventions, no machinery — and the kit is stripped back as the model improves).

@@ -39,7 +39,13 @@ T6–T7 anecdote does not earn a rule (see `harness-discipline.md`, single-incid
 | A harness for every task: dynamic workflows in Claude Code | `claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code` | T2 | canonical dynamic-workflows source (first-party blog); `ultracode` trigger word; the 3 failure-modes (agentic laziness / self-preferential bias / goal drift) that ground "fresh-context Evaluator ≠ in-context self-recheck" |
 | Introducing dynamic workflows in Claude Code | `claude.com/blog/introducing-dynamic-workflows-in-claude-code` | T2 | why bounded fan-out now; convergence/adversarial pattern; cost caveat |
 | Multi-agent research system | `anthropic.com/engineering/multi-agent-research-system` | T1 | brief-subagents-like-a-new-colleague; effort scaling; token economics (single-agent ~4×, multi-agent ~15× chat; 80% of variance = token usage) |
-| Code review in Claude Code | `code.claude.com/docs/en/code-review` | T1 | review surfaces (`/code-review` for the working diff, `/review` for PRs, `ultrareview`); REVIEW.md severity calibration |
+| Code review in Claude Code | `code.claude.com/docs/en/code-review` | T1 | review surfaces (`/code-review` for the working diff or a PR, `/review` as its alias, `ultrareview` for the cloud pass); REVIEW.md severity calibration |
+| Orchestrate teams of Claude Code sessions | `code.claude.com/docs/en/agent-teams` | T1 | "check whether a lighter option does the job" before a team; subagents-vs-teams comparison; teams cost more tokens and suit research/review/independent-ownership work, not sequential or same-file work |
+| Claude Code release notes | `code.claude.com/docs/en/changelog` | T2 | the shipped-surface record the inventory is grounded on. One entry is worth citing on its own: **v2.1.232 removed the startup tip suggesting you create custom subagents** (and the matching `/powerup` nudge) — the vendor retiring its own "write a custom agent" prompt is first-party corroboration of built-ins-first, not just our reading of it |
+| AGENTS.md (spec + site) | `agents.md` | T4 | the cross-vendor instruction-file standard (Agentic AI Foundation; read by Codex/Cursor/Copilot). Grounds the bridge pattern: one authoritative file, `@AGENTS.md` import or symlink for Claude Code, never a paraphrased second copy |
+| GitHub — how to write a great AGENTS.md (2,500+ repos) | `github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/` | T4 | the section order that changed agent behavior in the wild: executable commands early, three-tier boundaries (Always / Ask first / Never), stack with versions, code examples over prose, explicit "done". Also the negative finding: most files fail by being vague |
+| Fowler / Böckeler — harness engineering | `martinfowler.com/articles/harness-engineering.html` | T4 | harness as two control systems — **guides** (feedforward: conventions, specs, rules files) and **sensors** (feedback: linters, tests, review), each in a computational and an inferential mode. Names the human's job as *iterating on the harness itself* when failures recur, which is what this kit's strip revision does |
+| Empirical: generated instruction files can hurt | reported across 2026 studies (see `native-capabilities.md`, Memory §) | T3 | LLM-authored AGENTS.md/CLAUDE.md measured at −2% success / +23% cost in one study and reduced success in 5 of 8 settings (+2.45–3.92 steps) in another; mechanism is restating what the repo already shows. Grounds "generate, then cut everything derivable" |
 | Chroma — Context Rot | `trychroma.com/research/context-rot` | T4 | universal pre-overflow degradation (corroborates context-engineering; vendor-bias caveat) |
 | GitHub Spec Kit (README, command table) | `github.com/github/spec-kit` | T4 | another vendor's spec-first flow placing `/speckit.clarify` (resolve underspecification) and `/speckit.checklist` (requirements completeness) **before** `/speckit.plan` — corroborates that the pre-implementation ambiguity gate is a real gap, not a local preference. Not a source for the kit's disposition wording |
 
@@ -56,9 +62,18 @@ T6–T7 anecdote does not earn a rule (see `harness-discipline.md`, single-incid
 - **Harness swing ≈ model swing** (Harness-Bench, arXiv 2605.27922) — empirically corroborates the
   headline principle: harness quality moves the score about as much as a model tier, and a stronger
   model narrows harness variance. Supports "less harness, but the right harness."
+- **The harness-swing claim now has a cross-vendor data point** (T4, vendor engineering claim —
+  not independently replicated, and the benchmark is not coding): OpenAI open-sourced the engine
+  behind Codex under Apache-2.0 (August 2026) and reported that changing **only** harness settings
+  — inference retention and compaction — moved its model from 13.3% to 38.3% on ARC-AGI-3 while
+  cutting token use roughly sixfold, with the model held fixed. Read it as corroboration of
+  Harness-Bench above (same shape: model constant, harness varied, large swing), and as evidence
+  the "strip the scaffolding" conversation is now industry-wide rather than an Anthropic house
+  style. It earns no new invariant here — a vendor's own headline number is not the tier that
+  grounds a rule.
 - **Harness ROI ∝ exploration cost** (lab empirics, 22 runs / 5 tasks, May 2026): context preload
   pays off when non-obvious structure × ambiguous spec × ≥1k LoC coincide; on low-exploration
-  tasks a harness is pure overhead. Grounds "skip the Phase 5 kit for libraries/one-offs."
+  tasks a harness is pure overhead. Grounds "add nothing a library or one-off will not use."
 - **Cross-vendor refuter — an upgrade of the fresh-context rung, not a new rule** (lab empirics,
   2026-08-01; the lab's artifacts are not shipped with the kit — this distillation is): a reviewer
   from another model family (Codex CLI attached as an MCP server) found **5 real holes in a
@@ -68,7 +83,7 @@ T6–T7 anecdote does not earn a rule (see `harness-discipline.md`, single-incid
   **current** practice (daily use, reported as a substantial quality/throughput gain), which is
   practitioner preference rather than a track record: it starts at that same episode, so it is
   days old, not months. Practice, not measurement — no control, no A/B; ~T3, the tier that already
-  grounds `practice-baseline.md`. What this supports is the *discipline* — refute-framed prompt,
+  grounds a named practitioner's preference. What this supports is the *discipline* — refute-framed prompt,
   read-only sandbox, triage rather than relay, reproduce each finding with your own failing test,
   stop when findings stop being regressions, keep an objective differential layer beside the
   reviewer. What it does **not** support is "always call a second vendor", nor any claim that a
@@ -82,5 +97,6 @@ T6–T7 anecdote does not earn a rule (see `harness-discipline.md`, single-incid
   harnesses for long-running agents*, T1), not *more* machinery. This is the published
   progressive-simplification stance — *"find the simplest solution possible, and only increase
   complexity when needed"*; strip scaffolding as models improve (*Harness design for
-  long-running apps*, T1). The Bootstrap **long-running build kit** (checklist Phase 5)
-  encodes that spine as opt-in conventions for sustained builds.
+  long-running apps*, T1). The kit encodes that spine as two lines an operator acts on — name a
+  real verification command, keep continuity on disk — not as a set of files it generates
+  (`operator-playbook.md` §2).

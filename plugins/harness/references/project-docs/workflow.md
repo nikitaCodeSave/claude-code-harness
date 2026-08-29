@@ -1,6 +1,6 @@
-<!-- shipped-by: claude-code-harness v1.21.4 — do not hand-evolve in the project;
+<!-- shipped-by: claude-code-harness v1.23.0 — do not hand-evolve in the project;
      improvements flow through the plugin (re-synced on audit). Project-specific
-     facts live in CLAUDE.md (and features.json, if present), not here. -->
+     facts live in CLAUDE.md, not here. -->
 
 # Workflow — the professional development flow
 
@@ -10,10 +10,10 @@ when the trigger fires; this file is on-demand, not per-turn context.
 ## Session start (every working session)
 
 1. `git log --oneline -10` + read `.claude/progress/` — restore state.
-2. Read `.claude/features.json` (if present) — take **one** highest-priority open feature;
-   skip `blocked: true` entries — they wait on what `blocked_reason` names, not on another attempt.
-3. Run the oracle — the verification command CLAUDE.md names (`make check` / the test suite /
-   `scripts/init.sh`). Confirm the baseline is green *before* changing code.
+2. Take **one** open unit of work from wherever this project tracks them (issues, a backlog file,
+   the devlog) — one at a time, and skip what is waiting on someone else rather than re-attempting it.
+3. Run the verification command CLAUDE.md names (`make check` / the test suite). Confirm the
+   baseline is green *before* changing code.
 4. A handoff note is a **claim, not a fact**: "verified" written by a past session must be
    re-executed before you rely on it. Phrase queued fixes as "reproduce → close".
 
@@ -62,17 +62,15 @@ goes almost straight to Plan — the full gate set is the exception, not a ritua
 - Work test-first by default: write the failing test, commit it, then implement until green
   (red→green is the default, not dogma — see `testing.md` rule 2 for what actually matters).
   Never weaken or delete a test to get green.
-- One feature per cycle; `passes: true` in the ledger only after **every** verify step ran,
-  negative cases included. When verify hits a wall outside your reach (missing creds, an
-  operator-only service, a third-party dependency), record `blocked: true` +
-  `blocked_reason: "<what unblocks it, and who>"` beside `passes: false` — a bare
-  `passes: false` cannot tell "cannot proceed here" from "not done yet", and the next
-  session will burn a cycle rediscovering the wall. Never flip `passes` on partial verify.
-  Before recording `blocked`, verify every layer you *can* reach below the wall (unit /
-  service-layer / stubbed-boundary dispatch) — `blocked` describes the last mile, not the
-  whole feature. Route the narrative (what ran green, what stays quarantined for whom) to
-  the feature's `notes` or the progress file — never invent ad-hoc ledger fields or root
-  handoff files.
+- One feature per cycle; call it done only after **every** verification step ran, negative cases
+  included. When verification hits a wall outside your reach (missing creds, an operator-only
+  service, a third-party dependency), say so explicitly — **"blocked on X, and here is who
+  unblocks it"** is a different state from "not done yet", and a tracker that cannot tell them
+  apart makes the next session burn a cycle rediscovering the wall. Before declaring it blocked,
+  verify every layer you *can* reach below the wall (unit / service-layer / stubbed-boundary
+  dispatch): blocked describes the last mile, not the whole feature. Put the narrative — what ran
+  green, what stays quarantined for whom — in the tracker entry or the progress file, not in a
+  root handoff file nobody will look for.
 - Git commit per feature with a descriptive message. Doc-with-code: the same commit updates
   the docs its diff touches (mapping table — `docs-discipline.md`).
 - **Exercise runtime-critical paths on real input before fixing the design.** For
@@ -80,9 +78,12 @@ goes almost straight to Plan — the full gate set is the exception, not a ritua
   parsers), a green test on mocked data does not cover real-corpus edge cases — run the path
   on representative real input *before* committing to a design, not after a deploy surfaces
   the edge case. The project CLAUDE.md names the concrete command for this stack.
-- **When stuck, stop at 2–3 failed iterations** and surface the blocker rather than thrashing.
-  Read the full error and understand the cause before retrying; a change that breaks many
-  things is a signal the approach is wrong, not that it needs more patches.
+- **When stuck, stop at 2–3 failed iterations and escalate — don't improvise.** Say what you
+  tried, what failed, and what you need to proceed: a decision only the owner can make, a
+  credential, a service that is down. An agent with no escalation route invents a workaround, and
+  a workaround for a missing permission or credential is the expensive kind. Read the full error
+  and understand the cause before retrying; a change that breaks many things is a signal the
+  approach is wrong, not that it needs more patches.
 
 ## Verification ladder (after each substantive change)
 
@@ -93,7 +94,7 @@ Run the rungs in order; escalate by stakes — and **name the chosen rung to the
 | Self-verify | always | oracle green + lint/types + end-to-end check of the actual behavior ("looks done" ≠ "is done") |
 | `/code-review` | substantive diff | run it yourself at the end of the change (it reviews the working diff or a PR; `/review` is simply its alias — verify the surface exists in your session's `/`-autocomplete) |
 | Fresh-context second opinion | high-stakes, "looks done", silent-wrong-is-costly; **per-change** for silent-wrong-prone components (parsers/rewriters of untrusted input, guards/validators, invariant refactors) | separate session or subagent prompted to **refute**, not confirm — the author anchors on its own solution. For the silent-wrong class, prefer a refuter **initiated outside the authoring session** (fresh session / external audit) over a subagent you spawn: a self-commissioned evaluator partly inherits your framing (one passed a denylist that an external pass then broke with Unicode-obfuscated input). Also usable UPSTREAM on a large/irreversible design decision before you freeze it — grill it to kill ≥1 alternative with a concrete failure scenario or cost |
-| External audit | milestone closed / security-correctness-critical / irreversible | operator opens a **new** session and runs `/claude-code-harness:external-audit <scope>` (requires the claude-code-harness plugin; without it — a fresh session prompted to refute, the rung above); executed evidence beats read evidence |
+| External audit | milestone closed / security-correctness-critical / irreversible | pick by what carries the risk: **the change** → `/code-review ultra` (cloud fleet over the branch or PR, paid); **the deliverable** → the operator opens a **new** session that audits the scope and **executes** the live stack. Executed evidence beats read evidence — a reader-only pass once called golden numbers "unproven" that an executing pass re-derived exactly |
 
 Periodically worth running on *accepted* features too — fresh-context audits have caught
 HIGH defects in already-green code. For guard/validator/parser features, "verify passed" and
@@ -124,7 +125,7 @@ kit's default carriers, not a mandate:
 pruned back to current state):
 1. Verify every closed feature has its episodic record (devlog entry or equivalent) — it
    outlives the progress file.
-2. Confirm features.json (if present) marks them done (passes:true).
+2. Confirm the project's own tracker marks them done.
 3. Make the terminal state legible: set `Quick state → CLOSED` or delete the file — both are
    valid ends (closed history lives in devlog + git); what matters is that a finished task's
    file no longer reads as active work.

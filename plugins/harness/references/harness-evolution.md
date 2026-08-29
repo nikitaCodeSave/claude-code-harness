@@ -2,8 +2,8 @@
 
 The procedure for evolving the **canon** — this plugin's repository
 (`nikitaCodeSave/claude-code-harness`) — by empirical signals, not by taste.
-(The practice baseline §1–8 lives in the operator-global `~/.claude/CLAUDE.md` and evolves
-separately; on a release its snapshot is re-distilled into `references/practice-baseline.md`.)
+(An operator's own behavioral baseline lives in their `~/.claude/CLAUDE.md` and evolves
+separately — the kit does not ship or re-distill a copy of it.)
 Two operations: the **D-cycle** (folding proven findings inward) and the **strip revision**
 (carrying obsolete pieces outward). Both are subordinate to the headline principle: a component
 lives only as long as it encodes something the model does not do natively.
@@ -16,8 +16,8 @@ community). So the strip revision compares a *delta* rather than "everything fro
 canon carries one provenance stamp — its last grounding point:
 
 <!-- harness-refresh-ledger
-last-grounded: CC v2.1.226 · Claude 5 family (Opus 5 default on Max/Team-Premium/Enterprise, Sonnet 5, Fable 5) · 2026-08-08
-sources-checked: changelog delta 2.1.221→2.1.224 · claude.com/blog (context-engineering rules for Claude 5, AI-native SDLC security, agent-harness 3 patterns) · anthropic.com/engineering (how-we-contain-claude) · platform.claude.com (prompting Opus 5, what's-new Opus 5) · arXiv (2607.14275 context-quality preflight, 2606.14249 HarnessX) · live binary + runtime probes (WebSearch at xhigh/max on opus-5 and opus-5[1m], thinking-off 400, /doctor scope) · fresh-context refuter with its own probes on the current client, red-controlled against a superseded one (`.claude/audits/websearch-fix-1-21-4/`) · prior full sweep (docs sub-agents/plugins-reference/commands/hooks/memory/model-config) grounded at CC v2.1.210 / 2026-07-15
+last-grounded: CC v2.1.251 · Claude 5 family (Opus 5 default on Max/Team-Premium/Enterprise-PAYG and, since 2.1.251, seat-based Enterprise; Sonnet 5, Fable 5) · 2026-08-29
+sources-checked: changelog delta 2.1.227→2.1.251 (local cache, functional Added/Changed/Removed sweep) · code.claude.com/docs/en/whats-new weeks 32-34 · code.claude.com/docs/en/agent-teams (full re-read — TeamCreate/TeamDelete removed in 2.1.178, named-subagent-becomes-teammate, teammateMode, model precedence) · code.claude.com/docs/en/hooks (31 documented vs 33 in binary) · live binary strings-probe on 2.1.251 (PreModelSwitch/PostModelSwitch, CLAUDE_CODE_RESTRICTED, CLAUDE_CODE_SUBAGENT_MODEL, promptCacheTtl/subagentPromptCacheTtl, modelPicker, ANTHROPIC_DEFAULT_MODEL, teammateMode) · industry (OpenAI open-sourced the Codex harness under Apache-2.0 on 2026-08-20; arXiv 2608.23552 Prime Agent, 2608.17528 Agent Lightning v1.0) · prior grounding at CC v2.1.226 / 2026-08-08
 -->
 
 The stamp is updated at the end of each strip revision (the external-intake pass below). The
@@ -29,8 +29,8 @@ a session, with no extra machinery).
 ## Signal sources
 
 - The project's `.claude/harness-journal.md` — 1–3 "kit-fell-short / kit-got-in-the-way"
-  observations per session (opt-in, see operator-playbook §2).
-- The verdicts of external audits (`/external-audit`, fresh-context Evaluators).
+  observations per session (opt-in; `operator-playbook.md` §2 says when it is worth keeping).
+- The verdicts of external audits (a fresh session told to refute, `/code-review ultra`).
 - The operator's corrections along the way (the recurring ones especially).
 - **External drift** (CC version / model / approaches) — compared during the strip revision, the
   external-intake pass; the baseline is the refresh-ledger above.
@@ -38,8 +38,8 @@ a session, with no extra machinery).
 ## D-cycle (≈1 session)
 
 Trigger: a milestone closed, or ≥5 substantive observations accumulated. For projects **without a
-journal** (it is opt-in) there is no journal trigger — there, milestone-close and external-audit
-verdicts are what work; don't wait for "5 observations" that have nowhere to come from.
+journal** (it is opt-in) there is no journal trigger — there, milestone-close and the verdicts of
+fresh-context audits are what work; don't wait for "5 observations" that have nowhere to come from.
 
 1. **Collect** the journal observations + audit verdicts + operator corrections for the period.
 2. **Classify** each: `kit-gap` (the canon didn't cover a recurring need) ·

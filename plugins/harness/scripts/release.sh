@@ -58,9 +58,9 @@ git rev-parse -q --verify "refs/tags/v$V" >/dev/null && {
 
 # 4. Stage the release surface and hand off the conscious step.
 git add "$PLUGIN" "$DEVLOG_PLUGIN" "$MARKET" \
-  plugins/harness/SKILL.md plugins/harness/references/ plugins/harness/agents/ \
-  plugins/harness/commands/ plugins/harness/scripts/ plugins/devlog/ \
-  README.md CHANGELOG.md
+  plugins/harness/SKILL.md plugins/harness/references/ \
+  plugins/harness/scripts/ plugins/devlog/ \
+  README.md CHANGELOG.md AGENTS.md
 echo
 git status --short
 cat <<EOF

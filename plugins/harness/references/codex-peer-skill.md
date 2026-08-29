@@ -12,17 +12,16 @@ managed agents (so principle 9, "CLI-subscription only", is untouched: it govern
 models are reached, not which CLIs exist on the machine).
 
 **This is an upgrade of an existing rung for operators who already run a second vendor — never a
-reason to acquire one.** The rung that ships is the native `code-refuter`; it is the default and
+reason to acquire one.** The rung that ships is a fresh same-family session; it is the default and
 it is sufficient. The material below is therefore *not* a live skill inside the plugin: a plugin
 skill's description loads into every consumer's session, including the majority who have no Codex,
 and that reads as "install another CLI" while costing them tokens. It is delivered to disk only
-after a positive detection and an explicit yes — the same channel as `practice-baseline.md` and
-`project-docs/*`.
+after a positive detection and an explicit yes — the same channel as `project-docs/*`.
 
 ## Delivery procedure
 
-1. **One gate, evaluated before this file is opened.** `bootstrap-checklist.md` Phase 2b states it
-   in full so the majority case never loads these pages: **a Codex MCP server is already
+1. **One gate, and it must be checked before this file is opened** (SKILL.md's reference map
+   states it, so the majority case never loads these pages): **a Codex MCP server is already
    registered** — it is named by `claude mcp list`. One probe, and it is the authoritative one:
    registrations do not all live in one file, so grepping a config path answers the wrong question.
    - **`codex` merely present on PATH does not open the gate.** An unwired CLI means the operator
@@ -48,7 +47,7 @@ after a positive detection and an explicit yes — the same channel as `practice
    the very start of the file: a comment placed first makes the loader take *that line* as the
    skill's description, so the skill keeps loading, keeps counting, and never triggers, with the
    comment showing where the description should be (reproduced live, 2026-08-01 — this is why the
-   `practice-baseline.md` stamp convention could not simply be copied here: its target file has no
+   `project-docs/*` stamp convention could not simply be copied here: those files have no
    frontmatter). Then say which path was taken in the run summary.
 4. **Never wire, rewire, or reconfigure the MCP server.** The gate already required it to exist;
    its configuration is the operator's, and a session that "fixes" it is editing user-scope config
@@ -179,8 +178,8 @@ round's 16 findings triaged to 5 real holes that 109 tests, three fix commits an
 same-family pass had missed), plus the maintainer's **current standing practice** — daily use,
 reported as a substantial quality and throughput gain. The second layer is practice, not
 measurement (no control, no A/B), and it is *current*, not longitudinal: it began at the episode
-above, so read it as a strong practitioner preference rather than a track record. That places it
-at the same tier as the practice baseline's own grounding. The lab's artifacts do not ship with
+above, so read it as a strong practitioner preference rather than a track record. That places it at the
+tier of a named practitioner's current preference, not of a measured result. The lab's artifacts do not ship with
 the kit; what ships is this distillation.
 
 What the evidence supports is the **discipline** above — refute-framed prompt, read-only sandbox,

@@ -8,6 +8,36 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #49 · 2026-08-29 · AGENTS.md не читается — и это измерено, а не взято из доки
+
+**Tags:** harness, docs, external-audit, agents-md
+
+Аудит кита против внешнего среза (first-party best-practices и memory, спека AGENTS.md под Agentic AI Foundation, разбор GitHub по 2500+ репозиториям, Fowler о harness engineering) дал семь зазоров. Оператор снял два (guardrails, observability) и попросил закрыть остальные с…
+
+[→ entries/0049-agents-md-ne-chitaetsya-i-eto-izmereno-a-ne-vzyato-iz-doki.md](entries/0049-agents-md-ne-chitaetsya-i-eto-izmereno-a-ne-vzyato-iz-doki.md)
+
+---
+
+## #48 · 2026-08-29 · Кит перестал везти машинерию: три роли и две фазы удалены
+
+**Tags:** harness, cleanup, release, breaking
+
+Интейк (#47) закрыл дельту фактов, но оператор поставил задачу шире: удалять обязательно и максимально приближаться к дефолтному бэкенду Claude Code. Порог сменился — раньше компонент оставался, если нативное перекрывало его лишь частично; теперь остаётся только то, чему…
+
+[→ entries/0048-kit-perestal-vezti-mashineriyu-tri-roli-i-dve-fazy-udaleny.md](entries/0048-kit-perestal-vezti-mashineriyu-tri-roli-i-dve-fazy-udaleny.md)
+
+---
+
+## #47 · 2026-08-29 · Кит учил вызывать tool'ы, которых больше нет
+
+**Tags:** docs, native-capabilities, external-intake, release
+
+Ledger стоял на CC v2.1.226 (8 августа), живой клиент — v2.1.251. Двадцать пять релизов дельты, из них три недели пришлись на период, когда Anthropic выпускал по несколько версий в неделю. Внешний интейк по процедуре harness-evolution.md Pass 1.
+
+[→ entries/0047-kit-uchil-vyzyvat-tool-y-kotorykh-bolshe-net.md](entries/0047-kit-uchil-vyzyvat-tool-y-kotorykh-bolshe-net.md)
+
+---
+
 ## #46 · 2026-08-08 · Политика, способная выключить весь harness, получила одну строку
 
 **Tags:** docs, native-capabilities, release

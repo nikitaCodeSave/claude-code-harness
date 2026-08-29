@@ -7,6 +7,148 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.23.0] — 2026-08-29
+
+**The kit stops shipping machinery: the 3-role external audit is retired in favour of native
+surfaces, and twenty-five releases of drift are folded in.** An external-intake pass against CC
+v2.1.251 (the ledger stood at v2.1.226), followed by a strip revision applying the kit's own
+retire rule to the kit itself.
+
+### Removed — BREAKING
+
+- **`commands/external-audit.md` and `agents/{evidence-executor,process-auditor,code-refuter}.md`
+  are gone.** The plugin now ships a skill and its references — no agents, no commands, no hooks.
+  Rationale, in the kit's own terms: a fleet of adversarial reviewers is a **shipped surface**
+  (`/code-review ultra`, alias `/ultrareview`), and what made the rung valuable was the
+  *independent fresh context*, which a new session provides for free — the orchestration around it
+  was exactly the hand-rolled pipeline this kit tells everyone else not to build. It had also
+  become a maintenance liability: role frontmatter had to track effort/tool semantics, the command
+  carried a three-way `ROLE_DIR` fallback, and its JSON contract needed re-verification on every
+  release.
+- **What replaces it, by what carries the risk**: the change → `/code-review ultra`; the
+  deliverable → a fresh session told to audit the scope **and execute the live stack**. The one
+  rule worth carrying over — *executed evidence beats read evidence* — is now stated in
+  `operator-playbook.md` §6 and in the shipped `project-docs/workflow.md` ladder.
+- **Users of `/claude-code-harness:external-audit` must switch to one of the two.** The retirement
+  is recorded in `audit-checklist.md` §3, where the kit's own roles previously held a carve-out
+  from the "retire the custom code-reviewer" finding — that carve-out is gone too.
+- **`references/practice-baseline.md` and Bootstrap Phase 2b are gone.** The kit no longer ships,
+  embeds, or re-syncs a copy of the operator's behavioral baseline. It belongs in the operator's
+  own `~/.claude/CLAUDE.md`, where it already lives; a project embed was a second copy of the same
+  prose in a lower-priority layer, and re-syncing it by content-version stamp was maintenance the
+  kit paid for a duplicate. An existing `.claude/rules/practice-baseline.md` from an older
+  bootstrap is now an operator-owned file: `audit-checklist.md` §4 reports it as an orphan rather
+  than offering a re-sync that will never come.
+- **Bootstrap Phase 5 (the "long-running build kit") is gone** — the generated `features.json`
+  ledger, `scripts/init.sh`, the seeded `F0`, the session-start ritual and their verification
+  probes. What survived is two operator actions in `operator-playbook.md` §2: name one real
+  verification command in CLAUDE.md, and install the devlog companion whose SessionStart digest
+  already surfaces recent entries and active progress. Commitments belong in whatever tracker the
+  project already keeps. `bootstrap-checklist.md` lost 236 lines (646 → 410); the shipped
+  `project-docs/workflow.md` now speaks of "the project's tracker" instead of ledger fields.
+
+### Fixed
+
+- **Agent teams rewritten against the current surface.** The kit described `TeamCreate` /
+  `TeamDelete` as the way in — **both were removed in v2.1.178**, and `team_name` on the Agent
+  tool is accepted but ignored. A harness step following the old text called tools that do not
+  exist. The section now carries what actually governs a team: `teammateMode` (in-process by
+  default), the model-precedence chain, auto-approved teammate plans, mailbox/task-list paths,
+  and the limits. **The load-bearing addition: enabling the flag changes ordinary delegation** —
+  a subagent Claude names on its own launches as a teammate, so a team forms during work nobody
+  framed as team work, at teammate token cost. Also folded into `harness-discipline.md`.
+- **Version pin moved to v2.1.251**, refresh ledger re-stamped with the sources actually checked.
+- **Hooks: 31 → 33 events** — `PreModelSwitch` / `PostModelSwitch` (v2.1.251) are binary-verified
+  but not yet on the docs page, and the file now says so rather than implying the page is complete.
+- **The thinking-off ceiling is no longer an error.** The kit said `xhigh`/`max` with thinking
+  disabled returns 400. Since v2.1.251 the client intercepts that combination and sends `high` —
+  so the real failure mode is a **silent ceiling**, not a visible rejection. Corrected in the
+  inventory and in the shipped workflow distillation's neighbouring claim.
+- **`/review` is an alias, not the PR-only surface** — corrected in `audit-checklist.md` §3,
+  which still carried the retired split.
+
+### Added — the industry-audit fold
+
+An audit against the current external guidance (first-party `best-practices` and `memory`, the
+AGENTS.md spec, GitHub's analysis of 2,500+ repositories, Fowler on harness engineering) produced
+seven gaps; these close them.
+
+- **`AGENTS.md` is now a first-class case.** It is the cross-vendor standard, and **Claude Code
+  does not read it** — measured here with an `InstructionsLoaded` hook across three setups: with
+  only `AGENTS.md` a session starts with *no* project instructions; `@AGENTS.md` in CLAUDE.md puts
+  both files in the startup context; a symlink puts the content there as one file. A naive
+  behavioural probe ("what is the codename?") answers correctly in all three because the model
+  simply reads the file — so the hook is the oracle, and that is now stated where someone would
+  otherwise be misled. Bootstrap Phase 0 detects `AGENTS.md` and other agents' rule files and
+  bridges instead of paraphrasing; `audit-checklist.md` §4 flags both the unbridged and the
+  duplicated case. `/import` is documented as the one-time migration it is.
+- **The CLAUDE.md template was reordered around external evidence**, not taste: commands first and
+  executable with real flags, boundaries as **Always / Ask first / Never** mirrored into
+  `settings.json` permissions, stack with versions, an explicit "done = these exit 0". Phase 7
+  gained two anchored greps for the Commands and Boundaries headings.
+- **"Generated is a draft, not a deliverable."** Two 2026 studies measured LLM-authored instruction
+  files making agents worse (−2% success at +23% cost; reduced success in 5 of 8 settings,
+  +2.45–3.92 steps), both because the file restated what the repo already shows. Phase 2 now ends
+  with the cut pass — one question per line — and `audit-checklist.md` treats an uncut generated
+  CLAUDE.md as a real finding.
+- **The boundary with `/init` is drawn.** `CLAUDE_CODE_NEW_INIT=1` runs interactive discovery, a
+  subagent exploration and a reviewable proposal, and folds in other agents' rule files. The kit
+  now routes the draft to it and keeps the parts it does not do — permissions, the shipped
+  distillation, the cut. Re-walking that discovery by hand is listed as built-in duplication.
+- **Escalation is a duty line now**, in the CLAUDE.md template and the shipped
+  `project-docs/workflow.md`: after two failed attempts, say what you tried and what you need —
+  never invent a workaround for a missing permission or credential.
+- **Compaction instruction** in the template (preserve modified files, commands already run and
+  their results, ratified decisions) — the documented fix for what compaction drops.
+- **Native surfaces the inventory was missing**: `/batch` (5–30 subagents, each in a worktree,
+  each opening a PR — reach for it before scripting a `claude -p` loop), `/btw` (a side question
+  that never enters history — the cheap answer to context pollution), `/verify`, `claudeMd` as a
+  managed setting with the settings-enforce / CLAUDE.md-steer split, `InstructionsLoaded` as the
+  instrument for "did this reach the context", and the code-intelligence plugin recommendation for
+  typed languages.
+- **`evidence-base.md` gains four entries**: the AGENTS.md spec, GitHub's 2,500-repository
+  analysis, Fowler's guides/sensors model, and the generated-file empirics.
+- **Both of this repository's own repos now carry `AGENTS.md`** with the import wired in and
+  verified by the same hook — the kit ships the practice it just started following.
+
+- **`--restricted` / `CLAUDE_CODE_RESTRICTED=1`** (v2.1.248) as the shipped read-and-reason
+  profile — reach for it before rebuilding one out of deny rules, with the caveat that it also
+  ignores your settings, so a guard hook is off in that mode too.
+- **A deny rule is hygiene, not containment** — v2.1.251 fixed four real walk-arounds (post-check
+  symlink swap in Read/Write/Edit, `Read(...)` denies never applied to symlinked Grep/Glob paths,
+  Workflow `scriptPath` read before its check, arithmetic-assignment Bash auto-approval). Two
+  consequences now stated: enforcement is a property of the release, so keep the client current;
+  and adversarial containment is the sandbox's job. Also a new `audit-checklist.md` §10 finding.
+- **`subagent_type: "fork"`** (v2.1.232, on by default) — a delegate inheriting the full
+  conversation *and* prompt cache, with the boundary that matters here: it inherits the author's
+  framing, so it is the wrong shape for an independent refuter.
+- **`CLAUDE_CODE_SUBAGENT_MODEL` changed from override to default** (v2.1.251) — an existing pin
+  now loses to an agent definition's `model:`. Flagged in the inventory, in the delegate-discipline
+  section, and as an audit finding.
+- **Prompt-cache TTL for delegates** — `experimental.cacheTtl` in agent frontmatter (v2.1.248),
+  `promptCacheTtl` / `subagentPromptCacheTtl` (v2.1.243), and the note that an in-process teammate
+  sits outside the main conversation's TTL bucket.
+- **`/tasks` prints each subagent's model and effort** (v2.1.243) — the cheap oracle for "did my
+  declaration hold", which retires the main reason to write a `subagentStatusLine` script.
+- **Native checks the audit should not re-derive by hand**: `audit-checklist.md` opens with a new
+  **§0.5 — run `/doctor` first**, naming what it covers (dead-weight skills/MCP/plugins off real
+  usage counters, CLAUDE.md rightsizing, slow hooks, settings parse failures, version currency)
+  and what it structurally cannot (committed files, and every judgment-shaped finding). Bootstrap
+  Phase 7 opens the same way. Plus the v2.1.246 `/permissions` Auto mode tab and the
+  wildcard-before-subcommand allow-rule warning.
+- **Smaller surface folds**: `Concise` output style (v2.1.237); the Workflow tool's description
+  cut from ~5.7k to ~1k tokens with authoring moved into the `workflow-authoring` skill
+  (v2.1.248) — cited as first-party precedent for progressive disclosure; `notify_when_idle` and
+  `@`-mentions for cross-session messaging; `/effort` saving a per-model default; `ANTHROPIC_DEFAULT_MODEL`
+  and `modelPicker`; `/loop` always available with a `/usage` Loops breakdown; bundled `/design`;
+  Opus 5 now the default on seat-based Enterprise.
+- **`evidence-base.md` gains three sources**: the agent-teams doc (T1, "check whether a lighter
+  option does the job"); the release notes as a citable record — **v2.1.232 removed the startup
+  tip suggesting you create custom subagents**, the vendor retiring its own "write a custom agent"
+  nudge; and OpenAI open-sourcing the Codex harness under Apache-2.0 with a harness-only swing of
+  13.3% → 38.3% on ARC-AGI-3 at ~6× fewer tokens (**T4 vendor claim**, corroborating Harness-Bench,
+  earning no invariant).
+
 ## [1.21.8] — 2026-08-08
 
 **One line for a policy that can turn the whole harness off.** The doc-verification sweep surfaced

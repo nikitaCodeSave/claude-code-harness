@@ -12,17 +12,16 @@ Each step below adds exactly what has proven its worth — and not before its tr
 
 | Layer | Where | What it is |
 |---|---|---|
-| Behavioral baseline | project embed `.claude/rules/practice-baseline.md` (default) or `~/.claude/CLAUDE.md` (global, opt-in) | §1–§8 working discipline (Bootstrap Phase 2b); re-synced by its content-version stamp |
 | Kit (this plugin) | source of truth — repo `nikitaCodeSave/claude-code-harness`; on the machine — the installed plugin in `~/.claude/plugins/` | Bootstrap / Audit / Extend / Explain |
-| Independent verification | inside the plugin: `commands/external-audit.md` + `agents/{evidence-executor,process-auditor,code-refuter}.md` — travel with the plugin | fresh-context refute — the `code-refuter` role solo is the per-change workhorse; the full 3-role `/external-audit` is the rare escalation |
+| Independent verification | nothing shipped — native surfaces + a fresh session | a new session told to refute is the per-change workhorse; `/code-review ultra` (paid cloud fleet) or a cross-vendor reviewer is the rare escalation |
 | Workflow distillation | `<repo>/.claude/docs/{workflow,testing,docs-discipline}.md` | shipped by bootstrap verbatim from the kit (`references/project-docs/`); refreshed by a re-sync at audit time keyed on the `shipped-by` version |
 | Continuity companion | the `devlog` plugin (same marketplace, optional) | `/devlog:devlog` skill + `devlog-reindex` + a SessionStart digest that surfaces recent devlog & active progress (silent in projects without them) |
 | Project layer | `<repo>/CLAUDE.md` + `<repo>/.claude/` + `<repo>/docs/` | created by step 1, grows by triggers |
 
-The plugin and the behavioral baseline reach the machine/profile **separately**:
+How the pieces reach the machine:
 - **The plugin (kit)** — `/plugin marketplace add nikitaCodeSave/claude-code-harness`, then
-  `/plugin install claude-code-harness@claude-code-harness`; carries SKILL.md, `/external-audit`,
-  and the agent roles.
+  `/plugin install claude-code-harness@claude-code-harness`; carries SKILL.md and its references —
+  no agents, no commands, no hooks.
   (For a maintainer developing the plugin itself — symlink its checkout into `~/.claude/skills/`:
   a directory with `.claude-plugin/plugin.json` is auto-loaded as `claude-code-harness@skills-dir`,
   with no install step. This is the **only** dogfooding path that stays live: a marketplace
@@ -31,12 +30,6 @@ The plugin and the behavioral baseline reach the machine/profile **separately**:
   subfolder — or you get the skill without the plugin's `hooks/` and `bin/`. Do this for every
   plugin you maintain: a hand-kept copy of one you also ship is a fork that drifts —
   `audit-checklist.md` §2.)
-- **The behavioral baseline (§1–8)** does NOT arrive with the plugin (the plugin does not ship an
-  operator-global `CLAUDE.md`), but **Bootstrap delivers it** (Phase 2b,
-  `references/practice-baseline.md`): the session detects what your memory layers already carry
-  and offers a project embed under `.claude/rules/` (the default) or a global merge into
-  `~/.claude/CLAUDE.md` — the global write only with your explicit approval, after showing the
-  diff and writing a timestamped backup.
 - **The continuity machinery** is the optional `devlog` companion
   (`/plugin install devlog@claude-code-harness`): the `/devlog:devlog` skill, `devlog-reindex`,
   and a SessionStart digest that auto-surfaces recent devlog + active progress in projects that
@@ -51,9 +44,7 @@ The plugin and the behavioral baseline reach the machine/profile **separately**:
    (≤200 lines, an indexer, including a Working style with a verification ladder) +
    `.claude/settings.json` (the deny list matters more than allow) + the workflow distillation in
    `.claude/docs/` (3 files, verbatim from the kit) + `docs/ARCHITECTURE.md` and `docs/CODE-MAP.md`
-   with real content + an offer to install the practice baseline (project embed in
-   `.claude/rules/` by default; global `~/.claude/CLAUDE.md` merge only as a guarded opt-in —
-   diff shown, timestamped backup, your approval). The minimal MVH (CLAUDE.md + settings only) — via a
+   with real content. The minimal MVH (CLAUDE.md + settings only) — via a
    separate phrase: **"set up a minimal harness"**. There are no custom agents/hooks/skills in
    either variant — this is discipline, not an omission.
 4. The contract (stack / acceptance of the first feature / verify mechanism / sensitive paths)
@@ -61,40 +52,42 @@ The plugin and the behavioral baseline reach the machine/profile **separately**:
    the dangerous paths land in `permissions.deny` as soon as they're named. The one class that does
    *not* settle itself is a question whose answer changes what "correct" means — product semantics,
    a trade-off with a real cost. Answer those explicitly and dated, because a session that guesses
-   one of them ships something plausible and wrong. Where the answer lands: a ledger project keeps
-   it with the feature (§3); everywhere else, an ADR or the devlog entry for the change.
+   one of them ships something plausible and wrong. The answer lands in an ADR or the devlog entry
+   for the change — wherever this project keeps decisions.
 
 Step check: `claude --print "what is the project's stack?"` answers from CLAUDE.md.
 
-## 2. A multi-session product — commission the Phase 5 kit
+## 2. A multi-session product — three things worth having
 
-If the project is a product built feature-by-feature (not a library/script/one-off):
+The kit used to ship a "long-running build kit" (a feature ledger, a generated oracle script, a
+session-start ritual). It was retired in v1.23.0: the parts that mattered are a line in CLAUDE.md
+and a plugin, and the rest was scaffolding the model no longer needs. What is actually worth
+setting up for a product built feature-by-feature:
 
-1. Say: **"set up the long-running build kit (Phase 5)"**.
-2. You get conventions + files (not machinery): a runnable oracle with a green baseline — your
-   existing `make check`/`npm test` if the project has one, a `scripts/init.sh` only if it doesn't
-   · `.claude/features.json` (verify steps + `preconditions`, `passes: false`)
-   · `.claude/progress/<slug>.md` + devlog · a session-start ritual in CLAUDE.md
-   · a line about the fresh-context Evaluator. (`docs/ARCHITECTURE.md` + `CODE-MAP.md` and the
-   workflow distillation are already in place from bootstrap — that's the default shape, not
-   Phase 5.)
-3. **The session seeds the ledger, the operator reviews it**: the agent writes the product's
-   decomposition into features and verify contracts from your description; your step is to read
-   the seeded `features.json` and correct the boundaries/verify BEFORE the first feature (this is
-   your insurance against silent micro-decisions).
-4. **harness-journal — opt-in, off by default**: ask for `.claude/harness-journal.md`
-   (1–3 "kit-fell-short" observations per session) only if you plan to run D-cycles (step 7).
-   Without D-cycles the journal is dead weight.
+1. **Name one verification command in CLAUDE.md** — the existing `make check` / `npm test` /
+   `pytest -q`, not a new script wrapping them. A session that can close its own loop against a
+   real command is the whole of what the ledger was protecting; a second entry point re-running
+   the same gates is drift.
+2. **Install the devlog companion** (`/plugin install devlog@claude-code-harness`): its
+   SessionStart digest surfaces recent entries and any active `.claude/progress/<slug>.md`, so a
+   new session starts informed instead of re-deriving state. Detect first — an operator who
+   already runs a personal digest hook gets both, with no error to signal it.
+3. **Track commitments wherever the project already tracks them** (issues, a backlog file, the
+   devlog). Keep it in the repo the work ships from — the session task list is machine-local and
+   is not that register.
+
+**harness-journal — opt-in, off by default**: ask for `.claude/harness-journal.md` (1–3
+"kit-fell-short" observations per session) only if you plan to run D-cycles (step 7). Without
+D-cycles the journal is dead weight.
 
 ## 3. The build ritual — what the operator does between sessions
 
-- **Preconditions before starting a session**: bring up the services from
-  `features.json.preconditions` (DB docker container, local LLM, …). The session will check them
-  and stop if they're missing.
-- **Session start**: it's enough to say "continue from features.json" — the session-start ritual
-  is wired into the project CLAUDE.md (git log → progress → one feature → the oracle).
-- **Session end**: check by eye — is there a commit per feature, is `progress` updated, is
-  `passes: true` set only for features with completed verify steps.
+- **Preconditions before starting a session**: bring up the services the work needs (DB docker
+  container, local LLM, …) — a session that discovers them missing burns the turn on diagnosis.
+- **Session start**: with the devlog digest installed there is nothing to say — recent entries and
+  active progress are already in view; the session acts on that state instead of rediscovering it.
+- **Session end**: check by eye — a commit per unit of work, progress updated, and the
+  verification command actually run rather than asserted.
 - **Ratify what only you can decide.** Sessions surface questions whose answer changes what
   "correct" means — product semantics, a trade-off with a cost. Answer them explicitly: pick one of
   the options the session laid out (by its code, where it wrote a coded table), date it, say what
@@ -124,8 +117,7 @@ If the project is a product built feature-by-feature (not a library/script/one-o
 3. The audit also compares the `shipped-by` version of the workflow distillation (`.claude/docs/*`)
    against the same files in the installed plugin (content-version vs content-version — not the
    plugin's package number) and offers a re-sync when the canon copy is newer — so the factory
-   distillation in projects doesn't fall behind the canon. A project practice-baseline embed
-   is re-synced the same way, keyed on its content-version stamp.
+   distillation in projects doesn't fall behind the canon.
 
 ## 5. Keeping the kit and the baseline current
 
@@ -133,16 +125,11 @@ Updates flow through the plugin: `/plugin update claude-code-harness` (and `devl
 version changes only the plugin itself — copies that live in your projects or profile are
 re-synced deliberately, never silently:
 
-1. **Kit skills / agents / references** — current the moment the plugin updates; nothing to do.
+1. **Kit skill and references** — current the moment the plugin updates; nothing to do.
 2. **Workflow distillation** (`.claude/docs/*` in each project) — at the next
    **"audit my Claude Code harness"** the audit compares `shipped-by` headers and offers a
    re-sync (diff shown first; hand-edits surfaced, not overwritten).
-3. **Practice baseline** — same mechanism, keyed on the block's content-version stamp: a
-   project embed is re-synced by Audit; a global copy in `~/.claude/CLAUDE.md` is refreshed
-   only on request (**"refresh my practice baseline"**) via the guarded merge — diff first,
-   timestamped backup, your approval (`references/practice-baseline.md`, "Keeping installed
-   copies current").
-4. **The devlog companion's digest and commands** live inside that plugin — they update with
+3. **The devlog companion's digest and commands** live inside that plugin — they update with
    it; nothing is copied into your profile or projects.
 
 The whole maintenance ritual: `/plugin update` → in each active project, say
@@ -157,11 +144,13 @@ author commissions inherits the author's framing). A fresh-context check earns i
 *accepted* code — it has caught HIGH defects in features that were already green.
 
 **Tier 1 — the per-change refute (the workhorse).** For a silent-wrong-prone change (a
-parser/rewriter of untrusted input, a guard/validator, an invariant-preserving refactor), spawn a
-**single fresh-context refuter** prompted to *refute*, not confirm — the `code-refuter` role alone
-(`claude-code-harness:code-refuter`), no orchestration, its verdict to
-`.claude/audits/<slug>/AUDIT-REFUTER.json`. Cheap enough to run per-change — which is exactly where
-it earns its place, because that class passes the author's own tests while being wrong.
+parser/rewriter of untrusted input, a guard/validator, an invariant-preserving refactor), open a
+**fresh session** at the project root and tell it to *refute*, not confirm: name the invariant,
+point at the change, and ask for a failing input rather than an opinion. Cheap enough to run
+per-change — which is exactly where it earns its place, because that class passes the author's own
+tests while being wrong. **The kit ships no role file for this, deliberately** (it did until
+v1.23.0): the lever is the fresh context and the refute-framing, both of which a sentence supplies,
+while a shipped role file is one more thing to keep in sync with the review surfaces.
 
 **Cross-vendor variant of Tier 1 — only if you already run a second-vendor CLI.** A same-family
 refuter is fresh but not foreign: trained as the author was, it inherits a share of the author's
@@ -174,9 +163,8 @@ approval).
 
 Two questions that are easy to conflate, kept apart deliberately:
 
-- **Should you get a second vendor for this? No.** The rung that ships is the native
-  `code-refuter`, it is sufficient, and nothing in the kit's evidence justifies a second
-  subscription. (Nor is any of this an exception to "CLI-subscription only" — that principle
+- **Should you get a second vendor for this? No.** A fresh same-family session is sufficient, and
+  nothing in the kit's evidence justifies a second subscription. (Nor is any of this an exception to "CLI-subscription only" — that principle
   governs how *Anthropic* models are reached, not which CLIs exist on your machine.)
 - **If one is already wired, how often should it run? As the routine executor of Tier 1, not as a
   rare escalation** — that is where the maintainer's own practice has settled, and it is reported
@@ -186,19 +174,22 @@ Two questions that are easy to conflate, kept apart deliberately:
   track record. It grounds *the discipline of how to use such a reviewer*; it is not a
   demonstration that every project needs one.
 
-**Tier 2 — the full 3-role `/external-audit` (rare escalation).** Reserve for a closed milestone ·
-a security/correctness-critical feature · an expensive irreversible delivery that "looks done".
-1. Open a **new session** (not the authoring one) at the root of the audited project.
-2. Say: **`/external-audit <scope>`** (feature/milestone + where the spec lives); if the command
-   was delivered by the plugin, the name in the list is `claude-code-harness:external-audit`.
-3. The session launches three roles in parallel — evidence-executor (must EXECUTE the live stack),
-   process-auditor (git/scope/red→green), code-refuter (refutes the code) — and combines the
-   verdicts by the rule "executed evidence beats read evidence".
-4. Result: `.claude/audits/<slug>/AUDIT-VERDICT.json` + actionable items in progress.
+**Tier 2 — the milestone gate (rare escalation).** Reserve for a closed milestone · a
+security/correctness-critical feature · an expensive irreversible delivery that "looks done". Two
+shipped surfaces, picked by what carries the risk:
+- **The change is the risk** → **`/code-review ultra`** (alias `/ultrareview`, CLI `claude
+  ultrareview [target]`): a cloud fleet of bug-hunting agents over the branch or PR. Paid via
+  usage credits (~$5–25/run, 3 free runs on Pro/Max as a one-time allotment).
+- **The deliverable is the risk** → a **fresh session** at the project root, told to audit the
+  scope and, crucially, to **execute the live stack** rather than read it — the one rule worth
+  carrying over from the retired 3-role command is *executed evidence beats read evidence*: a
+  reader-only pass once called golden numbers "unproven" that an executing pass then re-derived
+  exactly. Have it write findings straight into `.claude/progress/<slug>.md` next steps as
+  "reproduce → close", and fix them in a separate red→green cycle rather than in the audit.
 
-Empirically the two tiers settle this way: in a sustained real-product build the full 3-role audit
-ran **once**, at a milestone; per-change verification used the `code-refuter` role alone. Ship the
-light tier as the default, the heavy tier as the exception.
+Empirically the two tiers settle this way: in a sustained real-product build the heavy gate ran
+**once**, at a milestone; per-change verification was a single fresh refuter. Default to the light
+tier; the heavy one is the exception.
 
 ## 7. D-cycle — evolving the canon (role: canon maintainer)
 

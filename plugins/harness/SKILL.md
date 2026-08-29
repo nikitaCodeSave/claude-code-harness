@@ -1,6 +1,6 @@
 ---
 name: claude-code-harness
-description: "Use this skill when introducing, auditing, refactoring, or extending the Claude Code harness of a project — i.e. its `.claude/` directory (CLAUDE.md, settings.json, hooks/, agents/, skills/, commands/) and root CLAUDE.md. Activates on phrases like 'set up Claude Code in this project', 'design my .claude/', 'audit my Claude Code harness', 'add a hook/skill/subagent', 'how should I organize CLAUDE.md', 'what built-ins does Claude Code already have', 'should I write a custom orchestrator subagent', 'when should I use a dynamic workflow', 'why is my harness slow / brittle / token-heavy', 'extend Claude Code with X', 'set up the long-running build kit (Phase 5)', 'refresh my practice baseline'. Claude Code 2.x / Opus-class-specific — does NOT teach harness design for other agent frameworks (building agents in OpenAI/Codex/LangChain-style stacks); an external CLI wired into *this* harness as an MCP server is in scope. Skip when the project's `.claude/` already encodes this discipline."
+description: "Use this skill when introducing, auditing, refactoring, or extending the Claude Code harness of a project — i.e. its `.claude/` directory (CLAUDE.md, settings.json, hooks/, agents/, skills/, commands/) and root CLAUDE.md. Activates on phrases like 'set up Claude Code in this project', 'design my .claude/', 'audit my Claude Code harness', 'add a hook/skill/subagent', 'how should I organize CLAUDE.md', 'what built-ins does Claude Code already have', 'should I write a custom orchestrator subagent', 'when should I use a dynamic workflow', 'why is my harness slow / brittle / token-heavy', 'extend Claude Code with X'. Claude Code 2.x / Opus-class-specific — does NOT teach harness design for other agent frameworks (building agents in OpenAI/Codex/LangChain-style stacks); an external CLI wired into *this* harness as an MCP server is in scope. Skip when the project's `.claude/` already encodes this discipline."
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls:*), Bash(tree:*), Bash(cat:*), Bash(find:*), Bash(grep:*), Bash(claude --help), Bash(claude agents:*), Bash(claude --version), Bash(claude --print:*), Bash(claude plugin list:*), Bash(git log:*), Bash(git status:*), Bash(wc:*)
 ---
 
@@ -38,7 +38,14 @@ programming/debugging.
 ## The four modes
 
 ### Mode 1: Bootstrap (empty `.claude/`)
-Read `references/bootstrap-checklist.md`. Run `claude --version` first (the built-in subagent
+Read `references/bootstrap-checklist.md`. **Two things decide the shape before anything else.**
+(1) Does the repo already have `AGENTS.md` or another agent's rule files? Then CLAUDE.md is a
+bridge (`@AGENTS.md` import or symlink), never a paraphrase — Claude Code does not read
+`AGENTS.md`, measured. (2) `/init` with `CLAUDE_CODE_NEW_INIT=1` now does interactive discovery,
+subagent exploration and a reviewable proposal — use it for the draft instead of hand-rolling the
+same walk, and spend the run on what it does not do: the permission model, the shipped
+distillation, and cutting the draft down to what cannot be derived from the repo.
+Run `claude --version` first (the built-in subagent
 types you must not recreate are catalogued in `references/native-capabilities.md`;
 `/agents` no longer opens a wizard — inspect configured agents via `/context`
 ("Custom Agents") or `.claude/agents/` directly; the CLI `claude agents` lists running
@@ -48,19 +55,10 @@ root `CLAUDE.md` ≤ 200 lines + `settings.json` with sane permissions + the shi
 `.claude/docs/{workflow,testing,docs-discipline}.md` (Phase 2c, verbatim copies from
 `references/project-docs/`) + `docs/ARCHITECTURE.md` & `docs/CODE-MAP.md` with real content.
 No custom subagents, hooks, or skills until justified; minimal MVH only on explicit operator
-request. **Transmit the practice baseline** (checklist Phase 2b /
-`references/practice-baseline.md`): the behavioral layer the kit's artifacts assume does not
-travel with a plugin install — detect across memory layers, then offer a project embed
-(default) or a guarded global merge (explicit opt-in). **For a
-sustained, multi-session product build, also set up the long-running build kit** (runnable
-oracle / feature-spec ledger / progress-handoff conventions — checklist Phase 5; Anthropic's
-long-running-harness playbook, files+conventions not machinery; still no custom
-subagents/hooks). **Greenfield (0 files, 0 commits) is a valid detected state, not a reason to
+request. **Greenfield (0 files, 0 commits) is a valid detected state, not a reason to
 stall**: an explicit request for the full harness on an empty repo is informed consent — deploy it
-with honestly-labelled stubs (never invented facts); on a *sustained* greenfield an `F0` ledger
-feature closes them in the loop, and where Phase 5 is skipped the stub marker carries its own fill
-trigger (never cite a `features.json` the project won't have). **Close every bootstrap by recording
-it** (Phase 8: the run writes its own first episodic entry, in whatever carrier the project's
+with honestly-labelled stubs (never invented facts) whose marker names its own fill trigger.
+**Close every bootstrap by recording it** (Phase 8: the run writes its own first episodic entry, in whatever carrier the project's
 continuity duty names — the layer starts live instead of as a convention nobody has exercised).
 Then stop.
 
@@ -99,12 +97,10 @@ already knows the kit):
 > - "audit my Claude Code harness" — audit `.claude/` (gap report, edits after approval)
 > - "set up Claude Code harness in this project" — bootstrap a production-grade harness
 >   (minimal via "set up a minimal harness")
-> - "set up the long-running build kit (Phase 5)" — oracle / feature-ledger / progress for a
->   multi-session product build
-> - Independent verification (fresh context, not self-recheck) — by default a **single
->   `code-refuter`** on each silent-wrong-prone change; escalate to the full 3-role
->   `/claude-code-harness:external-audit <scope>` in a **fresh** session only at a
->   milestone / irreversible delivery
+> - Independent verification (fresh context, not self-recheck) — by default a **fresh session
+>   told to refute** on each silent-wrong-prone change; escalate to `/code-review ultra` (the
+>   change is the risk) or a fresh session that **executes** the stack (the deliverable is the
+>   risk) only at a milestone / irreversible delivery
 > - Full lifecycle map — `references/operator-playbook.md`
 
 ## Reference map (load on demand — never preload all)
@@ -112,7 +108,6 @@ already knows the kit):
 - `references/native-capabilities.md` — current Claude Code built-ins. Read first in **Extend** / **Explain**.
 - `references/harness-discipline.md` — the rules, spawn/workflow policy, anti-patterns. Read in **Bootstrap** / **Extend**.
 - `references/bootstrap-checklist.md` — canonical layout + templates (default shape / MVH-on-request). Read in **Bootstrap**.
-- `references/practice-baseline.md` — transmittable behavioral baseline (§1–8) + delivery procedure. Read in **Bootstrap** (Phase 2b).
 - `references/project-docs/` — shipped distillation (`workflow.md` / `testing.md` / `docs-discipline.md`), copied verbatim into the project's `.claude/docs/` in **Bootstrap** (Phase 2c); re-synced by version in **Audit**.
 - `references/audit-checklist.md` — structured gap analysis. Read in **Audit**.
 - `references/evidence-base.md` — first-party + community sources with a T1–T7 rubric. Read when challenged or asked "where does this come from".
@@ -120,8 +115,10 @@ already knows the kit):
 - `references/codex-peer-skill.md` — the cross-vendor refuter skill the kit delivers **on consent,
   behind one mechanical gate**: a Codex MCP server is already registered. Read it when the gate is
   positive or when the operator asks for it by name; on a negative gate the option is not
-  mentioned at all — not in a run summary, not as a possibility. The gate condition is stated in
-  full in `bootstrap-checklist.md` Phase 2b, so evaluating it never requires loading this file.
+  mentioned at all — not in a run summary, not as a possibility. **The gate, in full, so evaluating
+  it never requires loading that file: a Codex MCP server is already registered** (it appears in
+  `claude mcp list`). `codex` merely on `PATH` does not count — an unwired CLI means the operator
+  has not chosen this.
 - `references/harness-evolution.md` — D-cycle (fold journal/audit findings into the canon) + strip revision procedure. Read when running a harness-evolution session.
 
 ## Non-negotiable principles (all modes)
@@ -168,9 +165,7 @@ already knows the kit):
 | .claude/docs/{workflow,testing,docs-discipline}.md | shipped distillation (verbatim, versioned) | 3 files |
 | docs/ARCHITECTURE.md + docs/CODE-MAP.md | real content from the code read | 2 files |
 | (no custom subagents/hooks/skills) | built-ins cover it | — |
-## Offered — practice baseline (Phase 2b): project embed `.claude/rules/practice-baseline.md` (~80 lines, default) or guarded user-global CLAUDE.md merge (opt-in); operator decides
-## Sustained build (Phase 5) adds — oracle (reuse the project's entry point; author scripts/init.sh only if none exists) · .claude/features.json (`priority` on every entry + the intake rule in `rules`: an acceptance-affecting question only the owner can answer is recorded, never decided by the session) · progress+devlog conventions
-## Greenfield (no code yet) — ARCHITECTURE/CODE-MAP ship as labelled stubs, never invented facts; on a sustained build the ledger seeds `F0` "get the brief → fill Stack / ARCHITECTURE / CODE-MAP / name the oracle", `passes: false` (no Phase 5 → no ledger: the stub marker carries the trigger)
+## Greenfield (no code yet) — ARCHITECTURE/CODE-MAP ship as labelled stubs, never invented facts; the stub marker carries its own fill trigger
 ## Minimal MVH (CLAUDE.md + settings only) — explicit operator request only
 ## Deferred until justified — subagents (evidence) · hooks (recurring pain) · skills (≥3× repeat)
 ## Closes with — Phase 8: the bootstrap records itself as episodic entry #1, in the carrier the continuity duty names (live layer + a carrier smoke test)
@@ -201,8 +196,6 @@ uncommitted content (external audit 2026-07-15), so the ritual is mechanical now
 exists only when committed, tagged **and pushed**: consumers install from origin/main via
 `/plugin marketplace add nikitaCodeSave/claude-code-harness`, and without a `version` bump
 users never receive changes.
-When the operator's global baseline (`~/.claude/CLAUDE.md` §1–8) gains a rule, re-distill
-`references/practice-baseline.md` in the same release — it is a snapshot and drifts silently otherwise.
 **The `codex-peer` block carries another vendor's call shape, so it needs a trigger, not a badge**:
 re-check it against the live `tools/list` whenever a maintainer's own call is rejected on an
 argument, or whenever that vendor's CLI is upgraded on the maintainer's machine — then bump the

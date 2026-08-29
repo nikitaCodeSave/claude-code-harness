@@ -1,11 +1,13 @@
 # Native capabilities — what Claude Code already does
 
-Working inventory as of **Claude Code v2.1.226 / the Claude 5 family (Fable 5, Sonnet 5,
+Working inventory as of **Claude Code v2.1.251 / the Claude 5 family (Fable 5, Sonnet 5,
 Opus 5) model generation** (August 2026). Default model is account-type-dependent [FP,
 `model-config`]: **Opus 5** (`claude-opus-5`, v2.1.219+ — now *the* default Opus model;
-1M context, $5/$25 MTok, knowledge cutoff May 2026) on Max / Team Premium / Enterprise PAYG;
-**Sonnet 5** (v2.1.197+) on Pro / Team Standard / Enterprise seats; Fable 5 is the default on
-no account type.
+1M context, $5/$25 MTok, knowledge cutoff May 2026) on Max / Team Premium / Enterprise PAYG
+**and, since v2.1.251, on seat-based Enterprise too**; **Sonnet 5** (v2.1.197+) on Pro /
+Team Standard; Fable 5 is the default on no account type. `ANTHROPIC_DEFAULT_MODEL`
+(v2.1.236) sets what new sessions start on — unlike `ANTHROPIC_MODEL` a `/model` pick still
+overrides it and persists; `modelPicker` (v2.1.243) curates the `/model` list itself.
 
 The point of this file: a harness must not reinvent a built-in. Before writing
 any custom subagent, hook, skill, or command, confirm the need is not already covered here.
@@ -63,11 +65,27 @@ harness step that expected an in-session fork must say `/subtask`. One condition
 instead** — a harness that hard-codes one name breaks on the other configuration. Neither gets a
 worktree of its own (binary-verified: both delegate to the same helper, which spawns the
 background agent with an empty worktree result); worktree isolation is the separate frontmatter
-field below. Frontmatter
-`maxTurns`, `isolation: worktree` (auto-cleaned branch-off), and `memory: user|project|local`
-(**persistent per-agent memory** under `~/.claude/agent-memory/`). Disable a built-in via
+field below. **Since v2.1.232 the Agent tool takes `subagent_type: "fork"` and forking is on by
+default**: such a delegate inherits the full conversation *and the prompt cache*, which makes it
+the cheap way to hand off a side task that needs everything you already know — the briefing cost
+that makes a fresh delegate expensive is simply absent. The same release made non-teammate agent
+spawns in interactive sessions **background by default**. Note the boundary against §8-style
+verification: a fork inherits the author's framing by construction, so it is the wrong shape for
+an independent refuter and the right one for "keep working on what we were just doing". Frontmatter
+`maxTurns`, `isolation: worktree` (auto-cleaned branch-off), `memory: user|project|local`
+(**persistent per-agent memory** under `~/.claude/agent-memory/`), and `experimental.cacheTtl`
+(`"5m"` / `"1h"`, v2.1.248 — a per-agent prompt-cache TTL used when no subagent TTL setting is
+configured; the settings-level pair is `promptCacheTtl` / `subagentPromptCacheTtl`, v2.1.243).
+Disable a built-in via
 `permissions.deny: ["Agent(Explore)"]`; `Agent(x,y)` allowed-type lists are **enforced**, and
 background subagents **prompt for permission in the main session** rather than auto-denying (v2.1.186).
+
+**`CLAUDE_CODE_SUBAGENT_MODEL` changed meaning in v2.1.251** — it now sets the *default*
+subagent model, and an agent definition's `model:` or an explicit per-spawn model **takes
+precedence over it**. Before that it overrode everything. A harness that pinned delegate models
+through this variable was silently re-layered by the upgrade: what it used to force it now only
+suggests. Check any harness relying on it, and prefer the agent definition's own `model:` when
+the pin must hold.
 
 ## Dynamic workflows — the bounded fan-out primitive [FP/BLOG]
 
@@ -88,11 +106,22 @@ bare word "workflow" does not trigger a run (asking in your own words does); a `
 - Manage with `/workflows`; bundled `/deep-research <question>` (needs WebSearch) — **invoke-only
   since v2.1.218: Claude no longer starts it on its own.** Saved workflows live in
   `.claude/workflows/` (project) or `~/.claude/workflows/` (user), run as `/<name>`.
+- **The script-writing reference is a bundled skill now, not tool prose** (v2.1.248): the
+  Workflow tool's description dropped from ~5.7k to ~1k tokens and the authoring guide moved
+  into `workflow-authoring`, loaded only when a script is actually being written. Worth knowing
+  as precedent, not just as a fact: Anthropic pays down its own always-loaded budget by moving
+  depth behind a trigger — the same move this kit calls progressive disclosure.
 - Size guideline (advisory) — **default `medium` since v2.1.219** ("aim for fewer than 15
   agents"); values `small` / `medium` / `large` / `unrestricted`. Settable from **any** settings
   file via the **`workflowSizeGuideline`** key (which then *hides* the `/config` row), or
   interactively via `/config` → "Dynamic workflow size" (v2.1.202).
 - Disable: `/config`, `"disableWorkflows": true`, or `CLAUDE_CODE_DISABLE_WORKFLOWS=1`.
+
+**`/batch <instruction>` is the shipped fan-out for a mechanical sweep** [FP, `/en/commands`]: in a
+git repo it splits the change across **5–30 subagents, each in its own worktree, each opening a
+pull request**. Reach for it before scripting a `for file in …; do claude -p …; done` loop — that
+loop is still the documented pattern when you need custom per-item logic or `--allowedTools`
+scoping, but a plain "apply this change across these files" is now one command.
 
 **When to reach for it** (`code.claude.com/docs/en/workflows`, "who holds the plan"): scope
 exceeds one conversation's coordination; you want the orchestration codified + rerunnable; or
@@ -102,13 +131,44 @@ default. See `harness-discipline.md` for the single-agent-first boundary.
 
 ## Agent teams — experimental, off by default [FP]
 
-`TeamCreate` / `TeamDelete` / `SendMessage` + the shared task list, gated behind
-`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (v2.1.32+). Multiple coordinating Claude Code
-instances, one fixed lead, peer mailbox. Token cost "significantly more than a single
-session" (community: ~7×). Shared list at `~/.claude/tasks/{team}/`, config at
-`~/.claude/teams/{team}/config.json` (machine-local, auto-generated). Quality-gate hooks:
-`TeammateIdle`, `TaskCreated`, `TaskCompleted`. Limits: one team per lead, no nested teams,
-no `/resume` mid-flight. **Document, route on explicit opt-in; do not enable by default.**
+Multiple coordinating Claude Code instances behind `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`:
+one fixed lead, teammates with their own context windows, a peer mailbox and a shared task
+list they self-claim from (file-locked). **There is no team-creation tool any more** —
+`TeamCreate` / `TeamDelete` were removed in v2.1.178, spawning a teammate needs no setup step,
+cleanup is automatic at session exit, and the `team_name` input on the Agent tool is accepted
+but ignored (same field in `TaskCreated` / `TaskCompleted` / `TeammateIdle` payloads is
+deprecated). A harness step that calls either tool is calling something that no longer exists.
+
+**The flag changes ordinary delegation — this is the part to know before enabling it.** While
+agent teams are on, a subagent *Claude names on its own* launches as a teammate, so a team can
+form during delegation nobody framed as team work. `=0` (user settings outrank a shell export;
+project / local / `--settings` / managed layers outrank user) restores plain subagents without
+a restart. Headless `-p` and SDK sessions never spawn teammates regardless.
+
+- **Display**: `teammateMode` — `in-process` (**the default since v2.1.179**, any terminal) /
+  `auto` / `tmux` / `iterm2` (needs the `it2` CLI); `--teammate-mode` flag is experimental and
+  absent from `--help`.
+- **Model**: `CLAUDE_CODE_SUBAGENT_MODEL` ▸ the spawn prompt ▸ the subagent definition's
+  `model` (in-process only) ▸ the lead's model. `teammateDefaultModel` was **removed in
+  v2.1.234** and a leftover value is ignored. Teammates inherit the lead's **effort**.
+- **Permissions**: teammates start with the lead's mode and cannot be given per-teammate modes
+  at spawn; their prompts surface in the lead session. One designed exception — a teammate's
+  **plan is auto-approved** by the lead session without the operator reviewing it.
+- **State on disk**: mailbox `~/.claude/teams/{team}/inboxes/{agent}.json`, config
+  `~/.claude/teams/{team}/config.json` (removed at session end; runtime state — never hand-edit
+  or pre-author), task list `~/.claude/tasks/{team}/` (survives, swept by `cleanupPeriodDays`).
+  Team name = `session-` + the first 8 chars of the session ID; there is no project-level team
+  config. Quality-gate hooks: `TeammateIdle`, `TaskCreated`, `TaskCompleted` (exit 2 = keep
+  working / block creation / block completion).
+- **Cost**: each teammate is a separate instance — token use scales linearly; first-party
+  advice is 3–5 teammates, and an in-process teammate falls **outside the main conversation's
+  cache TTL bucket** (5 min unless `subagentPromptCacheTtl: "1h"`).
+- **Limits**: no `/resume` or `/rewind` for in-process teammates, task status can lag, one team
+  per session, no nested teams, no background subagents from an in-process teammate, the lead
+  is fixed for its lifetime.
+
+**Document, route on explicit opt-in; do not enable by default** — and when the operator does
+enable it, tell them the delegation-shape change above, not just the token cost.
 Source: `code.claude.com/docs/en/agent-teams`.
 
 ## Tasks / scheduling [FP]
@@ -116,15 +176,18 @@ Source: `code.claude.com/docs/en/agent-teams`.
 `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` — the structured session task list
 (`TodoWrite` is disabled by default in its favor). It coordinates the run in progress and is
 machine-local (a team's shared list lives under `~/.claude/tasks/`), so it is **not** the
-repository-owned register of commitments: what outlives the run belongs in the project's ledger
-(`bootstrap-checklist.md` Phase 5). Using the ledger for in-run steps is ceremony; using the task
-list as the backlog puts the backlog outside the repo the work ships from. Scheduling is first-party documented
+repository-owned register of commitments: what outlives the run belongs in the repo, in whatever
+carrier the project keeps commitments in. Using the task list as the backlog puts the backlog
+outside the repo the work ships from. Scheduling is first-party documented
 (`code.claude.com/docs/en/tools-reference`, `/en/scheduled-tasks`): `CronCreate` /
 `CronList` / `CronDelete` schedule a recurring or one-shot prompt **within the current
 session** (session-scoped; restored on `--resume`/`--continue` if unexpired) — not a
 machine-level cron. `ScheduleWakeup` paces the next iteration of a self-paced `/loop`
-(Claude calls it itself; not on Bedrock/Vertex/Foundry). The **`/loop`** skill is the
-operator surface for recurring runs. For **durable, cross-session scheduling** the
+(Claude calls it itself). The **`/loop`** skill is the
+operator surface for recurring runs — since v2.1.248 its self-paced dynamic mode and the
+no-prompt autonomous default are **always available**, including on Bedrock/Vertex/Foundry, and
+`/usage` carries a **Loops breakdown** (runs, total tokens, tokens per run, last run) that makes
+a runaway loop visible without instrumenting anything (v2.1.243). For **durable, cross-session scheduling** the
 first-party surface is **`/schedule`** (the `RemoteTrigger` tool) managing **Routines** on
 claude.ai — Anthropic-hosted, survives sessions, min interval 1 h; Pro/Max/Team/Enterprise,
 not on Bedrock/Vertex/Foundry. Don't hand-roll a persistent cron around the session-scoped one.
@@ -149,11 +212,18 @@ Background tasks are **never restored on resume**. Recurring checks are the `/lo
 long-running or scheduled task can reach the operator who stepped away (Anthropic-hosted;
 not on Bedrock/Vertex/Foundry).
 
-## Hooks — 31 events [FP]
+## Hooks — 33 events [FP]
 
-Far more than the five most projects use. Full list (`code.claude.com/docs/en/hooks`):
+Far more than the five most projects use. Full list (`code.claude.com/docs/en/hooks` documents
+31; the two model-switch events shipped in v2.1.251 and are binary-verified but not yet on that
+page — a fresh event reaching the binary before the docs is the normal order, so check the
+binary, not only the page, when you need one that just shipped):
 
-- Session: `SessionStart`, `Setup`, `SessionEnd`
+- Session: `SessionStart`, `Setup`, `SessionEnd` — a `SessionStart` firing on **resume** also
+  receives the session's staleness and the estimated re-cache cost (v2.1.251)
+- Model: `PreModelSwitch`, `PostModelSwitch` (v2.1.251) — block, confirm, or annotate a model
+  switch. The first native seam for "this project's deep work does not silently drop to a
+  cheaper model"; previously only advisory prose could say it.
 - Per-turn: `UserPromptSubmit`, `UserPromptExpansion`, `Stop`, `StopFailure`
 - Tool loop: `PreToolUse`, `PostToolUse`, `PostToolUseFailure`, `PostToolBatch`,
   `PermissionRequest`, `PermissionDenied`
@@ -186,7 +256,8 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
   - `CLAUDE_CODE_EFFORT_LEVEL` — same values **plus `auto`** (= the current model's default).
   - CLI: `claude --effort <level>` for the session (a *launch pin*: `/effort` then reports
     "the launch-effort pin holds effort at X"), `claude agents --effort <level>` as the default
-    for dispatched background sessions.
+    for dispatched background sessions. Since v2.1.251 **`/effort` saves your default per
+    model**, so switching models no longer carries the previous model's level over.
   - **Precedence, measured 2026-07-26 on v2.1.220** (org ceiling ▸ env ▸ launch pin ▸ settings ▸
     model default). `CLAUDE_CODE_EFFORT_LEVEL` wins over everything user-side — including the
     `--effort` flag: with the env set to `auto`, `--effort low` vs `--effort xhigh` produced
@@ -233,7 +304,10 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
   not survive. The other real channel is the interactive statusline:
   `StatusLineCommandInput.effort.level`, plus **per-agent `effort` in the `subagentStatusLine`
   payload** (v2.1.214, added precisely so agent rows can render model + effort) — the cheap way
-  to see "who is running at what" during a fan-out. Headless leaves only token spend — a
+  to see "who is running at what" during a fan-out. **Cheaper still since v2.1.243: `/tasks` and
+  the agent detail dialogs now print the model and effort level each subagent ran on** — no
+  statusline script required, which retires the main reason to write one for fan-out
+  observability. Headless leaves only token spend — a
   subagent's own transcript at `<session-dir>/subagents/agent-<id>.jsonl` (+ `.meta.json` naming
   its `agentType`) — and that is a **weak** oracle: it separates tiers only across several runs
   on a task substantial enough to spend on (above). The transcript's own per-message effort field
@@ -253,10 +327,13 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
   *negative*: no error signature proves nothing until the same scan shows the tool was called.
 - **What to know before you raise effort on Opus 5** [FP,
   `platform.claude.com/docs/en/about-claude/models/whats-new-opus-5`]:
-  - *Thinking is on by default*, and disabling it is accepted **only at effort `high` or below** —
-    `thinking: {"type":"disabled"}` with `xhigh`/`max` returns 400, enforced per request. Also:
-    with thinking disabled the model can write a tool call into its text output instead of
-    emitting a `tool_use` block, so the tool never runs and nothing errors.
+  - *Thinking is on by default*, and disabling it is accepted **only at effort `high` or below**.
+    The API rejects `thinking: {"type":"disabled"}` with `xhigh`/`max` per request; **since
+    v2.1.251 the client no longer lets that combination reach the API** — it sends `high`
+    instead. So on a current client the failure mode is not an error but a **ceiling**: effort
+    above `high` is unreachable while thinking is off, silently. Also: with thinking disabled the
+    model can write a tool call into its text output instead of emitting a `tool_use` block, so
+    the tool never runs and nothing errors.
   - *`max_tokens` is a hard cap on thinking **plus** response text.* First-party guidance: at
     `xhigh`/`max` set it large "so the model has room to think and act across subagents and tool
     calls" (in Claude Code: `CLAUDE_CODE_MAX_OUTPUT_TOKENS`). A budget sized for `high` can end
@@ -303,11 +380,13 @@ classic audit offender, see `audit-checklist.md` §3). The surfaces:
   (`code.claude.com/docs/en/ultrareview`): typically **5–10 min, ~$5–25/run via usage credits**;
   3 free runs on Pro/Max (one-time allotment, no refresh; a stopped run still consumes one).
   Reserve it for high-stakes gates (security-sensitive change, migration, payment path);
-  `/code-review` covers the everyday case. Boundary vs the kit's `/external-audit`:
-  `ultrareview` is a paid cloud **diff/PR review** — reach for it when the change itself is
-  the risk; the kit's 3-role external audit is subscription-local and audits a
-  **deliverable** (executed evidence + process audit + adjudication) — reach for it at
-  milestone close / irreversible gates. They compose; neither replaces the other.
+  `/code-review` covers the everyday case. **This is the fleet-of-reviewers rung** — the kit
+  shipped its own 3-role audit until v1.23.0 and retired it here: what made that rung work was
+  the independent context, which a fresh session provides for free, while the orchestration
+  around it was the pipeline this kit tells others not to hand-roll. Where the change itself is
+  the risk, reach for `ultrareview`; where the *deliverable* is (milestone close, irreversible
+  gate), open a **new session** and tell it to refute — subscription-local, and it can execute
+  the live stack, which a diff review does not.
 - A `REVIEW.md` at the repo root customizes severity calibration
   (`code.claude.com/docs/en/code-review`; tags: Important / Nit / Pre-existing).
 
@@ -316,9 +395,9 @@ classic audit offender, see `audit-checklist.md` §3). The surfaces:
 and first-party guidance is explicit: **remove verification instructions carried over from
 earlier models** ("include a final verification step", "use a subagent to verify") — they cause
 **over-verification**. This does not retire the ladder: the ladder's rungs are *external*
-(`/code-review` on the diff, a fresh-context refuter, `/external-audit` at a gate), and an
+(`/code-review` on the diff, a fresh-context refuter, `/code-review ultra` at a gate), and an
 independent evaluator is not the same thing as telling the author to check itself
-(`harness-discipline.md`, §8 of the practice baseline). What it does retire is prompt-level
+(`harness-discipline.md`). What it does retire is prompt-level
 nagging — the "remember to verify" line in CLAUDE.md and the "then verify with a subagent" tail
 on a task prompt. Same model generation also delegates to subagents more readily on its own.
 
@@ -353,6 +432,14 @@ scope only** — never checked-in files). What it covers:
   always-loaded guidance into lazy skills and nested CLAUDE.md files.
 - **Slow hooks and context-heavy extensions**, version currency, making auto mode the default
   permission mode, and pre-approving frequently denied read-only commands.
+- **Server-managed-settings diagnostics** (v2.1.248) — a startup warning when they fail to load,
+  and a `/doctor` + `/status` line explaining the failure or why they were not fetched.
+
+Two neighbouring native checks that overlap what a harness would otherwise hand-roll: a
+**startup warning for Bash allow rules with a wildcard before the subcommand** (`Bash(git *
+main)`, v2.1.246 — such a rule also matches options inserted before the subcommand, which is
+how an allowlist quietly widens), and a **`/permissions` → Auto mode tab** (v2.1.246) for
+viewing and editing the classifier rules instead of hand-editing `autoMode.*` blind.
 
 One budget fact it encodes, worth knowing on its own: **the skill listing is budgeted at ~1% of the
 context window — when the summed descriptions exceed it, entries get truncated and skill routing
@@ -365,6 +452,22 @@ it audits prompts and tool descriptions for patterns written for older models, w
 
 ## Memory [FP] (`code.claude.com/docs/en/memory`)
 
+**`/init` is no longer just a file generator** [FP]. With **`CLAUDE_CODE_NEW_INIT=1`** it runs an
+interactive multi-phase flow: it asks which artifacts to set up (CLAUDE.md files, skills, hooks),
+explores the codebase **with a subagent**, fills gaps with follow-up questions, and presents a
+reviewable proposal **before writing anything**. It also reads `AGENTS.md`, `.cursor/rules`,
+`.github/copilot-instructions.md`, `.devin/`, `.windsurf/`, `.clinerules` and folds the relevant
+parts in. Anything a harness kit does at bootstrap has to be measured against *this*, not against
+the old one-shot `/init` — the parts it covers are not the kit's to reimplement.
+
+**A generated instructions file is a draft, not a deliverable.** Two 2026 studies found
+LLM-authored `AGENTS.md`/`CLAUDE.md` files made agents *worse*: one measured −2% success at +23%
+cost, the other reduced task success in 5 of 8 settings and added 2.45–3.92 steps per task. The
+mechanism in both: the generated file restates what the model can already derive from the
+repository, so it spends context to say nothing. The rule that follows is not "don't generate" —
+it is **generate, then cut everything derivable**, keeping only what a new teammate would have to
+be told. `/doctor` automates the cut for a checked-in CLAUDE.md.
+
 Two systems, both loaded every session: **CLAUDE.md** (you write) and **Auto memory** (Claude
 writes). CLAUDE.md load order broad→specific: managed policy → user `~/.claude/CLAUDE.md` →
 project `./CLAUDE.md` or `./.claude/CLAUDE.md` → local `./CLAUDE.local.md`; plus `.claude/rules/*.md`,
@@ -373,6 +476,36 @@ in `~/.claude/projects/<project>/memory/` with a `MEMORY.md` index (first 200 li
 loaded each session). Command is **`/memory`** (lists loaded files, toggles auto memory).
 **There is no built-in `/remember`** — "remember X" is natural-language behavior writing to
 auto memory.
+
+**`AGENTS.md` — the cross-vendor standard Claude Code does not read** [FP, `/en/memory`]. It is the
+file Codex, Cursor and Copilot look for (an open spec under the Agentic AI Foundation, adopted by
+tens of thousands of repositories), and **Claude Code reads `CLAUDE.md`, not `AGENTS.md`**. Two
+first-party bridges, both keeping one source of truth:
+
+- `@AGENTS.md` as the first line of `CLAUDE.md`, with Claude-specific additions below it.
+- `ln -s AGENTS.md CLAUDE.md` when nothing Claude-specific is needed (on Windows the symlink needs
+  Administrator or Developer Mode — use the import there).
+
+**Measured here, three runs on v2.1.251, with an `InstructionsLoaded` hook as the oracle** (it logs
+exactly which instruction files load, and is the right instrument for any "did this reach the
+context" question):
+
+| Setup | In the startup context |
+|---|---|
+| `AGENTS.md` alone | **only the user-level CLAUDE.md** — the project file is absent |
+| `CLAUDE.md` containing `@AGENTS.md` | both `CLAUDE.md` **and** `AGENTS.md`, as separate entries |
+| `CLAUDE.md` symlinked to `AGENTS.md` | `CLAUDE.md` (one file, carrying the AGENTS.md content) |
+
+The first row is the finding that matters: in a repo that keeps only `AGENTS.md`, Claude starts
+with **no project instructions at all**. A prompt can still make it *read* the file — a naive probe
+asking "what is the codename?" answers correctly, from a tool call — so a behavioural probe
+confirms nothing here. Use the hook.
+
+`/import` (v2.1.213+) appends another agent's config — `AGENTS.md`, `.cursor/rules`,
+`.github/copilot-instructions.md` and friends — into the matching `CLAUDE.md` as a **one-time
+copy**, and carries over MCP servers, commands, subagents and skills. One-time: it does not keep
+them in sync, so for a repo that keeps evolving its `AGENTS.md`, the import or symlink is the
+maintainable form and `/import` is the migration.
 
 **What loads when — and the silent-error surface (verified 2026-06-24, FP `code.claude.com/docs/en/memory`).**
 CLAUDE.md is delivered as a **user message after the system prompt**, not in the system prompt
@@ -427,7 +560,19 @@ correctly refuses injection-shaped instructions found in a working directory.
   (This generalizes the long-standing incompatibility with `AskUserQuestion`: a fork could never
   prompt the operator because it always ran detached — that is now the default path, not an edge
   case.) Frontmatter booleans also accept `yes`/`no`/`on`/`off`/`1`/`0` (v2.1.218).
-- **Slash commands** — `.claude/commands/*.md`; appear in `/`-autocomplete.
+- **Slash commands** — `.claude/commands/*.md`; appear in `/`-autocomplete. Bundled skills keep
+  arriving (`/design` — artboard-based UI drafting, research preview v2.1.234+; `/claude-api`
+  with its `prompt-audit` and `cost-optimize` subcommands), so **check `/`-autocomplete before
+  authoring a command for a generic need** — the built-in set is a moving target, and the
+  duplicate you write does not announce itself. Two small ones with harness consequences:
+  **`/verify`** runs and checks the app itself (the rung above "tests pass" — first-party
+  guidance is to run it *after* Claude's own check passes), and **`/btw`** answers a side question
+  **without putting it in conversation history**, which is the cheap fix for the context-pollution
+  failure mode rather than a `/clear`.
+- **Code intelligence** — for a typed language, first-party best-practices recommends installing a
+  code-intelligence plugin so Claude navigates by **symbol** instead of reading whole files, with
+  automatic error detection after edits. This is the tools-layer move the harness-gains research
+  keeps pointing at; it is not something a prompt or a rule can substitute for.
 - **MCP** — external tools appear as normal tools; `Elicitation`/`ElicitationResult` support input flows.
 - **Plugins** — marketplaces `anthropics/claude-plugins-official` (auto-registered) and
   `anthropics/claude-plugins-community` (`@claude-community`); can ship subagents/hooks/skills/
@@ -449,8 +594,11 @@ correctly refuses injection-shaped instructions found in a working directory.
 Files in `.claude/output-styles/` (or `~/.claude/`, or managed policy) that **modify the system prompt
 directly** — set role/tone/format for *every* response. Activated via `/config` → Output style (saved to
 `settings.local.json` `outputStyle`); the standalone `/output-style` command was removed in v2.1.91. Read
-**once at session start** — a change takes effect only after `/clear` or a new session. Built-ins:
-**Default / Proactive / Explanatory / Learning**.
+**once at session start** — a change takes effect only after `/clear` or a new session.
+
+Built-ins: **Default / Proactive / Explanatory / Learning / Concise** (v2.1.237 — leads with the
+result, skips preamble and narration, does the work just as thoroughly; check the built-ins
+before authoring a style for "shorter answers", that need is now shipped).
 
 **Silent-error trap — the one reason this is in the kit.** A custom output style's instructions are appended
 to the end of the system prompt, and it **omits Claude Code's built-in software-engineering instructions
@@ -500,8 +648,12 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
   files (`.npmrc` / `.bazelrc` / `.pre-commit-config.yaml` / `.devcontainer/` …) and shell
   startup files.
 - **Cross-session messaging is a shipped surface**: sessions can message each other across your
-  machines (`SendMessage` + **`ListAgents`** to discover them; macOS/Linux). Its guard rails, all
-  native: a relay **carries no user authority** (receivers refuse relayed permission requests),
+  machines (`SendMessage` + **`ListAgents`** to discover them; macOS/Linux, and since v2.1.248
+  also on Bedrock/Vertex/Foundry and with telemetry disabled). Type **`@`** in the prompt to
+  mention another session by name (v2.1.232), and pass **`notify_when_idle`** to ask one session
+  for a single notice when it next goes idle (v2.1.236) — opt-in, one-shot, **no polling**, which
+  is the same anti-sleep-loop discipline as the Background-waiting section above. Its guard
+  rails, all native: a relay **carries no user authority** (receivers refuse relayed permission requests),
   outbound messages pass the permission classifier before dispatch, `crossSessionInbound` holds
   messages addressed to a permission-bypassed session for your approval (`dialogExpiry` bounds the
   wait), and a failed delivery is now reported as an error instead of "Message sent". Treat access
@@ -510,6 +662,25 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
 - `fallbackModel` setting (ordered list) / `--fallback-model` — automatic model fallback,
   including interactive sessions. Managed settings can pin an allowed version range
   (`requiredMinimumVersion` / `requiredMaximumVersion`).
+- **A path deny rule is hygiene, not a security boundary — and v2.1.251 is where that stopped
+  being theoretical.** That release fixed four ways the permission layer could be walked around:
+  Read/Write/Edit followed a **symlink swapped inside the working directory after the check had
+  passed**; **Grep and Glob never applied `Read(...)` deny rules to files reached through a
+  symlinked search path** at all; the Workflow tool read (and quoted in errors) a `scriptPath`
+  outside what the session may read before its permission check ran; and Bash auto-approved
+  commands assigning an arithmetic expression to an integer variable (`OPTIND=1/0`). Two
+  consequences for a harness. **Keep the client current** — a deny rule's enforcement is a
+  property of the release, not of the rule. And **do not treat `deny` as containment against
+  anything adversarial**: it fences honest mistakes, while OS-level enforcement is the sandbox
+  (this is the same "contain at the environment layer, steer at the model layer" split that
+  `evidence-base.md` cites first-party).
+- **`--restricted` / `CLAUDE_CODE_RESTRICTED=1`** (v2.1.248) — the shipped hard-floor profile:
+  removes the built-in tools that run commands or code plus `WebFetch` (unless named in
+  `--tools`), keeps file tools inside the working directory, refuses `bypassPermissions`, and
+  **ignores user, project and local settings files**. For "let it read and reason, never let it
+  execute" this is now a flag, not a bespoke allowlist — reach for it before hand-building a
+  read-only profile out of deny rules. Note what the last clause costs: your own settings do not
+  apply either, so a guard hook you rely on is *also* off in that mode.
 - **Isolation is enforced for Bash too, in every session type**: a worktree-isolated session (and
   its subagents) can no longer run destructive git commands against the main checkout — isolation
   covers file edits *and* shell. Related hardening you get for free (so do not hand-roll it):
@@ -522,6 +693,12 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
   sandboxed commands read a sentinel while the proxy substitutes the real value on egress;
   `extract` regexes, `decode: "jwt"` with `maskClaims`, `awsPairs`/`sigv4` re-signing; needs
   `network.tlsTerminate`, honoured only from user/managed/`--settings` scope).
+- **`claudeMd` as a managed setting** puts CLAUDE.md content directly inside `managed-settings.json`
+  instead of deploying a file, and it **cannot be excluded** by `claudeMdExcludes`. The division
+  first-party draws is worth carrying into any harness design: **settings enforce, CLAUDE.md
+  steers** — blocking tools/commands/paths, sandbox isolation, env and login belong in settings;
+  code style, data-handling reminders and behavioural instructions belong in the managed CLAUDE.md.
+  A rule written on the wrong side of that line is either unenforceable or unreadable.
 - **A managed policy can switch off non-plugin customization entirely** —
   `strictPluginOnlyCustomization` (binary-verified; absent from the public settings page) blocks
   `~/.claude/{surface}/`, the project's `.claude/{surface}/`, `settings.json` hooks and `.mcp.json`

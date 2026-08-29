@@ -14,6 +14,8 @@ anything; it carries what the file tree cannot tell you. Claude Code additionall
   plugin and never ships.
 - `~/.claude/skills/claude-code-harness` on the maintainer's machine is a **symlink to
   `plugins/harness/`**, so edits here are live immediately. Edit here, never in a copy.
+- `evals/` is the kit's own regression suite — mechanical checks plus fixture projects and a
+  criteria file written before the runs. Dev harness, never shipped.
 
 ## Commands
 
@@ -27,10 +29,14 @@ claude plugin validate .
 
 # devlog index (required after adding an entry under .claude/devlog/entries/)
 ./plugins/devlog/bin/devlog-reindex
+
+# regression suite — seconds, free; run it before every release
+./evals/run.sh mech
 ```
 
-Done = `release.sh` completes without a stamp mismatch, `plugin validate` prints
-`✔ Validation passed`, and the reindexer reports no ERRORS.
+Done = `./evals/run.sh mech` exits 0, `release.sh` completes without a stamp mismatch,
+`plugin validate` prints `✔ Validation passed`, and the reindexer reports no ERRORS. The suite
+was red for four consecutive releases because this line did not name it.
 
 ## Boundaries
 
@@ -47,9 +53,11 @@ Done = `release.sh` completes without a stamp mismatch, `plugin validate` prints
 
 ## Conventions that are not obvious from the files
 
-- **One file carries the version pin.** Only `plugins/harness/references/native-capabilities.md`
-  states a Claude Code version. Every other document describes behavior without binding it to a
-  release and points there. Duplicating a currency pin makes it go stale silently in one copy.
+- **One file carries the currency pin.** Only `plugins/harness/references/native-capabilities.md`
+  states a **patch-level** Claude Code version or a dated grounding stamp; every other document
+  describes behavior without binding it to a release and points there. Duplicating a currency pin
+  makes it go stale silently in one copy. A coarse generation scope (`2.x / Opus-class`) and a
+  dated "verified against" line are **provenance, not a pin** — they stay.
 - **`references/project-docs/*` ship verbatim into other people's repositories.** They carry a
   `shipped-by:` stamp that is the re-sync key, and a content gate: durable principles and stable
   affordances only. A claim tied to a ticket number or a specific Claude Code version belongs in

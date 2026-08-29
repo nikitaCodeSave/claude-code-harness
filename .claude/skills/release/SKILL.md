@@ -1,7 +1,8 @@
 ---
 name: release
-description: "Провести изменение репозитория claude-code-harness от правки до origin/main — надёжно, одним ритуалом. Сначала решает развилку: правка задевает shipped-поверхность (plugins/**, README, CHANGELOG, marketplace.json) → нужен version bump + тег; или это dev-harness-фикс (.claude/**, .gitignore) → обычный commit+push без тега. Затем выполняет выбранный путь целиком: bump обоих plugin.json в локстепе, CHANGELOG-запись, devlog+reindex, staging через release.sh, commit/tag/push, верификация синка с origin. Используй ВСЕГДА, когда просят зарелизить/выкатить/обновить плагин, поднять/сменить версию, поставить тег, закоммитить и запушить изменение в этом репо, или спрашивают «нужен ли тег для этой правки». Триггеры: «зарелизь», «выкати обновление», «подними версию до X», «закоммить и запушь», «обнови плагин», «release», «ship it», «bump version». Скипай только для правок, которые заведомо не идут в git (черновики в scratchpad, чисто аналитические ответы)."
+description: "Ритуал релиза claude-code-harness: развилка «нужен ли тег», bump обоих plugin.json в локстепе, CHANGELOG, devlog+reindex, staging через release.sh, commit/tag/push и верификация синка с origin. Вызывается оператором командой /release — модель его не инициирует."
 argument-hint: "[patch|minor|major | или коротко: что за изменение]"
+disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git status:*), Bash(git add:*), Bash(git commit:*), Bash(git tag:*), Bash(git push:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git rev-parse:*), Bash(git ls-remote:*), Bash(git branch:*), Bash(plugins/harness/scripts/release.sh:*), Bash(python3:*), Bash(jq:*), Bash(claude --version), Bash(tail:*), Bash(ls:*)
 ---
 

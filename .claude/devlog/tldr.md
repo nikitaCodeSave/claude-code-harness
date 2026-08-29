@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #55 · 2026-08-29 · Кит прошёл собственный аудит: чек-лист не знал, что бывают проекты-производители харнесов
+
+**Tags:** harness, audit, checklist, self-application
+
+Кит предписывает чужим проектам режим Audit, но сам через него не проходил ни разу. Свежая сессия применила audit-checklist.md к dev-harness этого репозитория (.claude/ + корневые файлы, но не plugins/** — там продукт). Задание отдельно требовало отметить неприменимые секции…
+
+[→ entries/0055-kit-proshel-sobstvennyy-audit-chek-list-ne-znal-chto-byvayut.md](entries/0055-kit-proshel-sobstvennyy-audit-chek-list-ne-znal-chto-byvayut.md)
+
+---
+
 ## #54 · 2026-08-29 · Ревьюер другого вендора откатил две мои правки: доки отстали от changelog
 
 **Tags:** harness, cross-vendor, regression, evidence

@@ -9,7 +9,7 @@
 # иначе скилл не загружается из чужой рабочей директории.
 set -uo pipefail
 R="$(cd "$(dirname "$0")" && pwd)"
-KIT=/home/nikita/PROJECTS/claude-code-harness
+KIT="$(dirname "$R")"
 MODE="${1:-all}"
 
 run_mech() {

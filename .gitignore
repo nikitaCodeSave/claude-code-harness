@@ -24,12 +24,17 @@
 /.claude/*
 !/.claude/CLAUDE.md
 !/.claude/DEMO.md
+!/.claude/settings.json
 !/.claude/devlog/
 !/.claude/skills/
 !/.claude/audits/
 /.claude/audits/**
 !/.claude/audits/*/
 !/.claude/audits/*/AUDIT-*.json
+# frozen provenance is a preservation claim — the evidence has to be in history, not on one disk
+!/.claude/audits/*/*.md
+!/.claude/audits/*/logs/
+!/.claude/audits/*/logs/*
 
 # Never track even inside whitelisted dirs
 .credentials.json

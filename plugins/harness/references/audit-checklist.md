@@ -5,7 +5,26 @@ until the operator approves** the items they want fixed. Output uses the report 
 `SKILL.md`. Grounded for a capable Claude Code / Opus-class generation; the currency pin lives
 in `references/native-capabilities.md`.
 
-## 0. Live machinery vs completed-run artifact (ask this first)
+## 0. First draw the line: what here is the harness, and what is the deliverable
+
+Every section below assumes the audited project **consumes** a harness and **produces** something
+else. Establish that this holds before walking them, because two shapes break it:
+
+- **The deliverable is harness content** — a plugin, a template, a canon like this kit. Then the
+  project's own `.claude/` is the audit target and everything under the shipped directory is the
+  *product*, judged by its release process, not by this file. The whole shipped-docs cluster in §4
+  (re-sync, coverage-per-file, "a shipped line contradicts the project's canon") is meaningless
+  there: it would compare a file to itself, and "fixing" it by copying the canon into the project's
+  own `.claude/docs/` creates the two-live-copies drift §2 exists to prevent. Skip that cluster and
+  say you skipped it.
+- **The project is prose, not code.** Stack-and-version questions, dependency pins and
+  test-framework items have no referent. Answer them "N/A — no code surface", not "clean"; a
+  section that could not bite is not evidence of discipline.
+
+Write the line down at the top of the report. An auditor who never draws it produces confident
+findings against a structure the project deliberately does not have.
+
+## 0.1 Live machinery vs completed-run artifact (ask this next)
 
 Before classifying any finding, check whether the harness's machinery describes a **live, ongoing**
 task or a **completed run** — look for a done-marker, an all-goals-complete state, or a
@@ -19,8 +38,15 @@ or re-run before proposing edits to its machinery.
 
 ## 0.5 Run the native audit first — then audit what it cannot see
 
-**`/doctor` (alias `/checkup`) is the first pass, not a competitor to this file.** It covers,
-natively and against real usage data, several sections' worth of ground: unparseable settings and
+**`/doctor` (alias `/checkup`) is the first pass, not a competitor to this file** — and it is the
+**slash command**, run by the operator in the session being audited. `claude doctor` on the CLI is
+a different tool: it reports installation health (version, platform, install method, update
+channel, managed-settings fetch) and closes by pointing at the slash command. It is not a
+substitute, and a fresh-context auditor — the very shape this kit prescribes for auditing — has no
+slash commands at all. So: **ask the operator to run `/doctor` and paste the output**; if that is
+not possible, say so in the report and name which sections went unaided rather than substituting
+the CLI form. What the slash command covers,
+natively and against real usage data, is several sections' worth of ground: unparseable settings and
 colliding agent definitions, skills/MCP servers/plugins that cost context but are never used
 (read off `skillUsage` / `pluginUsage` counters and a transcript scan — the retire half of §5),
 CLAUDE.md rightsizing against §4's altitude question, slow hooks (§6), version currency (§1), and
@@ -115,7 +141,10 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   picking either. Same for a personal hook beside the plugin's on one event. The tell is a
   fix that must be applied twice. Replace the copy with a **symlink to the plugin directory**
   (`<config-dir>/skills/<name>` → `<repo>/plugins/<name>`): a dir with `.claude-plugin/plugin.json`
-  loads `@skills-dir`, in place, so the repo stays the single source
+  loads `@skills-dir`, in place, so the repo stays the single source. Note for the report once the
+  remedy is in place: a symlinked copy makes this detector **vacuous** — the two paths are one
+  inode, so there is no pair to diff. Record that as "no second copy exists", not as "the copies
+  agree"; the first is a fact, the second implies a comparison that never ran
   (`code.claude.com/docs/en/plugins-reference`). Observed here: a personal devlog skill drifted
   a month from the shipped one — a stale script path and a language-pinned parser — while a
   personal SessionStart hook duplicated the plugin's digest in every session.
@@ -202,11 +231,18 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   read like a licence to cut exactly these; they are not, because the duty is the *project-side*
   write-through the bootstrap's Phase 7 greps for. Their retire triggers: embed → global baseline
   installed; duty lines → a target model proposes these steps unprompted.
-- **Continuity duty absent from CLAUDE.md** — `grep -ciE '^#{0,4} *-? *\*{0,2}Continuity' CLAUDE.md`
+- **Continuity duty absent from CLAUDE.md** —
+  `for f in CLAUDE.md .claude/CLAUDE.md; do [ -f "$f" ] && grep -ciE '^#{0,4} *[0-9.]* *-? *\*{0,2}Continuity' "$f"; done`
   → 0. **Use that anchored form, not a bare `grep -ci continuity`:** the kit's own Reference-materials
   block ends a line with the word ("…verification ladder, continuity"), so the bare grep scores 1 on a
   CLAUDE.md that has the pointer and no duty — it misses most of the population it is meant to find.
   The anchor demands the word as a label at line start (duty bullet or a `## Continuity` heading).
+  **Three ways this grep lies, all of them false *fails*:** the instruction file may be
+  `.claude/CLAUDE.md` rather than the root one (Claude Code loads both with equal standing — hence
+  the loop above); a numbered heading (`## 6. Continuity`) scored 0 until `[0-9.]*` was added; and
+  the anchor is an English token, so an instruction layer written in another language can never
+  satisfy it. **The finding is the missing duty, not the missing word** — when the grep returns 0,
+  read the file before reporting.
   The project may keep a devlog and ship `.claude/docs/workflow.md` — and
   still never tell a working session that a feature/fix/config change/decision closes with an episodic
   entry, or name the carrier. Finding: the layer then holds only while the operator watches; entries
@@ -253,7 +289,11 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   is legitimate wherever they keep it — but say so, so nobody waits for a re-sync that will never
   come. Their choice: keep it as a project-owned rule, or fold it into their own
   `~/.claude/CLAUDE.md` and delete the embed. Never edit a global copy from an audit.
-- **`codex-peer` re-sync — only if a copy already exists.** If `skills/codex-peer/SKILL.md` is
+- **`codex-peer` re-sync — only if a copy already exists.** Key the search on the **stamp, not the
+  filename** — `grep -rl "codex-peer content-version"` across the project and the resolved config
+  dir. A name-keyed check reports "absent, not a finding" while an operator-named variant
+  (`skills/codex-mcp/`, say) sits in the profile; a same-mission skill carrying no stamp is a §2
+  overlapping-mission observation, not a re-sync candidate. Where a stamped copy is
   present (project, or the user profile at `<config-dir>/skills/`), compare its `codex-peer
   content-version` stamp against the canonical block in `references/codex-peer-skill.md` and offer
   the same diff-first re-sync; a hand-adapted copy (pinned model/effort/local defaults) is
@@ -330,6 +370,10 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   `.claude_old/`, `_backups/` at root …) — a parked copy of a retired harness *outside* `.claude/`
   is invisible to a `.claude/`-scoped walk, yet it is untracked history waiting to be committed
   or copied. Remediation: delete (the history belongs in git), or fence + gitignore it explicitly.
+  **Exclude `.claude-plugin/` from this sweep**: it is a `.claude`-prefixed root directory in every
+  plugin repository, and it is the marketplace catalog — required, tracked, load-bearing. A literal
+  application of this item to any repo the kit's audience publishes from proposes deleting the
+  manifest.
 
 ## 10. Permissions & secrets
 

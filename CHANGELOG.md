@@ -7,6 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.24.0] — 2026-08-29
+
+**The kit was run through its own Audit mode for the first time, and the valuable half of the
+report was about the checklist, not the repository.** Nine of eleven misfiring items shared one
+root: `audit-checklist.md` assumes the audited project *consumes* a harness and *produces code*.
+Pointed at a project that produces harness content — which is every consumer of this kit who
+publishes a plugin or a template — it generates confident false findings.
+
+### Added
+
+- **§0 now draws the harness/deliverable line before anything else runs.** When the deliverable
+  *is* harness content, the project's own `.claude/` is the target and the shipped directory is
+  product; the whole shipped-docs cluster in §4 is skipped explicitly, because re-syncing there
+  compares a file to itself and "fixing" it duplicates the canon into the repo that authors it —
+  the exact drift §2 exists to prevent. And when the project is prose rather than code,
+  stack/version/test items are answered **N/A**, never "clean": a section that could not bite is
+  not evidence of discipline.
+
+### Fixed
+
+- **§0.5 conflated `/doctor` with `claude doctor`.** They are different tools: the CLI form reports
+  installation health and closes by pointing at the slash command, which is where the usage
+  counters, transcript scan and CLAUDE.md rightsizing live. Worse, the slash command is
+  **unavailable to a fresh-context auditor** — the very shape this kit prescribes for auditing. The
+  section now tells the auditor to ask the operator to run it and paste the output, and to name
+  which sections went unaided otherwise.
+- **The continuity anchor produced false failures in three ways, all now closed.** It hard-coded
+  the root `CLAUDE.md` (a project using `.claude/CLAUDE.md` — loaded with equal standing — scored 0
+  on every write-through grep); a numbered heading `## 6. Continuity` scored 0 because the anchor
+  allowed `#`, `-`, `*` but not a section number; and the token is English, so a non-English
+  instruction layer can never satisfy it. The greps now resolve the instruction file and accept a
+  number, and the section states plainly that **the finding is the missing duty, not the missing
+  word**. Same fix applied to Phase 7 in `bootstrap-checklist.md`.
+- **§2's symlink remedy makes §2's own detector vacuous, and the report must say so.** Once the
+  copy is a symlink the two paths are one inode: record "no second copy exists", not "the copies
+  agree" — the second implies a comparison that never ran.
+- **§9's sibling sweep proposed deleting the marketplace manifest.** `.claude-plugin/` is a
+  `.claude`-prefixed root directory in every plugin repository, and it is required and tracked.
+  Now excluded by name.
+- **The `codex-peer` re-sync check keyed on a filename**, so it reported "absent" while an
+  operator-named variant sat in the profile. It now keys on the stamp, and a stampless same-mission
+  skill is routed to §2 as an overlapping-mission finding.
+
+### Dev-harness (not shipped, recorded for provenance)
+
+The same audit found the repo's own regression suite red since v1.23.0 — four assertions guarding
+prose that release deliberately deleted — with four releases shipped over it because the
+repository's definition of "Done" never named the suite. The orphaned assertions are gone, the
+suite is wired into "Done", its two scripts no longer hardcode the maintainer's home directory, the
+project `settings.json` is now tracked (a deny rule in an untracked file protects one disk), and
+and the `Never` tier that was prose-only now carries `Edit(...)` deny rules, verified live against
+a seeded control. One of those rules had to be dropped a minute after it was written: denying
+`Edit(.claude/devlog/entries/**)` is faithful to the prose ("never edit existing entries") but the
+tool cannot tell creation from modification, and new entries land there constantly. A mechanical
+guard needs testing for what it lets through as much as for what it catches.
+
 ## [1.23.5] — 2026-08-29
 
 **A cross-vendor reviewer reverted two of yesterday's "fixes" — they were regressions.** Five

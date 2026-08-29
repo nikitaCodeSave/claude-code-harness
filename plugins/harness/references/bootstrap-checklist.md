@@ -336,9 +336,12 @@ claude --print "ok" </dev/null 2>&1 >/dev/null | grep -E '^(Permission |Ignoring
 # Also blind to `Grep(path)`, which never warns — only the Phase 3 template prevents that one.
 claude --print "what is the project's stack?"  # pass = answer matches CLAUDE.md, not a guess
 claude --print "what files are you not allowed to touch here?"  # pass = names the deny/ask rules from settings.json
-grep -ci "plan mode" CLAUDE.md && grep -ci "fresh-context" CLAUDE.md && grep -ci "size the change" CLAUDE.md \
-  && grep -ciE '^#{0,4} *-? *\*{0,2}Continuity' CLAUDE.md \
-  && grep -cE '^#{1,4} *Commands' CLAUDE.md && grep -cE '^#{1,4} *Boundaries' CLAUDE.md
+# CM resolves the instruction file: Claude Code loads a root CLAUDE.md and .claude/CLAUDE.md alike,
+# and a project using the latter scores 0 on every grep below if you hard-code the former.
+CM=$([ -f CLAUDE.md ] && echo CLAUDE.md || echo .claude/CLAUDE.md)
+grep -ci "plan mode" $CM && grep -ci "fresh-context" $CM && grep -ci "size the change" $CM \
+  && grep -ciE '^#{0,4} *[0-9.]* *-? *\*{0,2}Continuity' $CM \
+  && grep -cE '^#{1,4} *Commands' $CM && grep -cE '^#{1,4} *Boundaries' $CM
 ls .claude/docs/workflow.md .claude/docs/testing.md .claude/docs/docs-discipline.md docs/ARCHITECTURE.md docs/CODE-MAP.md
 # pass = all six greps ≥1 (plan-mode duty + verification ladder + change-sizing + continuity duty +
 # a Commands section + a three-tier Boundaries section landed in CLAUDE.md) and all five

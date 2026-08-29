@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # M2-M5 — статическая согласованность кита. Запускать из любого места.
-K=/home/nikita/PROJECTS/claude-code-harness
+K="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$K"; fail=0
 say() { if [ "$2" = 0 ]; then echo "  PASS $1"; else echo "  FAIL $1"; fail=1; fi }
 
@@ -17,18 +17,9 @@ PY
 )
 say "все json-блоки парсятся (bad=$bad)" $([ "$bad" = 0 ]; echo $?)
 
-echo "M3 — authority: rules и проза не противоречат"
-r=$(grep -c "never decide it yourself" plugins/harness/references/bootstrap-checklist.md)
-a=$(grep -c "never the authority" plugins/harness/references/bootstrap-checklist.md)
-bad_phrase=$(grep -c "readings that$" plugins/harness/references/bootstrap-checklist.md 2>/dev/null || echo 0)
-say "rules несёт 'never decide it yourself' (n=$r)" $([ "$r" -ge 1 ]; echo $?)
-say "проза несёт 'never the authority' (n=$a)" $([ "$a" -ge 1 ]; echo $?)
-say "нет старой формулировки 'you settle yourself and say why'" $(! grep -q "you settle yourself and say why" plugins/harness/references/bootstrap-checklist.md; echo $?)
-
-echo "M4 — bounded spike сохраняет ограничение"
-# фраза переносится по строкам — ищем по нормализованному тексту, не построчным grep
-say "'rather than shipping the behavior' на месте" $(tr '\n' ' ' < plugins/harness/references/bootstrap-checklist.md | tr -s ' ' | grep -q "rather than shipping the behavior"; echo $?)
-say "'Bounded is a condition, not a label' на месте" $(tr '\n' ' ' < plugins/harness/references/bootstrap-checklist.md | tr -s ' ' | grep -q "Bounded is a condition, not a label"; echo $?)
+# M3 (authority ledger) и M4 (bounded spike) удалены 2026-08-29: инварианты, которые они
+# сторожили, ушли вместе с Phase 5 в v1.23.0 — тесты остались орфанами и держали набор
+# красным четыре релиза. Восстанавливать ретайренную прозу ради зелёного теста нельзя.
 
 echo "M5 — ссылки и версии"
 miss=$(python3 - <<'PY'

@@ -1,0 +1,234 @@
+################ p1a ################
+--- tool_use calls ---
+toolu_01SzZxUTzsbPkn4MA5172V6g	Bash	{"command":"printenv CLAUDE_EFFORT","description":"Print CLAUDE_EFFORT env var"}
+toolu_01NZdrpCcjdQiMsPabUy9qmm	ToolSearch	{"query":"select:WebSearch","max_results":1}
+toolu_012cNd1vxNa5hKG5w39UFBFC	WebSearch	{"query":"Anthropic Claude Opus 5 model release"}
+--- tool_result records ---
+toolu_01SzZxUTzsbPkn4MA5172V6g	is_error=false	xhigh
+toolu_01NZdrpCcjdQiMsPabUy9qmm	is_error=false	[{"type":"tool_reference","tool_name":"WebSearch"}]
+toolu_012cNd1vxNa5hKG5w39UFBFC	is_error=false	Web search results for query: "Anthropic Claude Opus 5 model release"
+
+Links: [{"title":"Anthropic releases new model, Opus 5","url":"https://tech.yahoo.com/ai/claude/articles/anthropic-releases-model-opus-5-171758276.ht
+--- 400/effort signature anywhere in stream ---
+--- final result ---
+subtype=success is_error=false turns=4
+result: **Шаг 1** — `printenv CLAUDE_EFFORT`, вывод дословно:
+
+```
+xhigh
+```
+
+**Шаг 2** — WebSearch по запросу «Anthropic Claude Opus 5 model release». Заголовок первого результата:
+
+> **Anthropic releases new model, Opus 5**
+
+Примечание: чтобы вызвать WebSearch, пришлось сначала загрузить его схему через ToolSearch — это deferred-инструмент, без загрузки схемы прямой вызов падает с ошибкой валидации. Никаких других инструментов не использовал.
+
+Sources:
+- [Anthropic releases new model, Opus 5 (Yahoo Tech)](https://tech.yahoo.com/ai/claude/articles/anthropic-releases-model-opus-5-171758276.html)
+- [An
+
+################ p1b ################
+--- tool_use calls ---
+toolu_01LCvktPtQx2SaHAAdugqkM3	Bash	{"command":"printenv CLAUDE_EFFORT","description":"Print CLAUDE_EFFORT env var"}
+toolu_01MFuJy9cRDCwanfwsatWgmX	ToolSearch	{"query":"select:WebSearch","max_results":1}
+toolu_01PbQYgaHidXwrgPQamqBJvz	WebSearch	{"query":"Anthropic Claude Opus 5 model release"}
+--- tool_result records ---
+toolu_01LCvktPtQx2SaHAAdugqkM3	is_error=false	xhigh
+toolu_01MFuJy9cRDCwanfwsatWgmX	is_error=false	[{"type":"tool_reference","tool_name":"WebSearch"}]
+toolu_01PbQYgaHidXwrgPQamqBJvz	is_error=false	Web search results for query: "Anthropic Claude Opus 5 model release"
+
+Links: [{"title":"Anthropic releases new model, Opus 5","url":"https://tech.yahoo.com/ai/claude/articles/anthropic-releases-model-opus-5-171758276.ht
+--- 400/effort signature anywhere in stream ---
+--- final result ---
+subtype=success is_error=false turns=4
+result: **Шаг 1** — `printenv CLAUDE_EFFORT`, вывод дословно:
+
+```
+xhigh
+```
+
+**Шаг 2** — WebSearch по запросу «Anthropic Claude Opus 5 model release». Первый результат:
+
+**«Anthropic releases new model, Opus 5»** — [tech.yahoo.com](https://tech.yahoo.com/ai/claude/articles/anthropic-releases-model-opus-5-171758276.html)
+
+Примечание: чтобы вызвать WebSearch, потребовался один дополнительный служебный вызов `ToolSearch` — схема этого инструмента отложенная (deferred) и без загрузки вызов бы завершился ошибкой валидации.
+
+Sources:
+- [Anthropic releases new model, Opus 5 — Yahoo Tech](https://tech.yahoo.
+
+################ p2a ################
+--- tool_use calls ---
+toolu_01YLRtP4gj6eX61YWfirh2Lr	Bash	{"command":"printenv CLAUDE_EFFORT","description":"Print CLAUDE_EFFORT env var"}
+toolu_01HrLy4z5NogQfWG5HcF494f	ToolSearch	{"query":"select:WebSearch","max_results":1}
+toolu_01TMhpxs86cspky3RgMat9dc	WebSearch	{"query":"Anthropic Claude Opus 5 model release"}
+--- tool_result records ---
+toolu_01YLRtP4gj6eX61YWfirh2Lr	is_error=false	max
+toolu_01HrLy4z5NogQfWG5HcF494f	is_error=false	[{"type":"tool_reference","tool_name":"WebSearch"}]
+toolu_01TMhpxs86cspky3RgMat9dc	is_error=false	Web search results for query: "Anthropic Claude Opus 5 model release"
+
+Links: [{"title":"Anthropic releases new model, Opus 5","url":"https://tech.yahoo.com/ai/claude/articles/anthropic-releases-model-opus-5-171758276.ht
+--- 400/effort signature anywhere in stream ---
+--- final result ---
+subtype=success is_error=false turns=4
+result: **Шаг 1** — вывод `printenv CLAUDE_EFFORT` дословно:
+
+```
+max
+```
+
+**Шаг 2** — WebSearch вызван ровно один раз с запросом «Anthropic Claude Opus 5 model release». Заголовок первого результата:
+
+> **Anthropic releases new model, Opus 5**
+
+Примечание: чтобы вызвать WebSearch, пришлось сначала подгрузить её схему через `ToolSearch` — этот инструмент отложенный (deferred), без загрузки схемы прямой вызов падает с ошибкой валидации. Других инструментов не использовал.
+
+Sources:
+- [Anthropic releases new model, Opus 5](https://tech.yahoo.com/ai/claude/articles/anthropic-releases-model-opus-5-1717582
+
+################ p2b ################
+--- tool_use calls ---
+toolu_01J75D5BZzvjPKmrLFGjFkaA	Bash	{"command":"printenv CLAUDE_EFFORT","description":"Print CLAUDE_EFFORT env var"}
+toolu_01163ScYNhEEmonDv3Z1HwEX	ToolSearch	{"query":"select:WebSearch","max_results":1}
+toolu_01BdYfGaizQvkEPByh344k2Q	WebSearch	{"query":"Anthropic Claude Opus 5 model release"}
+--- tool_result records ---
+toolu_01J75D5BZzvjPKmrLFGjFkaA	is_error=false	max
+toolu_01163ScYNhEEmonDv3Z1HwEX	is_error=false	[{"type":"tool_reference","tool_name":"WebSearch"}]
+toolu_01BdYfGaizQvkEPByh344k2Q	is_error=false	Web search results for query: "Anthropic Claude Opus 5 model release"
+
+Links: [{"title":"Anthropic releases new model, Opus 5","url":"https://tech.yahoo.com/ai/claude/articles/anthropic-releases-model-opus-5-171758276.ht
+--- 400/effort signature anywhere in stream ---
+--- final result ---
+subtype=success is_error=false turns=4
+result: **Шаг 1** — вывод `printenv CLAUDE_EFFORT` дословно:
+
+```
+max
+```
+
+**Шаг 2** — WebSearch вызван ровно один раз с запросом «Anthropic Claude Opus 5 model release». Заголовок первого результата:
+
+> **Anthropic releases new model, Opus 5**
+
+Примечание: чтобы вызвать `WebSearch`, потребовался `ToolSearch` — этот инструмент отложенный, и без загрузки схемы вызов невозможен. Никаких других инструментов не использовалось.
+
+Sources:
+- [Anthropic releases new model, Opus 5](https://tech.yahoo.com/ai/claude/articles/anthropic-releases-model-opus-5-171758276.html)
+- [Anthropic releases new model, Opus 5 
+
+################ p224 ################
+--- tool_use calls ---
+toolu_011kfFgmJ2qexjmk9V1yjjf3	Bash	{"command":"printenv CLAUDE_EFFORT","description":"Print CLAUDE_EFFORT env var"}
+toolu_01SDHRXHLQywWfo8kSHFEFTK	ToolSearch	{"query":"select:WebSearch","max_results":1}
+toolu_015iRcTqXUcTqgftQ2s4umYc	WebSearch	{"query":"Anthropic Claude Opus 5 model release"}
+--- tool_result records ---
+toolu_011kfFgmJ2qexjmk9V1yjjf3	is_error=false	xhigh
+toolu_01SDHRXHLQywWfo8kSHFEFTK	is_error=false	[{"type":"tool_reference","tool_name":"WebSearch"}]
+toolu_015iRcTqXUcTqgftQ2s4umYc	is_error=false	Web search results for query: "Anthropic Claude Opus 5 model release"
+
+Links: [{"title":"Anthropic releases new model, Opus 5","url":"https://www.axios.com/2026/07/24/anthropic-releases-new-model-opus-5"},{"title":"Anthr
+--- 400/effort signature anywhere in stream ---
+--- final result ---
+subtype=success is_error=false turns=4
+result: **Шаг 1** — вывод `printenv CLAUDE_EFFORT` дословно:
+
+```
+xhigh
+```
+
+**Шаг 2** — WebSearch вызван один раз с запросом «Anthropic Claude Opus 5 model release». Первый результат:
+
+**«Anthropic releases new model, Opus 5»** — [axios.com](https://www.axios.com/2026/07/24/anthropic-releases-new-model-opus-5)
+
+Одно примечание: чтобы вызвать `WebSearch`, потребовался предварительный `ToolSearch` — этот инструмент отложенный, его схема не была загружена, и без неё вызов упал бы с ошибкой валидации. Это единственный дополнительный вызов, никаких других инструментов не использовалось.
+
+Sources:
+- [Anthr
+
+################ old222 ################
+--- tool_use calls ---
+toolu_01PgMsJSDrfVxNj3bu8fbUNA	Bash	{"command":"printenv CLAUDE_EFFORT","description":"Print CLAUDE_EFFORT env var"}
+toolu_014Zt1sdnAkCbZBXEqxif5Ku	ToolSearch	{"query":"select:WebSearch","max_results":1}
+toolu_01CYxE39ejs1pQAjggLD6Rjn	WebSearch	{"query":"Anthropic Claude Opus 5 model release"}
+--- tool_result records ---
+toolu_01PgMsJSDrfVxNj3bu8fbUNA	is_error=false	xhigh
+toolu_014Zt1sdnAkCbZBXEqxif5Ku	is_error=false	[{"type":"tool_reference","tool_name":"WebSearch"}]
+toolu_01CYxE39ejs1pQAjggLD6Rjn	is_error=false	Web search results for query: "Anthropic Claude Opus 5 model release"
+
+Links: [{"title":"Anthropic releases new model, Opus 5","url":"https://tech.yahoo.com/ai/claude/articles/anthropic-releases-model-opus-5-171758276.ht
+--- 400/effort signature anywhere in stream ---
+--- final result ---
+subtype=success is_error=false turns=4
+result: **Шаг 1** — `printenv CLAUDE_EFFORT`, вывод дословно:
+
+```
+xhigh
+```
+
+**Шаг 2** — WebSearch вызван один раз с запросом `Anthropic Claude Opus 5 model release`. Первый результат:
+
+> **Anthropic releases new model, Opus 5**
+
+Примечание: чтобы вызвать `WebSearch`, потребовалось предварительно загрузить её схему через `ToolSearch` (`select:WebSearch`) — эта тула отложенная и без загрузки схемы вызов падает с `InputValidationError`. Никаких других инструментов не использовал.
+
+Sources:
+- [Anthropic releases new model, Opus 5 (Yahoo Tech)](https://tech.yahoo.com/ai/claude/articles/anthropic-releases
+
+################ old220 ################
+--- tool_use calls ---
+toolu_011Tj5v3R2eWC13cYCpZAZUc	Bash	{"command":"printenv CLAUDE_EFFORT","description":"Print CLAUDE_EFFORT env var"}
+toolu_01QEMCkdVwrC9YCQ1kocWkJB	ToolSearch	{"query":"select:WebSearch","max_results":1}
+toolu_01FN1sBvgARJCgkas4tdNDdq	WebSearch	{"query":"Anthropic Claude Opus 5 model release"}
+--- tool_result records ---
+toolu_011Tj5v3R2eWC13cYCpZAZUc	is_error=false	xhigh
+toolu_01QEMCkdVwrC9YCQ1kocWkJB	is_error=false	[{"type":"tool_reference","tool_name":"WebSearch"}]
+toolu_01FN1sBvgARJCgkas4tdNDdq	is_error=true	API Error: 400 output_config.effort 'xhigh' is not supported when thinking is disabled on this model. Use effort 'high' or below, or enable thinking.
+--- 400/effort signature anywhere in stream ---
+      2 output_config.effort 'xhigh' is not supported when thinking is disabled on this model. Use effort 'high' or below, or enable thinking.
+      2 output_config.effort 'xhigh' is not supported when thinking is disabled on this model. Use effort 'high' or below, or enable thinking.\n```\n\n**Первый заголовок результата сообщить не могу — поиск не выполнился.** Ошибка не связана с самим запросом: она возникает на уровне конфигурации вызова (effort `xhigh` при отключённом thinking), то есть детерминирована, и повтор с теми же настройками даст тот же результат. Повторять не стал, так как вы просили вызвать инструмент ровно один раз.\n\nОдно отступление от «no other tools»: WebSearch в этой сессии — deferred-инструмент, его схема не была загружена, поэтому перед вызовом пришлось выполнить `ToolSearch(\
+      4 API Error: 400
+--- final result ---
+subtype=success is_error=false turns=4
+result: **Шаг 1** — `printenv CLAUDE_EFFORT`, вывод дословно:
+
+```
+xhigh
+```
+
+**Шаг 2** — вызов WebSearch с запросом «Anthropic Claude Opus 5 model release» сделан ровно один раз, но результатов не вернул. Вместо них пришла ошибка:
+
+```
+API Error: 400 output_config.effort 'xhigh' is not supported when thinking is disabled on this model. Use effort 'high' or below, or enable thinking.
+```
+
+**Первый заголовок результата сообщить не могу — поиск не выполнился.** Ошибка не связана с самим запросом: она возникает на уровне конфигурации вызова (effort `xhigh` при отключённом thinking), то есть детерминирова
+
+################ red_toolerr ################
+--- tool_use calls ---
+toolu_01NhxrbUZt3WGjhCpx9FnpEk	Bash	{"command":"exit 7","description":"Run exit 7"}
+--- tool_result records ---
+toolu_01NhxrbUZt3WGjhCpx9FnpEk	is_error=true	Exit code 7
+--- 400/effort signature anywhere in stream ---
+--- final result ---
+subtype=success is_error=false turns=2
+result: Команда выполнена: `exit 7`.
+
+Результат — ненулевой код возврата **7**, вывода (stdout/stderr) нет. Это ожидаемое поведение: `exit 7` просто завершает shell с указанным статусом. Инструмент отрапортовал это как ошибку (`Exit code 7`), хотя фактического сбоя не произошло.
+
+################ red_think0 (MAX_THINKING_TOKENS=0 + --effort xhigh, opus-5) ################
+subtype=success is_error=true api_error_status=400
+result: API Error: 400 output_config.effort 'xhigh' is not supported when thinking is disabled on this model. Use effort 'high' or below, or enable thinking.
+
+assistant-level is_api_error_message:
+is_api_error_message=true
+################ slash-command registration across versions ################
+2.1.220: code-review,review
+2.1.222: code-review,review
+2.1.223: code-review
+2.1.224: code-review
+2.1.225: code-review
+2.1.226: code-review
+NOTE: known alias /ultrareview is also absent from slash_commands, so absence != removal.
+
+################ /review live in a tiny repo with an uncommitted diff (2.1.226) ################
+m.py:2 — `add` now returns `a-b`; every caller gets subtraction instead of the sum (e.g. `add(2,3)` → `-1`).

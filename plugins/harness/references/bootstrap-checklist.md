@@ -84,7 +84,7 @@ sessions where the operator is present.
 | `.claude/agents/` | **no** — built-ins cover it; defer until evidence |
 | `.claude/hooks/` | **no** — defer until a recurring pain |
 | `.claude/skills/` | **no** — defer until a workflow repeats ≥3× |
-| `.claude/commands/` | **no** — defer until requested |
+| `.claude/commands/` | **no** — and when the need arrives, write a skill instead: same `/name`, and it is the only form with `disable-model-invocation`. Existing `commands/*.md` keep working; nothing to migrate |
 | `.mcp.json` | only if there is a clear external-tool need |
 
 Defaulting to "no" on the machinery rows is the discipline, not timidity.
@@ -274,7 +274,9 @@ NotebookEdit. Giving one of *those* tools a path of its own is the no-op — `Gl
 `NotebookEdit(path)` are parsed, never matched, and warn at startup; measured live, a
 `deny: Write(./s/**)` let the file be created anyway. `Grep(path)` never warns at all — the warning
 list is hardcoded and omits it — so nothing tells you it isn't doing what you meant; write `Read(path)`
-and the question doesn't arise. (`MultiEdit` is gone as a tool: "matches no known tool".) A **bare**
+and the question doesn't arise. (`MultiEdit` is gone as a tool and emits **both** warnings — "matches
+no known tool" *and* the "use `Edit(path)` instead" line, since it is still in the hardcoded
+edit-tool list.) A **bare**
 tool name is a different rule and stays live: `deny: Write` without parens matches the tool everywhere
 and is not a typo. Dead rules are worse than absent ones — they read as protection while enforcing
 nothing, and a template is the one place a no-op propagates into every project that copies it.
@@ -372,6 +374,18 @@ If CLAUDE.md names a verification command (`make check`, `pytest -q`), **run it 
 actually executes** — a runnable check the agent can close its own loop against is the difference
 between long-horizon autonomy and drift, and one that only exists on paper is worse than none.
 Running it will prompt for permission on first use — expected; don't skip the run because of it.
+
+**When launching the app is more than one command** — a database, an env file, a graphical
+session, a multi-step build — do not hand-write a launch procedure into CLAUDE.md. `/run` and
+`/verify` infer a standard launch on their own, and that inference is exactly what gets unreliable
+here; `/run-skill-generator`, run **once per project** (again when the build changes), gets the app
+up from a clean environment and commits the working recipe as `.claude/skills/run-<name>/`, which
+every later run in the repo follows. `/verify` records its own recipe the same way when it had to
+work one out. That is the kit's "state on disk" rule satisfied natively — a recorded skill, not a
+second entry point wrapping your gates. **Detect before prescribing**: these are bundled skills,
+and a bundled skill can be absent from a given profile (`CLAUDE_CODE_DISABLE_BUNDLED_SKILLS`, a
+managed policy, an org build). Confirm the surface exists in `/`-autocomplete before routing the
+project at it; if it does not, name the real launch command in CLAUDE.md as above and stop there.
 
 ## Phase 8 — Record the bootstrap
 

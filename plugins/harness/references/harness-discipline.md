@@ -119,6 +119,17 @@ never sees a delegate's `tool_result`s, only its final text, so neither surfaces
   So before an audit or verification pass whose whole value is depth, confirm
   `printenv CLAUDE_CODE_EFFORT_LEVEL` is empty — a declared level holds against every user-side
   layer except that one. Above both sits the org ceiling, which this kit has not measured.
+- **The permission mode.** `permissionMode:` in a delegate's frontmatter is the weakest of the
+  three declarations, because the parent decides: a parent in `acceptEdits`/`bypassPermissions`
+  wins outright, and **a parent in auto mode — the default on Pro/Max/Team — ignores the
+  frontmatter entirely**. So `permissionMode: plan` on a refuter is not a read-only guarantee; on
+  a default profile it does nothing at all. When read-only is the point, constrain `tools:`
+  instead — that one holds. (`permissions.disableBypassPermissionsMode` likewise voids a
+  frontmatter `bypassPermissions`.) Same failure shape as the two above: the declaration is
+  accepted, silently outranked, and nothing in the transcript says so.
+- **The model.** `CLAUDE_CODE_SUBAGENT_MODEL` overrides both a definition's `model:` and a
+  per-spawn model; `inherit` is the documented way to stand it down. Read what actually applied
+  off `/tasks`, which prints each delegate's model and effort.
 
 ```yaml
 ---

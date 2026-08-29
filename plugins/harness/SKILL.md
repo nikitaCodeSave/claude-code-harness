@@ -78,7 +78,7 @@ it. If it does, point to the built-in and stop. If a custom primitive is justifi
 | Knowledge loaded on demand | **reference-skill** (`disable-model-invocation` if you only trigger it) |
 | Search-heavy work that would pollute main context | **subagent** — `Explore` / `general-purpose` first; custom only with evidence |
 | Invariant that must fire even when the model "forgets" | **hook** (enforce at `Stop` / `UserPromptSubmit`, not mid-write) |
-| Operator-facing shortcut for a frequent ritual | **slash command** in `.claude/commands/<name>.md` |
+| Operator-facing shortcut for a frequent ritual | **skill** in `.claude/skills/<name>/SKILL.md` — same `/name`; add `disable-model-invocation: true` when it has side effects (a `commands/*.md` file is the same mechanism but has no such switch, so Claude may invoke it) |
 | Codebase-scale sweep / migration / trust-critical audit exceeding one context | **dynamic workflow** (keyword `ultracode`) — built-in; never hand-roll a pipeline |
 | Cross-session knowledge | **memory** (CLAUDE.md / auto memory) |
 | External tool surface | **MCP server** in `.mcp.json` |

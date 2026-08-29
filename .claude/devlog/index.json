@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-29T16:01:27Z",
-  "entry_count": 50,
+  "generated_at": "2026-08-29T16:31:17Z",
+  "entry_count": 51,
   "entries": [
     {
       "id": 1,
@@ -730,6 +730,21 @@
       "supersedes": null,
       "path": "entries/0050-pyat-svezhikh-auditorov-dorogo-stoyat-ne-piny-a-utverzhdeniy.md",
       "preview": "Сразу после v1.23.0 оператор поставил цель: harness без архаизмов и мёртвых правил, по практикам индустрии. Запущено пять независимых аудиторов свежим контекстом, каждому — установка опровергать, а не подтверждать, и жёсткий фильтр против генерического чек-листа (CI, Docker…"
+    },
+    {
+      "id": 51,
+      "date": "2026-08-29",
+      "title": "Оракул, поставленный не в том месте: кит проверял спавн, а явление жило позже",
+      "tags": [
+        "harness",
+        "audit",
+        "method",
+        "currency"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0051-orakul-postavlennyy-ne-v-tom-meste-kit-proveryal-spavn-a-yav.md",
+      "preview": "Вторая половина того же аудита пятью свежими контекстами (первая — #50, релиз v1.23.1). Если 1.23.1 чинила утверждения, которые протухли, то 1.23.2 чинит утверждения, которые кит проверил негодным методом — включая одно, помеченное в тексте как binary-verified."
     }
   ]
 }

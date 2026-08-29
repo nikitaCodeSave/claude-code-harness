@@ -7,6 +7,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.23.2] — 2026-08-29
+
+**The second half of the same audit.** Where 1.23.1 fixed assertions that had gone stale, this one
+fixes assertions the kit had never verified properly — including one it labelled
+"binary-verified" — and closes two gaps where a native surface already did the job better.
+
+### Fixed
+
+- **`/fork` does get a worktree; the kit's "binary-verified" claim was verified at the wrong
+  moment.** The probe observed an empty worktree field *at spawn*; first-party says Claude Code
+  "instructs it to create a worktree of its own **before making code changes**" — lazily, at the
+  first write. An empty field at T0 is exactly what lazy creation looks like, so the observation
+  could not support a claim about the agent's whole life. The three cases are now separate:
+  `/fork` and agent-view sessions get one, `/subtask` shares the session's checkout, and
+  `isolation: worktree` remains the lever for isolation *by construction rather than by
+  instruction*. **The general rule is now step 5 of the strip revision**: check the oracle's scope
+  against the claim's scope, put the oracle where the phenomenon lives, and if the two cannot be
+  made to match, write the narrower claim you actually measured.
+- **`REVIEW.md` does not reach the local `/code-review`** — "the review follows your `CLAUDE.md`
+  like any Claude Code session, but it doesn't read `REVIEW.md`". It tunes the **managed GitHub
+  service**, which is a Team/Enterprise research preview, so a project on Pro/Max that wrote one
+  for local review got nothing. The local lever is the **effort level**, and that is now what the
+  kit says.
+- **A ritual belongs in a skill, not in `.claude/commands/`, and the reason is safety.** Both
+  forms create `/name` and both can be invoked by Claude; only a skill has
+  `disable-model-invocation`. The kit demanded that switch for side-effecting rituals in two
+  places while its own primitives table routed those same rituals to `commands/`, where the
+  switch does not exist. Existing `commands/*.md` keep working — nothing to migrate.
+- **`MultiEdit` emits *both* startup warnings**, not just "matches no known tool": it is gone as a
+  tool yet still sits in the hardcoded edit-tool list. Measured on a live probe whose control
+  (`NoSuchTool`) proved the oracle could see. The same run confirmed the load-bearing half of that
+  section: `Glob`/`Write`/`NotebookEdit` warn, and **`Grep(path)` warns not at all** — a rule that
+  reads as protection, enforces nothing, and says nothing.
+- Delegate frontmatter now documents **all four** declarations and who outranks each:
+  `permissionMode` is the weakest — a parent in `acceptEdits`/`bypassPermissions` wins outright and
+  a parent in **auto mode ignores it entirely**, so `permissionMode: plan` on a refuter is not a
+  read-only guarantee on a default profile; constrain `tools:` instead.
+  `permissions.disableBypassPermissionsMode` likewise voids a frontmatter `bypassPermissions`.
+
+### Added
+
+- **`/run-skill-generator` and the recorded-recipe path**, which the kit did not mention at all.
+  `/run` and `/verify` infer a standard launch, and that inference "gets unreliable for projects
+  that need anything beyond a standard launch"; the generator, run once per project, commits the
+  working recipe as `.claude/skills/run-<name>/`. This *replaces* a hand-written launch procedure —
+  the kit's own "state on disk" rule, satisfied natively. Prescribed with a detect-first step:
+  bundled skills can be absent from a profile, so confirm the surface in `/`-autocomplete before
+  routing a project at it.
+
+### Removed
+
+- The perishable "`/review` is simply its alias" clause from `project-docs/workflow.md` — a file
+  that ships **verbatim into other people's repositories** and cannot re-check anything there. The
+  kit's own content gate forbids embedding a perishable platform fact in those files, and this one
+  was already version-bound (`/review` was a separate command before v2.1.223). The durable half —
+  verify the surface exists in your `/`-autocomplete — stays.
+
+### Not verified
+
+Stated here rather than left implicit: the **subagent-transcript forensics**
+(`<session-dir>/subagents/agent-<id>.jsonl`, the `.meta.json` `agentType`, `is_error` on the
+`tool_result`, the false-clean `isApiErrorMessage` filter) is the one claim in this release's scope
+that neither a first-party source nor a live probe confirmed. It is plausible and consistent with
+"only the final result comes back", but it is unproven. `--safe-mode` and
+`strictPluginOnlyCustomization`, which were in the same bucket when the audit started, are now
+confirmed.
+
 ## [1.23.1] — 2026-08-29
 
 **Five independent fresh-context auditors were pointed at the kit with an instruction to refute,

@@ -94,6 +94,13 @@ Compare the delta *from the refresh ledger*, not "everything from scratch". Sour
    component — it's obsolete.
 3. Obsolete pieces are **deleted, not archived into the canon** (history stays in git + devlog).
 4. Whatever the last D-cycle added and that didn't work is the first candidate for removal.
+5. **Check the oracle's scope against the claim's scope before writing either down.** A probe
+   answers about the moment and the layer where it was taken; a sentence in a reference asserts
+   something about a whole lifetime or a whole configuration. A spawn-time binary probe cannot
+   settle a property the runtime creates later — an empty field at T0 is what lazy creation looks
+   like — and a `--help` listing cannot settle what a subcommand does. Put the oracle where the
+   phenomenon lives (act, then observe the artifact), and if the two scopes cannot be made to
+   match, write the narrower claim you actually measured.
 
 At the end of the revision — **update the refresh ledger** (new CC version / model / date /
 checked sources), sync the version line of `native-capabilities.md`, and record a devlog entry. A

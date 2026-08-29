@@ -62,10 +62,15 @@ full conversation, reuses the prompt cache) — **`/fork` is no longer this**: s
 copies the conversation into a *background* session with its own row in `claude agents`, so a
 harness step that expected an in-session fork must say `/subtask`. One conditional worth knowing:
 **with agent view turned off `/subtask` does not exist and `/fork` starts the forked subagent
-instead** — a harness that hard-codes one name breaks on the other configuration. Neither gets a
-worktree of its own (binary-verified: both delegate to the same helper, which spawns the
-background agent with an empty worktree result); worktree isolation is the separate frontmatter
-field below. **Since v2.1.232 the Agent tool takes `subagent_type: "fork"` and forking is on by
+instead** — a harness that hard-codes one name breaks on the other configuration. **Worktrees differ between the two, and the difference is late-bound**: a `/fork`ed background
+copy is instructed to "create a worktree of its own **before making code changes**" — lazily, at
+its first write, not at spawn — except where it edits in place (outside a git repository with no
+`WorktreeCreate` hook). Agent view likewise moves each dispatched session into its own worktree.
+`/subtask`, the in-session form, shares the session's checkout. Do not read a spawn-time probe as
+evidence here: an empty worktree field at T0 is exactly what a lazily-created worktree looks like,
+so the observation cannot support a claim about the agent's whole life. For a delegate that must
+be isolated *by construction* rather than by instruction, the `isolation: worktree` frontmatter
+field below is still the deterministic lever. **Since v2.1.232 the Agent tool takes `subagent_type: "fork"` and forking is on by
 default**: such a delegate inherits the full conversation *and the prompt cache*, which makes it
 the cheap way to hand off a side task that needs everything you already know — the briefing cost
 that makes a fresh delegate expensive is simply absent. The same release made non-teammate agent
@@ -103,7 +108,9 @@ bare word "workflow" does not trigger a run (asking in your own words does); a `
 - Caps: **up to 16 concurrent agents** (fewer on low-CPU machines), **1,000 agents total per run**.
 - Spawned agents inherit your tool allowlist and follow the **ordinary subagent permission
   rules** — a parent in `acceptEdits`/`bypassPermissions` wins and cannot be overridden, a parent
-  in auto mode is inherited and makes frontmatter `permissionMode` a no-op, otherwise the
+  in auto mode is inherited and makes frontmatter `permissionMode` a no-op (and
+  `permissions.disableBypassPermissionsMode` makes a frontmatter `bypassPermissions` a no-op too),
+  otherwise the
   definition's mode, else the session's. The script itself has no filesystem/shell access — only
   the agents do.
 - Resumable **within the same session** (cached agent results); a fresh session restarts it.
@@ -398,7 +405,12 @@ classic audit offender, see `audit-checklist.md` §3). The surfaces:
   the risk, reach for `ultrareview`; where the *deliverable* is (milestone close, irreversible
   gate), open a **new session** and tell it to refute — subscription-local, and it can execute
   the live stack, which a diff review does not.
-- A `REVIEW.md` at the repo root customizes severity calibration
+- A `REVIEW.md` at the repo root tunes the **managed GitHub Code Review service** (Team/Enterprise
+  research preview) — the local `/code-review` **does not read it**: "the review follows your
+  `CLAUDE.md` like any Claude Code session, but it doesn't read `REVIEW.md`". The calibration lever
+  for the local review is the **effort level**: `low`/`medium` report only high-confidence
+  findings, `high`–`max` broaden coverage and may include less certain ones. A project on
+  Pro/Max that writes a `REVIEW.md` for local review gets nothing.
   (`code.claude.com/docs/en/code-review`; tags: Important / Nit / Pre-existing).
 
 **Counter-pressure from the model side — don't *instruct* self-verification** [FP,
@@ -580,7 +592,13 @@ correctly refuses injection-shaped instructions found in a working directory.
   authoring a command for a generic need** — the built-in set is a moving target, and the
   duplicate you write does not announce itself. Two small ones with harness consequences:
   **`/verify`** runs and checks the app itself (the rung above "tests pass" — first-party
-  guidance is to run it *after* Claude's own check passes), and **`/btw`** answers a side question
+  guidance is to run it *after* Claude's own check passes). It and **`/run`** infer a standard
+  launch with no setup, and that inference is what degrades on a project needing a database, an
+  env file, a graphical session or a multi-step build: there, **`/run-skill-generator`** — once per
+  project, again when the build changes — brings the app up from a clean environment and commits
+  the working recipe as `.claude/skills/run-<name>/`, which every later run follows; `/verify`
+  records its own recipe the same way when it had to work one out. Prefer that over writing a
+  launch procedure into CLAUDE.md. **`/btw`** answers a side question
   **without putting it in conversation history**, which is the cheap fix for the context-pollution
   failure mode rather than a `/clear`.
 - **Code intelligence** — for a typed language, first-party best-practices recommends installing a

@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #51 · 2026-08-29 · Оракул, поставленный не в том месте: кит проверял спавн, а явление жило позже
+
+**Tags:** harness, audit, method, currency
+
+Вторая половина того же аудита пятью свежими контекстами (первая — #50, релиз v1.23.1). Если 1.23.1 чинила утверждения, которые протухли, то 1.23.2 чинит утверждения, которые кит проверил негодным методом — включая одно, помеченное в тексте как binary-verified.
+
+[→ entries/0051-orakul-postavlennyy-ne-v-tom-meste-kit-proveryal-spavn-a-yav.md](entries/0051-orakul-postavlennyy-ne-v-tom-meste-kit-proveryal-spavn-a-yav.md)
+
+---
+
 ## #50 · 2026-08-29 · Пять свежих аудиторов: дорого стоят не пины, а утверждения о поведении
 
 **Tags:** harness, audit, currency, fresh-context

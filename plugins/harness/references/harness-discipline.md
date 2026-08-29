@@ -82,7 +82,7 @@ bloat CLAUDE.md; the invocation-control and forked-lookup mechanics for it
 ## Subagents are for context isolation / parallelism — not ownership
 
 "Subagents run in their own context… useful for tasks that read many files without cluttering
-your main conversation." (*Extend Claude Code*, T1.) The main thread owns the task end-to-end
+your main conversation." (*Best practices*, T1.) The main thread owns the task end-to-end
 through verification. Spawn only for: (a) context isolation (search-heavy work whose output
 would pollute main context), (b) parallelism (independent searches converging back), or
 (c) auto-compact rescue. **Built-ins first**: `Explore` / `Plan` / `general-purpose` cover
@@ -194,7 +194,7 @@ anti-pattern, not the goal.
 ## Give Claude a verification loop it can close itself
 
 "Claude stops when the work looks done. Without a check it can run, 'looks done' is the only
-signal, and you become the verification loop." (*Best practices*, T1.) Enforcement ladder,
+signal available, and you become the verification loop." (*Best practices*, T1.) Enforcement ladder,
 cheapest first: in-prompt check → `/goal` condition (re-checked every turn) → **Stop hook**
 (deterministic gate) → **`/code-review`** (built-in, local, free — run it on substantive
 changes; it reviews the working diff or a PR, and `/review` is simply its alias — surfaces catalogued in
@@ -217,9 +217,10 @@ Decisions → ADRs; ongoing long task → a progress file (`.claude/progress/<sl
 not a specific file layout — offer these conventions, don't mandate them; a project that keeps
 continuity in git-commit prefixes or structured memory meets the same goal, and prescribing one
 format is friction projects route around.** Not ephemeral scrollback. Context is a degrading resource: rot
-sets in well before the hard window limit (Chroma "Context Rot", T4; operational reports put
-it around ~256K on 1M-window models, 2025–26 figures) — keep state on disk and compact before
-the degradation zone, not at the ceiling.
+sets in well before the hard window limit (Chroma "Context Rot", T4) — keep state on disk and
+compact before the degradation zone, not at the ceiling. A specific pre-rot threshold is **not**
+sourced here: the figure this file used to carry (~256K on 1M-window models) traces to no entry in
+`evidence-base.md`, and the Chroma study does not state it. Treat the threshold as unmeasured.
 
 ## Before any extension: layer and retire trigger
 

@@ -84,7 +84,7 @@ sessions where the operator is present.
 | `.claude/agents/` | **no** — built-ins cover it; defer until evidence |
 | `.claude/hooks/` | **no** — defer until a recurring pain |
 | `.claude/skills/` | **no** — defer until a workflow repeats ≥3× |
-| `.claude/commands/` | **no** — and when the need arrives, write a skill instead: same `/name`, and it is the only form with `disable-model-invocation`. Existing `commands/*.md` keep working; nothing to migrate |
+| `.claude/commands/` | **no** — and when the need arrives, write a skill instead: first-party guidance points new workflows at `skills/`, which adds a directory for supporting files. Same mechanism otherwise, `disable-model-invocation` included; existing `commands/*.md` keep working, nothing to migrate |
 | `.mcp.json` | only if there is a clear external-tool need |
 
 Defaulting to "no" on the machinery rows is the discipline, not timidity.
@@ -315,7 +315,9 @@ forever — still no custom subagents/hooks until a trigger earns them.
 
 ## Phase 7 — Verify
 
-**Run `/doctor` first** (alias `/checkup`) — the native setup checkup catches unparseable
+**Have the operator run `/doctor` first** (alias `/checkup`) — it is a slash command in *their*
+session, not something a delegate or a headless run can reach, and `claude doctor` on the CLI is a
+different, installation-health-only tool. The native setup checkup catches unparseable
 settings, colliding agent definitions, slow hooks, version currency and context-heavy extensions
 without any of the checks below. The rest of this phase is the write-through evidence `/doctor`
 has no view of: whether *this project's* files got the duties, and whether its permission rules
@@ -338,10 +340,16 @@ claude --print "what is the project's stack?"  # pass = answer matches CLAUDE.md
 claude --print "what files are you not allowed to touch here?"  # pass = names the deny/ask rules from settings.json
 # CM resolves the instruction file: Claude Code loads a root CLAUDE.md and .claude/CLAUDE.md alike,
 # and a project using the latter scores 0 on every grep below if you hard-code the former.
+# CM resolves the file AND its @imports: a bridged CLAUDE.md (`@AGENTS.md`, per Phase 0/1) carries
+# the duty in the imported file, and a literal read of CLAUDE.md scores 0 on all six.
 CM=$([ -f CLAUDE.md ] && echo CLAUDE.md || echo .claude/CLAUDE.md)
-grep -ci "plan mode" $CM && grep -ci "fresh-context" $CM && grep -ci "size the change" $CM \
-  && grep -ciE '^#{0,4} *[0-9.]* *-? *\*{0,2}Continuity' $CM \
-  && grep -cE '^#{1,4} *Commands' $CM && grep -cE '^#{1,4} *Boundaries' $CM
+CMTEXT=$(cat "$CM"; sed -n 's/^@\(.*\)$/\1/p' "$CM" | while read -r i; do [ -f "$i" ] && cat "$i"; done)
+# separate with `;` not `&&` — grep -c returns 1 on a zero count, so a chain stops at the first
+# miss and the "all six" line the comment promises never prints
+echo "$CMTEXT" | grep -ci "plan mode"; echo "$CMTEXT" | grep -ci "fresh-context"
+echo "$CMTEXT" | grep -ci "size the change"
+echo "$CMTEXT" | grep -ciE '^[[:space:]]*#{0,4} *[0-9.]* *[-*+]? *\*{0,3}Continuity'
+echo "$CMTEXT" | grep -cE '^#{1,4} *Commands'; echo "$CMTEXT" | grep -cE '^#{1,4} *Boundaries'
 ls .claude/docs/workflow.md .claude/docs/testing.md .claude/docs/docs-discipline.md docs/ARCHITECTURE.md docs/CODE-MAP.md
 # pass = all six greps ≥1 (plan-mode duty + verification ladder + change-sizing + continuity duty +
 # a Commands section + a three-tier Boundaries section landed in CLAUDE.md) and all five
@@ -387,8 +395,10 @@ every later run in the repo follows. `/verify` records its own recipe the same w
 work one out. That is the kit's "state on disk" rule satisfied natively — a recorded skill, not a
 second entry point wrapping your gates. **Detect before prescribing**: these are bundled skills,
 and a bundled skill can be absent from a given profile (`CLAUDE_CODE_DISABLE_BUNDLED_SKILLS`, a
-managed policy, an org build). Confirm the surface exists in `/`-autocomplete before routing the
-project at it; if it does not, name the real launch command in CLAUDE.md as above and stop there.
+managed policy, an org build). Check mechanically rather than by looking at autocomplete, which a
+headless run has no access to: `claude --print "list your available skills"` names what this
+profile actually carries. If the skill is not there, name the real launch command in CLAUDE.md as
+above and stop.
 
 ## Phase 8 — Record the bootstrap
 

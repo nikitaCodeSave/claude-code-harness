@@ -2,7 +2,7 @@
 
 Read this when someone challenges a recommendation or asks "where does this come from".
 Every core harness principle has a **first-party (T1)** citation — the discipline is grounded,
-not idiosyncratic. Verified against current docs July 2026; the currency pin lives in
+not idiosyncratic. Source claims re-verified against the cited pages 2026-08-29; the currency pin lives in
 `references/native-capabilities.md`.
 
 ## Trust rubric
@@ -22,15 +22,15 @@ T6–T7 anecdote does not earn a rule (see `harness-discipline.md`, single-incid
 
 | Source | URL | Tier | Supports |
 |---|---|---|---|
-| Best practices for Claude Code | `code.claude.com/docs/en/best-practices` | T1 | CLAUDE.md ≤200 lines, prune-like-code, verify-loop ladder, adversarial-review-but-don't-over-engineer |
-| Extend Claude Code ("match features to your goal") | `code.claude.com/docs/en/features-overview` | T1 | built-ins-first, hook-vs-skill determinism, action-vs-reference skills, subagent isolation, build-over-time triggers |
+| Best practices for Claude Code | `code.claude.com/docs/en/best-practices` | T1 | prune-like-code, verify-loop ladder, adversarial-review-but-don't-over-engineer, subagent context isolation |
+| Extend Claude Code ("match features to your goal") | `code.claude.com/docs/en/features-overview` | T1 | built-ins-first, hook-vs-skill determinism, action-vs-reference skills, build-over-time triggers, **"Rule of thumb: Keep CLAUDE.md under 200 lines"** |
 | Orchestrate subagents at scale with dynamic workflows | `code.claude.com/docs/en/workflows` | T1 | "who holds the plan" boundary; concurrency caps; cost gate |
-| What's new in Claude Opus 5 | `platform.claude.com/docs/en/about-claude/models/whats-new-opus-5` | T1 | effort default `high`; 1M context default+max; thinking on by default, effort as the depth dial; literal instruction-following |
-| Prompting Claude Opus 5 | `platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5` | T1 | do not over-instruct verification ("use a subagent to verify" causes over-verification); give the full spec up front; filter review severity in a second pass |
+| What's new in Claude Opus 5 | `platform.claude.com/docs/en/about-claude/models/whats-new-opus-5` | T1 | effort default `high`; 1M context default+max; thinking on by default, effort as the depth dial |
+| Prompting Claude Opus 5 | `platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5` | T1 | do not over-instruct verification ("use a subagent to verify" causes over-verification); give the full spec up front; filter review severity in a second pass; **literal instruction-following** ("may follow that instruction literally and report less") |
 | The new rules of context engineering for Claude 5 | `claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models` | T1 | >80% of Claude Code's system prompt removed with no measurable loss; conflicting instructions as the harm mechanism; CLAUDE.md budget goes to gotchas; progressive disclosure; `/doctor` rightsizes |
 | How Anthropic secures its AI-native SDLC | `claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle` | T1 | boundaries around access and actions, not around instructions; an agent's boundary must include its access to other agents |
 | How we contain Claude across products | `anthropic.com/engineering/how-we-contain-claude` | T1 | contain at the environment layer first, steer at the model layer second; approval fatigue is measured, not hypothetical |
-| Agent harness design: 3 patterns | `claude.com/blog/harnessing-claudes-intelligence` | T1 | lean on the model not the harness; strip it down as capability grows; boundaries are the part you keep |
+| Agent harness design: 3 patterns | `claude.com/blog/harnessing-claudes-intelligence` | T1 | lean on the model not the harness; strip it down as capability grows; "set boundaries carefully in your harness design" |
 | Effective context engineering for AI agents | `anthropic.com/engineering/effective-context-engineering-for-ai-agents` | T1 | context as finite/degrading resource; smallest high-signal token set; just-in-time retrieval; tool minimalism |
 | Building effective agents | `anthropic.com/research/building-effective-agents` | T1 | simplest solution first; add complexity only when simpler demonstrably underperforms |
 | Writing effective tools for AI agents | `anthropic.com/engineering/writing-tools-for-agents` | T1 | high-leverage, namespaced, token-efficient, prompt-engineered tools |
@@ -43,11 +43,11 @@ T6–T7 anecdote does not earn a rule (see `harness-discipline.md`, single-incid
 | Orchestrate teams of Claude Code sessions | `code.claude.com/docs/en/agent-teams` | T1 | "check whether a lighter option does the job" before a team; subagents-vs-teams comparison; teams cost more tokens and suit research/review/independent-ownership work, not sequential or same-file work |
 | Claude Code release notes | `code.claude.com/docs/en/changelog` | T2 | the shipped-surface record the inventory is grounded on. One entry is worth citing on its own: **v2.1.232 removed the startup tip suggesting you create custom subagents** (and the matching `/powerup` nudge) — the vendor retiring its own "write a custom agent" prompt is first-party corroboration of built-ins-first, not just our reading of it |
 | AGENTS.md (spec + site) | `agents.md` | T4 | the cross-vendor instruction-file standard (Agentic AI Foundation; read by Codex/Cursor/Copilot). Grounds the bridge pattern: one authoritative file, `@AGENTS.md` import or symlink for Claude Code, never a paraphrased second copy |
-| GitHub — how to write a great AGENTS.md (2,500+ repos) | `github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/` | T4 | the section order that changed agent behavior in the wild: executable commands early, three-tier boundaries (Always / Ask first / Never), stack with versions, code examples over prose, explicit "done". Also the negative finding: most files fail by being vague |
+| GitHub — how to write a great AGENTS.md (2,500+ repos) | `github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/` | T4 | the section order that changed agent behavior in the wild: executable commands early, three-tier boundaries (Always / Ask first / Never), stack with versions, code examples over prose. Also the negative finding: most files fail by being vague |
 | Fowler / Böckeler — harness engineering | `martinfowler.com/articles/harness-engineering.html` | T4 | harness as two control systems — **guides** (feedforward: conventions, specs, rules files) and **sensors** (feedback: linters, tests, review), each in a computational and an inferential mode. Names the human's job as *iterating on the harness itself* when failures recur, which is what this kit's strip revision does |
 | Empirical: generated instruction files can hurt | reported across 2026 studies (see `native-capabilities.md`, Memory §) | T3 | LLM-authored AGENTS.md/CLAUDE.md measured at −2% success / +23% cost in one study and reduced success in 5 of 8 settings (+2.45–3.92 steps) in another; mechanism is restating what the repo already shows. Grounds "generate, then cut everything derivable" |
 | Chroma — Context Rot | `trychroma.com/research/context-rot` | T4 | universal pre-overflow degradation (corroborates context-engineering; vendor-bias caveat) |
-| GitHub Spec Kit (README, command table) | `github.com/github/spec-kit` | T4 | another vendor's spec-first flow placing `/speckit.clarify` (resolve underspecification) and `/speckit.checklist` (requirements completeness) **before** `/speckit.plan` — corroborates that the pre-implementation ambiguity gate is a real gap, not a local preference. Not a source for the kit's disposition wording |
+| GitHub Spec Kit (README, command table) | `github.com/github/spec-kit` | T4 | another vendor's spec-first flow placing `/speckit.clarify` (resolve underspecification) **before** `/speckit.plan` — the README states that order for `clarify` only; `/speckit.checklist` (requirements completeness) exists but is not tied to a position in the flow — corroborates that the pre-implementation ambiguity gate is a real gap, not a local preference. Not a source for the kit's disposition wording |
 
 ## Empirical grounding notes (current model generation)
 
@@ -59,9 +59,12 @@ T6–T7 anecdote does not earn a rule (see `harness-discipline.md`, single-incid
   bounded-fan-out primitive — per built-ins-first the harness routes to them (for
   scope-exceeds-context, codified repeatability, or trust-critical adversarial verification,
   gated on higher token cost) rather than reimplementing orchestration.
-- **Harness swing ≈ model swing** (Harness-Bench, arXiv 2605.27922) — empirically corroborates the
-  headline principle: harness quality moves the score about as much as a model tier, and a stronger
-  model narrows harness variance. Supports "less harness, but the right harness."
+- **A stronger model narrows harness variance** (Harness-Bench, arXiv 2605.27922) — verbatim:
+  "stronger model backends tend to achieve higher mean scores while exhibiting lower cross-harness
+  variance", over "substantial variation across model–harness pairings". Supports "less harness,
+  but the right harness". **The paper does not compare the two magnitudes** — an earlier reading
+  here claimed harness quality moves the score about as much as a model tier; that sentence is not
+  in the paper and has been removed.
 - **The harness-swing claim now has a cross-vendor data point** (T4, vendor engineering claim —
   not independently replicated, and the benchmark is not coding): OpenAI open-sourced the engine
   behind Codex under Apache-2.0 (August 2026) and reported that changing **only** harness settings

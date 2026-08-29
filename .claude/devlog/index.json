@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-29T17:13:32Z",
-  "entry_count": 55,
+  "generated_at": "2026-08-29T17:51:38Z",
+  "entry_count": 56,
   "entries": [
     {
       "id": 1,
@@ -804,6 +804,21 @@
       "supersedes": null,
       "path": "entries/0055-kit-proshel-sobstvennyy-audit-chek-list-ne-znal-chto-byvayut.md",
       "preview": "Кит предписывает чужим проектам режим Audit, но сам через него не проходил ни разу. Свежая сессия применила audit-checklist.md к dev-harness этого репозитория (.claude/ + корневые файлы, но не plugins/** — там продукт). Задание отдельно требовало отметить неприменимые секции…"
+    },
+    {
+      "id": 56,
+      "date": "2026-08-29",
+      "title": "Четыре верификатора на 470 утверждений: девятнадцать оказались неверными",
+      "tags": [
+        "harness",
+        "verification",
+        "currency",
+        "evidence"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0056-chetyre-verifikatora-na-470-utverzhdeniy-devyatnadtsat-okaza.md",
+      "preview": "Оператор поставил задачу довести харнес до безошибочного состояния, истина — в документации и статьях. Абсолют недостижим (за день дважды «исправление» оказалось регрессом), но систематическая сверка выполнима. Четыре свежих контекста поделили поверхность: две половины…"
     }
   ]
 }

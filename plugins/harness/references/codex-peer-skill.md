@@ -79,7 +79,7 @@ description: >-
   the same context. Covers the call shape (sandbox, effort, threads), what to do
   with the output, and why the loop does not converge on its own.
 ---
-<!-- codex-peer content-version: claude-code-harness v1.20.0 — the re-sync key; advances only
+<!-- codex-peer content-version: claude-code-harness v1.24.1 — the re-sync key; advances only
      when this block's text changes. It sits BELOW the frontmatter on purpose: a comment placed
      above it is taken as the description itself, and the skill loses its whole trigger surface. -->
 
@@ -104,7 +104,9 @@ replace your own testing, and it does not replace `/code-review`.
 }
 ```
 
-- **Parameter names are hyphenated**, not camelCase (`approval-policy`, `base-instructions`).
+- **On the `codex` tool the parameter names are hyphenated**, not camelCase (`approval-policy`,
+  `base-instructions`). `codex-reply` is the exception and uses `threadId` (its deprecated twin is
+  `conversationId`) — check `tools/list` rather than generalising from one tool to the other.
 - **`sandbox: "read-only"` for every review.** Not distrust — a reviewer has no need to write, so
   the narrowest sandbox is free.
 - **Effort has no dedicated parameter**: it goes through `config` as

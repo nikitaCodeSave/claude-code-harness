@@ -42,10 +42,11 @@ or re-run before proposing edits to its machinery.
 **slash command**, run by the operator in the session being audited. `claude doctor` on the CLI is
 a different tool: it reports installation health (version, platform, install method, update
 channel, managed-settings fetch) and closes by pointing at the slash command. It is not a
-substitute, and a fresh-context auditor — the very shape this kit prescribes for auditing — has no
-slash commands at all. So: **ask the operator to run `/doctor` and paste the output**; if that is
-not possible, say so in the report and name which sections went unaided rather than substituting
-the CLI form. What the slash command covers,
+substitute. And a fresh-context auditor cannot reach the slash command either: a subagent does get
+a skill list (`/code-review`, `/security-review`, `/init`, `/run` and others are there), but
+`doctor` is not among the skills handed to it. So: **ask the operator to run `/doctor` and paste
+the output**; if that is not possible, say so in the report and name which sections went unaided
+rather than substituting the CLI form. What the slash command covers,
 natively and against real usage data, is several sections' worth of ground: unparseable settings and
 colliding agent definitions, skills/MCP servers/plugins that cost context but are never used
 (read off `skillUsage` / `pluginUsage` counters and a transcript scan — the retire half of §5),
@@ -55,8 +56,9 @@ what it already reported** — hand-walking ground the tool covers is exactly th
 this kit exists to prevent.
 
 What it does **not** do, and why the rest of this file still runs: its write proposals touch
-**user/local scope only**, never checked-in files, so every finding about the repo's own committed
-harness is yours; and it has no view of the judgment-shaped items — a custom subagent that
+**user/local scope**, plus one checked-in exception — since v2.1.206 it proposes trimming a
+checked-in `CLAUDE.md` of content Claude could derive from the codebase. Everything else about the
+repo's own committed harness is yours; and it has no view of the judgment-shaped items — a custom subagent that
 duplicates a built-in (§3), a pipeline over-reach (§8), lab-vs-starter conflation (§9), dead
 *file-path* permission rules (§10), or whether a stale pin is a behavioral binding or honest
 provenance (§1). Record what `/doctor` already fixed
@@ -116,10 +118,15 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   upgrade). The allowlist is the inventory itself plus the frozen layers:
 
   ```bash
-  grep -rnE "Opus 4\.[0-9]|Opus [0-9]|Sonnet [0-9]|v?2\.1\.[0-9]{3}" \
+  grep -rnE "Opus [0-9.]+|Sonnet [0-9.]+|Haiku [0-9.]+|Fable [0-9.]+|claude-(opus|sonnet|haiku|fable)-[0-9]|v?2\.1\.[0-9]{3}" \
     --include="*.md" . \
-    | grep -vE "(archive/|devlog/|/reports/|/audits/|CHANGELOG\.md|native-capabilities\.md)"
+    | awk -F: '$1 !~ /(archive\/|devlog\/|\/reports\/|\/audits\/|CHANGELOG\.md|native-capabilities\.md)/'
   ```
+
+  **Filter on the path field, not the whole line.** A `grep -v` over `path:lineno:content` also
+  drops a live line whose *text* happens to mention `devlog/` or `archive/` — so a real pin hides
+  behind a word in its own sentence. And keep the model-name alternatives current: a pattern
+  written for one generation misses the next one's names and model ids.
 
   Classify each survivor by the rule above — behavioral binding → de-version; honest
   when/against-what sourcing → keep — and adapt the allowlist to the project's own frozen paths
@@ -231,18 +238,20 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   read like a licence to cut exactly these; they are not, because the duty is the *project-side*
   write-through the bootstrap's Phase 7 greps for. Their retire triggers: embed → global baseline
   installed; duty lines → a target model proposes these steps unprompted.
-- **Continuity duty absent from CLAUDE.md** —
-  `for f in CLAUDE.md .claude/CLAUDE.md; do [ -f "$f" ] && grep -ciE '^#{0,4} *[0-9.]* *-? *\*{0,2}Continuity' "$f"; done`
+- **Continuity duty absent from CLAUDE.md** — resolve the instruction file *and its `@imports`*,
+  then `grep -ciE '^[[:space:]]*#{0,4} *[0-9.]* *[-*+]? *\*{0,3}Continuity'`
   → 0. **Use that anchored form, not a bare `grep -ci continuity`:** the kit's own Reference-materials
   block ends a line with the word ("…verification ladder, continuity"), so the bare grep scores 1 on a
   CLAUDE.md that has the pointer and no duty — it misses most of the population it is meant to find.
   The anchor demands the word as a label at line start (duty bullet or a `## Continuity` heading).
-  **Three ways this grep lies, all of them false *fails*:** the instruction file may be
-  `.claude/CLAUDE.md` rather than the root one (Claude Code loads both with equal standing — hence
-  the loop above); a numbered heading (`## 6. Continuity`) scored 0 until `[0-9.]*` was added; and
-  the anchor is an English token, so an instruction layer written in another language can never
-  satisfy it. **The finding is the missing duty, not the missing word** — when the grep returns 0,
-  read the file before reporting.
+  **Five ways this grep lies, all of them false *fails*, each found by testing it against a file
+  known to carry the duty:** the instruction file may be `.claude/CLAUDE.md` rather than the root
+  one (Claude Code loads both with equal standing); the duty may live in an `@import`ed file, which
+  is what Phase 0/1 of the bootstrap *prescribes* — so a literal read of a bridged CLAUDE.md scores
+  0 by design; a numbered heading (`## 6. Continuity`) needs `[0-9.]*`; `*` / `+` bullets, a leading
+  tab and `***bold-italic***` need the widened character classes above; and the anchor is an English
+  token, so an instruction layer in another language can never satisfy it. **The finding is the
+  missing duty, not the missing word** — when the grep returns 0, read the file before reporting.
   The project may keep a devlog and ship `.claude/docs/workflow.md` — and
   still never tell a working session that a feature/fix/config change/decision closes with an episodic
   entry, or name the carrier. Finding: the layer then holds only while the operator watches; entries
@@ -290,8 +299,11 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   come. Their choice: keep it as a project-owned rule, or fold it into their own
   `~/.claude/CLAUDE.md` and delete the embed. Never edit a global copy from an audit.
 - **`codex-peer` re-sync — only if a copy already exists.** Key the search on the **stamp, not the
-  filename** — `grep -rl "codex-peer content-version"` across the project and the resolved config
-  dir. A name-keyed check reports "absent, not a finding" while an operator-named variant
+  filename**, and scope it to markdown under the skills directories —
+  `grep -rl --include='*.md' "codex-peer content-version" . "$CFG/skills"`. Without `--include`
+  the search drags in `<config-dir>/projects/*.jsonl` and `file-history/`, which contain every
+  transcript that ever mentioned the phrase — including the audit that ran this grep, so the check
+  poisons itself on second use. A name-keyed check reports "absent, not a finding" while an operator-named variant
   (`skills/codex-mcp/`, say) sits in the profile; a same-mission skill carrying no stamp is a §2
   overlapping-mission observation, not a re-sync candidate. Where a stamped copy is
   present (project, or the user profile at `<config-dir>/skills/`), compare its `codex-peer

@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #56 · 2026-08-29 · Четыре верификатора на 470 утверждений: девятнадцать оказались неверными
+
+**Tags:** harness, verification, currency, evidence
+
+Оператор поставил задачу довести харнес до безошибочного состояния, истина — в документации и статьях. Абсолют недостижим (за день дважды «исправление» оказалось регрессом), но систематическая сверка выполнима. Четыре свежих контекста поделили поверхность: две половины…
+
+[→ entries/0056-chetyre-verifikatora-na-470-utverzhdeniy-devyatnadtsat-okaza.md](entries/0056-chetyre-verifikatora-na-470-utverzhdeniy-devyatnadtsat-okaza.md)
+
+---
+
 ## #55 · 2026-08-29 · Кит прошёл собственный аудит: чек-лист не знал, что бывают проекты-производители харнесов
 
 **Tags:** harness, audit, checklist, self-application

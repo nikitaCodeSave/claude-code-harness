@@ -7,6 +7,101 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.24.1] — 2026-08-29
+
+**Four verifiers checked roughly 470 factual claims against the changelog of the running version,
+live probes and first-party pages; nineteen were wrong.** No surface changed — this release only
+makes the kit stop asserting things that are not so. Two findings are dangerous rather than
+merely wrong, and they lead.
+
+### Fixed — the two that could hurt a consumer
+
+- **"Destructive git and IaC are blocked out of the box" was false outside auto mode, and the kit
+  told consumers not to write a deny rule because of it.** The release note is headed "Improved
+  **auto mode** safety" and carries three conditions (only when you didn't ask to discard local
+  work, only for a commit the agent didn't make this session, only for a stack you didn't name);
+  the binary's circuit-breaker table lists `dangerousRemoval`, `backgroundOperator` and
+  `suspiciousWindowsPath` and no git/IaC entry. **Measured**: in `manual` mode with
+  `Bash(git reset:*)` allowed, `git reset --hard` ran and destroyed uncommitted work. The text now
+  scopes the claim to auto mode and says plainly that elsewhere a deny rule is the only guard.
+- **`$HOME` is not a path anchor in permission rules.** The kit said `~`/`$HOME` deny rules also
+  cover Bash. Measured: `Read(~/x/**)` denied a `cat`; `Read($HOME/x/**)` let the same file
+  through **silently**, with a control rule warning in the same run. The four anchors are `//`,
+  `~/`, `/` and relative. Reworded, and made precise about what a Read/Edit deny does reach in
+  Bash: the recognisable file commands, not a Python or Node script opening the same path.
+
+### Fixed — assertions about Claude Code
+
+- `effort:` in frontmatter **does not accept `inherit`** — the schema is five named levels or an
+  integer, and the loader rejects anything else. Omitting the field is how you inherit; `inherit`
+  belongs to `model:`, a different field with a different schema.
+- The hooks page **documents all 33 events**, `PreModelSwitch`/`PostModelSwitch` included. The
+  kit's "the page documents 31, check the binary" was a lesson resting on a fact that no longer
+  holds. (The list of 33 itself was verified name-for-name against the binary enum.)
+- `claude plugin validate` **warns** on a version mismatch and still passes; only `--strict` fails
+  and only `claude plugin tag` refuses. The kit promised a strictness that does not exist.
+- Forked skills: **before** v2.1.218 a fork blocked the turn until it finished. The kit had the
+  direction reversed.
+- The `paths:` bug cluster is four-fifths closed — only #16299 remains open (2026-08-29); one was
+  fixed in 2.1.198 and two closed not-planned. Citing a stale issue number as a live constraint is
+  its own defect class.
+- Cross-session messaging reached **Windows** in v2.1.239; `/doctor`'s write proposals *do* touch
+  checked-in files for the CLAUDE.md checks (v2.1.206); worktree isolation has four documented
+  skip conditions plus `bgIsolation: "none"`, including a write outside the working directory;
+  effort defaults to `high` **except Opus 4.7** (`xhigh`), and `xhigh` is absent on Opus 4.6 /
+  Sonnet 4.6; the effort precedence chain was missing the frontmatter rank it relies on three
+  lines later; `/schedule` is the cloud surface of three, not "the" surface; per-agent memory
+  writes to a different root per scope; `/design`'s version pin has no changelog entry and is gone.
+- The stale `CLAUDE_CODE_SUBAGENT_MODEL` semantics survive on **three** docs pages, not one —
+  recorded, with the point that a page count cannot be the tiebreaker.
+
+### Fixed — the source catalogue
+
+`evidence-base.md` attributed claims to papers that do not make them, which is the worst defect a
+citation file can carry:
+
+- **"Harness swing ≈ model swing" is not in Harness-Bench.** The paper reports "substantial
+  variation across model–harness pairings" and, verbatim, that "stronger model backends tend to
+  achieve higher mean scores while exhibiting lower cross-harness variance" — it never compares
+  the two magnitudes. The comparison has been removed and the sourced half kept.
+- "explicit *done*" was credited to the 2,500-repository study, which does not list it; the
+  ≤200-line rule belongs to *Extend Claude Code*, not *Best practices*; literal
+  instruction-following to *Prompting Claude Opus 5*, not *What's new*; the subagent-isolation
+  quote to *Best practices*; a "boundaries are the part you keep" framing the source does not use;
+  and a dropped word inside quotation marks ("the only signal **available**").
+- A **~256K pre-rot threshold** presented as first-party traces to no entry in the catalogue and
+  is not in the Chroma study. It is now named as unmeasured rather than quietly carried.
+
+### Fixed — checklist procedures that lied
+
+- The continuity grep produced false *failures* five ways: a `.claude/CLAUDE.md` instruction file,
+  a duty living in an `@import`ed file (which the bootstrap itself prescribes), a numbered
+  heading, `*`/`+` bullets and bold-italic, and a non-English instruction layer. The greps now
+  resolve the file and its imports; the section states that the finding is the missing duty, not
+  the missing word.
+- A `&&` chain stopped at the first zero, so the "all six ≥1" line the comment promised never
+  printed on failure.
+- The `codex-peer` stamp search returned 21 hits and zero correct ones — it swept
+  `<config-dir>/projects/*.jsonl` and `file-history/`, so it also **poisoned itself** by matching
+  the transcript of the audit that ran it. Scoped to markdown under the skills directories.
+- The drift detector filtered `path:lineno:content` as one string, dropping a live line whose text
+  merely mentions `devlog/` or `archive/`; it now filters the path field and covers current model
+  names, which the old pattern missed.
+- `/doctor` is a slash command in the operator's session — the CLI `claude doctor` is
+  installation-health only. A delegate cannot run either; what it lacks is specifically the
+  `doctor` skill, not slash commands as a class.
+- A step told the auditor to check `/`-autocomplete, an interactive affordance, in a phase the
+  same file says may run headless. Replaced with a mechanical check.
+- `commands/*.md` **does** support `disable-model-invocation` — verified with two probe commands,
+  one flagged and one not. The recommendation to prefer a skill stands on first-party guidance and
+  the supporting-files directory, not on a safety difference that does not exist.
+
+### Added
+
+- **The background-session subcommands the kit never named**: `claude attach`, `logs`, `stop`,
+  `respawn` (`--all` after an upgrade) and `rm`. A project scripting any of this is carrying
+  obvyazka the CLI ships.
+
 ## [1.24.0] — 2026-08-29
 
 **The kit was run through its own Audit mode for the first time, and the valuable half of the

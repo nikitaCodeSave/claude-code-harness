@@ -65,9 +65,13 @@ harness step that expected an in-session fork must say `/subtask`. One condition
 instead** — a harness that hard-codes one name breaks on the other configuration. **Worktrees differ between the two, and the isolation is an explicit act, not a property of the
 spawn.** A `/fork`ed background copy **starts in the original checkout with its edits blocked**
 and is instructed to call **`EnterWorktree`** before changing code; isolation exists only once
-that call succeeds. Three cases skip it: `worktree.bgIsolation: "none"` (lets background sessions
-edit the working copy directly, for repos where worktrees are impractical), outside a git
-repository with no `WorktreeCreate` hook, and a copy already moved out of a hook-created worktree.
+that call succeeds — `bgIsolation: "worktree"` (the default) blocks Edit/Write in the main
+checkout until `EnterWorktree` is called. Isolation is skipped when: the session already sits in a
+linked worktree (one Claude created under `.claude/worktrees/`, **or one you made with
+`git worktree add`**); the file being edited is inside a linked worktree; the working directory is
+not a git repository and there is no `WorktreeCreate` hook; or the write targets a path **outside
+the working directory**. Separately, `worktree.bgIsolation: "none"` turns the whole mechanism off
+for repos where worktrees are impractical.
 `/subtask`, the in-session form, shares the session's checkout. Do not read a spawn-time probe as
 evidence here: an empty worktree field at T0 is what a not-yet-called `EnterWorktree` looks like,
 so the observation cannot support a claim about the agent's whole life. For a delegate that must
@@ -80,7 +84,9 @@ spawns in interactive sessions **background by default**. Note the boundary agai
 independent verification: a fork inherits the author's framing by construction, so it is the wrong
 shape for an independent refuter and the right one for "keep working on what we were just doing". Frontmatter
 `maxTurns`, `isolation: worktree` (auto-cleaned branch-off), `memory: user|project|local`
-(**persistent per-agent memory** under `~/.claude/agent-memory/`), and `experimental.cacheTtl`
+(**persistent per-agent memory**, each scope writing to its own root:
+`~/.claude/agent-memory/<agentType>/`, `.claude/agent-memory/<agentType>/`, and
+`.claude/agent-memory-local/<agentType>/`), and `experimental.cacheTtl`
 (`"5m"` / `"1h"`, v2.1.248 — a per-agent prompt-cache TTL used when no subagent TTL setting is
 configured; the settings-level pair is `promptCacheTtl` / `subagentPromptCacheTtl`, v2.1.243).
 Disable a built-in via
@@ -93,9 +99,10 @@ subagent model rather than override everything: an agent definition's `model:` a
 per-spawn model now take precedence over it." So the order is **per-spawn model ▸ definition's
 `model:` ▸ this variable ▸ the parent's model**, and `inherit` disables the default outright.
 A harness that pinned delegate models through this variable was silently re-layered by the
-upgrade: what it used to force it now only suggests. **Note the source conflict** — the
-`model-config` settings page still describes the pre-2.1.251 override semantics, and the
-changelog for the version you are running is the newer of the two. Read a delegate's actual model
+upgrade: what it used to force it now only suggests. **Note the source conflict** — *three* docs
+pages (`model-config`, `workflows`, `agent-teams`) still describe the pre-2.1.251 override
+semantics, and the changelog for the version you are running is the newer of them all. That a
+stale claim survives on several pages at once is why the page count is not the tiebreaker. Read a delegate's actual model
 off `/tasks` rather than trusting either document.
 
 ## Dynamic workflows — the bounded fan-out primitive [FP/BLOG]
@@ -211,8 +218,9 @@ machine-level cron. `ScheduleWakeup` paces the next iteration of a self-paced `/
 operator surface for recurring runs — since v2.1.248 its self-paced dynamic mode and the
 no-prompt autonomous default are **always available**, including on Bedrock/Vertex/Foundry, and
 `/usage` carries a **Loops breakdown** (runs, total tokens, tokens per run, last run) that makes
-a runaway loop visible without instrumenting anything (v2.1.243). For **durable, cross-session scheduling** the
-first-party surface is **`/schedule`** (the `RemoteTrigger` tool) managing **Routines** on
+a runaway loop visible without instrumenting anything (v2.1.243). For **durable, cross-session
+scheduling** first-party offers three surfaces — Desktop scheduled tasks and GitHub Actions
+alongside the cloud one. The cloud surface is **`/schedule`** (the `RemoteTrigger` tool) managing **Routines** on
 claude.ai — Anthropic-hosted, survives sessions, min interval 1 h; Pro/Max/Team/Enterprise,
 not on Bedrock/Vertex/Foundry. Don't hand-roll a persistent cron around the session-scoped one.
 
@@ -236,12 +244,17 @@ Background tasks are **never restored on resume**. Recurring checks are the `/lo
 long-running or scheduled task can reach the operator who stepped away (Anthropic-hosted;
 not on Bedrock/Vertex/Foundry).
 
+**Operating a background session is a set of CLI subcommands, not a harness you write** (all in
+`claude --help` as of v2.1.251): `claude attach <id>` opens it in the current terminal — the id is
+the short one `claude --bg` prints and `claude agents` lists; `logs <id>` prints its recent
+terminal output; `stop`/`kill <id>` ends it; `respawn [id]` (or `--all`) restarts it on the
+current Claude Code version, which is what you want after an upgrade; `rm <id>` deletes it. A
+project that wrapped any of this in a script is carrying obvyazka the CLI now ships.
+
 ## Hooks — 33 events [FP]
 
 Far more than the five most projects use. Full list (`code.claude.com/docs/en/hooks` documents
-31; the two model-switch events shipped in v2.1.251 and are binary-verified but not yet on that
-page — a fresh event reaching the binary before the docs is the normal order, so check the
-binary, not only the page, when you need one that just shipped):
+33, matching the binary enum name for name, `PreModelSwitch` / `PostModelSwitch` included):
 
 - Session: `SessionStart`, `Setup`, `SessionEnd` — a `SessionStart` firing on **resume** also
   receives the session's staleness and the estimated re-cache cost (v2.1.251)
@@ -270,7 +283,9 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
 ## Effort, fast, thinking [FP] (`code.claude.com/docs/en/model-config`)
 
 - Tiers: `low`, `medium`, `high`, `xhigh`, `max` — effort is supported across the Claude 5
-  family and the Opus 4.x generation (live `/effort` dialog). **Default = `high`**.
+  family and the Opus 4.x generation (live `/effort` dialog). **Default = `high` on every model
+  that supports effort, except Opus 4.7, which defaults to `xhigh`**; and `xhigh` itself is absent
+  on Opus 4.6 / Sonnet 4.6, which offer `low` / `medium` / `high` / `max`.
 - **How to set it — session-wide** (binary- and schema-verified 2026-07-25 on v2.1.220):
   - `effortLevel` in settings — enum `low` | `medium` | `high` | `xhigh` **only**. `max` is
     session-only (use `/effort`); an out-of-enum value here is swallowed by a `.catch()` rather
@@ -282,8 +297,10 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
     "the launch-effort pin holds effort at X"), `claude agents --effort <level>` as the default
     for dispatched background sessions. Since v2.1.251 **`/effort` saves your default per
     model**, so switching models no longer carries the previous model's level over.
-  - **Precedence, measured 2026-07-26 on v2.1.220** (org ceiling ▸ env ▸ launch pin ▸ settings ▸
-    model default). `CLAUDE_CODE_EFFORT_LEVEL` wins over everything user-side — including the
+  - **Precedence, measured 2026-07-26 on v2.1.220** (org ceiling ▸ env ▸ **a delegate's frontmatter
+    `effort:`** ▸ launch pin ▸ settings ▸ model default). The frontmatter rank is what makes the
+    per-delegate lever below work at all; docs fold launch pin / settings / `/effort` into one
+    rank, while the measurement below separates them. `CLAUDE_CODE_EFFORT_LEVEL` wins over everything user-side — including the
     `--effort` flag: with the env set to `auto`, `--effort low` vs `--effort xhigh` produced
     911/953 vs 798/533 output tokens (no effect), while with the env unset the same pair gave
     722 vs 1053 (median, N=3) and `effortLevel` in settings gave 427/493 vs 692/994. The org
@@ -300,8 +317,10 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
     while the ranges still crossed. Interactively, `/effort` reports the active level directly;
     that is the answer, not an inference.
 - **How to set it per delegate — this is the harness lever.** `effort:` in the frontmatter of
-  `.claude/agents/*.md` (also accepted in skill and command frontmatter): a named level, an
-  integer, or `inherit`. The **Agent tool overrides only `model` per call, never effort** — the
+  `.claude/agents/*.md` (also accepted in skill and command frontmatter): a named level
+  (`low` / `medium` / `high` / `xhigh` / `max`) or an integer — **`inherit` is not valid here**,
+  the loader rejects it; that value belongs to `model:`, which is a different field with a
+  different schema. Omitting `effort:` is how you inherit. The **Agent tool overrides only `model` per call, never effort** — the
   level comes from the agent's definition; a dynamic workflow is the surface that *does* take it
   per call (`agent(prompt, {effort})`). Measured 2026-07-26 on v2.1.220, same prompt and same
   parent session: `effort: low` → 862 / 656 output tokens, `effort: xhigh` → 3358 / 3452 (N=2).
@@ -449,8 +468,9 @@ prescribe. Where review sits in the verification ladder — see `harness-discipl
 
 `/doctor` (alias `/checkup`) is a **health-check of the harness itself**, not just of the install,
 and it is the reason a hand-written "audit my `.claude/`" script is duplicated obvyazka. Read-only
-first, then it proposes fixes and asks before applying (its write proposals touch **user/local
-scope only** — never checked-in files). What it covers:
+first, then it proposes fixes and asks before applying. Its write proposals touch **user/local
+scope**, with one documented exception: the CLAUDE.md checks may propose edits to **checked-in**
+files (trimming content Claude could derive from the codebase, v2.1.206). What it covers:
 
 - **Install and settings** — duplicate/leftover installs, PATH, unparseable settings, broken or
   colliding agent definitions (the same ground `claude doctor` prints read-only).
@@ -565,9 +585,10 @@ a rule "only where it's needed" instead of taxing every turn in root CLAUDE.md, 
 that subtree (native, `code.claude.com/docs/en/large-codebases`) — empirically read and obeyed by
 fresh subagents (a directory convention overrode an explicit contrary instruction in test). This is
 the reliable mechanism for scoping a campaign / large-feature-area protocol. Do **not** rely on
-`.claude/rules/*.md` `paths:` frontmatter for this: it is heuristic and carries an open bug cluster
-(#16853 not-loaded-on-matching-read, #16299 loads-globally, #21858 user-level ignored, #23478
-Read-only-not-Write, #17204 documented-syntax-wrong) — unfixed on 2.1.x; use it only for nice-to-have
+`.claude/rules/*.md` `paths:` frontmatter for this: it is heuristic, and **#16299 (a scoped rule
+loading globally) is open as of 2026-08-29**. The rest of what used to be listed here as an open
+cluster has closed — #16853 fixed in 2.1.198, #21858 completed, #23478 and #17204 closed
+not-planned by a stale bot — so check state before citing a number. Use `paths:` only for nice-to-have
 narrowing, make critical rules always-on. Guaranteed delivery for must-not-miss → a `SessionStart` /
 `CwdChanged` hook reading `cwd` → `additionalContext`. **A scoped rule must read as a legitimate
 project convention, not an imperative** ("always append token X") — a security-conscious model
@@ -589,11 +610,11 @@ correctly refuses injection-shaped instructions found in a working directory.
   `context: fork` skill runs in the *background* by default** — the turn continues without its
   result. So a fork-skill whose answer the current turn depends on **must** carry
   `background: false` in frontmatter; without it the harness step silently proceeds unanswered.
-  (This generalizes the long-standing incompatibility with `AskUserQuestion`: a fork could never
-  prompt the operator because it always ran detached — that is now the default path, not an edge
-  case.) Frontmatter booleans also accept `yes`/`no`/`on`/`off`/`1`/`0` (v2.1.218).
+  (Note the direction of the change: **before v2.1.218 a forked skill blocked the turn until it
+  finished**; background is the new default, not the old one.) Frontmatter booleans also accept `yes`/`no`/`on`/`off`/`1`/`0` (v2.1.218).
 - **Slash commands** — `.claude/commands/*.md`; appear in `/`-autocomplete. Bundled skills keep
-  arriving (`/design` — artboard-based UI drafting, research preview v2.1.234+; `/claude-api`
+  arriving (`/design` — artboard-based UI drafting, a hub for Claude Design, research preview
+  with no changelog entry to pin it to; `/claude-api`
   with its `prompt-audit` and `cost-optimize` subcommands), so **check `/`-autocomplete before
   authoring a command for a generic need** — the built-in set is a moving target, and the
   duplicate you write does not announce itself. Two small ones with harness consequences:
@@ -620,7 +641,9 @@ correctly refuses injection-shaped instructions found in a working directory.
   plugin's own `plugin.json` is canonical (it wins over the marketplace entry) and acts as
   the **update cache key** — pushing new commits without bumping it ships nothing to
   installed users. Releases pin via `{name}--v{version}` git tags; `claude plugin validate`
-  requires plugin.json and the marketplace entry to agree, and installs record the resolved
+  **warns** when plugin.json and the marketplace entry disagree and still passes (measured:
+  "✔ Validation passed with warnings") — it fails only under `--strict`, while `claude plugin tag`
+  refuses outright. Installs record the resolved
   `gitCommitSha` (binary-verified). Distribution is no longer git/npm-only: an **`archive` source** installs a
   plugin from a zip over HTTPS with optional SHA-256 pinning. `/plugin install` refreshes a stale
   marketplace catalog and retries before reporting "not found", and plugins installed via
@@ -681,13 +704,17 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
   controls — rather than that it is present.
 - Deny rules accept a glob in the tool-name position (`"*"` denies all tools);
   `WebFetch(domain:...)` deny/ask/allow overrides the built-in preapproved hosts;
-  `~`/`$HOME`-path deny rules also block Bash commands referencing them; Read deny rules
+  a Read/Edit deny rule also blocks the **recognisable file commands** in Bash (`cat`, `head`,
+  `tail`, `sed` …) but not a Python or Node script that opens the same path. Path anchors are
+  `//`, `~/`, `/` and relative — **`$HOME` is not one of them**: measured, `Read(~/x/**)` denied
+  a `cat`, while `Read($HOME/x/**)` let the same file through silently (the control rule warned
+  in the same run, so the probe was not blind). Read deny rules
   hide files from Glob/Grep; `acceptEdits` prompts before writing code-executing config
   files (`.npmrc` / `.bazelrc` / `.pre-commit-config.yaml` / `.devcontainer/` …) and shell
   startup files.
 - **Cross-session messaging is a shipped surface**: sessions can message each other across your
-  machines (`SendMessage` + **`ListAgents`** to discover them; macOS/Linux, and since v2.1.248
-  also on Bedrock/Vertex/Foundry and with telemetry disabled). Type **`@`** in the prompt to
+  machines (`SendMessage` + **`ListAgents`** to discover them; macOS, Linux and — since v2.1.239 —
+  Windows, and since v2.1.248 also on Bedrock/Vertex/Foundry and with telemetry disabled). Type **`@`** in the prompt to
   mention another session by name (v2.1.232), and pass **`notify_when_idle`** to ask one session
   for a single notice when it next goes idle (v2.1.236) — opt-in, one-shot, **no polling**, which
   is the same anti-sleep-loop discipline as the Background-waiting section above. Its guard
@@ -750,11 +777,17 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
   questions (used by the audit and strip rituals). `disableBundledSkills` /
   `CLAUDE_CODE_DISABLE_BUNDLED_SKILLS` hides bundled skills, workflows, and built-in slash
   commands from the model (context-budget control).
-- **Native destructive-command block + auto-mode classifier (v2.1.183/193).** Destructive git
-  and IaC are blocked **out of the box** — `git reset --hard` / `checkout -- .` / `clean -fd` /
-  `stash drop`, `commit --amend` of another author's commit, `terraform` / `pulumi` / `cdk destroy`.
-  **Do not re-encode these as custom DENY rules** — this ground is covered natively; a manual
-  guard here is redundant obvyazka. The auto-mode classifier is now **diagnosable and configurable**: the denial
+- **Native destructive-command block, and it is an *auto-mode* mechanism (v2.1.183/193).** The
+  release note is headed "Improved **auto mode** safety": `git reset --hard` / `checkout -- .` /
+  `clean -fd` / `stash drop` are blocked **when you didn't ask to discard local work**,
+  `commit --amend` when the commit wasn't made by the agent this session, and `terraform` /
+  `pulumi` / `cdk destroy` **unless you asked for the specific stack**. Three conditions, not a
+  blanket ban — and none of it is a circuit breaker: the binary's breaker table carries only
+  `dangerousRemoval`, `backgroundOperator` and `suspiciousWindowsPath`. **Measured**: in `manual`
+  mode with `Bash(git reset:*)` allowed, `git reset --hard` ran and destroyed uncommitted work.
+  So: skip a custom DENY rule for these **while the project works in auto mode**; a project that
+  runs in `manual`, `acceptEdits` or `bypassPermissions` has no native block here and a deny rule
+  is the only guard. The auto-mode classifier is now **diagnosable and configurable**: the denial
   reason surfaces in the transcript, a toast, and `/permissions` → recent denials (v2.1.193); keys
   `autoMode.classifyAllShell` + `autoMode.{allow, soft_deny, hard_deny, environment}` with
   `$defaults` inheritance; the classifier defaults to Sonnet 5 for external sessions,

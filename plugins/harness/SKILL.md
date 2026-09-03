@@ -53,7 +53,10 @@ background sessions, not types). Default shape is **production-grade regardless 
 conventions + documents, not machinery, so it does not contradict the headline principle:
 root `CLAUDE.md` ≤ 200 lines + `settings.json` with sane permissions + the shipped workflow distillation
 `.claude/docs/{workflow,testing,docs-discipline}.md` (Phase 2c, verbatim copies from
-`references/project-docs/`) + `docs/ARCHITECTURE.md` & `docs/CODE-MAP.md` with real content.
+`references/project-docs/`) + `docs/ARCHITECTURE.md` as a **decision record** (no module map, no
+`CODE-MAP.md` — the code carries those, and a boundary test pins them where the project has one)
++ `.claude/rules/` for the
+domain prohibitions no type or test can express, where the repo actually has any.
 No custom subagents, hooks, or skills until justified; minimal MVH only on explicit operator
 request. **Greenfield (0 files, 0 commits) is a valid detected state, not a reason to
 stall**: an explicit request for the full harness on an empty repo is informed consent — deploy it
@@ -163,9 +166,10 @@ already knows the kit):
 | CLAUDE.md (root) | entry-point indexer (incl. Working style + verification ladder + continuity duty) | ~80 lines |
 | .claude/settings.json | permissions + minimal env | ~20 lines |
 | .claude/docs/{workflow,testing,docs-discipline}.md | shipped distillation (verbatim, versioned) | 3 files |
-| docs/ARCHITECTURE.md + docs/CODE-MAP.md | real content from the code read | 2 files |
+| docs/ARCHITECTURE.md | decision record: ratified decisions + measured reasons + non-claims (never a module map) | 1 file |
+| .claude/rules/ | domain prohibitions no test can express — only where Phase 0 found any | 0–n files |
 | (no custom subagents/hooks/skills) | built-ins cover it | — |
-## Greenfield (no code yet) — ARCHITECTURE/CODE-MAP ship as labelled stubs, never invented facts; the stub marker carries its own fill trigger
+## Greenfield (no code yet) — ARCHITECTURE ships as a labelled stub, never invented facts; the stub marker carries its own fill trigger
 ## Minimal MVH (CLAUDE.md + settings only) — explicit operator request only
 ## Deferred until justified — subagents (evidence) · hooks (recurring pain) · skills (≥3× repeat)
 ## Closes with — Phase 8: the bootstrap records itself as episodic entry #1, in the carrier the continuity duty names (live layer + a carrier smoke test)

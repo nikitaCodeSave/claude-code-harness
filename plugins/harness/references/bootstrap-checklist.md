@@ -3,8 +3,8 @@
 Procedure for introducing Claude Code to a project with no `.claude/`. Two shapes:
 
 - **Default — production-grade bootstrap:** root `CLAUDE.md` + `settings.json` + the shipped
-  workflow distillation in `.claude/docs/` (Phase 2c) +
-  `docs/ARCHITECTURE.md` & `docs/CODE-MAP.md` written from the code actually read. Projects are
+  workflow distillation in `.claude/docs/` (Phase 2c) + `docs/ARCHITECTURE.md` as a decision
+  record, plus `.claude/rules/` for whatever prohibitions Phase 0 actually found. Projects are
   written for production releases from day 0 **regardless of size** — a full professional flow
   is cheaper to lay down at bootstrap than to retrofit (operator directive, 2026-06; the
   retrofit that motivated it cost a full session).
@@ -33,7 +33,16 @@ ls "${CLAUDE_CONFIG_DIR:-$(echo ~)/.claude}"      # user-level config already pr
 # ACTIVE config dir ($CLAUDE_CONFIG_DIR when set and non-empty, else <home>/.claude; non-bash shells apply the
 # same rule their own way). Absent dir = empty layer, a valid answer, not an error.
 ls AGENTS.md .cursor/rules .cursorrules .github/copilot-instructions.md 2>/dev/null  # another agent got here first
+grep -rniE '\b(never|must not|do not|forbidden|invariant)\b' README* docs/ CONTRIBUTING* 2>/dev/null | head -30
+# ^ prohibitions someone already wrote down — Phase 4's input, see below
 ```
+
+**Collect the prohibitions while you read — nothing later goes looking for them.** Phase 4 writes
+`.claude/rules/` from what this phase found, so a "must never" whose only copy sits in a README
+paragraph or a code comment is lost if you don't record it here. The grep above is a starting
+point, not the answer: also note what the code enforces defensively without saying why, and ask the
+operator directly ("what must never happen in this system, even when it's inconvenient?") — that
+one question routinely returns rules no file states. Record them; don't invent any.
 
 **If the repo already carries `AGENTS.md`, that is the source of truth and CLAUDE.md becomes a
 bridge, not a rewrite.** `AGENTS.md` is the cross-vendor standard (Codex, Cursor, Copilot);
@@ -80,7 +89,9 @@ sessions where the operator is present.
 | `CLAUDE.md` (root) | **yes** — project entry-point indexer. If `AGENTS.md` exists: `@AGENTS.md` import or symlink, never a paraphrase |
 | `.claude/settings.json` | **yes** — permissions + minimal env |
 | `.claude/docs/` (Phase 2c) | **yes** — shipped distillation: `workflow.md` + `testing.md` + `docs-discipline.md`, copied verbatim from the kit |
-| `docs/ARCHITECTURE.md` + `docs/CODE-MAP.md` | **yes** — real content from the code read in Phase 0, never boilerplate; greenfield (no code to read) → labelled stubs, never invented facts (MVH-on-request: skip) |
+| `docs/ARCHITECTURE.md` | **yes** — a decision record (ratified decisions with dates, measured reasons with numbers, deliberate retentions, non-claims), not a module map; greenfield (nothing decided yet) → a labelled stub, never invented facts (MVH-on-request: skip) |
+| `.claude/rules/` (Phase 4) | **yes, where Phase 0 found any** — one file per domain prohibition a type or test cannot express; none found → no directory, never an invented rule |
+| `docs/CODE-MAP.md` | **no** — the module itself says it. The one exception (a layout genuinely unreadable from the tree) is `docs-discipline.md`'s to grant, and it grants an *index*, not a maintained map |
 | `.claude/agents/` | **no** — built-ins cover it; defer until evidence |
 | `.claude/hooks/` | **no** — defer until a recurring pain |
 | `.claude/skills/` | **no** — defer until a workflow repeats ≥3× |
@@ -122,7 +133,7 @@ Done = these exit 0.
 "We use PEP 8" is useless; "we mock HTTP with respx, not unittest.mock" is useful.>
 
 ## Boundaries
-- **Always**: <run the test command before saying done · update the doc its diff touches>
+- **Always**: <run the test command before saying done · update the oracle its diff touches>
 - **Ask first**: <schema migrations · anything under infra/ · new dependencies>
 - **Never**: <commit secrets · edit files under vendor/ · push to main>
   ^ mirror the Never/Ask tiers into settings.json permissions (Phase 3) — prose steers,
@@ -149,7 +160,8 @@ Done = these exit 0.
 - When blocked, escalate instead of improvising: after two failed attempts at the same thing,
   stop and report what you tried and what you need — <a decision from the owner / a credential /
   a service that is down>.
-- Doc-with-code: a change updates its matching doc in the same commit — mapping table in
+- Doc-with-code: a change updates its matching **oracle** — test, type, schema — in the same
+  commit, and a document only where the claim has no oracle; mapping table in
   `.claude/docs/docs-discipline.md`.
 - Continuity: a feature / fix / config or API change / architectural decision closes with an
   episodic entry (`/devlog:devlog` if installed, else a `.claude/devlog/entries/` note — or this
@@ -161,7 +173,7 @@ Done = these exit 0.
   results, and any decision the operator ratified.
 
 ## Reference materials
-- docs/ARCHITECTURE.md / docs/CODE-MAP.md / docs/ADR/ / .claude/rules/ (only those that exist)
+- docs/ARCHITECTURE.md / docs/ADR/ / .claude/rules/ (only those that exist)
 - .claude/docs/workflow.md — flow: session ritual, plan, verification ladder, continuity
 - .claude/docs/testing.md · .claude/docs/docs-discipline.md — invariants (shipped by the kit)
 - .claude/devlog/entries/ — episodic record, one entry per change (the first entry creates the
@@ -202,26 +214,38 @@ them, sessions never proposed a single ladder rung and coded nontrivial integrat
 `apps/web/src/app/page.tsx`, not "the homepage component". Concrete paths save a discovery
 tool-call; this applies to `Commands` and `Reference materials` too.
 
-**Root `docs/` is part of the default shape**: write `docs/ARCHITECTURE.md` (module map, data
-flow, external services — from the code actually read in Phase 0, never boilerplate) and
-`docs/CODE-MAP.md` (one line per module: path → responsibility) at bootstrap. Do not wait for
-docs to "emerge" — that inverts causality (no docs → no doc rules → docs never appear;
-observed in a real bootstrapped product: zero documentation after 8 features). The ongoing
-docs rules (doc-with-code mapping, ADR threshold, glossary first-use, owner/last-updated
-frontmatter) ship as `.claude/docs/docs-discipline.md` in Phase 2c — CLAUDE.md carries only
-the one-line duty pointer, not the rules themselves. `GLOSSARY.md` / `ADR/` / `RUNBOOKS/`
-are created on first real entry, not empty. MVH-on-request: skip `docs/` entirely.
+**Root `docs/` is part of the default shape — but only the half that has no oracle**: write
+`docs/ARCHITECTURE.md` as a **decision record** (what was ratified and when, the measured reason
+with its number, code deliberately kept without a caller, explicit non-claims), from what Phase 0
+actually established. Do **not** put the module map, the data-flow overview or the import graph in
+it, and do not write a module map at bootstrap at all — the narrow exception for an unreadable
+layout is `docs-discipline.md`'s to grant, not the bootstrap's. The code carries that material, and
+prose restating it costs a write on every structural change forever. (Distinct from the two studies
+above: those measured the *runtime* cost of a derivable claim sitting in an always-on instruction
+file, which is why the same material must not reach CLAUDE.md either. Two costs, one conclusion —
+don't merge them into one citation.) Where Phase 0 established nothing for a section, a labelled
+stub naming its fill trigger; the ban on invention is unchanged.
+
+Do not wait for docs to "emerge" either — that inverts causality (no docs → no doc rules → docs
+never appear; observed in a real bootstrapped product: zero documentation after 8 features). The
+ongoing docs rules (rule 0 "oracle before prose", the doc-with-code mapping, ADR threshold,
+glossary first-use, owner/last-updated frontmatter) ship as `.claude/docs/docs-discipline.md` in
+Phase 2c — CLAUDE.md carries only the one-line duty pointer, not the rules themselves.
+`GLOSSARY.md` / `ADR/` / `RUNBOOKS/` are created on first real entry, not empty.
+MVH-on-request: skip `docs/` entirely.
 
 **Placeholder ≠ boilerplate — the ban is on invention, not on empty cells.** "Never boilerplate"
-forbids writing a plausible-looking fact you did not read: a module map for modules that don't
-exist, a data flow you imagined, a stack you assumed from the repo name. It does not forbid an
-**honestly-labelled empty cell that names its own fill trigger**. So on a greenfield repo both
-files are still written — as stubs carrying the heading skeleton the real content will occupy and
-a marker saying what they are: `> Stub — no code exists yet. Fill from the first modules that land
-(bootstrap <date>).` A labelled stub is legible state; the next session sees exactly what is
-missing and what fills it. An invented one is a lie the next session trusts. **Name the fill
+forbids writing a plausible-looking fact you did not read: a decision nobody ratified, a rationale
+you imagined, a stack you assumed from the repo name. It does not forbid an
+**honestly-labelled empty cell that names its own fill trigger**. So on a greenfield repo
+`ARCHITECTURE.md` is still written — as a stub carrying the heading skeleton the real content will
+occupy and a marker saying what it is: `> Stub — nothing decided yet. Fill from the first ratified
+decision (bootstrap <date>).` A labelled stub is legible state; the next session sees exactly what
+is missing and what fills it. An invented one is a lie the next session trusts. **Name the fill
 trigger inside the marker, and name one that exists** — the marker itself is the trigger, so let
-it say what lands ("fill from the first modules that land"). A stub pointing at a file that does
+it say what lands ("fill from the first ratified decision"), and name a *decision*, never "the
+first modules that land": a module-shaped trigger refills the file with the module map this shape
+just removed. A stub pointing at a file that does
 not exist is the noise the MVH note above forbids, wearing an accountability costume.
 
 ## Phase 2c — Ship the workflow distillation (`.claude/docs/`)
@@ -232,7 +256,8 @@ from `references/project-docs/` into the project:
 - `.claude/docs/workflow.md` — the full flow: session ritual, plan-before-code, red→green work
   cycle, verification-ladder semantics, continuity layers, production posture.
 - `.claude/docs/testing.md` — the five stack-agnostic testing invariants + cross-cutting rules.
-- `.claude/docs/docs-discipline.md` — doc-with-code mapping table, ADR threshold, glossary,
+- `.claude/docs/docs-discipline.md` — rule 0 (oracle before prose: what earns a document at all,
+  and where prohibitions live), the doc-with-code mapping table, ADR threshold, glossary,
   frontmatter rules.
 
 Why files in the project and not knowledge in the plugin: skills are a pull channel — a working
@@ -301,17 +326,33 @@ repos read-only *mechanically* — `allow: Read(//abs/path/**)` plus `deny: Edit
 would not). A deny rule survives context loss; in live use the same mechanism also blocked a
 credential-file write that prompt-discipline had missed.
 
-## Phase 4 — (Optional) `.claude/rules/` for hard invariants
+## Phase 4 — `.claude/rules/` for hard prohibitions
 
-Only if there are *non-negotiable* invariants the model must respect even when inconvenient
-(e.g. "PII fields must never be logged"). Each rule ≤ 30 lines, prescriptive, referenced from
-CLAUDE.md. If it needs more than 30 lines it is guidance — put it in `docs/CONVENTIONS.md`.
+Part of the default shape wherever Phase 0 found something to put there — and absent otherwise; an
+invented rule is the same noise as an invented doc. What belongs here is a **non-negotiable
+prohibition on an action**: "PII fields must never be logged", "an observation code is never
+derived from prose", "filling a counter must not trigger a producer call". A single instance of any
+of those is assertable — mock the producer and assert it was not called — and where it is, **write
+that test too**; the rule earns its place because it binds the call sites nobody has written yet,
+which is the part no test reaches. That is the class `docs-discipline.md` rule 0 marks as
+unprovable from code, and the class that disappears silently when a document is deleted, which is
+why it gets a carrier instead of a paragraph.
+
+Each rule file ≤30 lines, prescriptive, referenced from CLAUDE.md. Needs more than 30 lines → it is
+guidance, put it in `docs/CONVENTIONS.md`. Two mechanism facts set that budget (detail in
+`native-capabilities.md`): rules **without** `paths:` load in full at every session start, so this
+layer is priced per turn and descriptive prose in it is exactly the tax rule 0 forbids; and
+`paths:` scoping is heuristic, so a must-not-miss rule stays always-on rather than scoped.
+
+Do not restate CLAUDE.md's `Never` tier here. That tier carries repository operations, mirrored
+into `settings.json` (Phase 3); this directory carries domain prohibitions, which no permission
+rule can reach.
 
 ## Phase 6 — Stop
 
 No hooks, agents, skills, or commands yet. The default shape (indexer + settings + shipped
-`.claude/docs/` + `docs/ARCHITECTURE.md`/`CODE-MAP.md`) is the harness most projects need
-forever — still no custom subagents/hooks until a trigger earns them.
+`.claude/docs/` + `docs/ARCHITECTURE.md` + whatever prohibitions Phase 4 earned) is the harness
+most projects need forever — still no custom subagents/hooks until a trigger earns them.
 
 ## Phase 7 — Verify
 
@@ -350,10 +391,11 @@ echo "$CMTEXT" | grep -ci "plan mode"; echo "$CMTEXT" | grep -ci "fresh-context"
 echo "$CMTEXT" | grep -ci "size the change"
 echo "$CMTEXT" | grep -ciE '^[[:space:]]*#{0,4} *[0-9.]* *[-*+]? *\*{0,3}Continuity'
 echo "$CMTEXT" | grep -cE '^#{1,4} *Commands'; echo "$CMTEXT" | grep -cE '^#{1,4} *Boundaries'
-ls .claude/docs/workflow.md .claude/docs/testing.md .claude/docs/docs-discipline.md docs/ARCHITECTURE.md docs/CODE-MAP.md
+ls .claude/docs/workflow.md .claude/docs/testing.md .claude/docs/docs-discipline.md docs/ARCHITECTURE.md
 # pass = all six greps ≥1 (plan-mode duty + verification ladder + change-sizing + continuity duty +
-# a Commands section + a three-tier Boundaries section landed in CLAUDE.md) and all five
-# shipped/authored docs exist. The last two are anchored as headings because that is the shape the
+# a Commands section + a three-tier Boundaries section landed in CLAUDE.md) and all four
+# shipped/authored docs exist. `.claude/rules/` is deliberately NOT in that list: it exists only
+# where Phase 0 found a prohibition, so a presence check there would reward inventing one. The last two are anchored as headings because that is the shape the
 # 2,500-repository analysis found load-bearing: commands early and executable, boundaries in three
 # tiers. A file with the commands buried in prose passes a word-grep and fails the reader. This is the write-through check — it catches
 # instructions that stayed in the kit's references instead of landing in the project (e.g. a skipped

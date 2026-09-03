@@ -75,8 +75,10 @@ same thing works — and if you'd rather not rely on that, the last row calls it
 ## What the first setup touches
 
 - **In your repo**: root `CLAUDE.md`, `.claude/settings.json`, workflow docs under `.claude/docs/`,
-  and real `docs/ARCHITECTURE.md` + `docs/CODE-MAP.md`. Custom subagents, hooks, skills, and
-  commands are deliberately **not** created — see the opinion below.
+  `docs/ARCHITECTURE.md` as a decision record, and — where your project actually has any —
+  `.claude/rules/` for the prohibitions your code cannot state. No module map and no `CODE-MAP.md`: your tree and your tests already say that, and
+  prose that restates them is a file someone has to keep true forever. Custom subagents, hooks,
+  skills, and commands are deliberately **not** created — see the opinion below.
 - **If you already have an `AGENTS.md`** (the cross-vendor standard Codex, Cursor and Copilot
   read), it stays the source of truth: the kit bridges to it with an `@AGENTS.md` import or a
   symlink instead of writing a second file that says the same thing differently. Claude Code does

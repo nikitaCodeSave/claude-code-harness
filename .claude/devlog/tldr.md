@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #58 · 2026-08-29 · Карта модулей ушла из дефолтной формы, запреты получили свой слой
+
+**Tags:** harness, project-docs, bootstrap, strip-revision, empirics
+
+v1.26.0 назвала налог на документацию (rule 0 «оракул раньше прозы»), но оставила на месте форму, которая его производит: бутстрап писал docs/CODE-MAP.md и предписывал ARCHITECTURE.md как описание системы — карта модулей, поток данных, внешние сервисы. Правка v1.26.0 села в один…
+
+[→ entries/0058-karta-moduley-ushla-iz-defoltnoy-formy-zaprety-poluchili-svo.md](entries/0058-karta-moduley-ushla-iz-defoltnoy-formy-zaprety-poluchili-svo.md)
+
+---
+
 ## #57 · 2026-08-29 · Четыре запрета удалены: модель соблюдает их без инструкции
 
 **Tags:** harness, strip-revision, empirics, project-docs

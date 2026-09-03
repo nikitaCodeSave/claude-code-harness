@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-08-29T18:10:26Z",
-  "entry_count": 57,
+  "generated_at": "2026-09-03T20:05:20Z",
+  "entry_count": 58,
   "entries": [
     {
       "id": 1,
@@ -834,6 +834,22 @@
       "supersedes": null,
       "path": "entries/0057-chetyre-zapreta-udaleny-model-soblyudaet-ikh-bez-instruktsii.md",
       "preview": "Оператор поставил задачу убрать архаизмы и отсылки к действиям, которых модель без харнеса и так не совершила бы. Это буквально Pass 2 strip-ревизии, описанный в harness-evolution.md: перечислить компоненты с допущением «модель не умеет X», перепроверить допущение, удалить то…"
+    },
+    {
+      "id": 58,
+      "date": "2026-08-29",
+      "title": "Карта модулей ушла из дефолтной формы, запреты получили свой слой",
+      "tags": [
+        "harness",
+        "project-docs",
+        "bootstrap",
+        "strip-revision",
+        "empirics"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0058-karta-moduley-ushla-iz-defoltnoy-formy-zaprety-poluchili-svo.md",
+      "preview": "v1.26.0 назвала налог на документацию (rule 0 «оракул раньше прозы»), но оставила на месте форму, которая его производит: бутстрап писал docs/CODE-MAP.md и предписывал ARCHITECTURE.md как описание системы — карта модулей, поток данных, внешние сервисы. Правка v1.26.0 села в один…"
     }
   ]
 }

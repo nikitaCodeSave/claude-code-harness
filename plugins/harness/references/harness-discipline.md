@@ -48,8 +48,12 @@ A working rhythm, not machinery: no phase-subagents, no PM→Architect→Dev→Q
 "CLAUDE.md is loaded every session, so only include things that apply broadly." "Bloated
 CLAUDE.md files cause Claude to ignore your actual instructions." (*Best practices*, T1.) For
 each line ask: *would removing it cause a mistake?* If not, cut it — or, if Claude already does
-the thing correctly, delete the instruction; if it must hold every time, **convert it to a
-hook**. Reference content goes to skills (loaded on demand) or `.claude/rules/` (path-scoped).
+the thing correctly, delete the instruction; if it must hold every time **and is mechanically
+checkable at a tool boundary**, convert it to a hook — a hook is a program, so it can only enforce
+what a program can decide. A must-hold rule that is *semantic* ("an observation code is never
+derived from prose") has no such check and stays a rule. Reference content goes to skills (loaded
+on demand); domain prohibitions go to `.claude/rules/`, which loads with the session unless you
+scope it with `paths:` — and that scoping is heuristic, so a must-not-miss rule stays always-on.
 Treat CLAUDE.md like code: prune it, and test a change by observing whether behavior shifts.
 
 ## Mechanical invariants belong in hooks, not prompts

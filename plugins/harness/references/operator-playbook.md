@@ -43,8 +43,9 @@ How the pieces reach the machine:
 3. The default is **production-grade regardless of project size**: a root `CLAUDE.md`
    (≤200 lines, an indexer, including a Working style with a verification ladder) +
    `.claude/settings.json` (the deny list matters more than allow) + the workflow distillation in
-   `.claude/docs/` (3 files, verbatim from the kit) + `docs/ARCHITECTURE.md` and `docs/CODE-MAP.md`
-   with real content. The minimal MVH (CLAUDE.md + settings only) — via a
+   `.claude/docs/` (3 files, verbatim from the kit) + `docs/ARCHITECTURE.md` as a decision record
+   + `.claude/rules/` for the prohibitions the repo actually has. The minimal MVH (CLAUDE.md +
+   settings only) — via a
    separate phrase: **"set up a minimal harness"**. There are no custom agents/hooks/skills in
    either variant — this is discipline, not an omission.
 4. The contract (stack / acceptance of the first feature / verify mechanism / sensitive paths)

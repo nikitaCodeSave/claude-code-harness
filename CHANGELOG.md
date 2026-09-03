@@ -7,6 +7,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.27.0] — 2026-08-29
+
+**The default shape loses its module map and gains a prohibitions layer.** v1.26.0 named the
+documentation tax as rule 0 but left in place the shape that produces it: bootstrap wrote
+`docs/CODE-MAP.md` (one line per module: path → responsibility) and specified `docs/ARCHITECTURE.md`
+as a *description* of the system — module map, data flow, import graph. All of that is derivable
+from the tree and the boundary test, so all of it was a write on every structural change, forever.
+The one line that has no oracle — a prohibition on an *action* — now gets a carrier of its own
+instead of hiding inside the prose that gets deleted.
+
+### Removed
+
+- **`docs/CODE-MAP.md` leaves the default shape.** It restates `ls` plus the boundary test; a
+  hand-maintained copy buys nothing. A short index is still allowed where a repository's layout is
+  genuinely unreadable from its tree — as an index, never maintained against the diff. Phase 7's
+  presence gate drops from five files to four, and greenfield now ships one labelled stub, not two.
+
+### Changed
+
+- **`docs/ARCHITECTURE.md` is a decision record, not a description of the system**: ratified
+  decisions with their dates, measured reasons with their numbers, deliberate retentions of code
+  with no caller, explicit non-claims. A module map, a data-flow overview or an import graph does
+  not belong in it at any project size. Rule 6's escalation trigger moves with it — "diverged by 3+
+  modules" no longer parses for a file that holds no module list.
+- **`.claude/rules/` moves from "optional Phase 4" into the default shape**, as the carrier for
+  domain prohibitions no type, test or permission rule can express. It is created only where the
+  bootstrap actually found one — an invented rule is the same noise as an invented doc, which is
+  why Phase 7 deliberately does *not* gate on its presence. Budget unchanged (≤30 lines,
+  prescriptive) and now justified by the mechanism: rules without `paths:` load in full at every
+  session start, so descriptive prose there is taxed per turn. It does not duplicate CLAUDE.md's
+  `Never` tier — that tier is repository operations mirrored into `settings.json`.
+- **Doc-with-code now reads "updates the oracle" in the two copies that still said "updates the
+  doc"** — `project-docs/workflow.md` and the CLAUDE.md duty-line template in
+  `bootstrap-checklist.md`. Both are push-channel copies a session actually reads, so for one
+  release a bootstrapped project carried two files in one directory disagreeing about whether a
+  structural change updates a test or a document.
+- **Hook-versus-rule is now stated where it used to be collapsed.** `harness-discipline.md` and
+  `audit-checklist.md` both said a rule that must hold every time becomes a hook, and described
+  `.claude/rules/` as path-scoped — guidance that would have retired the new Phase 4 default at the
+  next audit. A hook is a program and can only enforce what a program can decide; a *semantic*
+  prohibition has no such check and stays an always-on rule.
+- **The "no test can express it" claim is corrected rather than repeated.** A single instance of
+  "the producer must not be called" or "PII must never be logged" *is* assertable, and the kit now
+  says to write that test as well. The rule earns its place because it binds the call sites nobody
+  has written yet — which is the part no test reaches. Stating it the old way put executable
+  invariants into advisory prose, against rule 0 itself.
+- **`ARCHITECTURE.md` and `ADR/` get an explicit split**, so a decision record and a decision log
+  don't become the same file twice: argument and alternatives live in the ADR, standing state —
+  the decision in a line, its date, its measured number, the retentions and non-claims — lives in
+  `ARCHITECTURE.md`, pointing at the ADR.
+- The maintenance cost and the runtime cost are cited separately. The two 2026 studies measured
+  *instruction* files in the always-on layer, not documentation read on demand; merging them into
+  one citation over-claimed what they establish about a `CODE-MAP.md`.
+- `project-docs/workflow.md` and `project-docs/docs-discipline.md` re-stamped to v1.27.0;
+  `testing.md` is untouched and stays at v1.25.0.
+
+### Added
+
+- **Phase 0 now collects prohibitions**, because nothing downstream goes looking for them: a grep
+  over README/docs/CONTRIBUTING, a note of what the code enforces defensively without saying why,
+  and one direct question to the operator ("what must never happen here, even when inconvenient?").
+  Phase 4 writes `.claude/rules/` from that list, so a "must never" whose only copy sat in a README
+  paragraph would otherwise be lost — the exact failure this release is about.
+- **Audit finding for the old shape.** A hand-maintained `CODE-MAP.md`, or an `ARCHITECTURE.md`
+  that opens with a module map, from a pre-v1.27.0 bootstrap is now a named finding with a
+  prescribed reduction — and with the two conditions that reduction failed without: a line-by-line
+  pass for the prohibition class before anything is deleted, and a fresh-context refuter over the
+  deletion. The operator approves it; an audit never performs it silently.
+
+Evidence: one production repository living under this discipline, plus the two 2026 studies the kit
+already cites on LLM-authored instruction files that restate what the model derives (−2% success at
++23% cost; reduced success in 5 of 8 settings, +2.45–3.92 steps per task). Not touched: `testing.md`,
+the machinery-defaults rows, MVH.
+
 ## [1.26.0] — 2026-08-29
 
 **The doc-with-code rule was generating a documentation tax, so it now sits inside a rule that

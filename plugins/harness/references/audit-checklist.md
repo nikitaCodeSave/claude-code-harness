@@ -179,8 +179,10 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   discovery is duplicated obvyazka — keep only the parts `/init` does not do.
 - A hand-rolled `sync-docs` skill/agent (classify the diff → update the matching docs)
   duplicates the **kit-shipped** docs-discipline rule 1 ("doc-with-code") rather than a native
-  surface — same disposition as the custom code-reviewer below: retire toward the rule, moving
-  any project-specific doc-map into CLAUDE.md. (Observed pattern: the skill gets built only
+  surface — same disposition as the custom code-reviewer below: retire toward the rule. Do not
+  relocate its doc-map into CLAUDE.md on the way out: CLAUDE.md is an indexer (rule 2), and rule 1
+  now routes a structural change to the oracle rather than to a document, so most of that map has
+  no destination — while a genuine prohibition the skill encoded moves to `.claude/rules/`. (Observed pattern: the skill gets built only
   where the rule is absent, and gets retired once the rule arrives — the main thread does
   this natively.)
 - A custom `code-reviewer` subagent or hand-rolled review pipeline — review is shipped:
@@ -227,8 +229,10 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   toggles are defined by X, not by this file"), because a number here will go stale again.
   Distinct from §1: that detector catches version pins, this one catches an authority conflict
   between two current docs.
-- Rules Claude already follows without instruction → delete; rules that must hold every time →
-  convert to a hook.
+- Rules Claude already follows without instruction → delete; rules that must hold every time **and
+  are mechanically checkable** → convert to a hook. A must-hold rule a program cannot decide (a
+  domain prohibition) is not a hook candidate — it belongs in `.claude/rules/`, and flagging it for
+  conversion would retire the one carrier that class has.
 - **Evidence-backed keeps, not cruft**: the kit's own deliverables — the shipped
   `.claude/docs/{workflow,testing,docs-discipline}.md` (Phase 2c)
   and the Working style duty lines (**plan-mode self-entry · verification ladder · change-sizing ·
@@ -298,6 +302,17 @@ in the report's "Out of scope" so the operator sees one audit, not two.
   is legitimate wherever they keep it — but say so, so nobody waits for a re-sync that will never
   come. Their choice: keep it as a project-owned rule, or fold it into their own
   `~/.claude/CLAUDE.md` and delete the embed. Never edit a global copy from an audit.
+- **A hand-maintained `docs/CODE-MAP.md`, or an `ARCHITECTURE.md` that opens with a module map /
+  import graph**, from a pre-v1.27.0 bootstrap: the kit no longer ships that shape. Prose restating
+  what the code already says — and what a boundary test pins where the project has one — costs a
+  write on every structural change and buys nothing — offer to cut the file to what has no oracle, and **route each survivor to its carrier
+  before deleting anything**: prohibitions on an action → `.claude/rules/`; ratified decisions with
+  dates, measured reasons with numbers, deliberate retentions and non-claims → `ARCHITECTURE.md`,
+  or the ADR where one was argued in full. Only then delete. Two conditions on that deletion: walk
+  the file **line by line** for the prohibition class (rule 0 — those lines have no oracle and
+  disappear silently), and put the deletion through a fresh-context refuter. Measured on the reduction that produced this rule, a cross-vendor
+  reviewer recovered four such claims from four documents already read in full. The operator
+  approves the deletion; an audit never performs it silently.
 - **`codex-peer` re-sync — only if a copy already exists.** Key the search on the **stamp, not the
   filename**, and scope it to markdown under the skills directories —
   `grep -rl --include='*.md' "codex-peer content-version" . "$CFG/skills"`. Without `--include`

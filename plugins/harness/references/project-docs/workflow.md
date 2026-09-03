@@ -1,4 +1,4 @@
-<!-- shipped-by: claude-code-harness v1.25.0 — do not hand-evolve in the project;
+<!-- shipped-by: claude-code-harness v1.27.0 — do not hand-evolve in the project;
      improvements flow through the plugin (re-synced on audit). Project-specific
      facts live in CLAUDE.md, not here. -->
 
@@ -70,8 +70,9 @@ goes almost straight to Plan — the full gate set is the exception, not a ritua
   dispatch): blocked describes the last mile, not the whole feature. Put the narrative — what ran
   green, what stays quarantined for whom — in the tracker entry or the progress file, not in a
   root handoff file nobody will look for.
-- Git commit per feature with a descriptive message. Doc-with-code: the same commit updates
-  the docs its diff touches (mapping table — `docs-discipline.md`).
+- Git commit per feature with a descriptive message. Doc-with-code: the same commit updates the
+  **oracle** its diff touches — the test, the type, the schema — and a document only where the
+  claim has no oracle (`docs-discipline.md`, rules 0–1).
 - **Exercise runtime-critical paths on real input before fixing the design.** For
   probabilistic / IO-heavy / data-shape-dependent code (LLM calls, pipelines, aggregation,
   parsers), a green test on mocked data does not cover real-corpus edge cases — run the path

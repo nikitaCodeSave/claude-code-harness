@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-09-03T20:05:20Z",
-  "entry_count": 58,
+  "generated_at": "2026-09-10T09:18:39Z",
+  "entry_count": 59,
   "entries": [
     {
       "id": 1,
@@ -850,6 +850,24 @@
       "supersedes": null,
       "path": "entries/0058-karta-moduley-ushla-iz-defoltnoy-formy-zaprety-poluchili-svo.md",
       "preview": "v1.26.0 назвала налог на документацию (rule 0 «оракул раньше прозы»), но оставила на месте форму, которая его производит: бутстрап писал docs/CODE-MAP.md и предписывал ARCHITECTURE.md как описание системы — карта модулей, поток данных, внешние сервисы. Правка v1.26.0 села в один…"
+    },
+    {
+      "id": 59,
+      "date": "2026-09-10",
+      "title": "Единица работы — спека с оператором, а не свод правил",
+      "tags": [
+        "harness",
+        "project-docs",
+        "bootstrap",
+        "skill",
+        "strip-revision",
+        "empirics",
+        "release"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0059-edinitsa-raboty-speka-s-operatorom-a-ne-svod-pravil.md",
+      "preview": "Претензия оператора: харнесс порождает артефакты, которые мешают работать, а правила, выведенные из этих артефактов, душат разработку. Два замера до правки, оба про кит, а не про гипотезу."
     }
   ]
 }

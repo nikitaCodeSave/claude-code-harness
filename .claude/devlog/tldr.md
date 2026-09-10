@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #59 · 2026-09-10 · Единица работы — спека с оператором, а не свод правил
+
+**Tags:** harness, project-docs, bootstrap, skill, strip-revision, empirics, release
+
+Претензия оператора: харнесс порождает артефакты, которые мешают работать, а правила, выведенные из этих артефактов, душат разработку. Два замера до правки, оба про кит, а не про гипотезу.
+
+[→ entries/0059-edinitsa-raboty-speka-s-operatorom-a-ne-svod-pravil.md](entries/0059-edinitsa-raboty-speka-s-operatorom-a-ne-svod-pravil.md)
+
+---
+
 ## #58 · 2026-08-29 · Карта модулей ушла из дефолтной формы, запреты получили свой слой
 
 **Tags:** harness, project-docs, bootstrap, strip-revision, empirics

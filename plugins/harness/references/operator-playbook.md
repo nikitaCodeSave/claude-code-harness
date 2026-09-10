@@ -185,8 +185,9 @@ shipped surfaces, picked by what carries the risk:
   scope and, crucially, to **execute the live stack** rather than read it — the one rule worth
   carrying over from the retired 3-role command is *executed evidence beats read evidence*: a
   reader-only pass once called golden numbers "unproven" that an executing pass then re-derived
-  exactly. Have it write findings straight into `.claude/progress/<slug>.md` next steps as
-  "reproduce → close", and fix them in a separate red→green cycle rather than in the audit.
+  exactly. Triage what comes back rather than relaying it — findings arrive mixed with accepted
+  residuals — and carry the survivors as "reproduce → close" in the open spec, fixing them in a
+  separate red→green cycle rather than inside the audit.
 
 Empirically the two tiers settle this way: in a sustained real-product build the heavy gate ran
 **once**, at a milestone; per-change verification was a single fresh refuter. Default to the light

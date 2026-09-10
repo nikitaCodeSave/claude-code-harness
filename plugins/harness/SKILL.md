@@ -28,8 +28,12 @@ workspace. Opinionated, and the opinion is one line:
 - Someone asks how Claude Code differs from generic agentic frameworks, or when to use a
   dynamic workflow → **Explain**.
 
-**Do NOT use when**: the operator's own harness already encodes this discipline (this skill is
-transmittable knowledge, not a self-description for a mature setup); the question is
+**Do NOT use when**: **this project's** `.claude/` already encodes this discipline (the skill is
+transmittable knowledge, not a self-description for a mature setup). Judge that on the repository
+in front of you, never on the operator's global layer: a practised operator carries this discipline
+in `~/.claude/CLAUDE.md`, and reading that as "already encoded" makes the skill decline in every
+one of their projects — including the empty ones it exists for. Measured 2026-09-09: a fresh
+project got no harness while artifacts accumulated anyway. Also skip when the question is
 about building a harness *inside another framework* (OpenAI/Codex/MCP-without-Claude) → point to
 `references/evidence-base.md` external sources — an external CLI attached to *this* harness via
 MCP is in scope, not an exclusion (`references/codex-peer-skill.md`); the question is general
@@ -61,9 +65,9 @@ No custom subagents, hooks, or skills until justified; minimal MVH only on expli
 request. **Greenfield (0 files, 0 commits) is a valid detected state, not a reason to
 stall**: an explicit request for the full harness on an empty repo is informed consent — deploy it
 with honestly-labelled stubs (never invented facts) whose marker names its own fill trigger.
-**Close every bootstrap by recording it** (Phase 8: the run writes its own first episodic entry, in whatever carrier the project's
-continuity duty names — the layer starts live instead of as a convention nobody has exercised).
-Then stop.
+**Close every bootstrap by recording it** (Phase 8: the run records itself in whatever carrier the
+project already keeps — the bootstrap commit where it keeps none, which is the default, not the
+fallback; a project does not acquire a journal here). Then stop.
 
 ### Mode 2: Audit (existing `.claude/`)
 Read `references/audit-checklist.md`. Walk it top-down; produce a gap statement + remediation
@@ -139,7 +143,11 @@ already knows the kit):
 7. **Give Claude a verification loop it can close** (prompt check → `/goal` → Stop hook →
    `/code-review` → fresh-context second opinion); tell adversarial reviewers to flag only
    correctness/requirement gaps.
-8. **Durable knowledge lives in artifacts** (ADRs / progress file / devlog), not chat.
+8. **The unit of work is a spec written with the operator** — why / what / constraints
+   `[hard]`·`[soft]` / an executable "Done when" / non-goals. A non-executable "Done when" means
+   the spec isn't ready to work from; phases and step lists don't belong in one. Durable knowledge
+   lives in artifacts (the spec, ADRs, the carrier the project already keeps), not chat — and a
+   carrier the project doesn't already keep is not introduced.
 9. **CLI-subscription only.** No managed-agents, beta headers, `--bare`, `--max-budget-usd`, API-key flows.
 
 ## Output template — Audit report
@@ -163,7 +171,7 @@ already knows the kit):
 ## Detected state — stack / age / existing docs / existing `.claude/` (greenfield = 0 files/0 commits is a state, not a blocker)
 ## Default shape (production-grade, any project size)
 | File | Purpose | ~size |
-| CLAUDE.md (root) | entry-point indexer (incl. Working style + verification ladder + continuity duty) | ~80 lines |
+| CLAUDE.md (root) | entry-point indexer (incl. Working style + verification ladder + spec duty) | ~80 lines |
 | .claude/settings.json | permissions + minimal env | ~20 lines |
 | .claude/docs/{workflow,testing,docs-discipline}.md | shipped distillation (verbatim, versioned) | 3 files |
 | docs/ARCHITECTURE.md | decision record: ratified decisions + measured reasons + non-claims (never a module map) | 1 file |
@@ -172,7 +180,7 @@ already knows the kit):
 ## Greenfield (no code yet) — ARCHITECTURE ships as a labelled stub, never invented facts; the stub marker carries its own fill trigger
 ## Minimal MVH (CLAUDE.md + settings only) — explicit operator request only
 ## Deferred until justified — subagents (evidence) · hooks (recurring pain) · skills (≥3× repeat)
-## Closes with — Phase 8: the bootstrap records itself as episodic entry #1, in the carrier the continuity duty names (live layer + a carrier smoke test)
+## Closes with — Phase 8: the bootstrap records itself in the carrier the project already keeps, the bootstrap commit by default (a carrier smoke test, not a new carrier)
 ```
 
 ## Gotchas

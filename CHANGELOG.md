@@ -7,6 +7,102 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [1.28.0] — 2026-09-10
+
+**The unit of work becomes a spec written with the operator, not the body of rules a harness
+accumulates.** The trigger was field evidence that this discipline produces artifacts that then get
+in the way, and rules distilled from those artifacts that choke the work they were meant to serve.
+Two measurements, both taken before the change. **(1)** In a fresh project the skill declined to
+run, and the cause was inside its own file: the body's "do NOT use when the operator's own harness
+already encodes this discipline" fires for every practised operator, whose global
+`~/.claude/CLAUDE.md` is loaded in every session — including the empty projects the skill exists
+for. The project got no harness while artifacts accumulated in it anyway. **(2)** On a production
+repository of 1446 commits living under this discipline, 816 commits (56%) touched only
+`.md`/`.json`; the active plan had grown to 1585 lines of which the actual agreement was 81 (5%);
+its declared `## Acceptance` section described phases that had closed days earlier, while the
+threshold actually in force sat 970 lines further down inside a journal section; and a refinement
+of the goal the owner had just ratified was written *into* the journal, because the file had
+nowhere else to put it.
+
+### Added
+
+- **`project-docs/workflow.md` opens on the spec.** Before non-trivial work, `specs/<slug>.md` is
+  written **with** the operator and records five things and nothing else: **why** (whose problem —
+  the reason is what settles the details nobody specified), **what** (observable behavior),
+  **constraints** marked `[hard]`/`[soft]` and stated as invariants rather than steps, **done
+  when** — an executable command with its expected result — and **not doing**. The executable
+  "Done when" is the one gate: a spec whose "Done when" is not executable is not ready to work
+  from.
+- **Phase lists and step-by-step plans are explicitly barred from a spec**, with the measurement
+  above as the reason: planning against the real code beats a plan written in advance for it, and a
+  spec that accretes a journal stops being an agreement — that is how the acceptance section came
+  to sit 970 lines from the threshold in force.
+- **Triage discipline for what a fresh refuter returns.** Findings arrive mixed with accepted
+  residuals and with adversarial angles the component is not built to resist; each is reproduced as
+  a failing test before it is fixed. The kit had a rung that produced findings and no line on what
+  to do with them, which reads as a licence to relay them.
+
+### Removed
+
+- **The change-size gate table** (trivial / small / medium / large, each with its own gate set)
+  leaves `workflow.md`. What replaces it is three lines: trivial → just do it, small → acceptance
+  criteria, anything crossing a shared invariant / migrating data / irreversible / unfamiliar
+  brownfield → a spec. The table specified ritual by size; the spec gate is the same judgement with
+  one artifact.
+- **The continuity-journal layer stops being a prescribed shape.** Out go `.claude/progress/<slug>.md`
+  in its two legitimate shapes, the three-step closing procedure for a long task, and the
+  session-start ritual that opened the file. **The open spec is the continuity layer** — it states
+  what must become true and what is still missing; a closed spec is history in git. Where a project
+  already keeps a journal, meet it there; a carrier that is not already earning its keep is not
+  introduced.
+
+### Changed
+
+- **`SKILL.md`'s "do NOT use when" clause now judges the repository in front of you, never the
+  operator's global layer** — the self-silencing bug above, stated in the file with its own
+  measurement so a future edit does not restore it.
+- **Principle 8 of the durable-knowledge block is now the spec** rather than "ADRs / progress file /
+  devlog", and says outright that a carrier the project does not already keep is not introduced.
+- **`bootstrap-checklist.md`: the CLAUDE.md duty line is the spec duty, not the continuity duty** —
+  the five fields, the executable "Done when", and a pointer to `.claude/docs/workflow.md`. It
+  survives even in MVH, because it names where the agreement lives and nothing else in the file
+  does. Phase 2c's description of what `workflow.md` contains was re-synced with the file itself.
+- **Phase 7's write-through token moves from `Continuity` to `Spec[ -]?first`**, anchored the same
+  way (line start, so the `- specs/ — the open agreements` pointer the template itself prescribes
+  cannot produce a false pass) and re-measured against real artifacts rather than reasoned about.
+  **Case-insensitive is deliberate and the comment now says why:** `-c` was tried on the argument
+  that it would exclude a lowercase pointer, and the measurement did not support it — the literal
+  `first` already excludes the pointers (pointer-only file scores 0 either way), while `-c`
+  false-failed `- Spec First:`, an ordinary paraphrase. Final check: six Phase-7 greps against the
+  template actually extracted from the checklist → `1 1 1 1 1 1`, and the bootstrap and audit
+  anchors are byte-identical.
+- **Phase 8 records the bootstrap in the carrier the project already keeps, and the bootstrap
+  commit is the default rather than the fallback.** A project does not acquire a journal here.
+- **The audit finding "Continuity duty absent from CLAUDE.md" becomes "Spec duty absent"** — left
+  as it was, Audit would have raised a finding against a correct v1.28.0 bootstrap. Its
+  five-false-fails note and its "the finding is the missing duty, not the missing word" caveat
+  carry over unchanged.
+- **`harness-discipline.md`**: "ongoing long task → a progress file" becomes "work in flight → its
+  open spec"; the state-on-disk framing around it is untouched, since that was already the point.
+- **Three copies that would otherwise have kept asserting the old rule**, found by grepping the
+  mechanism's name rather than the sentence: the audit checklist's list of transcript-grounded duty
+  lines still read `… change-sizing · continuity · doc-with-code` four lines above the renamed
+  finding; Phase 7's MVH note still said only the plan-mode and change-sizing greps apply, four
+  paragraphs after the MVH note that keeps the spec duty; and `operator-playbook.md` still sent an
+  external audit's findings into `.claude/progress/<slug>.md`.
+- **README no longer sells the devlog companion as a default install.** Under the new §6 a journal
+  is an option, not the kit's carrier: the kit does not mandate one and Phase 8 writes to the commit
+  by default. The companion keeps its section and its case — for projects that want a journal —
+  but the install block no longer says "install both".
+- `project-docs/workflow.md` re-stamped to v1.28.0 (145 → 121 lines); `testing.md` and
+  `docs-discipline.md` are untouched and keep their own stamps.
+
+Evidence: the two measurements above (a fresh-project trigger failure, 2026-09-09; a 1446-commit
+production repository, 2026-09-10), plus the rule-0 evidence v1.26.0 already cites on prose that
+restates what an oracle already pins. Three durable claims from the deleted sections were kept
+line-by-line rather than lost with their files: a handoff note is a claim and not a fact, real input
+before the design is frozen, and escalation after 2–3 failed iterations on one hypothesis.
+
 ## [1.27.0] — 2026-08-29
 
 **The default shape loses its module map and gains a prohibitions layer.** v1.26.0 named the

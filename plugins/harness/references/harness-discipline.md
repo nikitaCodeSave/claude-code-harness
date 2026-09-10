@@ -216,8 +216,8 @@ prompted to find gaps will invent them, and chasing every finding causes over-en
 
 ## Durable knowledge lives in artifacts, not chat
 
-Decisions → ADRs; ongoing long task → a progress file (`.claude/progress/<slug>.md`; the
-`claude-progress.txt` pattern, T1); completed changes → a devlog. **The lever is state-on-disk,
+Decisions → ADRs; work in flight → its open spec, which states what must become true and what is
+still missing; completed changes → whatever the project already keeps. **The lever is state-on-disk,
 not a specific file layout — offer these conventions, don't mandate them; a project that keeps
 continuity in git-commit prefixes or structured memory meets the same goal, and prescribing one
 format is friction projects route around.** Not ephemeral scrollback. Context is a degrading resource: rot

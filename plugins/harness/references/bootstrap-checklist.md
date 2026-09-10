@@ -163,10 +163,11 @@ Done = these exit 0.
 - Doc-with-code: a change updates its matching **oracle** — test, type, schema — in the same
   commit, and a document only where the claim has no oracle; mapping table in
   `.claude/docs/docs-discipline.md`.
-- Continuity: a feature / fix / config or API change / architectural decision closes with an
-  episodic entry (`/devlog:devlog` if installed, else a `.claude/devlog/entries/` note — or this
-  project's disciplined commit messages); a task spanning sessions keeps
-  `.claude/progress/<slug>.md` current. Layers and triggers — `.claude/docs/workflow.md`.
+- Spec first: non-trivial work starts from `specs/<slug>.md` written **with** the operator — why /
+  what / constraints `[hard]`·`[soft]` / **Done when: an executable command** / not doing. A
+  non-executable "Done when" means the spec isn't ready to work from; phases and step lists don't
+  go in a spec. The open spec is where things stand — don't add a parallel journal, meet the
+  carrier this project already keeps. Depth — `.claude/docs/workflow.md`.
 - Big/long tasks: give the full task spec up front in one well-specified turn, decompose into
   independently-verifiable slices, and run at `high`/`xhigh` effort for long-horizon / async work.
 - When compacting, preserve the list of modified files, the commands already run and their
@@ -174,10 +175,11 @@ Done = these exit 0.
 
 ## Reference materials
 - docs/ARCHITECTURE.md / docs/ADR/ / .claude/rules/ (only those that exist)
-- .claude/docs/workflow.md — flow: session ritual, plan, verification ladder, continuity
+- specs/ — the open agreements; each closes when its "Done when" runs green
+- .claude/docs/workflow.md — the spec, the work loop, the verification ladder
 - .claude/docs/testing.md · .claude/docs/docs-discipline.md — invariants (shipped by the kit)
-- .claude/devlog/entries/ — episodic record, one entry per change (the first entry creates the
-  directory; index.json / tldr.md there are generated — never hand-edit them)
+- .claude/devlog/entries/ — episodic record (index.json / tldr.md there are generated — never
+  hand-edit them)
   ^ only when the devlog IS this project's carrier; where the carrier is disciplined commit
   messages, drop this line — pointing at a directory the project will never grow is the same
   dangling-pointer noise the MVH note calls out.
@@ -193,16 +195,20 @@ and architecture overviews go; gotchas, non-obvious behavior, version pins and c
 differ from tool defaults stay. `/doctor` runs the same cut mechanically on a checked-in CLAUDE.md
 and is worth a pass here.
 
-MVH-on-request: drop the ladder-semantics, doc-with-code and continuity duty lines together with
-the `.claude/docs/` + `.claude/devlog/` Reference-materials lines — rules pointing at files that
-don't exist are noise (detect-then-prescribe). The change-sizing line stays — Phase 7 greps it —
+MVH-on-request: drop the ladder-semantics and doc-with-code lines together with the
+`.claude/docs/` + `.claude/devlog/` Reference-materials lines — rules pointing at files that
+don't exist are noise (detect-then-prescribe). The spec duty line stays even in MVH — it names
+where the agreement lives, which nothing else in the file does, and Phase 7 greps it; strip only
+its trailing `.claude/docs/workflow.md` pointer. The change-sizing line stays — Phase 7 greps it —
 but strip its trailing `.claude/docs/workflow.md` pointer: the duty stands without it, and a
 dangling one is the same noise on a line that survives.
 
-**Resolve the continuity carrier as you write the line.** The branches above are the choice, not
-the text to copy: CLAUDE.md names the one carrier this project actually uses (detect it — is the
-companion installed?), and that same carrier is the one Phase 8 records the bootstrap in. A duty
-line that ships the menu instead of the decision hands the next session the choice all over again.
+**Resolve the carrier as you write the line, and only if the project has one.** The branches above
+are the choice, not the text to copy: where the project already keeps a journal, CLAUDE.md names
+that one carrier (detect it — is the companion installed?), and Phase 8 records the bootstrap
+there. Where it keeps none, the duty line says so by omission and Phase 8 uses the commit. A line
+that ships the menu instead of the decision hands the next session the choice all over again; a
+line that mandates a carrier the project never wanted is the artifact this kit exists to avoid.
 
 The `## Working style` block stays even though the system prompt overlaps it — target model
 versions vary and its ~25-line cost buys resilience. Do **not** inflate it to a 60-line treatise.
@@ -253,8 +259,9 @@ not exist is the noise the MVH note above forbids, wearing an accountability cos
 Copy the kit's three project-docs **verbatim** (including the `shipped-by` provenance header)
 from `references/project-docs/` into the project:
 
-- `.claude/docs/workflow.md` — the full flow: session ritual, plan-before-code, red→green work
-  cycle, verification-ladder semantics, continuity layers, production posture.
+- `.claude/docs/workflow.md` — the spec as the unit of work (five fields, the executable
+  "Done when" gate, what/why-not-how), the work loop, verification-ladder semantics, where
+  things stand between sessions, production posture.
 - `.claude/docs/testing.md` — the five stack-agnostic testing invariants + cross-cutting rules.
 - `.claude/docs/docs-discipline.md` — rule 0 (oracle before prose: what earns a document at all,
   and where prohibitions live), the doc-with-code mapping table, ADR threshold, glossary,
@@ -389,27 +396,33 @@ CMTEXT=$(cat "$CM"; sed -n 's/^@\(.*\)$/\1/p' "$CM" | while read -r i; do [ -f "
 # miss and the "all six" line the comment promises never prints
 echo "$CMTEXT" | grep -ci "plan mode"; echo "$CMTEXT" | grep -ci "fresh-context"
 echo "$CMTEXT" | grep -ci "size the change"
-echo "$CMTEXT" | grep -ciE '^[[:space:]]*#{0,4} *[0-9.]* *[-*+]? *\*{0,3}Continuity'
+echo "$CMTEXT" | grep -ciE '^[[:space:]]*#{0,4} *[0-9.]* *[-*+]? *\*{0,3}Spec[ -]?first'
 echo "$CMTEXT" | grep -cE '^#{1,4} *Commands'; echo "$CMTEXT" | grep -cE '^#{1,4} *Boundaries'
 ls .claude/docs/workflow.md .claude/docs/testing.md .claude/docs/docs-discipline.md docs/ARCHITECTURE.md
-# pass = all six greps ≥1 (plan-mode duty + verification ladder + change-sizing + continuity duty +
+# pass = all six greps ≥1 (plan-mode duty + verification ladder + change-sizing + spec duty +
 # a Commands section + a three-tier Boundaries section landed in CLAUDE.md) and all four
 # shipped/authored docs exist. `.claude/rules/` is deliberately NOT in that list: it exists only
-# where Phase 0 found a prohibition, so a presence check there would reward inventing one. The last two are anchored as headings because that is the shape the
+# where Phase 0 found a prohibition, so a presence check there would reward inventing one. Neither
+# is `specs/`: a bootstrap precedes the first unit of work, so checking for a spec would reward
+# creating an empty one — the first spec is written with the operator when there is work. The last two are anchored as headings because that is the shape the
 # 2,500-repository analysis found load-bearing: commands early and executable, boundaries in three
 # tiers. A file with the commands buried in prose passes a word-grep and fails the reader. This is the write-through check — it catches
 # instructions that stayed in the kit's references instead of landing in the project (e.g. a skipped
-# evaluator line, or — the case that earned the fourth token — a CLAUDE.md naming no continuity duty
+# evaluator line, or — the case that earned the fourth token — a CLAUDE.md naming no spec duty
 # at all, while the depth sat shipped and unreferenced in `.claude/docs/workflow.md`).
-# **The continuity token is ANCHORED, and that anchor is the whole check.** A bare `grep -ci continuity`
-# is a false pass: the Reference-materials block this very template prescribes already ends a line with
-# the word ("…verification ladder, continuity"), so the buggy CLAUDE.md — pointer present, duty absent —
-# scores 1 and passes. Measured against the real artifact, not reasoned about. The anchor demands the
-# word as a *label at line start* (the duty bullet, or a `## Continuity` heading), which no pointer line
-# satisfies. Don't "simplify" it back. Equally, don't swap it for a prose fragment like
-# `closes with an episodic`: sessions paraphrase the duty (observed: "closes with a `/devlog:devlog`
-# entry"), so a phrase-token false-fails correct bootstraps — it was tried and scored 0 on all three.
-# The anchor is carrier-agnostic: it passes whether the carrier is a devlog or disciplined commits.
+# **The spec token is ANCHORED, and that anchor is the whole check.** A bare `grep -ci spec` is a
+# false pass: the Reference-materials block this very template prescribes carries `- specs/ — the
+# open agreements` and the Working-style block says "ambiguous spec", so a buggy CLAUDE.md with
+# pointers but no duty would score ≥1 and pass. Two parts carry the check and both were measured
+# against real artifacts: the line-start anchor, and the literal `first` — together they demand the
+# duty's own label (`- Spec first:`, `- **Spec-first**:`, or a `## Spec first` heading), which no
+# lowercase pointer satisfies (pointer-only file: 0). Case-insensitive is deliberate and must stay:
+# `-c` was tried and false-failed `- Spec First:` — an ordinary paraphrase — while buying nothing,
+# because `first` already excludes the pointers. Don't "simplify" the anchor away either, and don't
+# swap it for a prose fragment like `executable command`: sessions paraphrase the duty, and a
+# phrase-token false-fails correct bootstraps — measured on the token this one replaces, which
+# scored 0 on all three runs.
+# The anchor is carrier-agnostic: what it pins is that the agreement has a named home, not which one.
 # It is mechanical on purpose: a behavioral probe (`claude --print "what happens next
 # after a feature?"`) is contaminated by the operator's own global memory layers — their union
 # answers correctly even when the project file is missing the lines.
@@ -418,7 +431,9 @@ ls .claude/docs/workflow.md .claude/docs/testing.md .claude/docs/docs-discipline
 # them as N/A-by-construction, not "skipped" — due when the stack lands; name that in the stub marker.
 # The deny-rules probe and all
 # four greps apply unchanged (settings.json and CLAUDE.md are real on day zero).
-# MVH-on-request projects: only the plan-mode and change-sizing greps apply.
+# MVH-on-request projects: the plan-mode, change-sizing and spec-duty greps apply — the MVH note
+# above keeps that third line precisely because nothing else in an MVH file names where the
+# agreement lives. The rest are dropped with the files they point at.
 ```
 
 Each check has a crisp criterion — "command produced output" is not a pass.
@@ -444,12 +459,13 @@ above and stop.
 
 ## Phase 8 — Record the bootstrap
 
-The bootstrap writes its own first episodic entry **in the carrier the Phase 2 duty line names** —
-`/devlog:devlog` where the companion is installed, otherwise a hand-written
-`.claude/devlog/entries/0001-*.md`, or, where the project's carrier is disciplined commit messages,
-the bootstrap commit itself. The content is the bootstrap itself — what was detected (including
+The bootstrap records itself **in the carrier this project already keeps** (Phase 0 detected it):
+`/devlog:devlog` where the companion is installed, a hand-written
+`.claude/devlog/entries/0001-*.md` where that directory is the project's carrier, and otherwise the
+bootstrap commit itself — which is the default, not the fallback. A project that keeps no journal
+does not acquire one here. The content is the bootstrap itself — what was detected (including
 "greenfield"), what shape was deployed, what was deliberately deferred, what is still a labelled
-stub. The carrier is the one Phase 2's duty line names.
+stub.
 
 Four things fall out of that one action, which is why it is a phase and not a nicety: the *why* of
 this harness lands in the episodic layer instead of evaporating with the session that chose it;

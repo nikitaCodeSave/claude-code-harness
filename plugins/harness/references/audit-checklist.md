@@ -236,36 +236,40 @@ in the report's "Out of scope" so the operator sees one audit, not two.
 - **Evidence-backed keeps, not cruft**: the kit's own deliverables — the shipped
   `.claude/docs/{workflow,testing,docs-discipline}.md` (Phase 2c)
   and the Working style duty lines (**plan-mode self-entry · verification ladder · change-sizing ·
-  continuity · doc-with-code**) — are transcript-grounded (sessions without them proposed zero ladder
+  spec-first · doc-with-code**) — are transcript-grounded (sessions without them proposed zero ladder
   rungs and coded nontrivial work plan-free). Don't flag them under §4/§5 — and note the neighbouring
   bullets above ("lines that don't change behavior → cut", "rules Claude already follows → delete")
   read like a licence to cut exactly these; they are not, because the duty is the *project-side*
   write-through the bootstrap's Phase 7 greps for. Their retire triggers: embed → global baseline
   installed; duty lines → a target model proposes these steps unprompted.
-- **Continuity duty absent from CLAUDE.md** — resolve the instruction file *and its `@imports`*,
-  then `grep -ciE '^[[:space:]]*#{0,4} *[0-9.]* *[-*+]? *\*{0,3}Continuity'`
-  → 0. **Use that anchored form, not a bare `grep -ci continuity`:** the kit's own Reference-materials
-  block ends a line with the word ("…verification ladder, continuity"), so the bare grep scores 1 on a
-  CLAUDE.md that has the pointer and no duty — it misses most of the population it is meant to find.
-  The anchor demands the word as a label at line start (duty bullet or a `## Continuity` heading).
+- **Spec duty absent from CLAUDE.md** — resolve the instruction file *and its `@imports`*,
+  then `grep -ciE '^[[:space:]]*#{0,4} *[0-9.]* *[-*+]? *\*{0,3}Spec[ -]?first'`
+  → 0. **Use that anchored form, not a bare `grep -ci spec`:** the kit's own Reference-materials
+  block carries `- specs/ — the open agreements` and its Working-style block says "ambiguous spec",
+  so the bare grep scores ≥1 on a CLAUDE.md that has the pointers and no duty — it misses most of
+  the population it is meant to find. Two parts carry the anchor: line start, and the literal
+  `first`. Keep it case-**in**sensitive: `-c` was tried and false-failed `- Spec First:`, an
+  ordinary paraphrase, while buying nothing, because `first` already excludes the lowercase
+  pointers (pointer-only file scores 0 either way — measured).
   **Five ways this grep lies, all of them false *fails*, each found by testing it against a file
   known to carry the duty:** the instruction file may be `.claude/CLAUDE.md` rather than the root
   one (Claude Code loads both with equal standing); the duty may live in an `@import`ed file, which
   is what Phase 0/1 of the bootstrap *prescribes* — so a literal read of a bridged CLAUDE.md scores
-  0 by design; a numbered heading (`## 6. Continuity`) needs `[0-9.]*`; `*` / `+` bullets, a leading
+  0 by design; a numbered heading (`## 6. Spec first`) needs `[0-9.]*`; `*` / `+` bullets, a leading
   tab and `***bold-italic***` need the widened character classes above; and the anchor is an English
   token, so an instruction layer in another language can never satisfy it. **The finding is the
   missing duty, not the missing word** — when the grep returns 0, read the file before reporting.
-  The project may keep a devlog and ship `.claude/docs/workflow.md` — and
-  still never tell a working session that a feature/fix/config change/decision closes with an episodic
-  entry, or name the carrier. Finding: the layer then holds only while the operator watches; entries
-  stop the first session nobody reminds. **Common on projects bootstrapped before v1.17.0** — the
+  The project may keep specs and ship `.claude/docs/workflow.md` — and still never tell a working
+  session that non-trivial work starts from an agreement written with the operator, whose "Done
+  when" is an executable command. Finding: without it a session works from the request as it
+  understood it, and the gate that would have caught the misreading was never named. **Common on
+  projects bootstrapped before v1.28.0** — the
   checklist described the layer elsewhere and never asked CLAUDE.md to name it, while the
   write-through grep tested three other tokens (found by a clean-environment bootstrap run,
-  2026-07-17). Remediation: add the duty line from `bootstrap-checklist.md` Phase 2 — trigger +
-  carrier + `.claude/progress/<slug>.md` + pointer to `.claude/docs/workflow.md`, three lines. Do
-  **not** restate the depth `.claude/docs/workflow.md` §Continuity already ships; a 14-line
-  continuity section in CLAUDE.md is this finding's over-correction, not its fix (a heading-shaped
+  2026-07-17). Remediation: add the duty line from `bootstrap-checklist.md` Phase 2 — the five
+  fields, the executable "Done when", and a pointer to `.claude/docs/workflow.md`, one bullet. Do
+  **not** restate the depth `.claude/docs/workflow.md` already ships; a 14-line spec
+  section in CLAUDE.md is this finding's over-correction, not its fix (a heading-shaped
   section passes the anchored grep — it has the duty, in the wrong shape; that is a §4 altitude
   finding, not this one).
 - **Shipped-docs re-sync**: compare the `shipped-by: claude-code-harness vX.Y.Z` header in each

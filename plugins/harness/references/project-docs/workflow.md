@@ -1,145 +1,121 @@
-<!-- shipped-by: claude-code-harness v1.27.0 — do not hand-evolve in the project;
+<!-- shipped-by: claude-code-harness v1.28.0 — do not hand-evolve in the project;
      improvements flow through the plugin (re-synced on audit). Project-specific
      facts live in CLAUDE.md, not here. -->
 
-# Workflow — the professional development flow
+# Workflow — the spec is the unit of work
 
 Operational depth behind the duty lines in CLAUDE.md. Read the section you need
 when the trigger fires; this file is on-demand, not per-turn context.
 
-## Session start (every working session)
+## The agreement, written with the operator
 
-1. `git log --oneline -10` + read `.claude/progress/` — restore state.
-2. Take **one** open unit of work from wherever this project tracks them (issues, a backlog file,
-   the devlog) — one at a time, and skip what is waiting on someone else rather than re-attempting it.
-3. Run the verification command CLAUDE.md names (`make check` / the test suite). Confirm the
-   baseline is green *before* changing code.
-4. A handoff note is a **claim, not a fact**: "verified" written by a past session must be
-   re-executed before you rely on it. Phrase queued fixes as "reproduce → close".
+Truth is the code plus the spec you wrote together. Before non-trivial work,
+write `specs/<slug>.md` **with** the operator — ask only the questions whose
+answers change the work, then record five things and nothing else:
 
-## Size the change before you build
+- **Why** — whose problem, what changes. The reason is what settles the details
+  nobody specified.
+- **What** — observable behavior, not implementation.
+- **Constraints** — each marked `[hard]` (non-negotiable) or `[soft]` (may be
+  traded away for simplicity — that mark is an explicit licence to simplify, not
+  decoration). State them as invariants, not steps: "the operation is
+  idempotent", never "add a dedup table".
+- **Done when** — an executable command with its expected result. **If it isn't
+  executable, the spec isn't ready to work from.** This is the one gate.
+- **Not doing** — explicit non-goals, so scope cannot drift silently.
 
-Match upstream effort to blast-radius; default DOWN. Most work is trivial/small/medium and
-goes almost straight to Plan — the full gate set is the exception, not a ritual.
+**Specify *what* and *why*; leave *how* to the implementer.** Detector: a detail
+that moves business risk or architecture goes in; class names, file paths, table
+schemas, library choices stay out — those are the implementer's call and beat a
+guess frozen into the spec. The conversation a spec grows out of always carries
+implementation asides; without the detector they settle into the binding
+sections and start standing in for the requirement.
 
-- **trivial** (1-line, typo) → straight to Work. **small** (one file, clear spec) → acceptance
-  criteria only. **medium** (multi-file or one real design choice) → a design-lite paragraph in
-  the plan (data model + the one real alternative you rejected). **large** (crosses a shared
-  invariant, migration, irreversible, or an unfamiliar brownfield subsystem) → the gates below.
-- **NON-GOALS**: a large change freezes scope with an explicit "what we deliberately do NOT do"
-  line before Work — the always-skipped item that stops scope drift. (Hygiene, not a halting gate.)
-- **Spec *what* and *why*; leave *how* to the implementer.** Detector: a detail that moves
-  business risk or architecture → write it down; pure implementation (class and function names,
-  file paths, table schema, library choice) → don't — that is the implementer's call, and it beats
-  a guess frozen into the spec. The conversation a spec grows out of always carries implementation
-  asides; without the detector they settle into the *binding* sections and start standing in for
-  the requirement.
-- **Constraints are invariants, not steps** — "the operation is idempotent", not "add a dedup
-  table". Mark each `[hard]` (non-negotiable) or `[soft]` (may be traded away for simplicity —
-  that mark is an explicit licence to simplify, not decoration).
-- **Brownfield recon**: before touching a shared invariant on an existing subsystem, do read-only
-  recon with the built-in **Explore** agent (map · invariants · blast-radius) and state what
-  breaks. Keep it in context — persist it only if the operator asks; no per-feature doc.
-- **Design before you freeze**: for a large, irreversible decision, grill the design with a
-  fresh-context pass BEFORE committing — same refuter as the verification ladder, aimed upstream,
-  with the mandate "kill ≥1 alternative with a concrete failure scenario or cost." Then record the
-  winner in an ADR. Anything smaller: skip this — a rejected-alternative sentence in the plan is enough.
+**Phase lists and step-by-step plans do not belong in a spec.** Planning against
+the real code beats a plan written in advance for it. A spec that accretes a
+journal stops being an agreement: measured on a production repository, the
+declared acceptance section drifted 970 lines away from the threshold actually
+in force, and new ratified scope was written *into* the journal because the file
+had nowhere else to put it.
 
-## Plan before code
+Match effort to blast radius, default DOWN. Trivial (typo, one line) → just do
+it. Small (one file, clear ask) → acceptance criteria, no file. Anything that
+crosses a shared invariant, migrates data, is irreversible, or lands in an
+unfamiliar brownfield subsystem → a spec.
 
-- Nontrivial task (multi-file, architectural, ambiguous spec) → do read-only recon and produce
-  a plan decomposed into **independently verifiable slices**, each with its own check. Use plan
-  mode for the recon **unless the project defines its own planning ritual** (e.g. a planning
-  skill) — then follow that, it overrides this default. Skip in headless runs.
-- Before writing code, grep for an analogous pattern already in the codebase and the
-  dependencies of what you'll touch — extend the existing approach instead of duplicating it.
-- State assumptions explicitly; if multiple readings exist, present them — don't pick silently.
-- If you are already mid-implementation and realize the task is nontrivial — say so and stop
-  coding until a plan exists.
+**Brownfield recon before touching a shared invariant**: read-only mapping with
+the built-in **Explore** agent (map · invariants · blast radius), stated in the
+answer. Keep it in context; persist it only if the operator asks.
 
-## Work (one feature at a time)
+## Work
 
-- Work test-first by default: write the failing test, commit it, then implement until green
-  (red→green is the default, not dogma — see `testing.md` rule 2 for what actually matters).
-- One feature per cycle; call it done only after **every** verification step ran, negative cases
-  included. When verification hits a wall outside your reach (missing creds, an operator-only
-  service, a third-party dependency), say so explicitly — **"blocked on X, and here is who
-  unblocks it"** is a different state from "not done yet", and a tracker that cannot tell them
-  apart makes the next session burn a cycle rediscovering the wall. Before declaring it blocked,
-  verify every layer you *can* reach below the wall (unit / service-layer / stubbed-boundary
-  dispatch): blocked describes the last mile, not the whole feature. Put the narrative — what ran
-  green, what stays quarantined for whom — in the tracker entry or the progress file, not in a
-  root handoff file nobody will look for.
-- Git commit per feature with a descriptive message. Doc-with-code: the same commit updates the
-  **oracle** its diff touches — the test, the type, the schema — and a document only where the
-  claim has no oracle (`docs-discipline.md`, rules 0–1).
-- **Exercise runtime-critical paths on real input before fixing the design.** For
-  probabilistic / IO-heavy / data-shape-dependent code (LLM calls, pipelines, aggregation,
-  parsers), a green test on mocked data does not cover real-corpus edge cases — run the path
-  on representative real input *before* committing to a design, not after a deploy surfaces
-  the edge case. The project CLAUDE.md names the concrete command for this stack.
-- **When stuck, stop at 2–3 failed iterations and escalate — don't improvise.** Say what you
-  tried, what failed, and what you need to proceed: a decision only the owner can make, a
-  credential, a service that is down. An agent with no escalation route invents a workaround, and
-  a workaround for a missing permission or credential is the expensive kind. Read the full error
-  and understand the cause before retrying; a change that breaks many things is a signal the
-  approach is wrong, not that it needs more patches.
+- One unit at a time. Call it done only after **every** verification step ran,
+  negative cases included.
+- Work test-first by default; red→green is the default, not dogma — see
+  `testing.md` rule 2 for what actually matters.
+- **A handoff note is a claim, not a fact.** "Verified" written by a past session
+  is re-executed before you rely on it. Phrase queued fixes as "reproduce →
+  close".
+- **Exercise runtime-critical paths on real input before you freeze the design.**
+  For probabilistic / IO-heavy / data-shape-dependent code (model calls,
+  pipelines, aggregation, parsers), a green test on mocked data does not cover
+  real-corpus edge cases. Run the path on representative real input *before*
+  committing to a design, not after a deploy surfaces the edge case.
+- **Stop at 2–3 failed iterations on one hypothesis and escalate — don't
+  improvise.** Say what you tried, what failed, and what you need: a decision
+  only the owner can make, a credential, a service that is down. An agent with
+  no escalation route invents a workaround, and a workaround for a missing
+  permission is the expensive kind.
+- Doc-with-code: the same commit updates the **oracle** its diff touches — the
+  test, the type, the schema — and a document only where the claim has no oracle
+  (`docs-discipline.md`, rules 0–1).
 
 ## Verification ladder (after each substantive change)
 
-Run the rungs in order; escalate by stakes — and **name the chosen rung to the operator**:
+Run the rungs in order; escalate by stakes — and **name the chosen rung to the
+operator**:
 
 | Rung | When | How |
 |---|---|---|
 | Self-verify | always | oracle green + lint/types + end-to-end check of the actual behavior ("looks done" ≠ "is done") |
-| `/code-review` | substantive diff | run it yourself at the end of the change (it reviews the working diff or a PR; `/review` is its alias — verify the surface exists in your session's `/`-autocomplete) |
-| Fresh-context second opinion | high-stakes, "looks done", silent-wrong-is-costly; **per-change** for silent-wrong-prone components (parsers/rewriters of untrusted input, guards/validators, invariant refactors) | separate session or subagent prompted to **refute**, not confirm — the author anchors on its own solution. For the silent-wrong class, prefer a refuter **initiated outside the authoring session** (fresh session / external audit) over a subagent you spawn: a self-commissioned evaluator partly inherits your framing (one passed a denylist that an external pass then broke with Unicode-obfuscated input). Also usable UPSTREAM on a large/irreversible design decision before you freeze it — grill it to kill ≥1 alternative with a concrete failure scenario or cost |
-| External audit | milestone closed / security-correctness-critical / irreversible | pick by what carries the risk: **the change** → `/code-review ultra` (cloud fleet over the branch or PR, paid); **the deliverable** → the operator opens a **new** session that audits the scope and **executes** the live stack. Executed evidence beats read evidence — a reader-only pass once called golden numbers "unproven" that an executing pass re-derived exactly |
+| `/code-review` | substantive diff | run it yourself at the end of the change |
+| Fresh-context second opinion | high-stakes, "looks done", silent-wrong-is-costly; **per-change** for silent-wrong-prone components (parsers/rewriters of untrusted input, guards/validators, invariant refactors) | a separate session or subagent prompted to **refute**, not confirm — the author anchors on its own solution. Prefer a refuter initiated **outside** the authoring session: a self-commissioned evaluator partly inherits your framing. Also usable UPSTREAM on a large irreversible design decision before you freeze it |
+| External audit | milestone closed / correctness-critical / irreversible | by what carries the risk: **the change** → `/code-review ultra`; **the deliverable** → a new session that audits the scope and **executes** the live stack. Executed evidence beats read evidence |
 
-Periodically worth running on *accepted* features too — fresh-context audits have caught
-HIGH defects in already-green code. For guard/validator/parser features, "verify passed" and
-"the invariant holds" are different claims: the suite proves the cases it encodes, while the
-invariant lives in adversarial input space — a ledger has stood at all-green while an external
-audit refuted the invariant with an input class the suite never encoded. The refuter's mandate
-is the invariant, not the diff.
+Triage what a refuter returns, don't relay it: findings arrive mixed with
+accepted residuals and with adversarial angles the component is not built to
+resist. Reproduce each one yourself as a failing test before fixing it — the
+reviewer's output is a hypothesis. For guard/validator/parser work, "verify
+passed" and "the invariant holds" are different claims: the suite proves the
+cases it encodes, the invariant lives in adversarial input space.
 
-## Continuity (what survives the session)
+## Where things stand between sessions
 
-The lever is **state-on-disk, not a specific file layout** — if the project already keeps
-continuity elsewhere (descriptive git commits, a workspace/notes convention, structured
-memory), meet it there instead of adding a parallel store. The conventions below are the
-kit's default carriers, not a mandate:
+**The open spec is the continuity layer.** It states what must become true and
+what is still missing; a closed spec is history in git. Report a stopped unit as
+**"blocked on X, and here is who unblocks it"** — a different state from "not
+done yet", and a tracker that cannot tell them apart makes the next session burn
+a cycle rediscovering the wall.
 
-- `.claude/progress/<slug>.md` — the in-flight layer, in either of two legitimate shapes:
-  **task-scoped** (state of one bounded task: what's done, what's stuck, next steps — closes
-  when the task does) or a **workstream snapshot** (a long-lived rolling picture of one
-  workstream's *current* state + open threads; episodic history goes to the devlog, and the
-  file is pruned, not appended, so it stays a snapshot). Update before ending a session;
-  one-line `Quick state — <facts>` heading on top.
-- `.claude/devlog/entries/NNNN-<slug>.md` — one entry per feature/fix/decision: what changed
-  and why. Episodic layer, distinct from progress; written when the change lands, converted
-  from the progress file when a long task closes.
-- Durable knowledge lives in artifacts (ADR / docs / devlog), never only in chat.
+Do **not** add a parallel journal. Where the project already keeps one —
+descriptive commits, a devlog, a tracker, a workspace convention — meet it
+there. A carrier that is not already earning its keep is not introduced: measured
+across a live estate, prescriptive journal formats were adopted in a minority of
+projects and, where continuity was genuinely valued, it had been reinvented more
+cheaply. What survives the session is state on disk, not a specific layout.
 
-**Closing a long task** (task-scoped progress; a workstream snapshot doesn't close — it gets
-pruned back to current state):
-1. Verify every closed feature has its episodic record (devlog entry or equivalent) — it
-   outlives the progress file.
-2. Confirm the project's own tracker marks them done.
-3. Make the terminal state legible: set `Quick state → CLOSED` or delete the file — both are
-   valid ends (closed history lives in devlog + git); what matters is that a finished task's
-   file no longer reads as active work.
+Durable knowledge lives in artifacts (spec / ADR / the project's own carrier),
+never only in chat.
 
 ## Production posture (day 0, not "later")
 
-- Secrets: **never echoed into code, logs, tests or replies** — not even when asked for a debug
-  line, because the line outlives the debugging session. Secret-bearing paths get
-  `permissions.deny` entries the moment they are named.
-- Known limitations (retention, scale ceilings, missing hardening) are **written down** in
-  `docs/ARCHITECTURE.md` as conscious decisions — an undocumented limitation is a future
-  incident, a documented one is a backlog item.
-- Every feature's verify contract includes negative cases and degradation paths (service
-  down, malformed input, missing system dependency) — a bot that "works on the happy path"
-  is not releasable.
-- Operational entry points (run, logs, read-only data access) are documented in CLAUDE.md /
-  RUNBOOKS so an incident doesn't start with archaeology.
+- Secrets are **never echoed into code, logs, tests or replies** — not even for a
+  debug line, because the line outlives the debugging session. Secret-bearing
+  paths get `permissions.deny` entries the moment they are named.
+- Known limitations (retention, scale ceilings, missing hardening) are written
+  down in `docs/ARCHITECTURE.md` as conscious decisions — an undocumented
+  limitation is a future incident, a documented one is a backlog item.
+- Every unit's verify contract includes negative cases and degradation paths
+  (service down, malformed input, missing system dependency).
+- Operational entry points (run, logs, read-only data access) are documented in
+  CLAUDE.md / RUNBOOKS so an incident doesn't start with archaeology.

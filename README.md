@@ -11,13 +11,14 @@ You drive both by talking. There is no wizard and nothing to configure by hand.
 ```
 /plugin marketplace add nikitaCodeSave/claude-code-harness
 /plugin install claude-code-harness@claude-code-harness
-/plugin install devlog@claude-code-harness
+/plugin install devlog@claude-code-harness      # optional — see below
 ```
 
-The `devlog` companion is a separate plugin, but install both: the kit designs the harness,
-devlog gives it a memory. [Why that matters](#the-devlog-companion-your-projects-memory) —
-short version: a session that starts cold repeats mistakes a session that starts informed
-doesn't.
+The kit is the first line; `devlog` is a separate, optional plugin. The kit does not mandate a
+journal and does not create one: the unit of work it sets up is the spec you write with it, and
+where a project keeps no journal the bootstrap records itself in the commit. Add `devlog` when you
+want an episodic record on top of that — [what it buys you](#the-devlog-companion-your-projects-memory),
+short version: a session that starts cold repeats mistakes a session that starts informed doesn't.
 
 Run `/reload-plugins` (or restart the session) right after installing, before first use.
 
@@ -92,7 +93,8 @@ same thing works — and if you'd rather not rely on that, the last row calls it
 A Claude Code session forgets. Context gets compacted, the session ends, tomorrow's session opens
 cold — and re-litigates a decision you already made, or walks into a trap you already mapped. The
 harness the kit builds is *atemporal*: it says what's true about your project, not what happened
-in it. Those are different jobs, and the second one is where sessions actually bleed time.
+in it. The open spec covers the work in flight. Neither covers what already landed and why — and
+that is the gap where sessions bleed time.
 
 devlog is that second job, made runnable:
 
@@ -112,8 +114,9 @@ compounds: entry #18 in this repo's own devlog exists because entry #12 and #13 
 lesson twice, and the third time it got caught before shipping.
 
 Requirements: **Python 3** on `PATH` (standard library only — no pip installs). Runs on Linux,
-macOS, and Windows/Git Bash. If you'd rather keep your changelog by hand, skip the plugin — the
-kit works without it, it just won't remember for you.
+macOS, and Windows/Git Bash. If disciplined commit messages already do this job for you, skip the
+plugin — the kit works without it and won't nag you for entries; the bootstrap simply records
+itself in the commit.
 
 ## The opinion
 

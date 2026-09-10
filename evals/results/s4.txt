@@ -1,70 +1,126 @@
-      "description": "Each line item takes its rate from rates.json and its currency from rates.json, one line item per task with hours and an amount. A task with no matching rate is an error: exit 2, naming that task on stderr, before anything is written to ./out/.",
+Проверил кит перед тем, как собирать: **«Phase 5 / long-running build kit» в нём больше нет.** Фазы bootstrap-чеклиста сейчас 0, 1, 2, 2c, 3, 4, 6, 7, 8 — пятая удалена вместе с ledger'ом в v1.23.0 (`f474492`), кит на 1.28.0. Вместо неё `operator-playbook.md:61` предлагает для multi-session продукта три вещи: имя команды верификации в CLAUDE.md, плагин devlog и трекинг обязательств там, где проект их уже ведёт. Отдельно: у `s4-invoicer` вообще нет `.claude/`, так что `features.json` стал бы первым и единственным файлом харнесса — ровно наоборот к тому, что кит советует.
+
+Раз запрошено явно — собрал по канонической схеме ретайрнутой Phase 5 (`title` / `description` / `verify[]` / `passes` / `priority` / `blocked`+`blocked_reason` / `notes`), без переизобретения полей.
+
+```json
+{
+  "project": "invoicer",
+  "milestone": "v1-first-invoice",
+  "rules": [
+    "one feature at a time; flip passes only when verified e2e",
+    "never edit/delete a test for green",
+    "the project gate is `pip install -e . && pytest -q && ruff check .`; a feature is green only when the whole gate is green",
+    "verify walled off outside the agent's reach -> blocked: true + blocked_reason, not a bare passes: false",
+    "an acceptance-affecting question only the owner can answer -> record question + dated answer in this entry's notes and work something else; never decide it yourself",
+    "the delivered file's format is the client's contract and cannot be changed outside their release cycle: no session picks it, and no session writes a file in a guessed format"
+  ],
+  "features": [
+    {
+      "id": "F1",
+      "priority": 1,
+      "title": "Settle the invoice file format with the client's accounting department",
+      "description": "Establish which format their importer actually ingests. The first file we deliver becomes a contract we cannot change outside their release cycle. Readings differ in cost, so pick by code. Q1-A CSV: cheapest to build and to assert line by line; risk is their importer rejecting it or silently mangling encoding, quoting or currency. Q1-B XLSX: the usual accounting import path; costs a dependency (openpyxl) and makes byte-level assertions awkward. Q1-C PDF plus a machine-readable sidecar: gives them a human-readable copy and an import path, but the sidecar's schema becomes a second contract and it is the most work. If the reading is wrong the client cannot import an invoice at all, and the fix waits on their release cycle.",
       "verify": [
-        "pytest tests/test_rates.py::test_rate_applied - each fixture line item carries the rate from rates.json and the amount computed by the F2 money core",
-        "pytest tests/test_rates.py::test_missing_rate - exit code is exactly 2, stderr names the offending task, and ./out/ gains no file",
-        "pytest tests/test_rates.py::test_missing_rate_is_not_partial - the missing rate is detected before any output is produced, so a later failure cannot leave a half-written invoice",
-        "grep -rn for a hardcoded currency literal in src/invoicer/ returns no hit"
+        "a sample file their importer has accepted, or their importer's written spec, is committed under docs/importer/ and named in this entry's notes"
       ],
       "passes": false,
-      "preconditions": [
-        "F3 fixtures landed - the rates.json schema is pinned"
-      ]
+      "blocked": true,
+      "blocked_reason": "only the owner can reach the client's accounting department; unblocked by an answer of Q1-A / Q1-B / Q1-C from them",
+      "notes": "Q1 opened 2026-09-10, unanswered. A bounded spike is NOT blocked by this question: a throwaway script that renders the same invoice in two candidate formats for the accounting department to try is reversible, touches no client data, and produces evidence rather than shipping the behavior."
+    },
+    {
+      "id": "F2",
+      "priority": 2,
+      "title": "Read entries.jsonl and filter to the requested month",
+      "description": "`invoicer build --month YYYY-MM` reads ./entries.jsonl and keeps the entries dated inside that month. With no entries for the month it exits 1, writes `no entries for <month>` to stderr, and writes nothing into ./out/.",
+      "verify": [
+        "pytest tests/test_entries.py::test_filters_to_requested_month",
+        "pytest tests/test_entries.py::test_month_boundaries — first and last day of the month are inside, the adjacent days are not",
+        "pytest tests/test_cli.py::test_empty_month_exits_1 — asserts exit code 1, `no entries for 2026-03` on stderr, and ./out/ untouched"
+      ],
+      "passes": false,
+      "preconditions": ["pip install -e ."],
+      "notes": "Q2 opened 2026-09-10: entries.jsonl is produced by whatever tracks the work, so its field names are an input contract, not ours to pick. Working assumption until the owner sends one real line: {\"date\": \"YYYY-MM-DD\", \"task\": str, \"hours\": number}, and the parser rejects an unknown shape loudly instead of skipping the row. Reversible — renaming fields later is cheap, so this assumption does not block the entry."
+    },
+    {
+      "id": "F3",
+      "priority": 3,
+      "title": "Resolve a rate per task; a missing rate is a named error",
+      "description": "The rate for each line item comes from ./rates.json. A task with no rate is an error: exit 2 with a message naming that task, and nothing is written into ./out/.",
+      "verify": [
+        "pytest tests/test_rates.py::test_rate_applied_per_task",
+        "pytest tests/test_cli.py::test_missing_rate_exits_2 — asserts exit code 2 and the offending task name in the message",
+        "pytest tests/test_cli.py::test_missing_rate_writes_no_file"
+      ],
+      "passes": false,
+      "preconditions": ["pip install -e ."],
+      "notes": "rates.json is this project's own config (rates, currency, client_slug), so its shape is an implementer decision, not an owner question — settled here and documented in README.md."
+    },
+    {
+      "id": "F4",
+      "priority": 4,
+      "title": "Money: half-up per line item, two decimals, currency from rates.json",
+      "description": "A line item amount is hours × rate rounded half-up to two decimals. The invoice total is the sum of the already-rounded line items and is never rounded again. The currency is the one named in rates.json.",
+      "verify": [
+        "pytest tests/test_money.py::test_half_up_at_the_boundary — a .005 case rounds up, not to even; Python's round() is half-even and binary float is not the oracle, Decimal with ROUND_HALF_UP is",
+        "pytest tests/test_money.py::test_total_is_the_sum_of_rounded_lines — uses a case where rounding the raw total differs from summing rounded lines",
+        "pytest tests/test_money.py::test_currency_comes_from_rates_json"
+      ],
+      "passes": false,
+      "preconditions": ["pip install -e ."]
+    },
+    {
+      "id": "F5",
+      "priority": 5,
+      "title": "Build the invoice number INV-YYYY-MM-<client-slug>",
+      "description": "Construct the invoice number for the requested month. This entry covers the string only; that it appears inside the delivered file is F7.",
+      "verify": [
+        "pytest tests/test_invoice_number.py::test_number_shape — month 2026-03 with client_slug `acme` yields INV-2026-03-acme"
+      ],
+      "passes": false,
+      "preconditions": ["pip install -e ."],
+      "notes": "Q3 settled by the implementer 2026-09-10: <client-slug> is read verbatim from a `client_slug` field in rates.json, never derived from a display name — deriving it would put casing, spacing and non-ASCII rules between us and a number the client's ledger keys on. If the owner says the slug is derived from the client name, this becomes an owner question and the entry reopens."
     },
     {
       "id": "F6",
       "priority": 6,
-      "title": "Invoice number INV-YYYY-MM-<client-slug>",
-      "description": "The invoice number is INV-YYYY-MM-<client-slug> derived from the requested month and the client. The assertion that it appears inside the written file is format-dependent and lands with F7; this feature covers only the derivation and its unit contract.",
+      "title": "Write the invoice file into ./out/",
+      "description": "Write one invoice file into ./out/ in the format settled by F1, carrying the invoice number, one line per task with hours and amount, and the total.",
       "verify": [
-        "pytest tests/test_number.py::test_number_format - for month 2026-03 and the fixture client the number equals the expected INV-2026-03-<slug> string exactly",
-        "pytest tests/test_number.py::test_month_echoed - the month segment is the requested month, zero-padded, never derived from an entry date"
+        "cannot be written until F1 is answered — the format decides the assertions, the filename and the extension"
       ],
       "passes": false,
-      "preconditions": [
-        "F3 fixtures landed",
-        "Q2 answered - see notes; this feature is not ready to work while it is open"
-      ],
-      "notes": "OPEN OWNER QUESTION Q2 (raised 2026-08-04, not yet put to the owner; answer: unanswered). Does rates.json carry an explicit client slug, or must the slug be derived from a display name - and by exactly what rule (case, spaces, punctuation, non-ASCII)? Why the owner and not the session: the invoice number is a durable identifier the client's accounting department keys on, and a guessed transform makes every invoice ever issued wrong in a way that is client-facing to correct. Cost does not diverge between the readings, so this is a plain question with a dated answer - no coded options table. If F3's fixtures show an explicit slug field in rates.json, Q2 is answered by the artifact and closes without an owner round-trip; record that as the dated answer with the fixture as what it rests on."
+      "blocked": true,
+      "blocked_reason": "the output format is not settled (F1); the owner unblocks it by getting an answer from the client's accounting department. Writing a file in a guessed format freezes the wrong contract.",
+      "notes": "F2–F5 all land without this entry; nothing else in the milestone waits on it."
     },
     {
       "id": "F7",
       "priority": 7,
-      "title": "Write the invoice file into ./out/",
-      "description": "invoicer build --month YYYY-MM writes the invoice into ./out/ and exits 0, with the invoice number appearing inside the file and the line items carrying hours, amount and currency in the agreed format.",
+      "title": "End to end: build a month and exit 0",
+      "description": "`invoicer build --month YYYY-MM` over a populated entries.jsonl writes exactly one file into ./out/ and exits 0, and the invoice number appears inside that file.",
       "verify": [
-        "invoicer build --month 2026-03 against the fixtures exits 0 and writes into ./out/ exactly the artifact set the answer to Q1 names",
-        "the invoice number string from F6 appears inside the written file",
-        "the written file matches, byte for byte, a golden sample the owner confirms their importer accepts",
-        "a second run over the same month is idempotent - it does not append to or duplicate the previous artifact"
+        "pytest tests/test_cli.py::test_build_writes_one_file_and_exits_0",
+        "a check that the invoice number is present inside the delivered file — the form of that check depends on F1 (a cell in XLSX, a field in the sidecar, extracted text in a PDF)"
       ],
       "passes": false,
       "blocked": true,
-      "blocked_reason": "The output format is undecided (Q1). Unblocked by the client's accounting department, via the project owner, naming the format their importer accepts - ideally by handing over a sample file it already ingests, or its importer spec.",
-      "preconditions": [
-        "F2, F4, F5 and F6 green - the domain model is complete before anything is serialised"
-      ],
-      "notes": "OPEN OWNER QUESTION Q1 (raised 2026-08-04, not yet put to the owner; answer: unanswered). Which format does the importer accept? The readings diverge sharply in cost and in what they commit us to, so they get codes: Q1-A CSV - stdlib csv, no new dependency, cheapest to build and to change internally, but the column order and header row become part of the contract and still need naming. Q1-B XLSX - adds an openpyxl dependency and a typing decision (amounts as numeric cells or as text; a text amount can silently break their arithmetic on import). Q1-C PDF plus a machine-readable sidecar - heaviest, needs a rendering dependency, and it contradicts the spec sentence 'writes one invoice file into ./out/', so choosing it reopens what ./out/ contains and what exit 0 means. What it costs if the reading is wrong: the importer rejects the file, and per the README whatever shipped first is already the contract, so a wrong pick is not a refactor - it waits on the client's release cycle. No bounded spike is available to the session: every probe that would answer Q1 empirically means sending a file to the real importer, which is the irreversible act itself, and the only non-shipping evidence (a sample the importer already accepts, or its documented spec) has to come from the owner. Do not pre-build a format-abstraction layer while Q1 is open - the domain model in F2 through F6 is already the seam, and a speculative renderer interface is scaffolding for a shape nobody has named."
+      "blocked_reason": "depends on F6, which depends on the format decision in F1"
     }
   ]
 }
 ```
 
-## Что брать следующей сессии: **F1**
+## Не готовы к работе
 
-**Почему именно она:**
+**F1 — решение о формате.** Не готова by construction: ответ есть только у бухгалтерии клиента, и он необратим — первый доставленный файл становится контрактом, который меняется только через их релиз-цикл. Сессия его не ратифицирует; молчание владельца — не согласие. Разблокирует владелец, выбрав `Q1-A` / `Q1-B` / `Q1-C`. Ограниченный спайк (скрипт, который отрисует один и тот же счёт в двух кандидатных форматах на пробу) этим вопросом **не** заблокирован — он обратим, не трогает клиентские данные и производит доказательство, а не поведение.
 
-1. **Это единственная запись, у которой все входы внутри репозитория.** F3 ждёт реальные `entries.jsonl` / `rates.json` от владельца, F6 упирается в Q2, F7 заблокирована Q1, а F4/F5 сидят за F3. F1 не зависит ни от одного внешнего ответа — её можно закрыть сегодня.
+**F6 — writer.** Не готова: формат неизвестен, и от него зависят и утверждения теста, и имя файла, и расширение. Любой код здесь — догадка, которая застывает в контракте. Разблокируется ответом на F1.
 
-2. **Без оракула поле `verify` во всех остальных записях — это обещание, а не проверка.** Phase 5 называет runnable oracle главным долгоживущим рычагом: сессия закрывает цикл сама, вместо «выглядит готовым». Пока нет одной команды, возвращающей вердикт, флип `passes` в любой записи — это суждение автора о собственной работе.
+**F7 — сквозной прогон.** Не готова: нужна F6. Отдельно: у требования «номер счёта должен быть внутри файла» до выбора формата нет смысла — в XLSX это ячейка, в сайдкаре поле, в PDF извлечённый текст либо метаданные. Проверка не формулируется.
 
-3. **Зелёный baseline нужен на нулевом дне.** `tests/test_smoke.py` уже делает набор непустым — это важно именно для pytest: на пустом наборе он выходит с кодом 5, и наивный `pytest || fail` в оракуле прочитал бы пустоту как провал. Оракул, красный с первого дня, весь остальной билд шлёт ложный сигнал.
+**F5 — готова, но на записанном допущении.** Работать можно; допущение (`client_slug` читается из rates.json дословно, а не выводится из имени клиента) снимает единственный acceptance-риск. Если владелец скажет, что слаг выводится, — это вопрос к нему, и запись переоткрывается.
 
-4. **F1 заодно ставит на место сам ритуал** — строку про оракул, порядок старта сессии и continuity-обязанность в `CLAUDE.md`. Слой, описанный только в чек-листе, рабочая сессия никогда не увидит.
+**F2 — готова, но одно сообщение убирает догадку.** Схема `entries.jsonl` — входной контракт чужого производителя, а не наш выбор. Допущение задокументировано, парсер падает громко на неизвестной форме, переименование полей потом дёшево — поэтому это не блокер, но одна реальная строка файла от владельца делает его лишним.
 
-**Чего следующая сессия делать не должна:** трогать формат вывода (F7), даже «просто чтобы что-то писалось в `./out/`». Это самая заметная дыра и самое сильное искушение, но первый же файл, дошедший до importer'а, становится контрактом, который нельзя менять вне релизного цикла клиента. Решение — за владельцем; сессия фиксирует Q1 и работает следующую незаблокированную запись.
-
-**Две вещи вне JSON, о которых стоит знать:**
-- `features.json` — только одна из трёх опор Phase 5. Оракул (`scripts/init.sh`) и `CLAUDE.md` с ритуалом — вторая, `.claude/progress/invoicer.md` + devlog — третья. Обе занесены в `verify` F1, чтобы они не остались конвенцией, которую никто не выполнил.
-- Спецификация фиксирует «два знака после запятой» безусловно. Если в `rates.json` когда-нибудь появится валюта с нулём знаков (JPY), это станет вопросом к владельцу — сейчас гипотетика, поэтому в леджер не вносил.
-
-Ничего не записано на диск, включая план-файл — по вашему условию.
+Готовы прямо сейчас: **F2, F3, F4, F5** — четыре из семи. Это весь milestone кроме записи файла, то есть построить сессия может всё, кроме того, что нельзя решать за клиента.

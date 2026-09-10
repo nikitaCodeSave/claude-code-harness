@@ -14,8 +14,10 @@ anything; it carries what the file tree cannot tell you. Claude Code additionall
   plugin and never ships.
 - `~/.claude/skills/claude-code-harness` on the maintainer's machine is a **symlink to
   `plugins/harness/`**, so edits here are live immediately. Edit here, never in a copy.
-- `evals/` is the kit's own regression suite — mechanical checks plus fixture projects and a
-  criteria file written before the runs. Dev harness, never shipped.
+- `evals/` is the kit's own regression suite — mechanical checks plus one fixture project and a
+  criteria file written before the runs. Dev harness, never shipped. **A test whose mechanism the
+  kit has retired is deleted, not kept green**: four of six tests spent five releases exercising
+  a Phase 5 that no longer exists (`evals/README.md` records the cut).
 
 ## Commands
 

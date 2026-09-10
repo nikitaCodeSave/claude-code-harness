@@ -48,6 +48,8 @@ __pycache__/
 # eval-прогоны: сырые выводы кладутся вручную; git-каталоги фикстур — никогда
 evals/results/*.tmp
 evals/fixtures/**/.git/
+# сессия в plan-режиме пишет черновик плана внутрь фикстуры — правило ниже якорено к корню
+evals/fixtures/**/.claude/plans/
 
 # plansDirectory указывает сюда — черновики планов не версионируются
 .claude/plans/

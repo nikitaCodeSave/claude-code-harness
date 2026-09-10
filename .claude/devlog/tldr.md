@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #60 · 2026-09-10 · Регресс-набор пять релизов мерял ретайренный механизм
+
+**Tags:** evals, dev-harness, strip-revision, empirics
+
+Оператор усомнился в ценности evals/ сразу после релиза v1.28.0. Сомнение оказалось проверяемым, и проверка его подтвердила: четыре теста из шести целились в Phase 5 / features.json — механизм, ретайренный в v1.23.0.
+
+[→ entries/0060-regress-nabor-pyat-relizov-meryal-retayrennyy-mekhanizm.md](entries/0060-regress-nabor-pyat-relizov-meryal-retayrennyy-mekhanizm.md)
+
+---
+
 ## #59 · 2026-09-10 · Единица работы — спека с оператором, а не свод правил
 
 **Tags:** harness, project-docs, bootstrap, skill, strip-revision, empirics, release

@@ -40,6 +40,15 @@ Done = `./evals/run.sh mech` exits 0, `release.sh` completes without a stamp mis
 `plugin validate` prints `✔ Validation passed`, and the reindexer reports no ERRORS. The suite
 was red for four consecutive releases because this line did not name it.
 
+**Green does not mean correct, and the gap is the reason review exists here.** The suite checks
+structure: that a path a shipped document names resolves, that every reference is reachable from
+the map in `SKILL.md`, that both manifests carry the same version, that a JSON example parses. It
+cannot see that a claim went stale, that two documents now assert opposite things, or that a check
+has outlived the mechanism it guarded. Each of those has already happened in this repository — an
+external audit found three mutually contradicting claims no check covers, and four of six tests
+spent five releases exercising a retired Phase 5 — so treat a green suite as permission to review,
+never as a verdict.
+
 ## Boundaries
 
 - **Always**: bump the version in `plugin.json` for any change consumers should receive — it is the
@@ -52,6 +61,10 @@ was red for four consecutive releases because this line did not name it.
   provenance. Never hand-edit `index.json` / `tldr.md`; they are generated. Never put a `version`
   field in the marketplace entry — `plugin.json` is authoritative and the release script fails the
   build if one appears.
+  - The one repair a frozen file admits is **a link whose target moved**: the text stays exactly as
+    it was written, the path is corrected. A record that points nowhere has stopped being
+    provenance, and repairing the pointer is not rewriting the claim. Nothing else about a frozen
+    file is editable — not a rename it predates, not a conclusion later work overturned.
 
 ## Conventions that are not obvious from the files
 

@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #61 · 2026-09-22 · Модельные строки перешли на Opus 5.5, цифры оказались легкой частью
+
+**Tags:** native-capabilities, refresh-ledger, models, effort, refute-pass
+
+Оператор спросил статус актуальности знания о моделях Anthropic. Ответ оказался рассинхроном по четырём слоям сразу: встроенный prior модели (cutoff май 2026), бандл-скилл claude-api (кэш 2026-06-24), native-capabilities.md кита (CC 2.1.251 / 2026-08-29) и локальный changelog CC…
+
+[→ entries/0061-modelnye-stroki-pereshli-na-opus-5-5-tsifry-okazalis-legkoy.md](entries/0061-modelnye-stroki-pereshli-na-opus-5-5-tsifry-okazalis-legkoy.md)
+
+---
+
 ## #60 · 2026-09-10 · Регресс-набор пять релизов мерял ретайренный механизм
 
 **Tags:** evals, dev-harness, strip-revision, empirics

@@ -1,11 +1,22 @@
 # Native capabilities — what Claude Code already does
 
-Working inventory as of **Claude Code v2.1.251 / the Claude 5 family (Fable 5, Sonnet 5,
-Opus 5) model generation** (August 2026). Default model is account-type-dependent [FP,
-`model-config`]: **Opus 5** (`claude-opus-5`, v2.1.219+ — now *the* default Opus model;
-1M context, $5/$25 MTok, knowledge cutoff May 2026) on Max / Team Premium / Enterprise PAYG
-**and, since v2.1.251, on seat-based Enterprise too**; **Sonnet 5** (v2.1.197+) on Pro /
-Team Standard; Fable 5 is the default on no account type. `ANTHROPIC_DEFAULT_MODEL`
+**Model lines as of Claude Code v2.1.280 (2026-09-22); every other built-in below carries the
+older v2.1.251 / 2026-08-29 stamp** — see "Two stamps" below before treating a non-model claim
+here as current.
+
+Current lineup [FP, models overview]: the **Claude 5 family** — Fable 5.1, Opus 5.5, Sonnet 5
+(plus Mythos 5.1 where an access program grants it) — and **Haiku 4.5**, which is current but of
+the earlier 4.5 generation and supports no effort setting. Default model is
+account-type-dependent [FP, `model-config`]: **Opus 5.5** (`claude-opus-5-5`, v2.1.280+ — now
+*the* default Opus model; 1M context / 128K max output, $4/$20 MTok with $0.20 cache reads,
+reliable knowledge cutoff Jun 2026, **default effort `medium`** where Opus 5's was `high`) on
+**Pro, Max, Team, Enterprise and the Anthropic API** — Pro and Team Standard started on Sonnet 5
+until v2.1.280 — and on Claude Platform on AWS / Bedrock / Google Cloud; **Microsoft Foundry
+still defaults to Sonnet 4.5**. **Fable 5.1** (`claude-fable-5-1`, v2.1.257+ — the default
+*Fable*; $10/$50 MTok, $0.25 cache reads, cutoff Jun 2026) is the default of no account type
+(`/model fable`). Opus 5 and Fable 5 are **legacy** [FP, models overview] — still served, no
+longer any plan's default, and Fable 5 is still what `fable` / `best` resolve to in Claude apps
+gateway sessions until a gateway is configured for 5.1. `ANTHROPIC_DEFAULT_MODEL`
 (v2.1.236) sets what new sessions start on — unlike `ANTHROPIC_MODEL` a `/model` pick still
 overrides it and persists; `modelPicker` (v2.1.243) curates the `/model` list itself.
 
@@ -18,6 +29,12 @@ telemetry flags, experimental env vars).
 **This file is the kit's single version-pinned document.** Every other live doc states
 behavior without binding it to a release and points here — a currency pin duplicated in two
 places goes stale in one of them silently (`audit-checklist.md` §1 carries the detector).
+
+**Two stamps, not one.** The v2.1.280 header covers the **model lines only** — lineup, plan
+defaults, per-model effort defaults, fast mode (re-grounded 2026-09-22). Every other built-in
+below was last swept at **v2.1.251 / 2026-08-29**, so treat a non-model claim as carrying that
+older stamp until the functional 2.1.252→2.1.280 pass runs (`harness-evolution.md`'s refresh
+ledger states both).
 
 Trust legend: **[FP]** first-party docs (code.claude.com / platform.claude.com / anthropic.com),
 **[BLOG]** Anthropic blog. Everything below is usable on the CLI subscription (Max/Team/Pro/
@@ -283,11 +300,31 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
 ## Effort, fast, thinking [FP] (`code.claude.com/docs/en/model-config`)
 
 - Tiers: `low`, `medium`, `high`, `xhigh`, `max` — effort is supported across the Claude 5
-  family and the Opus 4.x generation (live `/effort` dialog). **Default = `high` on every model
-  that supports effort, except Opus 4.7, which defaults to `xhigh`**; and `xhigh` itself is absent
-  on Opus 4.6 / Sonnet 4.6, which offer `low` / `medium` / `high` / `max`.
+  family and the Opus 4.x generation (live `/effort` dialog). **The default is per model, and the
+  current default model is the exception: Opus 5.5 defaults to `medium`**, where every other
+  model that supports effort defaults to `high` except Opus 4.7, which defaults to `xhigh`; an
+  org default-effort level, where set, becomes the default for the org's default model. `xhigh`
+  itself is absent on Opus 4.6 / Sonnet 4.6, which offer `low` / `medium` / `high` / `max`.
+- **The lever a harness reaches for first is inert on the current default model** [FP,
+  `model-config`, verbatim]: "**A top-level `effortLevel` in your user settings file doesn't count
+  for Opus 5.5.** That key is the older form `/effort` wrote before Claude Code saved levels per
+  model: it keeps applying where it applied before, on Opus 5, Fable 5.1, and earlier models,
+  while Opus 5.5 and models released after it start at their own default until you choose a level
+  for them with `/effort` or the `/model` picker." Scope matters: **user** settings are what this
+  excludes — a top-level `effortLevel` in **project, local or managed** settings still applies to
+  every model. So a machine carrying `effortLevel: "xhigh"` in `~/.claude/settings.json` does not
+  slip one rung on Opus 5.5, it lands on `medium` — two rungs down, silently, with the file still
+  valid. Per-model levels live under **`modelSettings`** in user settings, which is also where
+  `maxEffortLevel` (v2.1.267) can cap a single model; top-level `maxEffortLevel` caps every
+  provider, Bedrock / Vertex / Foundry included, and a user may still pick lower.
+  Two v2.1.280 changes to check against a pinned model: a level **saved before `/effort` became
+  per-model no longer applies to a newly released model**, and Opus 4.7 / 4.8 / Fable 5 **stopped
+  holding their launch-default effort** over `/effort` in `-p` / the Agent SDK, a project /
+  managed / `--settings` `effortLevel`, or a per-model level.
 - **How to set it — session-wide** (binary- and schema-verified 2026-07-25 on v2.1.220):
-  - `effortLevel` in settings — enum `low` | `medium` | `high` | `xhigh` **only**. `max` is
+  - `effortLevel` in settings — enum `low` | `medium` | `high` | `xhigh` **only**, and **no longer
+    a universal lever: in *user* settings it does not reach Opus 5.5 or anything released after
+    it** (see the bullet above; project / local / managed layers still do). `max` is
     session-only (use `/effort`); an out-of-enum value here is swallowed by a `.catch()` rather
     than rejected, so a typo costs the level silently while leaving the file valid. `ultracode`
     *is* a settings key (boolean) — a `--settings` layer carrying it starts an `xhigh` session
@@ -298,7 +335,9 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
     for dispatched background sessions. Since v2.1.251 **`/effort` saves your default per
     model**, so switching models no longer carries the previous model's level over.
   - **Precedence, measured 2026-07-26 on v2.1.220** (org ceiling ▸ env ▸ **a delegate's frontmatter
-    `effort:`** ▸ launch pin ▸ settings ▸ model default). The frontmatter rank is what makes the
+    `effort:`** ▸ launch pin ▸ settings ▸ model default) — **the `settings` rank was measured
+    before user-settings `effortLevel` stopped reaching new models, so on Opus 5.5 that rank is
+    empty for the user layer and the model default wins there.** The frontmatter rank is what makes the
     per-delegate lever below work at all; docs fold launch pin / settings / `/effort` into one
     rank, while the measurement below separates them. `CLAUDE_CODE_EFFORT_LEVEL` wins over everything user-side — including the
     `--effort` flag: with the env set to `auto`, `--effort low` vs `--effort xhigh` produced
@@ -368,31 +407,49 @@ this "feed-and-continue" shape over hard block-at-stop when the goal is to nudge
   Read the oracle off `--output-format stream-json` rather than hunting a transcript path (slugs
   fold `_` to `-`, and a wrong path returns a confident, empty "no failures") — and confirm the
   *negative*: no error signature proves nothing until the same scan shows the tool was called.
-- **What to know before you raise effort on Opus 5** [FP,
-  `platform.claude.com/docs/en/about-claude/models/whats-new-opus-5`]:
-  - *Thinking is on by default*, and disabling it is accepted **only at effort `high` or below**.
-    The API rejects `thinking: {"type":"disabled"}` with `xhigh`/`max` per request; **since
-    v2.1.251 the client no longer lets that combination reach the API** — it sends `high`
-    instead. So on a current client the failure mode is not an error but a **ceiling**: effort
-    above `high` is unreachable while thinking is off, silently. Also: with thinking disabled the
-    model can write a tool call into its text output instead of emitting a `tool_use` block, so
-    the tool never runs and nothing errors.
-  - *`max_tokens` is a hard cap on thinking **plus** response text.* First-party guidance: at
-    `xhigh`/`max` set it large "so the model has room to think and act across subagents and tool
-    calls" (in Claude Code: `CLAUDE_CODE_MAX_OUTPUT_TOKENS`). A budget sized for `high` can end
-    the turn before the tool call happens — which reads as a lost capability, not a truncation.
-- **Fable 5 specifics** (v2.1.170+): not the default model on any plan (`/model fable`,
-  alias `best`); ~2× Opus price; thinking cannot be disabled; `/fast` does not run on it;
-  safety classifiers can auto-fall back to Opus mid-session.
+- **What to know before you raise effort on Opus 5.5** [FP,
+  `platform.claude.com/docs/en/models/opus-5-5/{whats-new-opus-5-5,migration-guide}`]:
+  - *Effort is the **only** thinking control.* Thinking is **always on** and cannot be disabled:
+    `thinking: {"type":"disabled"}` and `{"type":"enabled","budget_tokens":N}` both return 400
+    [FP, `thinking-troubleshooting` per-model table]. Where a harness used to switch thinking off
+    to save tokens, the lever is now a lower effort rung. (Both disabled-thinking traps — effort
+    silently ceilinged at `high`, and a tool call written into the text instead of a `tool_use`
+    block — are scoped by first-party **to Opus 5 alone**, and cannot occur where thinking cannot
+    be switched off. Opus 4.8 / 4.7 have neither trap: there thinking is *off* by default and only
+    `"enabled"` is rejected.)
+  - *`max_tokens` is a hard cap on thinking **plus** response text*, and this model thinks more
+    per turn at a given level than Opus 5 did, most of all at `xhigh` / `max`. First-party
+    testing on agentic coding landed on **128,000 — the model's maximum** [FP,
+    `prompting-claude-opus-5-5`]; the 64k starting point in the effort page belongs to the
+    Opus 5 / 4.8 / 4.7 sections. In Claude Code the knob is `CLAUDE_CODE_MAX_OUTPUT_TOKENS`.
+    A budget sized for the old model can end the turn before the tool call happens — which reads
+    as a lost capability, not a truncation.
+  - **API-only**, listed because it changes what a Messages-API integration must send — not
+    reachable from the CLI, which sets these itself: forced `tool_choice` (`any` / `tool`) returns
+    400 (use `auto` plus `strict: true` or structured outputs), and narration between tool calls
+    arrives as progress-update `thinking` blocks, empty at the default `display: "omitted"`.
+    Whether Claude Code's own `--print` output is affected is **unverified here** — CC manages
+    `thinking.display` itself; probe with `--output-format stream-json` before relying on either
+    behaviour in a runner.
+- **Fable 5.1 specifics** (v2.1.257+, `/model fable`, alias `best`): the default of no plan;
+  ~2.5× the Opus 5.5 token price ($10/$50 vs $4/$20); `/fast` does not run on it; safety
+  classifiers can auto-fall back to Opus mid-session. Its predecessor Fable 5 (v2.1.170+) is
+  legacy but still what `fable` / `best` resolve to in Claude apps gateway sessions.
 - `ultracode` is a **setting, not a tier**: sends `xhigh` *plus* auto dynamic-workflow
   orchestration for substantive tasks; session-only.
-- `/fast` — faster output (up to ~2.5×), **not** an effort downgrade; **Opus 5 and Opus 4.8
-  only** — older Opus models are not in fast mode; research preview
-  (`code.claude.com/docs/en/fast-mode`), billed **via usage credits outside subscription rate
-  limits** ($10/$50 MTok) — never "free on the plan".
+- `/fast` — faster output (up to ~2.5×), **not** an effort downgrade; **Opus 5.5, Opus 5 and
+  Opus 4.8 only** (Opus 5.5 is the fast-mode default since v2.1.280; Opus 4.7's was removed
+  2026-07-24, and switching to it turns fast mode off) — never on Sonnet or Haiku; research
+  preview (`code.claude.com/docs/en/fast-mode`), billed **via usage credits outside subscription
+  rate limits** ($8/$40 MTok on Opus 5.5, $10/$50 on Opus 5 / 4.8) — never "free on the plan".
+  The first toggle in a conversation reprices the whole accumulated context at the fast-mode
+  uncached input rate, so switch it on at the start of a session, not mid-way.
 - `ultrathink` — one-turn deeper-reasoning keyword (in-context only).
-- Adaptive thinking (always-on for Fable 5) triggers reasoning only when the turn
-  needs it — do **not** try to manage a thinking budget from the harness.
+- Adaptive thinking triggers reasoning only when the turn needs it — do **not** try to manage a
+  thinking budget from the harness. Per-model, from the `thinking-troubleshooting` table:
+  **always on and not disableable** on Opus 5.5 / Fable 5.1 / Fable 5 (and the Mythos pair);
+  **on by default but disableable** on Opus 5 (only at effort `high` or below) and Sonnet 5;
+  **off by default** on Opus 4.8 / 4.7, which reject only `"enabled"`.
 
 ## /goal [FP] (`code.claude.com/docs/en/goal`)
 
@@ -790,8 +847,12 @@ Native enforcement worth knowing before writing manual rules or guard hooks:
   is the only guard. The auto-mode classifier is now **diagnosable and configurable**: the denial
   reason surfaces in the transcript, a toast, and `/permissions` → recent denials (v2.1.193); keys
   `autoMode.classifyAllShell` + `autoMode.{allow, soft_deny, hard_deny, environment}` with
-  `$defaults` inheritance; the classifier defaults to Sonnet 5 for external sessions,
-  pinned per session (v2.1.210). A **PreToolUse hook `ask` now floors the auto-mode decision
+  `$defaults` inheritance; the classifier model defaults to Sonnet 5, pinned per session
+  (v2.1.210). **Where it runs changed in v2.1.278**: for Claude API and Enterprise users, and on
+  Bedrock / Vertex / Foundry / gateways, auto mode now defaults to the **server-side** classifier,
+  which does not bill classifier overhead and warns on billed fallback
+  (`CLAUDE_CODE_AUTO_MODE_SERVER=0` opts out on the third-party providers); `/status` carries an
+  `Auto mode server` row saying which side this session uses. A **PreToolUse hook `ask` now floors the auto-mode decision
   at a prompt** for unsandboxed Bash (v2.1.211) — the classifier can no longer silently
   downgrade a hook `ask`, so a guard hook stays authoritative over auto mode (consistent with
   "hooks are deterministic enforcement", above). **Since v2.1.207 `autoMode` is no longer read

@@ -1,11 +1,30 @@
 # Changelog
 
-All notable changes to the **harness** plugin (named `claude-code-harness` until 2.0.0) are documented here.
+All notable changes to the **harness** plugin (named `claude-code-harness` until 2.0.0) and its
+marketplace are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
+
+## [3.0.0] — 2026-10-28
+
+The `devlog` companion plugin leaves the marketplace. The `harness` skill and its templates are
+unchanged; the major version marks a removal for anyone who installed `devlog@claude-code-harness`.
+
+### Removed
+- **The `devlog` plugin** — the `.claude/devlog/` journal, its skill, the index regeneration and the
+  SessionStart digest. A project already keeps the carriers it duplicated: decisions with their
+  reasons in ADRs, work in flight in the open spec, measurements next to the rig that produced them,
+  what changed in git. In the maintainer's multi-session benchmark, decisions stated once survived
+  later sessions without any journal (3 of 3 runs). Installed at user level, the model-invoked skill
+  also started journals in projects that do not keep one.
+  To migrate: `/plugin uninstall devlog@claude-code-harness`. An existing `.claude/devlog/` stays as
+  plain markdown — keep it as a read-only archive or delete it.
+
+### Not changed
+- `plugins/harness/SKILL.md` and `plugins/harness/templates/`.
 
 ## [2.0.0] — 2026-10-28
 

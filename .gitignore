@@ -5,7 +5,7 @@
 # --- Marketplace manifest (root) ---
 !/.claude-plugin/
 
-# --- Shipped plugins (harness kit + devlog companion) ---
+# --- Shipped plugin (harness kit) ---
 !/plugins/
 
 # --- Distribution / maintenance tooling ---

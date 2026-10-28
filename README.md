@@ -82,15 +82,14 @@ hidden-requirement tasks with a simulated product owner and a hidden test oracle
   8 of 19 checks without it and 18 of 19 with it.
 - **Review by risk**, against the spec, correctness only, at most three rounds (first-party guidance).
 
-## The devlog companion (optional)
+## Upgrading
 
-`/plugin install devlog@claude-code-harness` adds an episodic "what changed and why" record under
-`.claude/devlog/` with a SessionStart digest. The harness does not need it — glossary, ADRs, the
-tracker and git carry a project's continuity — so install it only if you want that journal.
+**From 2.x.** The `devlog` companion is no longer in this marketplace: decisions belong in ADRs,
+measurements next to the code that produced them, and what changed in git. Remove it with
+`/plugin uninstall devlog@claude-code-harness`; an existing `.claude/devlog/` stays as plain
+markdown — keep it as a read-only archive or delete it. The `harness` skill itself is unchanged.
 
-## Upgrading from 1.x
-
-1.x shipped a rulebook into `.claude/docs/{workflow,testing,docs-discipline}.md` and a long
+**From 1.x.** 1.x shipped a rulebook into `.claude/docs/{workflow,testing,docs-discipline}.md` and a long
 Working-style block. In 2.0 that is one short *How we work* block in `CLAUDE.md`. Say "audit my
 Claude Code harness" in a 1.x project: it reports the copied rulebook as superseded and proposes
 the replacement. The plugin is now named `harness` (Claude Code reserves `claude-` names):

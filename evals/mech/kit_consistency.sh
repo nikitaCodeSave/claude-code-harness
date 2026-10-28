@@ -20,13 +20,13 @@ PY
 )
 say "json parses (bad=$bad)" $([ "$bad" = 0 ]; echo $?)
 
-echo "M2 — links resolve, versions in lockstep, marketplace carries no version"
+echo "M2 — links resolve, marketplace lists exactly the plugins on disk and carries no version"
 miss=$(python3 - <<'PY'
 import re,pathlib
 ANCHORED=re.compile(r'`((?:templates|skills|hooks|bin|scripts)/[\w/\-.]+\.(?:md|py|sh|json))`')
 RELLINK=re.compile(r'\]\((\.\./)?([\w/\-.]+\.md)\)')
-for plugin in ('plugins/harness','plugins/devlog'):
-    root=pathlib.Path(plugin)
+for root in sorted(pathlib.Path('plugins').iterdir()):
+    if not root.is_dir(): continue
     for p in sorted(root.rglob('*.md')):
         if 'templates' in p.parts: continue   # templates hold placeholders for the target repo
         t=p.read_text()
@@ -38,8 +38,10 @@ PY
 )
 [ -n "$miss" ] && echo "$miss" | sed 's/^/    /'
 say "no broken internal links" $([ -z "$miss" ]; echo $?)
-v1=$(jq -r .version plugins/harness/.claude-plugin/plugin.json); v2=$(jq -r .version plugins/devlog/.claude-plugin/plugin.json)
-say "versions in lockstep ($v1 = $v2)" $([ "$v1" = "$v2" ]; echo $?)
+listed=$(jq -r '.plugins[].source' .claude-plugin/marketplace.json | sed 's|^\./||' | sort)
+ondisk=$(for d in plugins/*/; do [ -f "$d.claude-plugin/plugin.json" ] && echo "${d%/}"; done | sort)
+[ "$listed" != "$ondisk" ] && diff <(echo "$listed") <(echo "$ondisk") | sed 's/^/    /'
+say "marketplace sources = plugin dirs with a manifest" $([ "$listed" = "$ondisk" ]; echo $?)
 say "marketplace entries carry no version" $([ "$(jq '[.plugins[]|select(has("version"))]|length' .claude-plugin/marketplace.json)" = 0 ]; echo $?)
 
 echo "M3 — SKILL.md names every template, and every named template exists"

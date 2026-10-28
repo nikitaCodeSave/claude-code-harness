@@ -2,7 +2,7 @@
 
 @../AGENTS.md
 
-Это **отдельный проект-репозиторий плагина** `claude-code-harness` — source of truth.
+Это **отдельный проект-репозиторий плагина** `harness` (маркетплейс `claude-code-harness`) — source of truth.
 Здесь ведётся разработка kit'а; правь тут, не в копиях. Операционный слой (команды,
 границы, неочевидные конвенции) живёт в корневом `AGENTS.md` — один источник для агентов
 любого вендора, здесь подключён импортом. Ниже — только то, что специфично для мейнтейнера.
@@ -20,15 +20,15 @@
 
 - `.claude-plugin/marketplace.json` (корень) — **каталог marketplace**; манифест
   каждого плагина — `plugins/<name>/.claude-plugin/plugin.json`. Это то, что публикуется.
-- Плагинов **два**: `plugins/harness/` (kit) и `plugins/devlog/` (continuity-компаньон;
-  автоматизация devlog'а, на которую kit ссылается). Раскладка — как в официальном
-  multi-plugin walkthrough; `source` в marketplace.json — явные `./plugins/<name>`.
-- `.claude/` — dev-harness **этого репо** (этот файл + `devlog/`). НЕ входит в плагины.
+- Плагин **один**: `plugins/harness/` (kit). Раскладка — как в официальном
+  multi-plugin walkthrough; `source` в marketplace.json — явный `./plugins/harness`.
+- `.claude/` — dev-harness **этого репо** (этот файл, скилл `release`, замороженные `devlog/` и
+  `audits/`). НЕ входит в плагин.
 
 ## Release
 
-Ритуал целиком — в скилле `release` (развилка «нужен ли тег», bump обоих `plugin.json`
-в локстепе, `scripts/release.sh`, devlog, commit/tag/push, верификация синка с origin).
+Ритуал целиком — в скилле `release` (развилка «нужен ли тег», bump `plugin.json`,
+CHANGELOG, `scripts/release.sh`, commit/tag/push, верификация синка с origin).
 
 ## Инвариант
 

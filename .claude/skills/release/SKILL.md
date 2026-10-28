@@ -1,9 +1,9 @@
 ---
 name: release
-description: "Ритуал релиза claude-code-harness: развилка «нужен ли тег», bump обоих plugin.json в локстепе, CHANGELOG, devlog+reindex, staging через release.sh, commit/tag/push и верификация синка с origin. Вызывается оператором командой /release — модель его не инициирует."
+description: "Ритуал релиза плагина harness: развилка «нужен ли тег», bump plugin.json, CHANGELOG, staging через release.sh, commit/tag/push и верификация синка с origin. Вызывается оператором командой /release — модель его не инициирует."
 argument-hint: "[patch|minor|major | или коротко: что за изменение]"
 disable-model-invocation: true
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git status:*), Bash(git add:*), Bash(git commit:*), Bash(git tag:*), Bash(git push:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git rev-parse:*), Bash(git ls-remote:*), Bash(git branch:*), Bash(plugins/harness/scripts/release.sh:*), Bash(python3:*), Bash(jq:*), Bash(claude --version), Bash(tail:*), Bash(ls:*)
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git status:*), Bash(git add:*), Bash(git commit:*), Bash(git tag:*), Bash(git push:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git rev-parse:*), Bash(git ls-remote:*), Bash(git branch:*), Bash(plugins/harness/scripts/release.sh:*), Bash(jq:*), Bash(claude --version), Bash(tail:*), Bash(ls:*)
 ---
 
 # Релиз / обновление репозитория claude-code-harness
@@ -12,14 +12,14 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git status:*), Bash(git add:*
 `origin/main` через `/plugin update`. Отсюда два жёстких факта, которые формируют весь ритуал:
 
 1. **Версия в `plugin.json` — это update cache key.** Правка shipped-поверхности БЕЗ бампа
-   версии доставляет подписчикам **ничего** (см. `native-capabilities.md` §Plugins). Значит любое
+   версии доставляет подписчикам **ничего** (plugins-reference). Значит любое
    изменение под `plugins/**` обязано пройти через релиз с бампом.
 2. **Релиз существует только когда запушен** (коммит + тег + push в origin). Незапушенный
-   релиз — это анонс в devlog без поставки. Три прошлых релиза сломались именно тут
-   (desync версий, стампы на несуществующих версиях, «зарелизил в devlog, но не запушил») —
+   релиз — это анонс без поставки. Три прошлых релиза сломались именно тут
+   (desync версий, стампы на несуществующих версиях, анонс без push) —
    ради этого и написан `scripts/release.sh`.
 
-Не переизобретай механику: `plugins/harness/scripts/release.sh` уже бампит обе версии,
+Не переизобретай механику: `plugins/harness/scripts/release.sh` уже бампит версию,
 стережёт drift и стейджит поверхность. Этот скилл — рунбук поверх него: **решение + пред-шаги +
 финиш + верификация**, то, что скрипт намеренно не делает.
 
@@ -31,7 +31,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git status:*), Bash(git add:*
 
 - **Shipped-поверхность** = `plugins/**` · `README.md` · `CHANGELOG.md` · `.claude-plugin/marketplace.json`.
   → **Путь B (Релиз):** version bump + тег.
-- **Только dev-harness** = `.claude/**` (CLAUDE.md, этот скилл, devlog-правка) · `.gitignore` ·
+- **Только dev-harness** = `.claude/**` (CLAUDE.md, этот скилл) · `evals/**` · `.gitignore` ·
   `.gitattributes` · `LICENSE`.
   → **Путь A (Dev-harness commit):** обычный commit + push, **без бампа, без тега**.
 
@@ -50,19 +50,16 @@ CLAUDE.md). Тогда это **Путь B** — раз shipped-поверхно
 Для изменений, которые не видны консюмеру (правки под `.claude/`, `.gitignore` и т.п.):
 
 1. Внеси правку.
-2. Если изменение значимое (не опечатка) → **devlog-запись + reindex** (см. Путь B, шаг B3 —
-   процедура та же; devlog ведётся для любого значимого изменения репо, не только релизов).
-3. `git add <файлы>` (+ `git add .claude/devlog/`, если была запись) → `git status` для контроля.
-4. Коммит с футером `Co-Authored-By` (см. ниже) → `git push origin main`.
-5. **Без** `plugin.json`-бампа и **без** тега.
+2. `git add <файлы>` → `git status` для контроля.
+3. Коммит: что изменилось и зачем — в сообщении (журнала помимо него нет), футер
+   `Co-Authored-By` (см. ниже) → `git push origin main`.
+4. **Без** `plugin.json`-бампа и **без** тега.
 
 ---
 
 ## Путь B — релиз (shipped-поверхность изменена)
 
 ### B0. Выбери версию (semver)
-
-Обе версии (`harness` + `devlog`) двигаются **в локстепе** одним числом — `release.sh` делает это сам.
 
 - **patch (`x.y.Z`)** — прозаические фиксы, docs-гигиена, один D-cycle-фолд, micro external-intake,
   багфикс в скрипте. Дефолт для большинства правок кита.
@@ -77,38 +74,13 @@ CLAUDE.md). Тогда это **Путь B** — раз shipped-поверхно
 
 Сделай фактические правки под `plugins/**`.
 
-**Gotcha — `shipped-by` стамп.** Если правка задевает `plugins/harness/references/project-docs/*.md`,
-обнови его заголовок `<!-- shipped-by: claude-code-harness vX.Y.Z … -->` на **новую** версию —
-иначе `release.sh` откажет (он проверяет, что каждый изменённый project-doc несёт актуальный стамп).
-
-**Не трогай функциональные staleness-стампы без причины** (refresh-ledger в `harness-evolution.md`,
-version-line + `verified DATE` в `native-capabilities.md`) — но если релиз меняет CC-версию или
-grounding, синхронизируй их (это часть изменения, а не отдельная правка).
-
 ### B2. Запись в CHANGELOG.md
 
 Добавь секцию `## [X.Y.Z] — YYYY-MM-DD` **над** предыдущей (формат Keep a Changelog; дату бери из
 контекста сессии — не выдумывай). Рубрики: `Added` / `Changed` / `Fixed` / `Removed`. Одна-две строки
 контекста сверху — зачем релиз. Если уместно, явно отметь, что **не** трогалось (это ловит скоуп).
 
-### B3. devlog-запись + reindex
-
-devlog — источник правды хронологии репо; index.json/tldr.md **генерируются** из entries.
-
-1. **Вычисли slug настоящей функцией, не руками** (валидатор требует точного совпадения
-   `slug == slugify(title)`):
-   ```bash
-   python3 -c "import importlib.util as u; s=u.spec_from_file_location('r','plugins/devlog/skills/devlog/rebuild-index.py'); m=u.module_from_spec(s); s.loader.exec_module(m); print(m.slugify('<ТОЧНЫЙ TITLE>'))"
-   ```
-2. Создай `.claude/devlog/entries/NNNN-<slug>.md` (следующий `NNNN`; frontmatter
-   `id / date / title / tags / status: complete`; тело — `## Контекст / ## Изменения /
-   ## Затронутые файлы / ## Проверка / ## Related`). Пиши на языке оператора (RU).
-3. **Reindex как оракул** (падает на плохом slug/frontmatter — зелёный прогон = запись валидна):
-   ```bash
-   python3 plugins/devlog/skills/devlog/rebuild-index.py .claude/devlog
-   ```
-
-### B3.5. Refuter — только если релиз несёт измеренное утверждение
+### B3. Refuter — только если релиз несёт измеренное утверждение
 
 **Условие, а не обряд.** Нужен, если релиз меняет *факт о поведении рантайма* — матрицу,
 «X ломается при Y», версию/поведение CC, вывод из замера. Не нужен для правок формулировок,
@@ -136,22 +108,18 @@ devlog — источник правды хронологии репо; index.js
 ```bash
 plugins/harness/scripts/release.sh X.Y.Z
 ```
-Скрипт: бампит **оба** `plugin.json`, стережёт marketplace-drift, проверяет `shipped-by` стампы,
-стейджит shipped-поверхность, печатает команды commit/tag/push. **Он НЕ автокоммитит** — финиш за тобой.
+Скрипт: бампит `plugin.json`, стережёт marketplace-drift, стейджит shipped-поверхность, печатает команды commit/tag/push. **Он НЕ автокоммитит** — финиш за тобой.
 
-**Gotcha — devlog не стейджится.** `release.sh` стейджит только shippable-поверхность; `.claude/devlog/`
-(dev-harness) он намеренно не трогает. Добавь сам:
-```bash
-git add .claude/devlog/
-```
-Затем `git status --short` → убедись, что застейджено ВСЁ: оба plugin.json, CHANGELOG, правки
-поверхности, entry+index.json+tldr.md. Ничего не должно висеть в untracked/unstaged.
+**Gotcha — dev-harness не стейджится.** `release.sh` стейджит только shippable-поверхность;
+правки под `.claude/` и `evals/`, если они едут в том же коммите, добавь сам. Затем
+`git status --short` → убедись, что застейджено ВСЁ: plugin.json, CHANGELOG, правки поверхности.
+Ничего не должно висеть в untracked/unstaged.
 
 ### B5. Коммит + тег + push
 
 ```bash
 git commit -m "$(cat <<'EOF'
-claude-code-harness vX.Y.Z: <однострочное summary>
+harness vX.Y.Z: <однострочное summary>
 
 <1–2 абзаца: что и зачем; при желании — что осталось нетронутым>
 
@@ -175,14 +143,11 @@ git ls-remote --tags origin vX.Y.Z                        # тег на remote
 ## Класс отказов, который снимает этот ритуал (почему шаги существуют)
 
 - **Desync `plugin.json` ↔ marketplace** — стережёт `release.sh` (B4).
-- **`shipped-by` стамп на несуществующей версии** — проверяет `release.sh` (B1/B4).
-- **Релиз анонсирован в devlog, но не запушен** — ловит верификация (B6).
-- **devlog-запись забыта из коммита** — ловит явный `git add .claude/devlog/` (B4).
-- **Плохой devlog-slug → битый index** — снимает real-slugify + reindex-оракул (B3).
+- **Релиз записан в CHANGELOG, но не запушен** — ловит верификация (B6).
 - **Правка shipped-поверхности без бампа → консюмеры получают ничего** — снимает развилка (Шаг 0 + B0).
-- **Скоуп-крип** — CHANGELOG «что не трогалось» + devlog `## Затронутые файлы` держат правку хирургичной.
+- **Скоуп-крип** — CHANGELOG «что не трогалось» держит правку хирургичной.
 
 ## Анти-паттерн
 
-Не запускай `release.sh` для dev-harness-правки (Путь A): он забампит версии и попросит тег там, где
+Не запускай `release.sh` для dev-harness-правки (Путь A): он забампит версию и попросит тег там, где
 консюмеру нечего доставлять. Развилка (Шаг 0) — первый и главный шаг.

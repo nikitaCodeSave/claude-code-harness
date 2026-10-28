@@ -15,7 +15,7 @@
 
 ## Зачем это нужно
 
-В операторском окружении kit догфудится симлинком `~/.claude/skills/claude-code-harness`
+В операторском окружении kit догфудится симлинком `~/.claude/skills/harness`
 (см. CLAUDE.md → Топология). Это удобно для разработки и **бесполезно для проверки
 consumer-journey**: автор видит правки мгновенно, подписчик — только то, что приехало
 через marketplace. Стенд отсекает симлинк вместе со всей остальной глобалкой.
@@ -46,8 +46,7 @@ cp ~/.claude/.credentials.json "$CLAUDE_CONFIG_DIR/"   # иначе потреб
 mkdir -p ~/demo-project && cd ~/demo-project && git init -q
 
 claude plugin marketplace add ~/PROJECTS/claude-code-harness --scope project
-claude plugin install claude-code-harness --scope project
-claude plugin install devlog --scope project
+claude plugin install harness --scope project
 
 claude
 ```
@@ -62,13 +61,12 @@ claude
 ## Проверка, что стенд собран верно
 
 ```bash
-claude plugin list                       # оба плагина, Scope: project, Status: enabled
-claude plugin details claude-code-harness # инвентарь компонентов + прогноз токенов
+claude plugin list                       # harness, Scope: project, Status: enabled
+claude plugin details harness            # инвентарь компонентов + прогноз токенов
 ```
 
-В самой сессии — спросить полный список skills. Должны быть
-`claude-code-harness:claude-code-harness` и `devlog:devlog`, и **не** должно быть личных
-глобальных инструкций.
+В самой сессии — спросить полный список skills. Должен быть `harness:harness`, и **не**
+должно быть личных глобальных инструкций.
 
 Проверять изоляцию только негативной пробой нельзя: «глобалки не видно» ничего не значит,
 если проба в принципе не умеет её детектировать. Нужен контроль — тот же вопрос без
@@ -76,11 +74,10 @@ claude plugin details claude-code-harness # инвентарь компонен�
 
 ## Грабли
 
-- **Имя плагина — `claude-code-harness`, не `harness`.** `harness` — только имя папки в
-  `plugins/`; `claude plugin install harness` падает с «not found in any configured
-  marketplace». На это же напорется пользователь, читающий структуру репо.
-- **Skills приходят под namespace плагина** — `claude-code-harness:claude-code-harness`,
-  `devlog:devlog`. Поиск по голому имени даст ложный отрицательный результат.
+- **Плагин — `harness`, маркетплейс — `claude-code-harness`.** Полный id —
+  `harness@claude-code-harness`; имя репозитория в нём — имя маркетплейса, а не плагина.
+- **Skills приходят под namespace плагина** — `harness:harness`. Поиск по голому имени даст
+  ложный отрицательный результат.
 - **Правки в репо не видны стенду сразу.** Симлинк-догфуд здесь отключён: плагин приезжает
   версионированной **копией** в `$CLAUDE_CONFIG_DIR/plugins/cache/`. Источник при
   marketplace-по-пути — рабочая директория, коммит не нужен (проверено: незакоммиченная
@@ -89,22 +86,22 @@ claude plugin details claude-code-harness # инвентарь компонен�
   `plugins/harness/.claude-plugin/plugin.json` он отвечает «already at the latest version» и
   правку не забирает. Для итерации по правкам **без** bump — переустановка:
   ```bash
-  claude plugin uninstall claude-code-harness@claude-code-harness --scope project
-  claude plugin install claude-code-harness --scope project
+  claude plugin uninstall harness@claude-code-harness --scope project
+  claude plugin install harness --scope project
   ```
 - **`update`/`uninstall` требуют полный id и явный scope.** `claude plugin update
-  claude-code-harness` падает с «not found», хотя `plugin list` показывает плагин
-  установленным: нужен `claude-code-harness@claude-code-harness` **и** `--scope project`
+  harness` падает с «not found», хотя `plugin list` показывает плагин
+  установленным: нужен `harness@claude-code-harness` **и** `--scope project`
   (по умолчанию команда смотрит в user scope). У `install` таких требований нет — там
   достаточно голого имени.
 - **Изменения применяются после перезапуска сессии** — CLI об этом честно предупреждает
   («Restart to apply changes»).
 - **`plugin details` вне стенда врёт про инвентарь.** В операторском окружении симлинк-догфуд
-  выигрывает разрешение, и команда отвечает про него (`Source: claude-code-harness@skills-dir`),
+  выигрывает разрешение, и команда отвечает про него (`Source: harness@skills-dir`),
   причём головного скилла в списке может не быть — корневой `SKILL.md` там уже загружен
   отдельно, как личный скилл. Читается как «плагин не везёт головной скилл» и провоцирует охоту
   на несуществующий баг упаковки. Внутри стенда та же команда даёт
-  `Source: claude-code-harness@claude-code-harness` и головной скилл на месте.
+  `Source: harness@claude-code-harness` и головной скилл на месте.
   **Инвентарь смотреть только со стенда.**
 - **Стенд — untrusted workspace.** Свежий `CLAUDE_CONFIG_DIR` не знает демо-проект: интерактивный
   `claude` спросит про доверие (принять и идти дальше), а `--print` молча **проигнорирует

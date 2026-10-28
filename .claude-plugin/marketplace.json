@@ -6,7 +6,7 @@
     "email": "nickbalakirev@gmail.com"
   },
   "metadata": {
-    "description": "The harness kit — sets up and keeps lean the Claude Code harness of new and existing projects, large ones included — plus the devlog continuity companion. Opinion: under a capable model, the least harness that works wins."
+    "description": "The harness kit — sets up and keeps lean the Claude Code harness of new and existing projects, large ones included. Opinion: under a capable model, the least harness that works wins."
   },
   "plugins": [
     {
@@ -21,19 +21,6 @@
         "onboarding",
         "monorepo",
         "long-lived-projects"
-      ]
-    },
-    {
-      "name": "devlog",
-      "source": "./plugins/devlog",
-      "description": "Records significant changes to .claude/devlog/ — the episodic 'what changed and why' continuity layer, one markdown entry per feature/fix/decision, with index+digest regeneration and a SessionStart digest that auto-surfaces recent devlog + active progress. Optional: the harness does not need it — glossary, ADRs, the tracker and git carry a project's continuity.",
-      "category": "workflow",
-      "keywords": [
-        "claude-code",
-        "devlog",
-        "changelog",
-        "continuity",
-        "session-handoff"
       ]
     }
   ]

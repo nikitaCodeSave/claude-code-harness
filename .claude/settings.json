@@ -6,8 +6,7 @@
     ],
     "deny": [
       "Edit(.claude/audits/**)",
-      "Edit(.claude/devlog/index.json)",
-      "Edit(.claude/devlog/tldr.md)"
+      "Edit(.claude/devlog/**)"
     ]
   }
 }

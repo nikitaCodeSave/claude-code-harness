@@ -13,8 +13,8 @@
       "preview": "1-paragraph summary, derived from first paragraph of the first '## ' section, language-agnostic, plain text — asterisk emphasis and inline links unwrapped to their text, contents of a `single` or ``double`` code span kept verbatim (≤280 chars, ellipsis included)"
     }
   },
-  "generated_at": "2026-09-22T20:01:30Z",
-  "entry_count": 61,
+  "generated_at": "2026-10-28T13:22:07Z",
+  "entry_count": 62,
   "entries": [
     {
       "id": 1,
@@ -899,6 +899,22 @@
       "supersedes": null,
       "path": "entries/0061-modelnye-stroki-pereshli-na-opus-5-5-tsifry-okazalis-legkoy.md",
       "preview": "Оператор спросил статус актуальности знания о моделях Anthropic. Ответ оказался рассинхроном по четырём слоям сразу: встроенный prior модели (cutoff май 2026), бандл-скилл claude-api (кэш 2026-06-24), native-capabilities.md кита (CC 2.1.251 / 2026-08-29) и локальный changelog CC…"
+    },
+    {
+      "id": 62,
+      "date": "2026-10-28",
+      "title": "Kit v2: один скилл и три шаблона вместо свода правил",
+      "tags": [
+        "release",
+        "rewrite",
+        "templates",
+        "large-projects",
+        "pocock"
+      ],
+      "status": "complete",
+      "supersedes": null,
+      "path": "entries/0062-kit-v2-odin-skill-i-tri-shablona-vmesto-svoda-pravil.md",
+      "preview": "Лаборатория (~/PROJECTS/Harnesses-Claude, devlog #144–148) замерила поток разработки на стенде pipeline-ab: скрытые требования владельца, симулированный пользователь, скрытый оракул, 63 одно-сессионных и 9 многосессионных прогонов. Выводы разошлись с содержимым кита: plan mode и…"
     }
   ]
 }

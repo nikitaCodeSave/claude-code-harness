@@ -6,22 +6,35 @@
     "email": "nickbalakirev@gmail.com"
   },
   "metadata": {
-    "description": "The claude-code-harness kit — designs, bootstraps, audits, and extends a Claude Code harness (.claude/ + root CLAUDE.md), plus the devlog continuity companion. Opinion: under a capable model, less harness yields more productivity."
+    "description": "The harness kit — sets up and keeps lean the Claude Code harness of new and existing projects, large ones included — plus the devlog continuity companion. Opinion: under a capable model, the least harness that works wins."
   },
   "plugins": [
     {
-      "name": "claude-code-harness",
+      "name": "harness",
       "source": "./plugins/harness",
-      "description": "Designs, bootstraps, audits, and extends a Claude Code harness (.claude/ + root CLAUDE.md). Bootstrap / Audit / Extend / Explain modes. Ships a skill and its references — no agents, no commands, no hooks.",
+      "description": "Sets up and keeps lean the Claude Code harness of a project — root CLAUDE.md, settings.json, per-component CLAUDE.md and the project knowledge layer — for new and existing projects, including large multi-component, long-lived codebases. One skill and three templates; no agents, commands or hooks.",
       "category": "workflow",
-      "keywords": ["claude-code", "harness", "plugin-development", "bootstrap", "audit"]
+      "keywords": [
+        "claude-code",
+        "harness",
+        "bootstrap",
+        "onboarding",
+        "monorepo",
+        "long-lived-projects"
+      ]
     },
     {
       "name": "devlog",
       "source": "./plugins/devlog",
-      "description": "Records significant changes to .claude/devlog/ — the episodic 'what changed and why' continuity layer, one markdown entry per feature/fix/decision, with index+digest regeneration and a SessionStart digest that auto-surfaces recent devlog + active progress. The harness kit recommends this; installing it makes that guidance runnable.",
+      "description": "Records significant changes to .claude/devlog/ — the episodic 'what changed and why' continuity layer, one markdown entry per feature/fix/decision, with index+digest regeneration and a SessionStart digest that auto-surfaces recent devlog + active progress. Optional: the harness does not need it — glossary, ADRs, the tracker and git carry a project's continuity.",
       "category": "workflow",
-      "keywords": ["claude-code", "devlog", "changelog", "continuity", "session-handoff"]
+      "keywords": [
+        "claude-code",
+        "devlog",
+        "changelog",
+        "continuity",
+        "session-handoff"
+      ]
     }
   ]
 }

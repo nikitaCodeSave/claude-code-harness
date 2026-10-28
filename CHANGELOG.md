@@ -1,11 +1,55 @@
 # Changelog
 
-All notable changes to the **claude-code-harness** plugin are documented here.
+All notable changes to the **harness** plugin (named `claude-code-harness` until 2.0.0) are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
+
+## [2.0.0] — 2026-10-28
+
+**Rewrite.** The kit shrinks from a skill plus ~3,000 lines of references and a rulebook copied into
+every project to one skill and three templates, and its content changes to what the maintainer's lab
+measured (`pipeline-ab`: hidden-requirement tasks, a simulated product owner, a hidden test oracle,
+N=3 per cell, 63 single-session and 9 multi-session runs).
+
+### Changed
+- **Plugin renamed `claude-code-harness` → `harness`.** Claude Code now reserves plugin names that
+  start with `claude-`; `claude plugin validate` rejected the old name. The marketplace keeps its name.
+- **One entry phrase for every state** — new project, existing project without a harness, existing
+  harness — with the path chosen from what the repository shows.
+- **Large and long-lived projects are supported** (layout from Claude Code's loading rules, not benchmarked): workspace detection, a `CLAUDE.md` per
+  component only where it has its own commands, invariants or contracts, knowledge per bounded
+  context (`GLOSSARY-MAP.md`), contracts between components treated as the riskiest seam.
+- **The work model is one short *How we work* block in the project `CLAUDE.md`**: interview →
+  spec (fixed interface verbatim) → build in the same session; tickets with tests from their
+  criteria for work that spans sessions; one implementer at a time; no test-first ritual;
+  review by risk; knowledge rules (glossary, ADRs including decisions stated "for later").
+- **Process tools come from `mattpocock-skills`** (tracker, tickets, `/wayfinder`, `/retro`),
+  installed as a plugin; `/tdd` is denied in user settings, `/implement-spec` is not the default.
+
+### Removed
+- `references/` (bootstrap and audit checklists, harness discipline, evidence base, operator
+  playbook, cross-vendor peer skill) and `references/project-docs/` with the `shipped-by` re-sync
+  machinery. `native-capabilities.md` and `harness-evolution.md` moved to the maintainer's lab,
+  where harness design is researched; projects never needed them.
+- The plan-mode duty, the test-first default and the auto-compact-rescue spawn trigger — each
+  contradicted by a measurement or by first-party guidance.
+
+### Review fixes before release
+- An independent refute-review found 15 issues; 14 fixed (one disproved by a test: the `tdd` deny
+  rule does block the bare skill name). Notable: `AGENTS.md` is read by Claude Code when no
+  `CLAUDE.md` exists, so a root `CLAUDE.md` switches nested ones off — each now gets a bridging
+  `CLAUDE.md`; a session started inside a package does not load root settings; third-party
+  marketplaces don't auto-update by default; several measurement claims were stated more strongly
+  than the lab's results support and were corrected.
+
+### Evals
+- Mechanical suite rewritten for v2 (json, links, lockstep, template coverage, budgets, no
+  version pins, no dead permission path forms); each check verified to fail on a planted defect.
+- Sessions: A (new large project), B (existing multi-component repository, new fixture
+  `monorepo`), C (existing harness with planted defects, kept from 1.x).
 
 ## [1.28.0] — 2026-09-10
 

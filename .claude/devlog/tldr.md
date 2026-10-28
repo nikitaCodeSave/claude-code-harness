@@ -8,6 +8,16 @@ Derived view — генерируется `rebuild-index.py` из `entries/*.md`
 
 ---
 
+## #62 · 2026-10-28 · Kit v2: один скилл и три шаблона вместо свода правил
+
+**Tags:** release, rewrite, templates, large-projects, pocock
+
+Лаборатория (~/PROJECTS/Harnesses-Claude, devlog #144–148) замерила поток разработки на стенде pipeline-ab: скрытые требования владельца, симулированный пользователь, скрытый оракул, 63 одно-сессионных и 9 многосессионных прогонов. Выводы разошлись с содержимым кита: plan mode и…
+
+[→ entries/0062-kit-v2-odin-skill-i-tri-shablona-vmesto-svoda-pravil.md](entries/0062-kit-v2-odin-skill-i-tri-shablona-vmesto-svoda-pravil.md)
+
+---
+
 ## #61 · 2026-09-22 · Модельные строки перешли на Opus 5.5, цифры оказались легкой частью
 
 **Tags:** native-capabilities, refresh-ledger, models, effort, refute-pass

@@ -1,154 +1,101 @@
 # claude-code-harness
 
-Two Claude Code plugins that set up, audit, and evolve your project's harness — the root
-`CLAUDE.md` and `.claude/` directory that turn a fresh repository into a workspace Claude
-works well in — and keep a memory of it across sessions.
+A Claude Code plugin that sets up — and keeps lean — the harness of your project: the root
+`CLAUDE.md`, `.claude/settings.json`, a `CLAUDE.md` per component where one is needed, and the
+project's knowledge layer. Built for new projects and existing ones, including large
+multi-component codebases worked on for months.
 
-You drive both by talking. There is no wizard and nothing to configure by hand.
+One opinion drives it: **under a capable model, the least harness that works wins.** Every line of
+the *How we work* block rests on a measurement or a first-party source; the layout for large
+repositories follows Claude Code's own loading rules. Everything else was cut.
 
 ## Install
 
 ```
 /plugin marketplace add nikitaCodeSave/claude-code-harness
-/plugin install claude-code-harness@claude-code-harness
-/plugin install devlog@claude-code-harness      # optional — see below
+/plugin install harness@claude-code-harness
+claude plugin install mattpocock-skills --marketplace mattpocock/skills
 ```
 
-The kit is the first line; `devlog` is a separate, optional plugin. The kit does not mandate a
-journal and does not create one: the unit of work it sets up is the spec you write with it, and
-where a project keeps no journal the bootstrap records itself in the commit. Add `devlog` when you
-want an episodic record on top of that — [what it buys you](#the-devlog-companion-your-projects-memory),
-short version: a session that starts cold repeats mistakes a session that starts informed doesn't.
+The second plugin, [mattpocock-skills](https://github.com/mattpocock/skills), brings the process
+tools the harness points at: the tracker, tickets, `/wayfinder`, `/retro`, domain modeling. Run
+`/reload-plugins` after installing. Two settings worth making once, in your **user** settings:
 
-Run `/reload-plugins` (or restart the session) right after installing, before first use.
+- `"deny": ["Skill(mattpocock-skills:tdd)"]` — the harness works without a test-first ritual
+  (why below); `/implement` then builds without it.
+- Updates: third-party marketplaces don't auto-update by default — enable it in `/plugin` →
+  Marketplaces, or run `claude plugin update <plugin>@<marketplace>` when you choose.
 
-Then open any project and say:
+## Use
+
+Open the project and say:
 
 > **"set up Claude Code harness in this project"**
 
-That's the whole setup. Installing writes nothing to your `~/.claude` profile, and everything
-the kit creates lands in your repo as plain files — read the diff, `git checkout` to undo.
+The same phrase works for every state — the skill reads the repository and picks the path:
 
-<details>
-<summary>Prefer to try it without touching your own setup at all?</summary>
-
-Run the kit against a disposable config **and** a disposable project:
-
-```bash
-export CLAUDE_CONFIG_DIR=~/claude-fresh                # a whole separate ~/.claude
-mkdir -p "$CLAUDE_CONFIG_DIR"
-cp ~/.claude/.credentials.json "$CLAUDE_CONFIG_DIR/"   # Linux/Windows: skips a re-login.
-                                                       # macOS keeps credentials in the Keychain — omit this
-mkdir -p ~/demo-project && cd ~/demo-project && git init -q
-
-claude plugin marketplace add nikitaCodeSave/claude-code-harness --scope project
-claude plugin install claude-code-harness --scope project
-
-claude    # then say: "set up Claude Code harness in this project"
-```
-
-You need both halves: `CLAUDE_CONFIG_DIR` relocates the *entire* `~/.claude` (global
-`CLAUDE.md`, settings, skills, memory), so the session sees the kit and none of your own setup —
-no project-level file can switch off a global `~/.claude/CLAUDE.md`. `--scope project` keeps the
-install in the demo project's `.claude/settings.json` rather than your user settings.
-
-Undo is `rm -rf ~/claude-fresh ~/demo-project`; your real `~/.claude` is never written to. Two
-things that bite: the plugin is named `claude-code-harness`, not `harness`, and a fresh config
-does not trust the demo project until you accept the dialog once.
-
-</details>
-
-## What you can say
-
-| You want | Say |
+| The project | What happens |
 |---|---|
-| A project gets its harness (new or existing repo) | **"set up Claude Code harness in this project"** |
-| The minimal variant (CLAUDE.md + settings only) | **"set up a minimal harness"** |
-| A gap report on an existing `.claude/` | **"audit my Claude Code harness"** |
-| To record what you just changed and why, for the next session | **"запиши в devlog"** / **`/devlog:devlog`** |
-| To know whether Claude Code already does X natively, before you build it | **"can Claude Code already do X?"** |
-| Independent verification of a finished deliverable | a **fresh session** told to refute and to execute the stack — or `/code-review ultra` when the change itself is the risk |
-| To call it explicitly — in your own words, in your own language | **`/claude-code-harness:claude-code-harness настрой мне харнесс, друг`** |
+| New, nothing on disk | Asks what it can't read (purpose, stack, planned components, what must never happen, sensitive paths) and writes the harness with honest `TBD`s instead of invented commands |
+| Existing, no harness | Maps the components, runs each test command once, writes the harness, and seeds the glossary and ADRs only from what the code can't tell — decisions with their reasons, terms used inconsistently |
+| Existing harness | Reports what to cut and what is missing, worst first; edits only after you approve |
 
-The phrases are examples, not incantations. The skill reads intent, so anything that means the
-same thing works — and if you'd rather not rely on that, the last row calls it by name.
+Then, once per repository: `/setup-matt-pocock-skills`. On a large effort whose path isn't clear
+yet, the first session is `/wayfinder`. In a monorepo, start Claude Code at the repository root —
+the shared settings and their deny list load from the directory a session starts in.
 
-## What the first setup touches
+Every few months, or after a model upgrade: **"audit my Claude Code harness"** — the cut matters
+more than the additions.
 
-- **In your repo**: root `CLAUDE.md`, `.claude/settings.json`, workflow docs under `.claude/docs/`,
-  `docs/ARCHITECTURE.md` as a decision record, and — where your project actually has any —
-  `.claude/rules/` for the prohibitions your code cannot state. No module map and no `CODE-MAP.md`: your tree and your tests already say that, and
-  prose that restates them is a file someone has to keep true forever. Custom subagents, hooks,
-  skills, and commands are deliberately **not** created — see the opinion below.
-- **If you already have an `AGENTS.md`** (the cross-vendor standard Codex, Cursor and Copilot
-  read), it stays the source of truth: the kit bridges to it with an `@AGENTS.md` import or a
-  symlink instead of writing a second file that says the same thing differently. Claude Code does
-  not read `AGENTS.md` on its own — a repo that has only that file starts a Claude session with no
-  project instructions at all, which we measured rather than assumed.
-- **Outside your repo**: nothing. The kit writes to your project and nowhere else — no profile
-  edits, no global memory merges, no hooks installed behind your back.
+## What lands
 
-## The devlog companion: your project's memory
+- **`CLAUDE.md`** (≤ 120 lines): commands, three-tier boundaries, *How we work*, *Project knowledge*.
+- **`.claude/settings.json`**: a deny list for the boundaries a permission rule can express, with
+  only path forms Claude Code actually matches.
+- **`<component>/CLAUDE.md`** in a multi-component repository, only where a component has its own
+  commands, invariants or contracts — Claude Code loads it when work touches that directory.
+- **Knowledge**: `GLOSSARY.md` (or a `GLOSSARY-MAP.md` per bounded context) and `docs/adr/`,
+  created on the first real entry.
 
-A Claude Code session forgets. Context gets compacted, the session ends, tomorrow's session opens
-cold — and re-litigates a decision you already made, or walks into a trap you already mapped. The
-harness the kit builds is *atemporal*: it says what's true about your project, not what happened
-in it. The open spec covers the work in flight. Neither covers what already landed and why — and
-that is the gap where sessions bleed time.
+No custom agents, hooks, commands or skills, and nothing copied into `.claude/docs/`.
 
-devlog is that second job, made runnable:
+## How we work — and why
 
-- **`/devlog:devlog`** — after a feature, fix, refactor, or a decision worth keeping, this writes
-  one entry to `.claude/devlog/entries/NNNN-slug.md`: what changed, why, what was verified. It's
-  git-tracked and reviewable, so it's a record your teammates read too, not a private cache. Ask
-  for it by name or just say "запиши в devlog" — and Claude offers it on its own once a
-  significant change lands.
-- **A digest at session start** — every new session opens with the recent entries and any
-  in-flight work already in view, so it starts informed instead of asking you to re-explain.
-  It's read-only, costs a few lines, and stays silent in projects that keep no devlog.
-- **`devlog-reindex`** — regenerates `index.json` + `tldr.md` from the entries, so the digest and
-  search stay correct without hand-maintained bookkeeping.
+The *How we work* block every project gets, with what each line rests on (measured on
+hidden-requirement tasks with a simulated product owner and a hidden test oracle, N=3 per cell):
 
-The payoff isn't the file — it's that the *next* session starts where the last one left off. That
-compounds: entry #18 in this repo's own devlog exists because entry #12 and #13 taught the same
-lesson twice, and the third time it got caught before shipping.
+- **Interview before code**, then write the spec — including any interface you fixed, verbatim.
+  Without the interview, full acceptance in 3 of 9 runs; with it, 7 to 9 of 9.
+- **Build in the session that wrote the spec.** Same session: 8 of 9 at the lowest cost of the
+  flows that held that rate; a fresh session building from the file alone: 7 of 9; with
+  acceptance tests first written from the spec in a separate session: 9 of 9.
+- **Work that won't fit one session**: tickets, each built in a fresh session from tests written
+  beforehand from its criteria — an extension of the result above, not measured on its own. One
+  implementer at a time — a ticket pipeline with parallel implementers reached the same acceptance
+  at 3.1–4.4× the cost.
+- **No test-first ritual**: without it, the agent's own tests stayed within 0.05 mutation score of a
+  `/tdd` pipeline; an external study found no gain at 3–8.5× the tokens. A test must be able to
+  fail, and "done" comes with the command and its output.
+- **Knowledge in files**: terms in the glossary, decisions — including ones stated "for later" —
+  in ADRs, read before touching an area. A frontier model kept earlier decisions across sessions
+  even without the rule (3 of 3 runs); the rule is insurance — in one smoke run a weaker model kept
+  8 of 19 checks without it and 18 of 19 with it.
+- **Review by risk**, against the spec, correctness only, at most three rounds (first-party guidance).
 
-Requirements: **Python 3** on `PATH` (standard library only — no pip installs). Runs on Linux,
-macOS, and Windows/Git Bash. If disciplined commit messages already do this job for you, skip the
-plugin — the kit works without it and won't nag you for entries; the bootstrap simply records
-itself in the commit.
+## The devlog companion (optional)
 
-## The opinion
+`/plugin install devlog@claude-code-harness` adds an episodic "what changed and why" record under
+`.claude/devlog/` with a SessionStart digest. The harness does not need it — glossary, ADRs, the
+tracker and git carry a project's continuity — so install it only if you want that journal.
 
-> **Under a capable model, less harness yields more productivity.** Find the simplest setup that
-> works; add a component only when a simpler approach demonstrably underperforms. If a component
-> encodes "the model can't do X" and the model already does X natively, it should not exist.
+## Upgrading from 1.x
 
-So the kit is as happy removing things as adding them. Point it at an existing `.claude/` and it
-reports what's dead weight: a custom orchestrator subagent, a multi-stage pipeline, a 500-line
-`CLAUDE.md`, mid-thought blocking hooks, stale model pins.
-
-Claude Code 2.x / Opus-class-specific. It does **not** teach harness design for other agent
-frameworks — how to build agents in OpenAI/Codex/LangChain-style stacks is out of scope. An
-external CLI wired *into this harness* as an MCP server is a different thing, and is in scope.
-
-## Learn more
-
-- [Operator playbook](plugins/harness/references/operator-playbook.md) — the human-facing
-  lifecycle: what to say at each stage, what to prepare between sessions, and how to stay current
-  (`/plugin update` → "audit my Claude Code harness" → approve the offered re-syncs).
-- [What ships](plugins/harness/) — the skill entry point (`SKILL.md`) and on-demand references
-  (bootstrap/audit checklists, native capabilities, evidence base, harness discipline). No agents,
-  no commands, no hooks: everything the kit used to ship as machinery is now a native surface it
-  routes to.
-- [The devlog plugin](plugins/devlog/) — the `/devlog:devlog` skill, the `devlog-reindex`
-  regenerator, and the session-start digest hook.
-
-## Provenance
-
-Distilled from a working harness laboratory and proven on a real empty-repo → working-product
-build. Not a template to copy wholesale — transmittable knowledge about harness *design*.
+1.x shipped a rulebook into `.claude/docs/{workflow,testing,docs-discipline}.md` and a long
+Working-style block. In 2.0 that is one short *How we work* block in `CLAUDE.md`. Say "audit my
+Claude Code harness" in a 1.x project: it reports the copied rulebook as superseded and proposes
+the replacement. The plugin is now named `harness` (Claude Code reserves `claude-` names):
+`/plugin uninstall claude-code-harness@claude-code-harness`, then install as above.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT

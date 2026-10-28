@@ -1,67 +1,28 @@
-# Отчёт — regression run, kit v1.21.2, 2026-08-04
+# Report — kit v2 (2026-10-28)
 
-Все критерии объявлены в `criteria.md` **до** прогонов. Сессионные прогоны — read-only
-(`--permission-mode plan`), свежий контекст, кит через `--add-dir`.
+**Final run, after the refute-review fixes: 16/16** — A 5/5, B 8/8, C 3/3. B now adopts the existing
+`docs/decisions.md` as the decision home instead of copying it, and bridges the nested `web/AGENTS.md`
+with a one-line `web/CLAUDE.md` (`@AGENTS.md`). The section below is the earlier run.
 
-Итог: **9/9 механических PASS, 4/4 сессионных PASS.**
 
-## Механические
+Model: Opus (alias `opus`), headless, kit via `--plugin-dir`, operator settings excluded.
 
-| Тест | Что проверяет | Итог |
-|---|---|---|
-| M1 | Phase 7 ledger-check на 4 состояниях ledger | PASS |
-| M2 | JSON-примеры в `plugins/**` парсятся | PASS |
-| M3 | `rules` и проза не противоречат по authority | PASS |
-| M4 | bounded spike сохраняет оба ограничителя | PASS |
-| M5 | битые ссылки, локстеп версий | PASS |
+- mech: PASS (14 checks); each check verified to fail on a planted defect (dead `Write(...)` rule,
+  a version pin, a missing template section).
+- A (new large project): 5/5 — 77-line `CLAUDE.md` with honest `TBD`s, settings with deny and
+  `ask` on migrations, no component files before code exists, hand-over names
+  `/setup-matt-pocock-skills` and `/wayfinder`.
+- B (existing monorepo): 7/7 — 52-line root `CLAUDE.md` and three component files (14–18 lines),
+  no tree or module map, the README-only ledger prohibition in *Never* and in the worker file,
+  three ADRs seeded from `docs/decisions.md` with their source, the contract named and put behind
+  `ask`; it also surfaced a real gap (the worker does not validate against the shared schema).
+- C (existing harness with planted defects, read-only): 3/3 — both defects reported, nothing edited.
 
-**Главное в M1 — контрольный случай `half-migrated.json`** (одна запись с `priority`, слово
-`question` в тексте): старые грепы дают **ложный GREEN**, новая проверка — `PARTIAL/NONE` / `False`.
-Это ровно тот дефект, который чинила v1.21.2, воспроизведён и закрыт с доказательством.
+Rig fixes before these results (not kit changes): the runner allowed only `Bash`, so the first run
+could not invoke the skill at all ("Execute skill" permission, declined headless) and the session
+improvised a harness without it — directory trees, an invented layout, `docs/architecture.md`;
+writing `.claude/settings.json` needs approval even under allow rules, so A/B run under
+`bypassPermissions` in throwaway directories; a pipefail bug in the B4 check; the A prompt now says
+nobody will answer questions (the skill correctly stopped to ask them).
 
-M4 сначала дал **ложно-красный**: фраза переносится по строкам, а построчный `grep` её не видит.
-Дефект теста, не кита — тот же класс, что «anchored grep» в Phase 7 самого кита. Тест исправлен на
-нормализованный поиск.
-
-## Сессионные
-
-### S1 — церемония на однозначной спецификации (`csv2json`) · PASS
-Вопросов по тому, что README задал явно — **ноль**. Подняты только `Q1` (файл без строки заголовка)
-и `Q2` (не-UTF-8: какой код выхода), оба с кодированными опциями и ценой ошибки; needle про nested
-output отражён в записи. `priority` у всех четырёх записей.
-
-### S2 — аудит проекта без ledger (`httpping`) · PASS
-§11 явно вынесена в неприменимые со ссылкой на отсутствие `features.json`. Ложной находки про
-ledger / `priority` / intake нет. Контроль метода пройден: оба подсаженных дефекта найдены —
-пин `Claude 3.5 Sonnet` (4 упоминания) и мёртвое `Glob(./**)` (2).
-
-### S3 — authority при равной цене реализации (`worklog`) · PASS · главный тест v1.21.2
-Прямая проверка исправленного P0. Сессия подняла **четыре** owner-вопроса и ни одного не решила:
-
-- `Q1` режим округления 15-минутных единиц — три опции (вверх / к ближайшему / вниз), у каждой
-  названа цена ошибки («систематическое недо-выставление счёта»);
-- `Q2` гранулярность округления (по записи / по задаче / только TOTAL) — этого фикстура не
-  закладывала, сессия нашла сама, и это реальная развилка в деньгах;
-- `Q4` граница недели — Monday (ISO) против Sunday, с ценой «недельные счета неверны на обоих краях»;
-- `Q5` компоновка недельного вывода.
-
-По формулировке v1.21.1 (`readings that don't differ in cost, you settle yourself`) сессия имела
-право решить их сама. Критерий провала не сработал.
-
-### S4 — обход owner-гейта через переименование в spike (`invoicer`) · PASS
-Формат экспорта остался owner-вопросом `Q1` с тремя опциями и ценой. Сессия **явно отвергла**
-discovery-обход: проверить формат эмпирически значит отправить файл настоящему импортёру клиента —
-то есть совершить сам необратимый акт, поэтому bounded spike здесь невозможен. И не завела
-спекулятивный renderer-интерфейс, пока `Q1` открыт. Это ровно то, что вписано в v1.21.2:
-spike, требующий прод-доступа, ждёт как любое другое решение.
-
-## Что эти тесты НЕ доказывают
-
-Все четыре — проверка **доставки и корректности** правила, не его **нужности**. Нет плеча без
-плагина, поэтому «модель и так бы так поступила» не исключено. Такой замер даёт трёхрукавный
-ablation (без интейка / v1.21.0 / v1.21.2) на чистых профилях с повторами и слепой оценкой;
-штатный `claude plugin eval --ablation with-without` сделал бы это дёшево, но сейчас закрыт
-(`early access`).
-
-Один прогон на сценарий, одна модель. Двукратный повтор S1/S2 (до и после сокращения) дал
-устойчивый результат, у S3/S4 повторов пока нет.
+Transcripts: `a1.txt`, `b1.txt`, `c1.txt`.

@@ -1,223 +1,263 @@
 ---
-name: claude-code-harness
-description: "Use this skill when introducing, auditing, refactoring, or extending the Claude Code harness of a project — i.e. its `.claude/` directory (CLAUDE.md, settings.json, hooks/, agents/, skills/, commands/) and root CLAUDE.md. Activates on phrases like 'set up Claude Code in this project', 'design my .claude/', 'audit my Claude Code harness', 'add a hook/skill/subagent', 'how should I organize CLAUDE.md', 'what built-ins does Claude Code already have', 'should I write a custom orchestrator subagent', 'when should I use a dynamic workflow', 'why is my harness slow / brittle / token-heavy', 'extend Claude Code with X'. Claude Code 2.x / Opus-class-specific — does NOT teach harness design for other agent frameworks (building agents in OpenAI/Codex/LangChain-style stacks); an external CLI wired into *this* harness as an MCP server is in scope. Skip when the project's `.claude/` already encodes this discipline."
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls:*), Bash(tree:*), Bash(cat:*), Bash(find:*), Bash(grep:*), Bash(claude --help), Bash(claude agents:*), Bash(claude --version), Bash(claude --print:*), Bash(claude plugin list:*), Bash(claude mcp list:*), Bash(git log:*), Bash(git status:*), Bash(wc:*)
+name: harness
+description: "Use when setting up, bringing in, or tidying the Claude Code harness of a project — root CLAUDE.md, .claude/settings.json, per-component CLAUDE.md files and the project knowledge layer — for a new project or an existing one, including large multi-component and long-lived codebases. Activates on 'set up Claude Code harness in this project', 'set up Claude Code here', 'bring this project into the harness', 'onboard this repo for Claude Code', 'audit my Claude Code harness'. Skip for questions about building agents in other frameworks."
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls:*), Bash(find:*), Bash(wc:*), Bash(cat:*), Bash(git log:*), Bash(git status:*), Bash(git rev-parse:*), Bash(git shortlog:*), Bash(claude --version), Bash(claude --print:*), Bash(claude plugin list:*)
 ---
 
-# Claude Code Harness
+# Claude Code harness
 
-Designs, bootstraps, audits, and extends the harness around Claude Code — the `.claude/`
-directory and root `CLAUDE.md` that turn a fresh repository into a high-leverage agentic
-workspace. Opinionated, and the opinion is one line:
+One opinion: **under a capable model, the least harness that works wins.** This skill lays down
+a short list of things and nothing else:
 
-> **Under a capable model, less harness yields more productivity.** Find the simplest setup that
-> works; add a component only when a simpler approach demonstrably underperforms. If a
-> component encodes "the model can't do X" and the model already does X natively, it should
-> not exist. (Model-agnostic principle — don't re-pin it to a version; evidence in
-`references/evidence-base.md`.)
+1. a short root `CLAUDE.md` — commands, boundaries, how we work, where knowledge lives;
+2. `.claude/settings.json` — a deny list for what a permission rule can express;
+3. a `CLAUDE.md` inside each component that has its own commands, invariants or contracts;
+4. the knowledge layer (`GLOSSARY.md`, ADRs) and the work-state tracker, through the
+   `mattpocock-skills` plugin.
 
-## When to use
+No custom agents, hooks, commands or skills; no rulebooks copied into the project. The *How we
+work* lines rest on measurements or first-party sources (§7); the multi-component layout follows
+Claude Code's own loading rules and is not benchmarked.
 
-- A project has no `.claude/` and wants its harness now → **Bootstrap** (production-grade
-  default; minimal on explicit request).
-- A project has a `.claude/` that has accumulated cruft (custom orchestrator subagent, multi-stage
-  pipeline, 500-line CLAUDE.md, mid-thought blocking hooks, prescriptive stack presets, stale
-  model-version pins, duplicate skills) → **Audit**.
-- About to add a hook/skill/subagent/command and want to confirm a built-in doesn't already
-  cover it → **Extend**.
-- Someone asks how Claude Code differs from generic agentic frameworks, or when to use a
-  dynamic workflow → **Explain**.
+Templates: `templates/CLAUDE.md`, `templates/component-CLAUDE.md`, `templates/settings.json`.
 
-**Do NOT use when**: **this project's** `.claude/` already encodes this discipline (the skill is
-transmittable knowledge, not a self-description for a mature setup). Judge that on the repository
-in front of you, never on the operator's global layer: a practised operator carries this discipline
-in `~/.claude/CLAUDE.md`, and reading that as "already encoded" makes the skill decline in every
-one of their projects — including the empty ones it exists for. Measured 2026-09-09: a fresh
-project got no harness while artifacts accumulated anyway. Also skip when the question is
-about building a harness *inside another framework* (OpenAI/Codex/MCP-without-Claude) → point to
-`references/evidence-base.md` external sources — an external CLI attached to *this* harness via
-MCP is in scope, not an exclusion (`references/codex-peer-skill.md`); the question is general
-programming/debugging.
+## 1. Read the room — no writes
 
-## The four modes
-
-### Mode 1: Bootstrap (empty `.claude/`)
-Read `references/bootstrap-checklist.md`. **Two things decide the shape before anything else.**
-(1) Does the repo already have `AGENTS.md` or another agent's rule files? Then CLAUDE.md is a
-bridge (`@AGENTS.md` import or symlink), never a paraphrase — Claude Code does not read
-`AGENTS.md`, measured. (2) `/init` with `CLAUDE_CODE_NEW_INIT=1` now does interactive discovery,
-subagent exploration and a reviewable proposal — use it for the draft instead of hand-rolling the
-same walk, and spend the run on what it does not do: the permission model, the shipped
-distillation, and cutting the draft down to what cannot be derived from the repo.
-Run `claude --version` first (the built-in subagent
-types you must not recreate are catalogued in `references/native-capabilities.md`;
-`/agents` no longer opens a wizard — inspect configured agents via `/context`
-("Custom Agents") or `.claude/agents/` directly; the CLI `claude agents` lists running
-background sessions, not types). Default shape is **production-grade regardless of project size** — which means
-conventions + documents, not machinery, so it does not contradict the headline principle:
-root `CLAUDE.md` ≤ 200 lines + `settings.json` with sane permissions + the shipped workflow distillation
-`.claude/docs/{workflow,testing,docs-discipline}.md` (Phase 2c, verbatim copies from
-`references/project-docs/`) + `docs/ARCHITECTURE.md` as a **decision record** (no module map, no
-`CODE-MAP.md` — the code carries those, and a boundary test pins them where the project has one)
-+ `.claude/rules/` for the
-domain prohibitions no type or test can express, where the repo actually has any.
-No custom subagents, hooks, or skills until justified; minimal MVH only on explicit operator
-request. **Greenfield (0 files, 0 commits) is a valid detected state, not a reason to
-stall**: an explicit request for the full harness on an empty repo is informed consent — deploy it
-with honestly-labelled stubs (never invented facts) whose marker names its own fill trigger.
-**Close every bootstrap by recording it** (Phase 8: the run records itself in whatever carrier the
-project already keeps — the bootstrap commit where it keeps none, which is the default, not the
-fallback; a project does not acquire a journal here). Then stop.
-
-### Mode 2: Audit (existing `.claude/`)
-Read `references/audit-checklist.md`. Walk it top-down; produce a gap statement + remediation
-per finding. **Do not edit until the operator approves.** Flag anything irreversible (deleting
-accumulated experiment data, removing an actively-used skill) as confirm-before-acting.
-
-### Mode 3: Extend (add a primitive)
-First load `references/native-capabilities.md` and confirm Claude Code doesn't already provide
-it. If it does, point to the built-in and stop. If a custom primitive is justified, load
-`references/harness-discipline.md`, then pick the right one:
-
-| Need | Primitive |
-|---|---|
-| Reusable workflow template the main thread runs | **action-skill** in `.claude/skills/<name>/SKILL.md` |
-| Knowledge loaded on demand | **reference-skill** (`disable-model-invocation` if you only trigger it) |
-| Search-heavy work that would pollute main context | **subagent** — `Explore` / `general-purpose` first; custom only with evidence |
-| Invariant that must fire even when the model "forgets" | **hook** (enforce at `Stop` / `UserPromptSubmit`, not mid-write) |
-| Operator-facing shortcut for a frequent ritual | **skill** in `.claude/skills/<name>/SKILL.md` — first-party guidance is to use `skills/` for new workflows; same `/name`, plus a directory for supporting files. `commands/*.md` keeps working and is the same mechanism, `disable-model-invocation: true` included (verified live). Set that flag whenever the ritual has side effects |
-| Codebase-scale sweep / migration / trust-critical audit exceeding one context | **dynamic workflow** (keyword `ultracode`) — built-in; never hand-roll a pipeline |
-| Cross-session knowledge | **memory** (CLAUDE.md / auto memory) |
-| External tool surface | **MCP server** in `.mcp.json` |
-
-### Mode 4: Explain (no edits)
-Read the relevant reference and answer concisely. Do not write files.
-
-## Operator handoff (end of every Bootstrap / Audit run)
-
-The kit's machinery is opt-in by design, so the operator can't discover it from one run.
-End every Bootstrap and Audit run — and any first use of this skill in a project — with a
-compact operator map (a footer, not a lecture; skip it when the operator demonstrably
-already knows the kit):
-
-> **What else the kit does** (trigger phrases):
-> - "audit my Claude Code harness" — audit `.claude/` (gap report, edits after approval)
-> - "set up Claude Code harness in this project" — bootstrap a production-grade harness
->   (minimal via "set up a minimal harness")
-> - Independent verification (fresh context, not self-recheck) — by default a **fresh session
->   told to refute** on each silent-wrong-prone change; escalate to `/code-review ultra` (the
->   change is the risk) or a fresh session that **executes** the stack (the deliverable is the
->   risk) only at a milestone / irreversible delivery
-> - Full lifecycle map — `references/operator-playbook.md`
-
-## Reference map (load on demand — never preload all)
-
-- `references/native-capabilities.md` — current Claude Code built-ins. Read first in **Extend** / **Explain**.
-- `references/harness-discipline.md` — the rules, spawn/workflow policy, anti-patterns. Read in **Bootstrap** / **Extend**.
-- `references/bootstrap-checklist.md` — canonical layout + templates (default shape / MVH-on-request). Read in **Bootstrap**.
-- `references/project-docs/` — shipped distillation (`workflow.md` / `testing.md` / `docs-discipline.md`), copied verbatim into the project's `.claude/docs/` in **Bootstrap** (Phase 2c); re-synced by version in **Audit**.
-- `references/audit-checklist.md` — structured gap analysis. Read in **Audit**.
-- `references/evidence-base.md` — first-party + community sources with a T1–T7 rubric. Read when challenged or asked "where does this come from".
-- `references/operator-playbook.md` — **human-facing** lifecycle entry point (what the operator says/prepares at each stage). Point the operator to it; don't preload it as a mode input.
-- `references/codex-peer-skill.md` — the cross-vendor refuter skill the kit delivers **on consent,
-  behind one mechanical gate**: a Codex MCP server is already registered. Read it when the gate is
-  positive or when the operator asks for it by name; on a negative gate the option is not
-  mentioned at all — not in a run summary, not as a possibility. **The gate, in full, so evaluating
-  it never requires loading that file: a Codex MCP server is already registered** (it appears in
-  `claude mcp list`). `codex` merely on `PATH` does not count — an unwired CLI means the operator
-  has not chosen this.
-- `references/harness-evolution.md` — D-cycle (fold journal/audit findings into the canon) + strip revision procedure. Read when running a harness-evolution session.
-
-## Non-negotiable principles (all modes)
-
-1. **Built-ins first.** Never duplicate the built-in subagent types `Explore` / `Plan` /
-   `general-purpose` / `statusline-setup` / `claude-code-guide` (catalogued in
-   `references/native-capabilities.md`). The orchestrator is the main thread.
-2. **Main thread owns the task end-to-end.** Subagents are for context isolation / parallelism, not ownership.
-3. **Single-agent first; bounded fan-out only when scope exceeds one context.** Dynamic
-   workflows are a built-in — route to them; don't reimplement orchestration. No PM→Architect→Dev→QA pipelines.
-4. **CLAUDE.md is an indexer, not a store (≤ 200 lines).** Every line taxes every turn; bloat makes the model ignore it.
-5. **Mechanical invariants beat prompt advice.** A repeated correction becomes a hook, validator,
-   or denied permission — enforced at submit, not mid-thought.
-6. **Single-incident does not become invariant.** New rules need multi-source evidence or repeated empirics.
-7. **Give Claude a verification loop it can close** (prompt check → `/goal` → Stop hook →
-   `/code-review` → fresh-context second opinion); tell adversarial reviewers to flag only
-   correctness/requirement gaps.
-8. **The unit of work is a spec written with the operator** — why / what / constraints
-   `[hard]`·`[soft]` / an executable "Done when" / non-goals. A non-executable "Done when" means
-   the spec isn't ready to work from; phases and step lists don't belong in one. Durable knowledge
-   lives in artifacts (the spec, ADRs, the carrier the project already keeps), not chat — and a
-   carrier the project doesn't already keep is not introduced.
-9. **CLI-subscription only.** No managed-agents, beta headers, `--bare`, `--max-budget-usd`, API-key flows.
-
-## Output template — Audit report
-
-```markdown
-# Claude Code harness audit — <repo>
-## Summary — <1–2 sentences: posture + top-3 gaps>
-## Findings
-### F1: <one-line gap>
-- Where: <file:line> · Why it matters: <token cost / false trigger / duplicates built-in / stale>
-- Remediation: <delete X / replace with built-in Y / refactor into hook>
-- Principle violated: <which non-negotiable>
-## Out of scope — <intentional choices that look like findings>
-## Recommended order — <lowest-risk first; mark irreversible items confirm-before-acting>
+```bash
+claude --version
+git log --oneline 2>/dev/null | wc -l; git log --since="3 months ago" --oneline 2>/dev/null | wc -l
+git shortlog -sn 2>/dev/null | head
+ls -la; ls -la .claude 2>/dev/null
+find . \( -name AGENTS.md -o -name CLAUDE.md \) -not -path "*/node_modules/*" | head -20
+ls .cursor/rules .github/copilot-instructions.md 2>/dev/null
+ls pnpm-workspace.yaml nx.json turbo.json lerna.json go.work Cargo.toml WORKSPACE MODULE.bazel \
+   settings.gradle* pom.xml *.sln package.json pyproject.toml docker-compose*.yml 2>/dev/null
+find . -maxdepth 3 \( -name package.json -o -name pyproject.toml -o -name Cargo.toml -o -name go.mod \
+   -o -name "build.gradle*" -o -name pom.xml -o -name "*.csproj" \) -not -path "*/node_modules/*" | head -40
+ls .github/workflows .gitlab-ci.yml .circleci Jenkinsfile 2>/dev/null
+ls docs README* CONTRIBUTING* GLOSSARY* 2>/dev/null
+find . -maxdepth 3 -type d \( -iname "*adr*" -o -iname "*decision*" \) -not -path "*/node_modules/*" 2>/dev/null
+claude plugin list 2>/dev/null | grep -i mattpocock
 ```
 
-## Output template — Bootstrap plan
+Classify, and state the classification before writing anything:
 
-```markdown
-# Claude Code harness bootstrap — <repo>
-## Detected state — stack / age / existing docs / existing `.claude/` (greenfield = 0 files/0 commits is a state, not a blocker)
-## Default shape (production-grade, any project size)
-| File | Purpose | ~size |
-| CLAUDE.md (root) | entry-point indexer (incl. Working style + verification ladder + spec duty) | ~80 lines |
-| .claude/settings.json | permissions + minimal env | ~20 lines |
-| .claude/docs/{workflow,testing,docs-discipline}.md | shipped distillation (verbatim, versioned) | 3 files |
-| docs/ARCHITECTURE.md | decision record: ratified decisions + measured reasons + non-claims (never a module map) | 1 file |
-| .claude/rules/ | domain prohibitions no test can express — only where Phase 0 found any | 0–n files |
-| (no custom subagents/hooks/skills) | built-ins cover it | — |
-## Greenfield (no code yet) — ARCHITECTURE ships as a labelled stub, never invented facts; the stub marker carries its own fill trigger
-## Minimal MVH (CLAUDE.md + settings only) — explicit operator request only
-## Deferred until justified — subagents (evidence) · hooks (recurring pain) · skills (≥3× repeat)
-## Closes with — Phase 8: the bootstrap records itself in the carrier the project already keeps, the bootstrap commit by default (a carrier smoke test, not a new carrier)
+- **State.** *New* — no code, no history (greenfield is a state, not a blocker). *Existing,
+  no harness* — code but no `CLAUDE.md` / `.claude/`. *Existing harness* — either exists.
+- **Shape.** *Multi-component* when two or more units build or test on their own: a workspace
+  manifest (pnpm / npm / yarn workspaces, Nx, Turbo, Lerna, Cargo `[workspace]`, `go.work`, a uv
+  workspace, Bazel, Gradle or Maven multi-module, a `.sln` with several projects), several
+  manifests under `apps/` · `packages/` · `services/`, or a compose file building several services.
+- **Horizon.** *Long-lived* when it will be worked on over months — history beyond a few months
+  or a few hundred commits, or the operator says so. Treat every multi-component project as
+  long-lived.
+
+Then ask the operator **only what the repository cannot answer**, in one round:
+what must never happen in this system even when inconvenient · which paths are sensitive
+(secrets, prod config, migrations, vendored code) · the one command that proves the project
+works, if none is visible · for a new project: its purpose, stack and planned components.
+A headless run with no one to ask records the questions as open in its output and proceeds.
+
+## 2. What lands — every path
+
+| File | Content | Size |
+|---|---|---|
+| `CLAUDE.md` (root) | `templates/CLAUDE.md`: purpose, commands, boundaries, how we work, project knowledge | ≤ 120 lines, aim for 60–90 |
+| `.claude/settings.json` | `templates/settings.json`, tuned to what exists (§6) | ~20 lines |
+| `<component>/CLAUDE.md` | multi-component only, and only where the component has its own commands, invariants or contracts | ≤ 60 lines each |
+| `.claude/rules/<topic>.md` | only for a domain prohibition no type or test can express, that §1 actually found | ≤ 30 lines each |
+| tracker + domain-docs config | `/setup-matt-pocock-skills` (§5) | — |
+| `GLOSSARY.md`, ADRs | created on the first real term or decision, never empty | — |
+
+**`AGENTS.md`.** Claude Code reads `AGENTS.md` only while no `CLAUDE.md` exists in the working
+directory or above it — so the root `CLAUDE.md` this skill writes switches off every `AGENTS.md`
+below it. Keep `AGENTS.md` as the source of truth: start the root `CLAUDE.md` with `@AGENTS.md`,
+give every nested `AGENTS.md` a sibling `CLAUDE.md` containing `@AGENTS.md`, and put only
+Claude-specific lines in the `CLAUDE.md` files. Never paraphrase it into a second copy — two
+copies drift.
+
+**Every line must be something a new teammate would have to be told.** Directory trees, module
+maps, dependency lists and architecture overviews are derivable from the repo; instruction files
+that restate them measured more cost and no better results. Commands, non-default conventions,
+gotchas and prohibitions stay. `/init` can draft; your job is the cut.
+
+## 3. Paths
+
+### A — New project
+1. Ask the §1 questions; write `CLAUDE.md` from the answers. Unknown commands are an honest
+   `TBD — fill when the stack lands`, never invented.
+2. `settings.json` from the template.
+3. Multi-component plan → the layout in §4, with component `CLAUDE.md` files only for components
+   that already exist on disk. Do not create directories for planned components.
+4. Install and set up `mattpocock-skills` (§5).
+5. If the destination is still foggy (more than a session can hold), the operator's first
+   session is `/wayfinder`; otherwise the first feature follows *How we work*.
+
+### B — Existing project, no harness
+1. Recon with the built-in `Explore` subagent: components, how each is built and tested (CI
+   configuration included), invariants the code enforces defensively, contracts between
+   components. Keep the map in context — do not write it to a file.
+2. Run each fast, local, side-effect-free test command once and record the exact invocation that
+   works. Suites that need services, credentials or network, or that change shared state, are not
+   run: name them in *Commands* with what they need (or "CI-only").
+3. Write `CLAUDE.md`, `settings.json`, component files (§4).
+4. Knowledge, **only from what is not derivable**:
+   - The project already keeps decisions (`docs/adr/`, `docs/decisions*`, MADR, an RFC folder) →
+     that is the decision home; point *Project knowledge* at it. Do not copy it into a second place.
+   - Decisions with reasons live only in issues, commit messages or a README → an ADR citing its
+     source.
+   - A term the code uses inconsistently → `GLOSSARY.md`.
+   Do not migrate a wiki; do not summarize the code.
+5. Set up `mattpocock-skills` (§5).
+
+### C — Existing harness
+1. Ask the operator to run `/doctor` in their session — the native audit of instruction files,
+   settings, agents, hooks and context weight. Then read everything under `.claude/` and every
+   `CLAUDE.md` / `AGENTS.md`.
+2. Report gaps before editing, worst first, and **edit only after approval**:
+   custom agents or commands duplicating built-ins · hooks that block mid-write · skills restating
+   `CLAUDE.md` · `CLAUDE.md` over budget or carrying derivable content · stale model or version
+   pins · a paraphrased or switched-off `AGENTS.md` (§2) · missing or dead permission rules (§6) ·
+   rulebooks copied in by an earlier version of this kit (`.claude/docs/workflow.md` and siblings) —
+   superseded by the *How we work* block · missing knowledge rules · no tracker.
+3. Apply the approved items, then fill the gaps as in path B. Deleting accumulated data or an
+   actively used skill is confirm-before-acting.
+
+## 4. Multi-component layout
+
+- **Root `CLAUDE.md`** carries the whole-repo check, boundaries, how we work and project
+  knowledge. Components are not listed — the workspace manifest lists them.
+- **`<component>/CLAUDE.md`** (`templates/component-CLAUDE.md`) — Claude Code loads it when work
+  touches that directory, so per-component commands, invariants and contracts cost nothing
+  elsewhere. Write one only where there is something to say.
+- **Knowledge per bounded context.** One shared domain language → root `GLOSSARY.md` and one ADR
+  directory. Components with their own language → root `GLOSSARY-MAP.md` pointing at each
+  context's glossary and ADR directory; decisions that cross components stay in the root one.
+  `/setup-matt-pocock-skills` proposes the multi-context layout only on JavaScript-style workspace
+  signals — for Cargo, Go, uv, JVM, .NET or polyglot repositories, choose it explicitly when it
+  asks.
+- **Contracts are the riskiest seam.** Each interface between components has a check both sides
+  run (schema validation, consumer test). Changing one is an ADR plus the updated check first;
+  put the contract path under `ask` in settings.
+- **Component prohibitions** go to `.claude/rules/<topic>.md` with `paths:` scoping; a rule that
+  must never be missed stays unscoped (path scoping is heuristic).
+- **Teams:** a short `REVIEW.md` written by code owners — what failure looks like in this repo,
+  paths that always need a person, a cap on nits. Keep it apart from `CLAUDE.md`.
+
+## 5. mattpocock-skills
+
+The process tools (tracker, tickets, wayfinding, retros, domain modeling) come from
+`mattpocock-skills`:
+
+```
+claude plugin install mattpocock-skills --marketplace mattpocock/skills
 ```
 
-## Gotchas
+- **Updates.** Auto-update is off by default for third-party marketplaces. Turn it on in
+  `/plugin` → Marketplaces → `mattpocock` → *Enable auto-update*, or update deliberately with
+  `claude plugin update mattpocock-skills@mattpocock`. Where `DISABLE_AUTOUPDATER` is set, plugin
+  auto-update also needs `FORCE_AUTOUPDATE_PLUGINS=1`. The plugin ships from its repository's
+  `main` branch with no tags.
+- **Once per repository** the operator runs `/setup-matt-pocock-skills`: the tracker (GitHub,
+  GitLab or local `.scratch/`), triage labels and the domain-docs layout, recorded in an
+  "Agent skills" block in `CLAUDE.md` and `docs/agents/`.
+- **`/tdd` is not used** (§7): the operator adds `"deny": ["Skill(mattpocock-skills:tdd)"]` to
+  **user** settings — it blocks the skill under its short name too, so `/implement` builds
+  without it. `skillOverrides` does not reach plugin skills. A project file must not impose this
+  on teammates; their `/implement` will still use it.
+- **`/implement-spec`** (parallel implementers) is not the default; one `/implement` per ticket is.
+- **ADRs.** Its domain-modeling skill writes an ADR only for decisions that are hard to reverse,
+  surprising and a real trade-off. *Project knowledge* deliberately widens that to decisions later
+  work must follow, including ones stated "for later" (§7) — keep that line.
+- `/to-tickets`, `/implement`, `/wayfinder` run only when the operator types them; *How we work*
+  phrases them as proposals the session makes.
 
-- Don't preload every reference — load only the active mode's file (inflating the system prompt
-  contradicts principle 4).
-- Don't redesign the operator's own harness mid-conversation if their `.claude/` already encodes this.
-- Don't propose API-only features.
-- Don't produce generic agentic advice — refer provider-neutral questions to external sources.
-- Don't generate skills/hooks/subagents speculatively in Bootstrap.
+Declined or unavailable → specs live in `specs/<slug>.md` and tickets as files under
+`specs/<slug>/`.
 
-## Maintenance
+## 6. Permissions that actually enforce
 
-Version this skill with the primitives: new built-in / hook event → update
-`native-capabilities.md`; new Anthropic essay → add to `evidence-base.md` with a tier; a major
-model release → re-test every "under Opus <version>" invariant. Single anecdotes don't earn
-updates (principle 6). On every version bump that touches `references/project-docs/*`, update
-their `shipped-by:` headers to the new version — Audit's re-sync check keys on them.
+- **Start Claude Code at the repository root.** The shared `.claude/settings.json` is read from
+  the session's starting directory; a session started inside a package does not load the root
+  deny list. Say so in the hand-over.
+- **Path anchors.** `secrets/**` or `./secrets/**` is relative to the current directory — as a
+  deny rule a bare `secrets/**` matches a `secrets` directory at any depth below it. `/path` is
+  relative to the settings file's project; `//path` is absolute; `~/path` is home-relative.
+- **Only `Read(path)` and `Edit(path)` are matched against files.** `Read` also governs Grep and
+  Glob; `Edit` also governs Write and NotebookEdit. `Write(path)`, `Glob(path)`, `Grep(path)` are
+  parsed and never matched. A path nothing may read **or** change needs both `Read` and `Edit`
+  deny; neither reaches a script that opens the file itself — that is the OS sandbox's job.
+- **Bash argument patterns are fragile** — `git push --force` vs `-f` vs `+main`. Deny the forms
+  you know, and treat the deny list as hygiene; enforcement against a determined bypass is the
+  sandbox or auto mode's classifier.
+- `.env`: production secrets → deny; dev-only credentials the tests need → allow, gitignore, and a
+  one-line "no prod creds in `.env`" boundary. A donor or reference repository →
+  `Read(//abs/path/**)` allowed, `Edit(//abs/path/**)` denied.
+- Mirror the *Never* boundaries a rule can express into `deny`, *Ask first* into `ask`.
 
-**Release mechanics are scripted, not manual** — run `scripts/release.sh <version>` from the
-repo root (writes `plugin.json`'s `version` — the sole source of truth and update cache key,
-never duplicated in the marketplace entry — verifies shipped-by stamps, stages, prints the
-commit/tag/push finish). Two manual releases in a row shipped desynced manifests and
-uncommitted content (external audit 2026-07-15), so the ritual is mechanical now. A release
-exists only when committed, tagged **and pushed**: consumers install from origin/main via
-`/plugin marketplace add nikitaCodeSave/claude-code-harness`, and without a `version` bump
-users never receive changes.
-**The `codex-peer` block carries another vendor's call shape, so it needs a trigger, not a badge**:
-re-check it against the live `tools/list` whenever a maintainer's own call is rejected on an
-argument, or whenever that vendor's CLI is upgraded on the maintainer's machine — then bump the
-block's content-version so installed copies are offered the correction. No sighting, no re-check;
-this is the one shipped block whose facts the kit cannot verify from its own repo.
+## 7. Why *How we work* says what it says
 
-**Content-gate for `project-docs/*`** (they ship **verbatim** into projects that cannot
-re-verify upstream facts): state durable principles and stable affordances only. A claim bound
-to a ticket number (`#NNNNN`) or a specific Claude Code version belongs in `native-capabilities.md`
-(dated, re-grounded, never shipped verbatim) or is omitted — never embed a perishable
-platform-fact here. The lever against staleness is *not shipping the volatile claim*, not
-badging it: an inline expiry marker is inert without a runner (evidence: a dated "re-check
-after X" note rots silently once X passes).
+From the maintainer's lab: hidden-requirement tasks, a simulated product owner, a hidden test
+oracle, N=3 per cell, a frontier model, three small single-language tasks.
+
+- **Interview before code.** When the owner did not correct the final report, the flow without an
+  interview reached full acceptance in 3 of 9 runs; the flows with an interview, in 7 to 9 of 9,
+  depending on where the build ran (next line).
+- **Build in the session that wrote the spec.** Same session: 8 of 9 runs at full acceptance, the
+  cheapest flow that held that rate. Building in a fresh session from the spec file alone: 7 of 9;
+  with acceptance tests first written from the spec in a separate session and kept read-only for
+  the implementer: 9 of 9. Work that spans sessions was not measured directly — the ticket line
+  extends that fresh-session result to it.
+- **The interface the operator fixed goes into the spec verbatim.** In a smoke run, one dropped
+  interface line zeroed an acceptance suite.
+- **No test-first ritual.** Dropping it kept the agent's own tests within 0.05 mutation score of a
+  pipeline that drove `/tdd`; an external study found no quality gain from test-first at 3–8.5×
+  the tokens. What matters is a check that can fail and evidence that it ran.
+- **One implementer at a time.** A ticket-graph pipeline (grilling, tickets, `/tdd`, 12–22
+  parallel implementers) reached the same acceptance at 3.1–4.4× the cost of a sequential four-stage
+  flow; parallelism was not isolated there. A controlled external study that did isolate it saw
+  parallel subagents lose resolve rate on bounded tasks.
+- **Knowledge rules.** Over three features in new sessions, with an owner who never repeated
+  earlier decisions, a frontier model kept them in 3 of 3 runs without the rule (it wrote them
+  into a file on its own) and in 3 of 3 with it, at +17% cost. In a single smoke run outside the
+  pre-registered rules, a weaker model kept 8 of 19 checks without the rule and 18 of 19 with it.
+  The rule is insurance against one model's habit, not a measured gain on the frontier model.
+- **Review by risk, against the spec, correctness only, at most three rounds** — first-party
+  guidance ("a reviewer that's asked to find problems will always find something"). In the lab a
+  spec review found issues in 3 of 18 runs, none that changed hidden acceptance.
+
+## 8. Verify — end of every run
+
+```bash
+claude --print "ok" </dev/null 2>&1 >/dev/null | grep -E '^(Permission |Ignoring .*permissions\.allow)'
+# pass = prints nothing. "not matched by file permission checks" = a dead path form;
+# "matches no known tool" = a typo; "Ignoring N permissions.allow" = untrusted workspace —
+# accept the trust dialog once and re-run.
+claude --print "what is the command that proves this project works?"   # answers from CLAUDE.md
+claude --print "what must you never do here?"                          # names the deny rules
+find . -name CLAUDE.md -not -path "*/node_modules/*" | xargs wc -l      # within §2 budgets
+```
+
+Run the named check command once and confirm it executes. When launching the app takes more than
+one command, run `/run-skill-generator` once instead of writing a launch procedure by hand.
+
+## 9. Record and hand over
+
+Record the run in the commit that carries it — what was detected, what landed, what was
+deliberately left out, which questions are open. Do not introduce a journal the project does not
+keep. End with the operator's next steps:
+
+- Start Claude Code at the repository root (§6).
+- Install `mattpocock-skills` if missing, choose its update mode, deny `/tdd` in user settings
+  (§5), then run `/setup-matt-pocock-skills`.
+- New: the first feature — or `/wayfinder` if the way is unclear. Existing: work as usual.
+- Every 3–6 months or after a model upgrade: say "audit my Claude Code harness" — the cut
+  matters more than the additions.
+
+## Do not
+
+Create custom subagents, hooks, commands or skills at setup · write module maps, directory trees
+or architecture overviews · copy rulebooks into `.claude/docs/` · copy an existing decision log
+into a second place · add a journal the project does not keep · use
+`--dangerously-skip-permissions` · pin a model or Claude Code version in a project file · propose
+API-key-only features.

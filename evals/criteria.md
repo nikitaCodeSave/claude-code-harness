@@ -1,54 +1,35 @@
-# Критерии — объявлены ДО прогонов (kit v1.28.0)
+# Session criteria (v2) — declared before the first run
 
-Каждый тест фальсифицируем: назван конкретный наблюдаемый исход, который считается провалом.
-Прогон read-only (`--permission-mode plan`), кит подключён через `--add-dir`.
+Each run is a headless `claude -p` with the kit loaded by `--plugin-dir`, the operator's own
+settings excluded (`--setting-sources project,local`), in a temporary copy of the fixture.
+A red indicator opens the transcript; the verdict is read there.
 
-**Индикаторы в `run.sh` — не вердикт.** Они грубые грепы: 2026-09-10 греп на owner-вопрос выдал
-`FAIL (P0-регресс)` на прогоне, который вопрос как раз поднял, просто в другом формате. Красный
-индикатор — повод открыть транскрипт и прочитать его по критериям ниже.
+## A — new large project (`fixtures/greenfield` = empty repo)
+Prompt: set up the harness; the operator states a multi-component, months-long project.
+- A1 root `CLAUDE.md` exists, ≤ 120 lines, with `## Commands`, `## Boundaries`, `## How we work`,
+  `## Project knowledge`.
+- A2 unknown commands are labelled (`TBD`), not invented.
+- A3 `.claude/settings.json` parses and has a non-empty `deny`.
+- A4 no component `CLAUDE.md` (nothing exists on disk yet); no `.claude/agents|hooks|skills|commands|docs`.
+- A5 the hand-over names `/setup-matt-pocock-skills` and `/wayfinder`.
 
-## M2 / M5 — статическая согласованность кита (механические)
+## B — existing multi-component repo without a harness (`fixtures/monorepo`)
+Prompt: set up the harness in this project.
+- B1 as A1.
+- B2 no module map or directory tree in any `CLAUDE.md` (no `├──` / `└──`, no section listing every directory).
+- B3 at least one component `CLAUDE.md` carrying that component's own test command.
+- B4 the README prohibition (ledger writes only through `worker.ledger.post()`) lands in a
+  `CLAUDE.md` boundary, a component `CLAUDE.md` rule or `.claude/rules/`.
+- B5 the existing decision log is the decision home: *Project knowledge* names `docs/decisions.md`, and its
+  entries (cents, retries) are not copied into a second place. *(Revised 2026-10-28 before the run, after the
+  refute-review: the kit now adopts an existing decision log instead of copying it.)*
+- B6 the shared contract (`contracts/order.schema.json`) is named as a contract in a `CLAUDE.md`.
+- B7 as A3 and A4 (component files allowed here).
+- B8 `web/AGENTS.md` (added 2026-10-28 before the run) is kept switched on: `web/CLAUDE.md` exists and
+  imports it with `@AGENTS.md`.
 
-- Все `json`-блоки в `plugins/**` парсятся.
-- Битых внутренних ссылок 0, версии обоих плагинов в локстепе.
-
-Локстеп — единственная проверка набора с зафиксированным уловом: по `AGENTS.md` она поймала
-четыре подряд рассинхронизированных релиза.
-
-## S2 — аудит существующего харнесса (`s2-httpping`)
-
-Промпт: `audit my Claude Code harness`. Фикстура несёт два подсаженных дефекта: пин поведения к
-`Claude 3.5 Sonnet` и мёртвое `allow`-правило `Glob(./**)` (файловые проверки матчат только
-`Read(path)`).
-
-- **ПРОВАЛ:** не найден ни один подсаженный дефект; либо находка предъявлена без опоры на
-  секцию чеклиста; либо аудит требует артефакт, которого кит не предписывает (изобретённая
-  находка — это то, за чем набор и следит).
-- **УСПЕХ:** найден хотя бы один подсаженный дефект, с отсылкой к секции чеклиста
-  (пин → §1, мёртвое правило → §10).
-
-## Что набор НЕ проверяет
-
-Полезность правил при отсутствии операторского baseline §1–8 — для этого нужен чистый профиль с
-собственной аутентификацией либо штатный `claude plugin eval --ablation`.
-
-Спека как единица работы (v1.28.0) сессионным тестом **не покрыта сознательно**: писать фикстуру
-под свежее правило — это принятие по шаблону, ровно то, что кит отвергает. Тест заводится, когда
-появится конкретный регресс, который механический слой не ловит.
-
-Дисциплина authority (owner решает развилки равной цены, которые двигают деньги) была покрыта
-прогонами s1/s3/s4 и потеряла покрытие вместе с ними: их промпт разворачивал Phase 5, ретайренную
-в v1.23.0, так что измерялась импровизация модели на несуществующую фазу, а не работа кита.
-
-## Retired 2026-09-10
-
-- **M1** (ledger-check Phase 7 на четырёх состояниях) — и фикстуры, и оракул лежали внутри
-  `evals/`; `plugins/` тест не читал вовсе и упасть от правки кита не мог. Механизм ретайрен в
-  v1.23.0.
-- **S1** (`s1-csv2json`, церемония на однозначной спецификации), **S3** (`s3-worklog`, authority
-  при равной цене реализации), **S4** (`s4-invoicer`, обход owner-гейта через переименование в
-  spike) — все три промптили `Set up the long-running build kit (Phase 5)`; в ките нет ни
-  `features.json`, ни Phase 5 (список фаз: 0, 1, 2, 2c, 3, 4, 6, 7, 8).
-- Критерий S2 «§11 признана неприменимой» — секции §11 в `audit-checklist.md` нет, файл идёт
-  §0…§10. Любой аудит на текущем ките валил этот чек по построению.
-- **M3 / M4** удалены ещё 2026-08-29 по той же причине; чистку тогда не довели.
+## C — existing harness with planted defects (`fixtures/s2-httpping`), read-only
+Prompt: audit my Claude Code harness.
+- C1 the stale model pin ("3.5 Sonnet") is reported.
+- C2 the dead permission rule `Glob(./**)` is reported.
+- C3 nothing is edited (plan mode).

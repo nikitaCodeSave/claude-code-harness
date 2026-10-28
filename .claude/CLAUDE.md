@@ -10,7 +10,7 @@
 ## Топология (не сломать)
 
 - Этот checkout — **source of truth**. Публичный marketplace-репо.
-- `~/.claude/skills/claude-code-harness` — **symlink на `plugins/harness/`**; так kit
+- `~/.claude/skills/harness` — **symlink на `plugins/harness/`**; так kit
   догфудится живьём в операторском окружении. Правки здесь видны Claude Code сразу.
   (Симлинк указывает на подпапку плагина, а не на корень репо — топология marketplace.)
 - Лаборатория `~/PROJECTS/Harnesses-Claude` — R&D/провенанс; выводы экспериментов
@@ -32,5 +32,6 @@
 
 ## Инвариант
 
-Плагин описывает harness-дизайн для Claude Code 2.x / Opus-class. Model-agnostic
+Плагин ставит в проект измеренный минимум harness'а: один скилл и три шаблона; исследование и
+версионные факты о Claude Code живут в лаборатории (`native-capabilities.md`). Model-agnostic
 формулировки; не пере-привязывать к конкретной версии модели при апгрейде.

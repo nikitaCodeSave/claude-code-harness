@@ -8,21 +8,20 @@ anything; it carries what the file tree cannot tell you. Claude Code additionall
 
 - `.claude-plugin/marketplace.json` (repo root) is the **marketplace catalog**. Each plugin's own
   manifest is `plugins/<name>/.claude-plugin/plugin.json`.
-- There are **two plugins**: `plugins/harness/` (the kit — a skill plus on-demand references) and
-  `plugins/devlog/` (the continuity companion the kit points at).
+- There are **two plugins**: `plugins/harness/` (the kit — one skill, `SKILL.md`, plus `templates/`) and
+  `plugins/devlog/` (the optional continuity companion).
 - `.claude/` at the repo root is this repository's **own** dev harness. It is not part of either
   plugin and never ships.
-- `~/.claude/skills/claude-code-harness` on the maintainer's machine is a **symlink to
+- `~/.claude/skills/harness` on the maintainer's machine is a **symlink to
   `plugins/harness/`**, so edits here are live immediately. Edit here, never in a copy.
-- `evals/` is the kit's own regression suite — mechanical checks plus one fixture project and a
-  criteria file written before the runs. Dev harness, never shipped. **A test whose mechanism the
-  kit has retired is deleted, not kept green**: four of six tests spent five releases exercising
-  a Phase 5 that no longer exists (`evals/README.md` records the cut).
+- `evals/` is the kit's own regression suite — mechanical checks plus three headless sessions on
+  fixtures, with criteria written before the runs. Dev harness, never shipped. **A test whose
+  mechanism the kit has retired is deleted, not kept green.**
 
 ## Commands
 
 ```bash
-# release: writes the version into BOTH plugin.json files in lockstep, checks shipped-by stamps,
+# release: writes the version into BOTH plugin.json files in lockstep,
 # stages the shippable surface, prints the commit/tag/push finish. It never commits for you.
 ./plugins/harness/scripts/release.sh <version>
 
@@ -32,8 +31,9 @@ claude plugin validate .
 # devlog index (required after adding an entry under .claude/devlog/entries/)
 ./plugins/devlog/bin/devlog-reindex
 
-# regression suite — seconds, free; run it before every release
+# regression suite — mech: seconds, free, before every release; sessions: ~10 min, after changing SKILL.md or templates
 ./evals/run.sh mech
+./evals/run.sh sessions
 ```
 
 Done = `./evals/run.sh mech` exits 0, `release.sh` completes without a stamp mismatch,
@@ -68,16 +68,12 @@ never as a verdict.
 
 ## Conventions that are not obvious from the files
 
-- **One file carries the currency pin.** Only `plugins/harness/references/native-capabilities.md`
-  states a **patch-level** Claude Code version or a dated grounding stamp; every other document
-  describes behavior without binding it to a release and points there. Duplicating a currency pin
-  makes it go stale silently in one copy. A coarse generation scope (`2.x / Opus-class`) and a
-  dated "verified against" line are **provenance, not a pin** — they stay.
-- **`references/project-docs/*` ship verbatim into other people's repositories.** They carry a
-  `shipped-by:` stamp that is the re-sync key, and a content gate: durable principles and stable
-  affordances only. A claim tied to a ticket number or a specific Claude Code version belongs in
-  `native-capabilities.md` or nowhere. Modify one of these files and the release script requires
-  its stamp to match the new version.
+- **Nothing shipped pins a version.** `SKILL.md` and `templates/` describe behavior without binding
+  it to a Claude Code release or a model; the mechanical suite fails on a pin. Version-specific
+  knowledge about Claude Code lives in the maintainer's lab (`native-capabilities.md`), not here.
+- **Templates ship into other people's repositories.** Every line there is paid for on every turn
+  of every session in those projects; a line stays only if it rests on a measurement or a
+  first-party source, and the reason is recorded in `SKILL.md` §7 or the CHANGELOG.
 - **Language split is deliberate**: everything that ships to users is English; the maintainer's
   devlog under `.claude/devlog/` is Russian.
 - **Single-incident does not become an invariant.** A new rule needs multi-source evidence or

@@ -56,3 +56,6 @@ evals/fixtures/**/.claude/plans/
 
 # plansDirectory указывает сюда — черновики планов не версионируются
 .claude/plans/
+
+# Session-eval workspace pointers (machine-local temp paths)
+/evals/results/*.ws

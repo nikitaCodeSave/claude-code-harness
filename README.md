@@ -193,6 +193,11 @@ repositories carried no `CLAUDE.md`. Two rigs:
 - **Build in the session that wrote the spec.** Same session: 8 of 9 runs, the cheapest flow that
   held that rate. A fresh session building from the file alone: 7 of 9. With acceptance tests
   first written from the spec in a separate session, read-only for the implementer: 9 of 9.
+- **The `CLAUDE.md` holds the flow; the commands are navigation.** With the kit's `CLAUDE.md` and a
+  plain request, sessions interviewed, wrote the spec and reported the test command with its output
+  in 9 of 9 runs, full acceptance in 9 of 9; through `/harness:task`, 8 of 9 — within noise. Across
+  series, the template cost 1.7–2.4× the same flow typed as one prompt (medians); which of its parts
+  that comes from is not separated.
 - **Work that won't fit one session**: tickets, each built in a fresh session from tests written
   beforehand from its criteria — an extension of the result above, not measured on its own. Only
   then: in the multi-session rig, a ticket flow without the tests-first step, run on features that
@@ -220,9 +225,8 @@ repositories carried no `CLAUDE.md`. Two rigs:
   commands are user-invoked and cost nothing until typed; project skills grow later, from tasks the
   project solved.
 - **No enforcement of the process.** *How we work* is a set of instructions. Only what a
-  permission rule can express is enforced. Whether a session follows the block with no prompt
-  typed has not been measured on its own — the manual gives the line to type where a step is
-  skipped.
+  permission rule can express is enforced. In the measured runs sessions followed the block
+  unprompted (above); where a step is skipped, the manual gives the line to type.
 - **No journal, and no pinned model or Claude Code version** in your project's files.
 - **Not a replacement for CI or human review.** The harness tells the agent how to work; your
   checks still decide what merges.

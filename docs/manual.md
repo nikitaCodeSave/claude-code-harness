@@ -25,8 +25,9 @@ by hand; they cost no context until you type them.
 
 The interview, review and fix prompts inside the commands are the ones that were measured; the
 tests and build commands adapt the measured whole-spec prompts to a ticket. The *How we work* block
-in `CLAUDE.md` asks every session to follow the same flow even without a command — that alone has
-not been measured, which is what the commands are for.
+in `CLAUDE.md` holds the same flow without a command: given a plain request, sessions interviewed,
+wrote the spec and reported the test command with its output in 9 of 9 runs. The commands add no
+measured quality on top of it; they are there so you always know what to type next.
 
 ## Setup
 

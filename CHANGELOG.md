@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [Unreleased]
+
+### Changed
+- README and manual (both languages): the *How we work* block is measured on its own. On the
+  three lab tasks with a busy owner, the kit's `CLAUDE.md` and a plain request gave an interview, a
+  spec and a reported test command in 9 of 9 runs and full acceptance in 9 of 9; `/harness:task`
+  gave 8 of 9 — within noise. The commands are described as navigation, not a quality lever, and
+  the template's cost against the same flow typed as one prompt (1.7–2.4×, across series) is stated.
+
 ## [3.1.0] — 2026-10-29
 
 The flow becomes a set of commands. Each session starts with `/harness:start`, which says where

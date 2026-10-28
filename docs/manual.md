@@ -9,13 +9,10 @@ Think in **flows, not skills**. There is one main flow for a change that fits on
 few branches off it: work that spans sessions, a foggy effort, a bug, work that arrives from other
 people. Each section gives the lines to type.
 
-How close those lines are to what was measured: the interview, review and fix lines are the
-lab benchmark's prompts, with file names adapted. The tests and build lines adapt its Check and
-Build prompts from a whole spec to one ticket. In the benchmark, a script write-protected
-directories between stages, and the repositories had no `CLAUDE.md`. In your project, the
-*How we work* block asks every session to follow the same flow on its own. A session left to that
-block alone, with no prompt typed, has not been measured. Where a session skips a step, the line to
-type is right here.
+The interview, review and fix lines are the prompts that were measured; the tests and build lines
+adapt them to a ticket. The *How we work* block asks every session to follow the same flow
+unprompted, which has not been measured on its own — where a session skips a step, type its line
+from here.
 
 ## Setup
 
@@ -155,14 +152,8 @@ Use this flow only when the work really does not fit one session. Signs:
 - the spec has several independent deliverables;
 - the context is filling up before the build starts.
 
-The measured relative of this flow is a warning. On features that *did* fit a session, the lab ran
-`/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement` per ticket in fresh sessions, with
-`/tdd` and fan-out removed. Against the main flow it:
-- cost 11×;
-- took five times the owner's turns;
-- was the only flow that lost a decision.
-
-The tests-first step below was not part of that run.
+On features that fit one session, a ticket flow cost 11× the main flow, took five times the
+owner's turns and lost a decision — so it is for work that really doesn't fit.
 
 **1. Interview as above, then stop before the build.**
 - With a tracker: finish the same conversation with `/to-spec`. It writes the spec from the
@@ -183,10 +174,8 @@ Before you leave this context, make sure every decision is in an ADR:
 Which decisions from this conversation are not yet in an ADR? Write them.
 ```
 
-That is how the benchmark's lost decision went. The owner had said it "for later". The spec
-synthesis kept it only as an out-of-scope note, with the amount gone. The next feature's interview
-asked again, and the owner — who in this test kept no memory between features — agreed to drop
-it. It was in no ADR.
+A decision that lives only in the conversation gets re-asked in a later session and can be
+dropped; an ADR is read before the work starts.
 
 **2. For each ticket — two sessions.**
 
@@ -226,16 +215,13 @@ git diff --stat <tests-commit> -- tests/acceptance/    # prints nothing
 
 *c. Review by risk*, as in the main flow.
 
-Why two sessions: in the benchmark, acceptance tests written from the spec in a separate session,
-read-only for the implementer, reached full acceptance in 9 of 9 runs — the best result measured.
-That was one spec in one sitting. Per ticket, the flow is an extension of it and has not been
-measured on its own.
+Why two sessions: acceptance tests written from the spec by a separate session, read-only for the
+implementer, gave the best result measured (9 of 9). Per ticket this extends that result; it is
+not measured on its own.
 
-**One ticket at a time.** `/implement-spec` builds ready tickets in parallel. In the benchmark, a
-pipeline with grilling, tickets, `/tdd` and 12–22 subagents reached the same acceptance as a
-sequential four-stage flow at 3.1–4.4× its cost. Those factors were not separated. A controlled
-external study that did isolate parallelism saw parallel subagents lose resolve rate on bounded
-tasks.
+**One ticket at a time.** `/implement-spec` builds ready tickets in parallel; parallel implementers
+cost more without better acceptance, and lose resolve rate on bounded tasks in a controlled
+external study.
 
 ## Other situations
 
@@ -352,12 +338,4 @@ with the line typed, that is a finding about the harness — report it rather th
 
 ## Where the numbers come from
 
-The maintainer's lab ran hidden-requirement tasks with a simulated product owner and a hidden test
-oracle, N=3 per cell:
-- 63 single-session runs;
-- 9 multi-session runs, each three features in new sessions.
-
-The implementing model was a frontier model and the owner was simulated by a second model; weaker
-models appeared only in smoke runs. The tasks were small, in one language. External sources are
-named where they are used. The reasoning behind each line is in the skill's §7 and the README's
-*How we work — and why*.
+The conditions behind every number on this page are in the README's *How we work — and why*.

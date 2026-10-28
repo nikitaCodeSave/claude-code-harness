@@ -16,7 +16,8 @@ a short list of things and nothing else:
    `mattpocock-skills` plugin.
 
 No custom agents, hooks, commands or skills; no rulebooks copied into the project. The *How we
-work* lines rest on measurements or first-party sources (§7); the multi-component layout follows
+work* lines rest on measurements or first-party sources (README, *How we work — and why*); the
+multi-component layout follows
 Claude Code's own loading rules and is not benchmarked.
 
 Templates: `templates/CLAUDE.md`, `templates/component-CLAUDE.md`, `templates/settings.json`.
@@ -120,8 +121,8 @@ gotchas and prohibitions stay. `/init` can draft; your job is the cut.
    custom agents or commands duplicating built-ins · hooks that block mid-write · skills restating
    `CLAUDE.md` · `CLAUDE.md` over budget or carrying derivable content · stale model or version
    pins · a paraphrased or switched-off `AGENTS.md` (§2) · missing or dead permission rules (§6) ·
-   rulebooks copied in by an earlier version of this kit (`.claude/docs/workflow.md` and siblings) —
-   superseded by the *How we work* block · missing knowledge rules · no tracker.
+   rulebooks copied into `.claude/docs/` (`workflow.md`, `testing.md`, `docs-discipline.md`) — the
+   *How we work* block replaces them · missing knowledge rules · no tracker.
 3. Apply the approved items, then fill the gaps as in path B. Deleting accumulated data or an
    actively used skill is confirm-before-acting.
 
@@ -167,14 +168,14 @@ The process tools (tracker, tickets, wayfinding, retros, domain modeling) come f
 - **Once per repository** the operator runs `/setup-matt-pocock-skills`: the tracker (GitHub,
   GitLab or local `.scratch/`), triage labels and the domain-docs layout, recorded in an
   "Agent skills" block in `CLAUDE.md` and `docs/agents/`.
-- **`/tdd` is not used** (§7): the operator adds `"deny": ["Skill(mattpocock-skills:tdd)"]` to
+- **`/tdd` is not used** (no test-first ritual): the operator adds `"deny": ["Skill(mattpocock-skills:tdd)"]` to
   **user** settings — it blocks the skill under its short name too, so `/implement` builds
   without it. `skillOverrides` does not reach plugin skills. A project file must not impose this
   on teammates; their `/implement` will still use it.
 - **`/implement-spec`** (parallel implementers) is not the default; one `/implement` per ticket is.
 - **ADRs.** Its domain-modeling skill writes an ADR only for decisions that are hard to reverse,
   surprising and a real trade-off. *Project knowledge* deliberately widens that to decisions later
-  work must follow, including ones stated "for later" (§7) — keep that line.
+  work must follow, including ones stated "for later" — keep that line.
 - `/to-tickets`, `/implement`, `/wayfinder` run only when the operator types them; *How we work*
   phrases them as proposals the session makes.
 
@@ -203,40 +204,7 @@ Declined or unavailable → specs live in `specs/<slug>.md` and tickets as files
   `Read(//abs/path/**)` allowed, `Edit(//abs/path/**)` denied.
 - Mirror the *Never* boundaries a rule can express into `deny`, *Ask first* into `ask`.
 
-## 7. Why *How we work* says what it says
-
-From the maintainer's lab: hidden-requirement tasks, a simulated product owner, a hidden test
-oracle, N=3 per cell, a frontier model, three small single-language tasks.
-
-- **Interview before code.** When the owner did not correct the final report, the flow without an
-  interview reached full acceptance in 3 of 9 runs; the flows with an interview, in 7 to 9 of 9,
-  depending on where the build ran (next line).
-- **Build in the session that wrote the spec.** Same session: 8 of 9 runs at full acceptance, the
-  cheapest flow that held that rate. Building in a fresh session from the spec file alone: 7 of 9;
-  with acceptance tests first written from the spec in a separate session and kept read-only for
-  the implementer: 9 of 9. Work that spans sessions was not measured directly — the ticket line
-  extends that fresh-session result to it.
-- **The interface the operator fixed goes into the spec verbatim.** In a smoke run, one dropped
-  interface line zeroed an acceptance suite.
-- **No test-first ritual.** A flow without it reached a mutation score within 0.05 of a pipeline
-  that drove `/tdd` — its suite included acceptance tests a separate session wrote, so this
-  compares independent tests without the ritual against the ritual; an external study found no
-  quality gain from test-first at 3–8.5× the tokens. What matters is a check that can fail and
-  evidence that it ran.
-- **One implementer at a time.** A ticket-graph pipeline (grilling, tickets, `/tdd`, 12–22
-  subagents) reached the same acceptance at 3.1–4.4× the cost of a sequential four-stage flow;
-  those factors were not separated there. A controlled external study that did isolate it saw
-  parallel subagents lose resolve rate on bounded tasks.
-- **Knowledge rules.** Over three features in new sessions, with an owner who never repeated
-  earlier decisions, a frontier model kept them in 3 of 3 runs without the rule (it wrote them
-  into a file on its own) and in 3 of 3 with it, at about +17% cost. In a single smoke run outside the
-  pre-registered rules, a weaker model kept 8 of 19 checks without the rule and 18 of 19 with it.
-  The rule is insurance against one model's habit, not a measured gain on the frontier model.
-- **Review by risk, against the spec, correctness only, at most three rounds** — first-party
-  guidance ("a reviewer that's asked to find problems will always find something"). In the lab a
-  spec review found issues in 3 of 18 runs, none that changed hidden acceptance.
-
-## 8. Verify — end of every run
+## 7. Verify — end of every run
 
 ```bash
 claude --print "ok" </dev/null 2>&1 >/dev/null | grep -E -A3 '^(Permission |Ignoring .*permissions\.allow|These settings )'
@@ -252,7 +220,7 @@ find . -name CLAUDE.md -not -path "*/node_modules/*" | xargs wc -l      # within
 Run the named check command once and confirm it executes. When launching the app takes more than
 one command, run `/run-skill-generator` once instead of writing a launch procedure by hand.
 
-## 9. Record and hand over
+## 8. Record and hand over
 
 Record the run in the commit that carries it — what was detected, what landed, what was
 deliberately left out, which questions are open. Do not introduce a journal the project does not

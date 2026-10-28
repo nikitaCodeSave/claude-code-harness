@@ -81,4 +81,9 @@ PY
 )
 [ -n "$dead" ] && echo "$dead" | sed 's/^/    /'
 say "only Read(path)/Edit(path) path forms" $([ -z "$dead" ]; echo $?)
+echo "M7 — shipped instructions describe the present: no dates, versions, journal or history phrasing"
+hist=$(grep -nE '20[0-9]{2}-[0-9]{2}-[0-9]{2}|\bv?[0-9]+\.[0-9]+\.[0-9]+\b|devlog|\bno longer\b|\bused to\b|\bpreviously\b|\bearlier version|\bformerly\b|\brenamed\b|\bUpgrading\b' \
+  plugins/harness/SKILL.md plugins/harness/templates/* docs/manual.md README.md || true)
+[ -n "$hist" ] && echo "$hist" | sed 's/^/    /'
+say "no history or version markers (history lives in CHANGELOG.md)" $([ -z "$hist" ]; echo $?)
 exit $fail

@@ -10,8 +10,7 @@
 > try it without touching your own setup at all?»: та же пара `CLAUDE_CONFIG_DIR` +
 > `--scope project`, но источник — GitHub, и без авторского шума.
 
-Проверено на Claude Code 2.1.211 (Linux). Флаги CLI меняются — при расхождении верить
-`claude plugin install --help`, не этому файлу.
+Флаги CLI меняются — при расхождении верить `claude plugin install --help`, не этому файлу.
 
 ## Зачем это нужно
 

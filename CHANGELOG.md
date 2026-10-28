@@ -37,6 +37,13 @@ ships.
   - a plugin enabled on claude.ai syncs in as a second copy;
   - `REVIEW.md` must be a regular file.
 
+- **Instructions describe the present only.** `SKILL.md` loses §7: the rationale with its numbers
+  is for people and lives in the README's *How we work — and why*, so the skill's context carries
+  only what it acts on (§8–§9 become §7–§8). The manual drops its benchmark narratives for a rule
+  plus one line of reason; the README drops *Upgrading* (the 1.x notes moved into the 2.0.0 entry
+  below). A new mechanical check, M7, fails on dates, version strings, the journal or history
+  phrasing in `SKILL.md`, the templates, the manual or the README — history lives here.
+
 ### Not changed
 - `plugins/harness/templates/`.
 
@@ -128,6 +135,13 @@ N=3 per cell, 63 single-session and 9 multi-session runs).
   version pins, no dead permission path forms); each check verified to fail on a planted defect.
 - Sessions: A (new large project), B (existing multi-component repository, new fixture
   `monorepo`), C (existing harness with planted defects, kept from 1.x).
+
+### Upgrading from 1.x
+- 1.x copied a rulebook into `.claude/docs/{workflow,testing,docs-discipline}.md` and a long
+  Working-style block. In a 1.x project, say "audit my Claude Code harness": it reports the copied
+  rulebook as superseded and proposes the *How we work* block instead.
+- The plugin's new name means a reinstall: `/plugin uninstall claude-code-harness@claude-code-harness`,
+  then `/plugin install harness@claude-code-harness`.
 
 ## [1.28.0] — 2026-09-10
 

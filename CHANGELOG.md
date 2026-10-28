@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [3.0.4] — 2026-10-28
+
+### Added
+- **`docs/manual.ru.md`**, the manual in Russian, linked from a language switch at the top of both
+  manuals; the Russian README now points to it. The lines to type stay in English — that is the
+  form that was measured — and the Russian manual says so. The M7 check covers it.
+
+### Fixed
+- The manual's user-settings example now turns on `autoUpdate` for both marketplaces, as the README
+  does.
+
+### Not changed
+- `plugins/harness/SKILL.md` and `plugins/harness/templates/`.
+
 ## [3.0.3] — 2026-10-28
 
 ### Changed

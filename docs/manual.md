@@ -1,5 +1,7 @@
 # The manual — working by the harness
 
+**English** · [Русский](manual.ru.md)
+
 What to type, when, and what to check, from the first install to month six of a project. The
 harness itself is small: a `CLAUDE.md` with a *How we work* block, a deny list, and the process
 tools from [mattpocock-skills](https://github.com/mattpocock/skills). This page is the flow those
@@ -11,9 +13,9 @@ people. Each section gives the lines to type.
 
 The interview, review and fix lines are the prompts that were measured; the tests and build lines
 adapt the measured whole-spec test and build prompts to a ticket. In the measurement a script
-write-protected the tests during the build; here a deny rule plus a `git diff` check stands in. The *How we work* block asks every session to follow the same flow
-unprompted, which has not been measured on its own — where a session skips a step, type its line
-from here.
+write-protected the tests during the build; here a deny rule plus a `git diff` check stands in.
+The *How we work* block asks every session to follow the same flow unprompted, which has not been
+measured on its own — where a session skips a step, type its line from here.
 
 ## Setup
 
@@ -38,6 +40,10 @@ Then, in your **user** settings (`~/.claude/settings.json`):
 {
   "permissions": { "deny": ["Skill(mattpocock-skills:tdd)"] },
   "extraKnownMarketplaces": {
+    "claude-code-harness": {
+      "source": { "source": "github", "repo": "nikitaCodeSave/claude-code-harness" },
+      "autoUpdate": true
+    },
     "mattpocock": {
       "source": { "source": "github", "repo": "mattpocock/skills" },
       "autoUpdate": true
@@ -47,7 +53,7 @@ Then, in your **user** settings (`~/.claude/settings.json`):
 ```
 
 The deny blocks `/tdd` under its short name too, so `/implement` builds without it. `autoUpdate`
-turns on updates for a third-party marketplace, where they are off by default. If your
+turns on updates for both third-party marketplaces, where they are off by default. If your
 settings set `DISABLE_AUTOUPDATER`, `DISABLE_UPDATES` or `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`,
 plugin auto-update is off until you also set `"FORCE_AUTOUPDATE_PLUGINS": "1"` under `env`. That
 keeps Claude Code itself pinned while plugins update. The update runs in the background of an

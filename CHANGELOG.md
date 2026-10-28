@@ -19,6 +19,8 @@ practice layer, before the kit was extracted into this standalone repository.
   - use, updating, and what the kit deliberately doesn't do.
 
   The measured rationale (*How we work — and why*) is unchanged.
+- **`README.ru.md`**, the README in Russian, linked from a language switch at the top of both.
+  The skill, templates and manual stay in English. The M7 check covers the Russian README too.
 - **`release.sh` moved out of the plugin** to `scripts/release.sh`. A maintainer tool no longer
   ships into users' plugin cache. It now rejects a version that isn't `X.Y.Z` instead of writing
   any string into `plugin.json`.

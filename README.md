@@ -1,5 +1,7 @@
 # claude-code-harness
 
+**English** · [Русский](README.ru.md)
+
 **`harness` is a Claude Code plugin that sets up the working environment Claude Code needs in your
 repository — and keeps it lean.** One skill reads your project and writes a short `CLAUDE.md`, a
 permission file that actually enforces, a `CLAUDE.md` per component where one is needed, and a
@@ -168,8 +170,6 @@ repositories carried no `CLAUDE.md`. Two rigs:
 - **single session** — 63 runs on three small single-language tasks with hidden requirements;
 - **multi-session** — 9 runs of one project built as three features in new sessions, with an owner
   who keeps no memory between features and states some decisions only once, "for later".
-
-
 
 - **Interview before code**, then write the spec (single session). Where the owner did not correct
   the agent's final report: without the interview, full acceptance in 3 of 9 runs; with it, 7 to 9

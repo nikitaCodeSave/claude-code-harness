@@ -87,9 +87,11 @@ bloat CLAUDE.md; the invocation-control and forked-lookup mechanics for it
 
 "Subagents run in their own context… useful for tasks that read many files without cluttering
 your main conversation." (*Best practices*, T1.) The main thread owns the task end-to-end
-through verification. Spawn only for: (a) context isolation (search-heavy work whose output
-would pollute main context), (b) parallelism (independent searches converging back), or
-(c) auto-compact rescue. **Built-ins first**: `Explore` / `Plan` / `general-purpose` cover
+through verification. Spawn only for: (a) isolating noisy output (search-heavy work whose
+output would pollute main context), (b) parallelism (independent work converging back), or
+(c) independent review in a fresh context. Protecting the context window is not a reason on
+its own — *Best practices* lists "use subagents to protect your context window" under "what
+you can stop doing". **Built-ins first**: `Explore` / `Plan` / `general-purpose` cover
 nearly all delegation — never clone `general-purpose` into a custom "orchestrator".
 
 When you do spawn: **brief the subagent like a new colleague** — concrete goal, output format

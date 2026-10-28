@@ -29,7 +29,11 @@ that moves business risk or architecture goes in; class names, file paths, table
 schemas, library choices stay out — those are the implementer's call and beat a
 guess frozen into the spec. The conversation a spec grows out of always carries
 implementation asides; without the detector they settle into the binding
-sections and start standing in for the requirement.
+sections and start standing in for the requirement. **Exception: an interface the
+operator fixed** (module path, signature, error class that other code calls) is a
+requirement, not an implementation choice — copy it into the spec verbatim. A
+session that builds from the file sees nothing else, and one dropped interface
+line zeroed a whole acceptance suite in a measured run.
 
 **Phase lists and step-by-step plans do not belong in a spec.** Planning against
 the real code beats a plan written in advance for it. A spec that accretes a
@@ -51,8 +55,20 @@ answer. Keep it in context; persist it only if the operator asks.
 
 - One unit at a time. Call it done only after **every** verification step ran,
   negative cases included.
-- Work test-first by default; red→green is the default, not dogma — see
-  `testing.md` rule 2 for what actually matters.
+- **Build in the session that wrote the spec** when the work fits one session.
+  Measured on hidden-requirement tasks (interview → spec → build, simulated
+  owner, hidden oracle, N=3 × 3 tasks): the same-session build matched a
+  four-stage flow (hidden-acceptance medians 100/100/100, 8 of 9 runs at 100%)
+  at 2.2–4.9× lower cost; a fresh-session build from the file alone lost
+  requirements (7 of 9), and held (9 of 9) only when acceptance tests were first
+  written from the spec in a separate context. Work that spans sessions needs
+  those tests as the carrier.
+- Test-first is not prescribed — see `testing.md` rule 2 for what actually
+  matters: a check that can fail, run, with its output as evidence.
+- Don't fan implementer subagents out over a bounded change: in a controlled
+  study parallel subagents cost 1.4–3.3× the tokens and lost resolve rate
+  (arXiv 2610.10263); in our measurement a ticket-graph pipeline with 12–22
+  implementers cost 3.1–4.4× the four-stage flow at equal acceptance.
 - **A handoff note is a claim, not a fact.** "Verified" written by a past session
   is re-executed before you rely on it. Phrase queued fixes as "reproduce →
   close".
@@ -105,7 +121,16 @@ projects and, where continuity was genuinely valued, it had been reinvented more
 cheaply. What survives the session is state on disk, not a specific layout.
 
 Durable knowledge lives in artifacts (spec / ADR / the project's own carrier),
-never only in chat.
+never only in chat. On a project that lives for months, make it explicit in the
+project CLAUDE.md: domain terms go to `GLOSSARY.md` on first use; decisions that
+are hard to reverse or that later work must follow — **including ones the
+operator states "for later"** — go to an ADR in the session where they were made;
+both are read before new work starts. Measured over three features in new
+sessions with an owner who never repeats earlier decisions: a frontier model
+carried them without the rule (it wrote them into a file on its own), with the
+rule as well at +17% cost, and a weaker model lost most of them without it (8 of
+19 checks vs 18 of 19 with it). The rule is the insurance that does not depend
+on one model's habit.
 
 ## Production posture (day 0, not "later")
 

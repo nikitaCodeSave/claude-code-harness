@@ -11,9 +11,12 @@ Five rules, extended by project CLAUDE.md, never replaced by it.
 2. **A test verifies behavior and is able to fail.** If it passes immediately and would not
    fail on broken behavior, it verifies nothing: see it fail (or prove it catches a planted
    regression) before trusting it. The red must come from the assertion you targeted — not an
-   incidental ImportError, typo, or broken fixture; otherwise the red proves nothing. Red→green
-   ordering is a useful default, not dogma — the lever is a runnable oracle asserting
-   **observable behavior through the public interface**, not prints, not private internals.
+   incidental ImportError, typo, or broken fixture; otherwise the red proves nothing. Writing
+   order is **not prescribed**: test-first as an instruction to the agent measured no gain in
+   quality or mutation score at 3–8.5× the tokens, and agents skip or fake the red step — prove
+   a test can fail by breaking the code (or by mutation testing), not by the order it was
+   written in. The lever is a runnable oracle asserting **observable behavior through the
+   public interface**, not prints, not private internals.
 3. **Tests live next to the code**: `test_<module>` beside `<module>`, or a mirrored `tests/`
    tree. No tests in odd corners — it kills discoverability.
 4. **One test — one behavior.** When something breaks you should not have to guess which of

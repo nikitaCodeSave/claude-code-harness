@@ -10,7 +10,8 @@ few branches off it: work that spans sessions, a foggy effort, a bug, work that 
 people. Each section gives the lines to type.
 
 The interview, review and fix lines are the prompts that were measured; the tests and build lines
-adapt them to a ticket. The *How we work* block asks every session to follow the same flow
+adapt the measured whole-spec test and build prompts to a ticket. In the measurement a script
+write-protected the tests during the build; here a deny rule plus a `git diff` check stands in. The *How we work* block asks every session to follow the same flow
 unprompted, which has not been measured on its own — where a session skips a step, type its line
 from here.
 
@@ -152,8 +153,9 @@ Use this flow only when the work really does not fit one session. Signs:
 - the spec has several independent deliverables;
 - the context is filling up before the build starts.
 
-On features that fit one session, a ticket flow cost 11× the main flow, took five times the
-owner's turns and lost a decision — so it is for work that really doesn't fit.
+On features that fit one session, a ticket flow (without the tests-first session below) cost 11×
+the main flow, took five times the owner's turns and lost a decision — so it is for work that
+really doesn't fit.
 
 **1. Interview as above, then stop before the build.**
 - With a tracker: finish the same conversation with `/to-spec`. It writes the spec from the
@@ -174,8 +176,9 @@ Before you leave this context, make sure every decision is in an ADR:
 Which decisions from this conversation are not yet in an ADR? Write them.
 ```
 
-A decision that lives only in the conversation gets re-asked in a later session and can be
-dropped; an ADR is read before the work starts.
+A decision kept anywhere but an ADR — even as an out-of-scope note in the spec — can be re-asked
+in a later session and dropped by an owner who has forgotten it; an ADR is read before the
+work starts.
 
 **2. For each ticket — two sessions.**
 
@@ -219,9 +222,10 @@ Why two sessions: acceptance tests written from the spec by a separate session, 
 implementer, gave the best result measured (9 of 9). Per ticket this extends that result; it is
 not measured on its own.
 
-**One ticket at a time.** `/implement-spec` builds ready tickets in parallel; parallel implementers
-cost more without better acceptance, and lose resolve rate on bounded tasks in a controlled
-external study.
+**One ticket at a time.** `/implement-spec` builds ready tickets in parallel. In the lab, a
+pipeline that ran 12–22 subagents together with grilling, tickets and `/tdd` cost 3.1–4.4× a
+sequential flow for the same acceptance (those factors were not separated); a controlled external
+study that isolated parallelism saw parallel subagents lose resolve rate on bounded tasks.
 
 ## Other situations
 

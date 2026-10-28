@@ -41,8 +41,10 @@ ships.
   is for people and lives in the README's *How we work — and why*, so the skill's context carries
   only what it acts on (§8–§9 become §7–§8). The manual drops its benchmark narratives for a rule
   plus one line of reason; the README drops *Upgrading* (the 1.x notes moved into the 2.0.0 entry
-  below). A new mechanical check, M7, fails on dates, version strings, the journal or history
-  phrasing in `SKILL.md`, the templates, the manual or the README — history lives here.
+  below). The README's rationale now states the conditions of both rigs (single-session and
+  multi-session) next to their numbers. A new mechanical check, M7, fails on dates, version
+  strings, the journal or history phrasing in `SKILL.md`, the templates, the manual or the README —
+  history lives here.
 
 ### Not changed
 - `plugins/harness/templates/`.

@@ -36,7 +36,7 @@ git rev-parse -q --verify "refs/tags/v$V" >/dev/null && {
 
 # 3. Stage the release surface and hand off the conscious step.
 git add -A "$PLUGIN" "$MARKET" \
-  plugins/ \
+  plugins/ docs/ \
   README.md CHANGELOG.md AGENTS.md
 echo
 git status --short

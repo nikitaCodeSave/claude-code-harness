@@ -29,7 +29,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git status:*), Bash(git add:*
 
 Посмотри `git status` / `git diff --stat`. **Задевает ли изменение shipped-поверхность?**
 
-- **Shipped-поверхность** = `plugins/**` · `README.md` · `CHANGELOG.md` · `.claude-plugin/marketplace.json`.
+- **Shipped-поверхность** = `plugins/**` · `docs/**` · `README.md` · `CHANGELOG.md` · `.claude-plugin/marketplace.json`.
   → **Путь B (Релиз):** version bump + тег.
 - **Только dev-harness** = `.claude/**` (CLAUDE.md, этот скилл) · `evals/**` · `.gitignore` ·
   `.gitattributes` · `LICENSE`.

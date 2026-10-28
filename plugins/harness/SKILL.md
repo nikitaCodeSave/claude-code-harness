@@ -154,10 +154,14 @@ claude plugin install mattpocock-skills --marketplace mattpocock/skills
 ```
 
 - **Updates.** Auto-update is off by default for third-party marketplaces. Turn it on in
-  `/plugin` → Marketplaces → `mattpocock` → *Enable auto-update*, or update deliberately with
-  `claude plugin update mattpocock-skills@mattpocock`. Where `DISABLE_AUTOUPDATER` is set, plugin
-  auto-update also needs `FORCE_AUTOUPDATE_PLUGINS=1`. The plugin ships from its repository's
-  `main` branch with no tags.
+  `/plugin` → Marketplaces → `mattpocock` → *Enable auto-update*, or declare it in user settings
+  with `"autoUpdate": true` on the marketplace's `extraKnownMarketplaces` entry (the settings
+  entry wins over the toggle). Any of `DISABLE_AUTOUPDATER`, `DISABLE_UPDATES` or
+  `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` switches the whole plugin auto-update pass off and
+  hides the toggle unless `FORCE_AUTOUPDATE_PLUGINS=1` is also set — that keeps Claude Code itself
+  pinned while plugins update. Update deliberately with
+  `claude plugin update mattpocock-skills@mattpocock`. The plugin pins its version in
+  `plugin.json`, so an update arrives when its author bumps it, not on every commit.
 - **Once per repository** the operator runs `/setup-matt-pocock-skills`: the tracker (GitHub,
   GitLab or local `.scratch/`), triage labels and the domain-docs layout, recorded in an
   "Agent skills" block in `CLAUDE.md` and `docs/agents/`.
@@ -210,16 +214,18 @@ oracle, N=3 per cell, a frontier model, three small single-language tasks.
   extends that fresh-session result to it.
 - **The interface the operator fixed goes into the spec verbatim.** In a smoke run, one dropped
   interface line zeroed an acceptance suite.
-- **No test-first ritual.** Dropping it kept the agent's own tests within 0.05 mutation score of a
-  pipeline that drove `/tdd`; an external study found no quality gain from test-first at 3–8.5×
-  the tokens. What matters is a check that can fail and evidence that it ran.
+- **No test-first ritual.** A flow without it reached a mutation score within 0.05 of a pipeline
+  that drove `/tdd` — its suite included acceptance tests a separate session wrote, so this
+  compares independent tests without the ritual against the ritual; an external study found no
+  quality gain from test-first at 3–8.5× the tokens. What matters is a check that can fail and
+  evidence that it ran.
 - **One implementer at a time.** A ticket-graph pipeline (grilling, tickets, `/tdd`, 12–22
-  parallel implementers) reached the same acceptance at 3.1–4.4× the cost of a sequential four-stage
-  flow; parallelism was not isolated there. A controlled external study that did isolate it saw
+  subagents) reached the same acceptance at 3.1–4.4× the cost of a sequential four-stage flow;
+  those factors were not separated there. A controlled external study that did isolate it saw
   parallel subagents lose resolve rate on bounded tasks.
 - **Knowledge rules.** Over three features in new sessions, with an owner who never repeated
   earlier decisions, a frontier model kept them in 3 of 3 runs without the rule (it wrote them
-  into a file on its own) and in 3 of 3 with it, at +17% cost. In a single smoke run outside the
+  into a file on its own) and in 3 of 3 with it, at about +17% cost. In a single smoke run outside the
   pre-registered rules, a weaker model kept 8 of 19 checks without the rule and 18 of 19 with it.
   The rule is insurance against one model's habit, not a measured gain on the frontier model.
 - **Review by risk, against the spec, correctness only, at most three rounds** — first-party

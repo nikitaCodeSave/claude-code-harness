@@ -8,6 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [3.0.1] — 2026-10-28
+
+### Added
+- **`docs/manual.md`** — the day-to-day flow: what to type for a change that fits one session, work
+  that spans sessions (tests first in their own session, read-only for the build), bugs, reviews by
+  risk, knowledge between sessions, phase boundaries, large repositories, and the signs the flow is
+  being followed. Says which lines are the benchmark's prompts and which are adapted. Linked from
+  the README.
+
+### Fixed
+- **Plugin auto-update conditions** (`SKILL.md` §5, README): any of `DISABLE_AUTOUPDATER`,
+  `DISABLE_UPDATES` or `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` turns plugin auto-update off
+  unless `FORCE_AUTOUPDATE_PLUGINS=1` is set (only the first was named); auto-update can also be
+  declared with `autoUpdate` on the marketplace's `extraKnownMarketplaces` entry. Source: Claude
+  Code's plugin loading reference, "When auto-update runs".
+- **Overstated evidence** (`SKILL.md` §7, README), found by an independent review of the manual:
+  - The mutation-score comparison behind "no test-first ritual" set a flow whose suite included
+    acceptance tests from a separate session against a `/tdd` pipeline. It does not compare "the
+    agent's own tests".
+  - The ticket pipeline ran 12–22 subagents, not "parallel implementers", and its factors were not
+    separated.
+  - The interview numbers hold for an owner who did not correct the final report.
+  - On features that fit one session, the ticket flow cost 11× and lost a decision.
+
+### Not changed
+- `plugins/harness/templates/`.
+
 ## [3.0.0] — 2026-10-28
 
 The `devlog` companion plugin leaves the marketplace. The `harness` skill and its templates are

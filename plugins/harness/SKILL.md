@@ -111,9 +111,11 @@ gotchas and prohibitions stay. `/init` can draft; your job is the cut.
 5. Set up `mattpocock-skills` (§5).
 
 ### C — Existing harness
-1. Ask the operator to run `/doctor` in their session — the native audit of instruction files,
-   settings, agents, hooks and context weight. Then read everything under `.claude/` and every
-   `CLAUDE.md` / `AGENTS.md`.
+1. Ask the operator to run the native audits in their session: `/doctor` (instruction files,
+   settings, agents, hooks, context weight), `/doctor prompt-audit` (instructions written for older
+   models, stale paths and commands, contradicting files) and `/skill-doctor` (skills that go
+   unused, with their context cost). Don't re-derive what they report. Then read everything under
+   `.claude/` and every `CLAUDE.md` / `AGENTS.md`; count plugin mods with the hooks.
 2. Report gaps before editing, worst first, and **edit only after approval**:
    custom agents or commands duplicating built-ins · hooks that block mid-write · skills restating
    `CLAUDE.md` · `CLAUDE.md` over budget or carrying derivable content · stale model or version
@@ -150,7 +152,7 @@ The process tools (tracker, tickets, wayfinding, retros, domain modeling) come f
 `mattpocock-skills`:
 
 ```
-claude plugin install mattpocock-skills --marketplace mattpocock/skills
+/plugin install mattpocock-skills --marketplace mattpocock/skills
 ```
 
 - **Updates.** Auto-update is off by default for third-party marketplaces. Turn it on in
@@ -193,7 +195,9 @@ Declined or unavailable → specs live in `specs/<slug>.md` and tickets as files
   deny; neither reaches a script that opens the file itself — that is the OS sandbox's job.
 - **Bash argument patterns are fragile** — `git push --force` vs `-f` vs `+main`. Deny the forms
   you know, and treat the deny list as hygiene; enforcement against a determined bypass is the
-  sandbox or auto mode's classifier.
+  sandbox or auto mode's classifier. Interactive sessions start in auto mode unless a mode is set,
+  but a project file cannot set `auto` or `bypassPermissions` (user settings or the flag can), and
+  some headless setups start in `default` mode — there the deny list is the only guard.
 - `.env`: production secrets → deny; dev-only credentials the tests need → allow, gitignore, and a
   one-line "no prod creds in `.env`" boundary. A donor or reference repository →
   `Read(//abs/path/**)` allowed, `Edit(//abs/path/**)` denied.
@@ -235,10 +239,11 @@ oracle, N=3 per cell, a frontier model, three small single-language tasks.
 ## 8. Verify — end of every run
 
 ```bash
-claude --print "ok" </dev/null 2>&1 >/dev/null | grep -E '^(Permission |Ignoring .*permissions\.allow)'
+claude --print "ok" </dev/null 2>&1 >/dev/null | grep -E -A3 '^(Permission |Ignoring .*permissions\.allow|These settings )'
 # pass = prints nothing. "not matched by file permission checks" = a dead path form;
-# "matches no known tool" = a typo; "Ignoring N permissions.allow" = untrusted workspace —
-# accept the trust dialog once and re-run.
+# "matches no known tool" = a typo; "These settings entries were skipped" = a malformed rule,
+# dropped; "These settings files did not load" = an invalid value voided the whole file;
+# "Ignoring N permissions.allow" = untrusted workspace — accept the trust dialog once and re-run.
 claude --print "what is the command that proves this project works?"   # answers from CLAUDE.md
 claude --print "what must you never do here?"                          # names the deny rules
 find . -name CLAUDE.md -not -path "*/node_modules/*" | xargs wc -l      # within §2 budgets

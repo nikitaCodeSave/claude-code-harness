@@ -14,12 +14,12 @@ repositories follows Claude Code's own loading rules. Everything else was cut.
 ```
 /plugin marketplace add nikitaCodeSave/claude-code-harness
 /plugin install harness@claude-code-harness
-claude plugin install mattpocock-skills --marketplace mattpocock/skills
+/plugin install mattpocock-skills --marketplace mattpocock/skills
 ```
 
 The second plugin, [mattpocock-skills](https://github.com/mattpocock/skills), brings the process
-tools the harness points at: the tracker, tickets, `/wayfinder`, `/retro`, domain modeling. Run
-`/reload-plugins` after installing. Two settings worth making once, in your **user** settings:
+tools the harness points at: the tracker, tickets, `/wayfinder`, `/retro`, domain modeling. Two
+settings worth making once, in your **user** settings:
 
 - `"deny": ["Skill(mattpocock-skills:tdd)"]` — the harness works without a test-first ritual
   (why below); `/implement` then builds without it.

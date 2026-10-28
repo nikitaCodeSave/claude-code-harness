@@ -8,6 +8,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [3.0.2] — 2026-10-28
+
+Intake of the Claude Code changelog from 2.1.252 to 2.1.312, checked against everything the kit
+ships.
+
+### Fixed
+- **The §8 permission check could pass on a broken settings file.** Claude Code now reports a
+  malformed rule under "These settings entries were skipped" and a whole file voided by an invalid
+  value under "These settings files did not load". The grep matched neither, so both printed
+  nothing — a pass. The pattern now matches them and shows their detail lines. Reproduced on
+  Claude Code 2.1.311.
+- **Install line.** `/plugin install mattpocock-skills --marketplace mattpocock/skills` in a
+  session, like the other two lines; the shell form needs a newer client. `/reload-plugins` is
+  gone: changes made in `/plugin` apply when its menu closes.
+
+### Changed
+- **Path C** (existing harness) has the operator run `/doctor prompt-audit` and `/skill-doctor`
+  besides `/doctor`, and counts plugin mods with the hooks.
+- **§6** says which permission mode a session starts in: interactive sessions start in auto mode
+  unless a mode is set; a project file cannot set auto or bypass; some headless setups start in
+  `default`, where the deny list is the only guard.
+- **Manual:**
+  - plan mode is read-only only when bypass permissions isn't available in the session;
+  - an `Edit` deny now also stops redirects, `tee` and `sed -i`;
+  - a session left idle for about an hour is compacted on its own;
+  - `/code-review` at medium also reports cleanups and conventions;
+  - a plugin enabled on claude.ai syncs in as a second copy;
+  - `REVIEW.md` must be a regular file.
+
+### Not changed
+- `plugins/harness/templates/`.
+
 ## [3.0.1] — 2026-10-28
 
 ### Added

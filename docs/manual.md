@@ -24,13 +24,15 @@ type is right here.
 ```
 /plugin marketplace add nikitaCodeSave/claude-code-harness
 /plugin install harness@claude-code-harness
-claude plugin install mattpocock-skills --marketplace mattpocock/skills
-/reload-plugins
+/plugin install mattpocock-skills --marketplace mattpocock/skills
 ```
 
+What you install from `/plugin` takes effect when its menu closes.
+
 Pocock's README also lists an official-directory route, `mattpocock-skills@claude-plugins-official`.
-Pick one route. Don't also copy the skills into a project with skills.sh: plugin plus copies gives
-every skill twice.
+Pick one route. Don't also copy the skills into a project with skills.sh, and don't also enable the
+plugin on your claude.ai account, which syncs it into terminal sessions as `mattpocock-skills@synced`:
+either way every skill comes twice.
 
 Then, in your **user** settings (`~/.claude/settings.json`):
 
@@ -113,13 +115,18 @@ Show the command you ran and its output.
 
 **6. Review by risk.**
 
-- **Ordinary change:** `/code-review` on the diff.
+- **Ordinary change:** `/code-review` on the diff. At medium effort it also reports cleanups and
+  `CLAUDE.md` conventions; fix what affects correctness, the rest is optional.
 - **High-stakes change** — security, migrations, parsers, invariants, anything that "looks done"
   and would be expensive if wrong: a **separate, read-only** session reviews it against the spec.
 
   ```
   claude --permission-mode plan
   ```
+
+  Plan mode is read-only only when bypass permissions is not available in that session (no
+  `--dangerously-skip-permissions`, no `bypassPermissions` default); otherwise Claude Code says
+  so once and edits go through.
   ```
   Review the changes since commit <base> (committed and uncommitted) against specs/<slug>.md.
   Report only gaps that affect correctness, each with file:line; skip style. If there is nothing
@@ -209,8 +216,9 @@ work around it.
 ```
 
 `/implement` commits to the current branch and does not close the ticket. Close it yourself, or
-blocked tickets never become ready. The deny stops the edit tools, not a shell write, so check that
-the tests stayed untouched:
+blocked tickets never become ready. The deny stops the edit tools and recognisable shell writes
+(redirects, `tee`, `sed -i`), not a script that opens the file itself, so check that the tests
+stayed untouched:
 
 ```bash
 git diff --stat <tests-commit> -- tests/acceptance/    # prints nothing
@@ -281,6 +289,7 @@ growing — were not modelled.
 | Tests session → build session | New session: the implementer must not have written its own oracle. |
 | Ticket → next ticket | New session; each ticket is self-contained. |
 | Build → high-stakes review | Separate read-only session. |
+| A session left waiting | A large session idle for about an hour (a build session parked during a long review) is compacted on its own; when you return to it, type `Re-read specs/<slug>.md before continuing.`, or turn it off in `/config` → Idle compaction. |
 | Context getting long | Mid-phase, keep going or hand a scoped piece to a subagent. At a boundary, prefer continuing or `/clear`; `/compact` is the last option (Pocock's `ask-matt`). After any compaction, type `Re-read specs/<slug>.md before continuing.` Scope limits live in the spec file because compaction is reported to drop them more often than requirements — one external study, not verified here. |
 | Work moves to a colleague, another directory or another harness | `/handoff`. |
 
@@ -293,7 +302,8 @@ growing — were not modelled.
 - **Tickets stay vertical slices** even when a deliverable crosses components. Don't cut them one
   component at a time.
 - **Teams:** keep a short `REVIEW.md` by code owners. It says what failure looks like here, which
-  paths always need a person, and caps the nits.
+  paths always need a person, and caps the nits. Keep it a regular file: the review service skips
+  a symlinked one and cuts one past its size limit.
 - **Who reviews is set by risk, not by author** (Anthropic's account of how its Claude Code team
   reviews):
 

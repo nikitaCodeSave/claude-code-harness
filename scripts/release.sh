@@ -14,6 +14,7 @@
 set -euo pipefail
 
 V="${1:?usage: scripts/release.sh <version, e.g. 1.14.0>}"
+[[ "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "version must be X.Y.Z, got: $V"; exit 1; }
 cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 # The plugin lives under plugins/harness/; the marketplace manifest stays at the repo root.
 PLUGIN=plugins/harness/.claude-plugin/plugin.json

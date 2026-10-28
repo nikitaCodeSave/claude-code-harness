@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [3.0.3] — 2026-10-28
+
+### Changed
+- **README rewritten for a first-time reader on GitHub**:
+  - what the plugin is and the problems it addresses;
+  - how it works: the skill's run, a diagram, and what Claude Code uses afterwards on its own;
+  - what lands in a repository, and the repository's layout;
+  - install, including user settings with `autoUpdate` for both marketplaces;
+  - use, updating, and what the kit deliberately doesn't do.
+
+  The measured rationale (*How we work — and why*) is unchanged.
+- **`release.sh` moved out of the plugin** to `scripts/release.sh`. A maintainer tool no longer
+  ships into users' plugin cache. It now rejects a version that isn't `X.Y.Z` instead of writing
+  any string into `plugin.json`.
+
+### Not changed
+- `plugins/harness/SKILL.md` and `plugins/harness/templates/`.
+
 ## [3.0.2] — 2026-10-28
 
 Intake of the Claude Code changelog from 2.1.252 to 2.1.312, checked against everything the kit

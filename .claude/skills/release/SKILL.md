@@ -3,7 +3,7 @@ name: release
 description: "Ритуал релиза плагина harness: развилка «нужен ли тег», bump plugin.json, CHANGELOG, staging через release.sh, commit/tag/push и верификация синка с origin. Вызывается оператором командой /release — модель его не инициирует."
 argument-hint: "[patch|minor|major | или коротко: что за изменение]"
 disable-model-invocation: true
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git status:*), Bash(git add:*), Bash(git commit:*), Bash(git tag:*), Bash(git push:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git rev-parse:*), Bash(git ls-remote:*), Bash(git branch:*), Bash(plugins/harness/scripts/release.sh:*), Bash(jq:*), Bash(claude --version), Bash(tail:*), Bash(ls:*)
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git status:*), Bash(git add:*), Bash(git commit:*), Bash(git tag:*), Bash(git push:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git rev-parse:*), Bash(git ls-remote:*), Bash(git branch:*), Bash(scripts/release.sh:*), Bash(jq:*), Bash(claude --version), Bash(tail:*), Bash(ls:*)
 ---
 
 # Релиз / обновление репозитория claude-code-harness
@@ -18,7 +18,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git status:*), Bash(git add:*
    релиз — это анонс без поставки; `scripts/release.sh` держит версии в синхроне, а push и
    проверка синка — шаги B5–B6.
 
-Не переизобретай механику: `plugins/harness/scripts/release.sh` уже бампит версию,
+Не переизобретай механику: `scripts/release.sh` уже бампит версию,
 стережёт drift и стейджит поверхность. Этот скилл — рунбук поверх него: **решение + пред-шаги +
 финиш + верификация**, то, что скрипт намеренно не делает.
 
@@ -102,7 +102,7 @@ CLAUDE.md). Тогда это **Путь B** — раз shipped-поверхно
 ### B4. Стейджинг + guard через release.sh
 
 ```bash
-plugins/harness/scripts/release.sh X.Y.Z
+scripts/release.sh X.Y.Z
 ```
 Скрипт: бампит `plugin.json`, стережёт marketplace-drift, стейджит shipped-поверхность, печатает команды commit/tag/push. **Он НЕ автокоммитит** — финиш за тобой.
 

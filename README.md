@@ -1,13 +1,110 @@
 # claude-code-harness
 
-A Claude Code plugin that sets up — and keeps lean — the harness of your project: the root
-`CLAUDE.md`, `.claude/settings.json`, a `CLAUDE.md` per component where one is needed, and the
-project's knowledge layer. Built for new projects and existing ones, including large
-multi-component codebases worked on for months.
+**`harness` is a Claude Code plugin that sets up the working environment Claude Code needs in your
+repository — and keeps it lean.** One skill reads your project and writes a short `CLAUDE.md`, a
+permission file that actually enforces, a `CLAUDE.md` per component where one is needed, and a
+place for the project's knowledge. From then on every Claude Code session starts with your
+commands, your boundaries, a way of working that was measured, and the decisions made so far —
+instead of a blank slate.
 
-One opinion drives it: **under a capable model, the least harness that works wins.** Every line of
-the *How we work* block rests on a measurement or a first-party source; the layout for large
-repositories follows Claude Code's own loading rules. Everything else was cut.
+It works for a new repository, an existing one, and one that already has a harness, including
+large multi-component codebases developed over months.
+
+> One opinion drives it: **under a capable model, the least harness that works wins.** A line
+> stays only if a measurement or a first-party source backs it; everything else is cut.
+
+## Why use it
+
+| The problem | What the plugin does about it |
+|---|---|
+| Each Claude Code session starts knowing nothing about your project. | A short root `CLAUDE.md` (aimed at 60–90 lines, never over 120): the command that proves the project works, what must never happen, how work is done here, where knowledge lives. Only what a new teammate would have to be told — nothing the model can read from the code. |
+| Harnesses grow until they cost more than they help: copied rulebooks, custom agents, hooks that block mid-write. | No agents, hooks, commands or rulebooks. The audit mode reports what to cut first, and every line it writes is paid for on every turn, so it writes few. |
+| The agent builds the wrong thing, or says "done" without proof. | A *How we work* block: an interview before code, a spec with your interface copied verbatim, the build in the same session, "done" only with the command and its output, review by risk. Each line rests on a measurement — see [How we work — and why](#how-we-work--and-why). |
+| Decisions get lost between sessions on a project that runs for months. | Terms go to a glossary, decisions — including ones stated "for later" — to ADRs, and a session reads the ones that touch an area before changing it. |
+| A large repository: one instruction file can't fit every component. | A `CLAUDE.md` inside each component that has its own commands, invariants or contracts; Claude Code loads it only when work touches that directory. Contracts between components sit behind `ask`. |
+| Permission rules that look right and match nothing. | Only the rule forms Claude Code matches; a check at the end of every run prints any rule that is dead, malformed or ignored. |
+| Projects that also use other agents (Codex, others) through `AGENTS.md`. | `AGENTS.md` stays the source of truth; `CLAUDE.md` imports it, because Claude Code reads `AGENTS.md` only while no `CLAUDE.md` is on the path. |
+
+## How it works
+
+```mermaid
+flowchart LR
+  subgraph repo["this repository = marketplace claude-code-harness"]
+    plugin["plugin harness<br/>SKILL.md + 3 templates"]
+  end
+  you(["you: 'set up Claude Code harness in this project'"]) --> skill
+  plugin --> skill["the skill runs in your repository"]
+  skill --> claude["CLAUDE.md"]
+  skill --> settings[".claude/settings.json"]
+  skill --> comp["component CLAUDE.md files"]
+  skill --> know["GLOSSARY.md · docs/adr/"]
+  skill --> pocock["mattpocock-skills set up"]
+  claude & settings & comp & know --> sessions["every later Claude Code session"]
+```
+
+**1. The skill runs once per setup or audit.** Claude Code picks it up from its description when
+you say one of its phrases. It then:
+
+1. **Reads the room, without writing.** Git history, `.claude/`, every `CLAUDE.md` and
+   `AGENTS.md`, workspace manifests, CI, any existing decision log.
+2. **Classifies the project.** Its state (new, existing without a harness, existing with one), its
+   shape (one component or several) and its horizon (short, or months of work).
+3. **Asks only what the repository can't answer**, in one round: what must never happen, which
+   paths are sensitive, which command proves the project works.
+4. **Takes one of three paths.**
+   - **New:** a harness with honest `TBD`s instead of invented commands.
+   - **Existing:** maps the components, runs each test command once, and seeds the glossary and
+     ADRs only from what the code can't tell.
+   - **Already harnessed:** has you run Claude Code's own audits, reports gaps worst first, and
+     edits only what you approve.
+5. **Writes the files** from the templates below and sets up the companion plugin.
+6. **Verifies** the permission rules, that a fresh session can name the project's check command
+   and its prohibitions, and the line budgets.
+7. **Hands over** in a commit that says what landed and what was left out.
+
+**2. After that, the plugin is not involved.** Your repository carries the harness, and Claude
+Code uses it on its own:
+
+- the root `CLAUDE.md` loads in every session;
+- a component's `CLAUDE.md` loads when work touches that directory;
+- `.claude/settings.json` enforces the deny list;
+- sessions read the glossary and ADRs before touching an area, because `CLAUDE.md` says so;
+- the process tools from [mattpocock-skills](https://github.com/mattpocock/skills) — `/to-spec`,
+  `/to-tickets`, `/implement`, `/wayfinder`, `/retro`, `/triage` — run when you type them.
+
+**3. Day to day,** the [manual](docs/manual.md) gives the lines to type for:
+
+- a change that fits one session;
+- work that spans sessions;
+- a bug;
+- a high-stakes review;
+- knowledge between sessions;
+- a large repository.
+
+It also lists the signs that the flow is being followed.
+
+## What lands in your repository
+
+| File | What it holds |
+|---|---|
+| `CLAUDE.md` (≤ 120 lines) | Purpose · *Commands* (the whole-repo check) · *Boundaries* (always / ask first / never) · *How we work* · *Project knowledge*. Starts with `@AGENTS.md` where the project keeps one. |
+| `.claude/settings.json` | `deny` for secrets, `.git/`, force-push and hard reset; `ask` for push, rebase and amend; read-only git commands allowed. Tuned to what the project has. |
+| `<component>/CLAUDE.md` (≤ 60 lines) | Only in a multi-component repository, and only where a component has its own commands, invariants or contracts. |
+| `GLOSSARY.md`, `docs/adr/` | Created on the first real term or decision, never empty. In a project that already keeps decisions, that log stays the home. |
+
+## Repository layout
+
+```
+.claude-plugin/marketplace.json   the marketplace catalog: one plugin
+plugins/harness/                  the plugin — the only thing that ships into Claude Code
+  .claude-plugin/plugin.json      name, description, version (the update key)
+  SKILL.md                        the skill: the run described above
+  templates/                      CLAUDE.md · component-CLAUDE.md · settings.json
+docs/manual.md                    the day-to-day flow, for people
+evals/                            the kit's own regression suite: mechanical checks + sessions on fixtures
+scripts/release.sh                the release ritual (maintainers)
+CHANGELOG.md                      every change, and what to do when updating
+```
 
 ## Install
 
@@ -17,54 +114,49 @@ repositories follows Claude Code's own loading rules. Everything else was cut.
 /plugin install mattpocock-skills --marketplace mattpocock/skills
 ```
 
-The second plugin, [mattpocock-skills](https://github.com/mattpocock/skills), brings the process
-tools the harness points at: the tracker, tickets, `/wayfinder`, `/retro`, domain modeling. Two
-settings worth making once, in your **user** settings:
+The second plugin brings the process tools the harness points at. Without it, specs live in
+`specs/<slug>.md` and tickets as files under `specs/<slug>/`.
 
-- `"deny": ["Skill(mattpocock-skills:tdd)"]` — the harness works without a test-first ritual
-  (why below); `/implement` then builds without it.
-- Updates: third-party marketplaces don't auto-update by default — enable it in `/plugin` →
-  Marketplaces (or `"autoUpdate": true` on the marketplace's `extraKnownMarketplaces` entry), or
-  run `claude plugin update <plugin>@<marketplace>` when you choose. With `DISABLE_AUTOUPDATER`,
-  `DISABLE_UPDATES` or `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` set, plugin auto-update also
-  needs `FORCE_AUTOUPDATE_PLUGINS=1`.
+Make these settings once, in your **user** settings (`~/.claude/settings.json`). Merge them into
+the file you have:
+
+```json
+{
+  "permissions": { "deny": ["Skill(mattpocock-skills:tdd)"] },
+  "extraKnownMarketplaces": {
+    "claude-code-harness": {
+      "source": { "source": "github", "repo": "nikitaCodeSave/claude-code-harness" },
+      "autoUpdate": true
+    },
+    "mattpocock": {
+      "source": { "source": "github", "repo": "mattpocock/skills" },
+      "autoUpdate": true
+    }
+  }
+}
+```
+
+- **The deny** keeps `/tdd` out, so `/implement` builds without a test-first ritual (why below).
+- **`autoUpdate`** turns on updates, which are off by default for third-party marketplaces. If
+  your settings set `DISABLE_AUTOUPDATER`, `DISABLE_UPDATES` or
+  `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`, plugin updates also need
+  `"FORCE_AUTOUPDATE_PLUGINS": "1"` under `env`.
 
 ## Use
 
-Open the project and say:
+Open the project at its root and say:
 
 > **"set up Claude Code harness in this project"**
 
-The same phrase works for every state — the skill reads the repository and picks the path:
+The same phrase works in every state; the skill picks the path from what it reads. Then:
 
-| The project | What happens |
-|---|---|
-| New, nothing on disk | Asks what it can't read (purpose, stack, planned components, what must never happen, sensitive paths) and writes the harness with honest `TBD`s instead of invented commands |
-| Existing, no harness | Maps the components, runs each test command once, writes the harness, and seeds the glossary and ADRs only from what the code can't tell — decisions with their reasons, terms used inconsistently |
-| Existing harness | Reports what to cut and what is missing, worst first; edits only after you approve |
-
-Then, once per repository: `/setup-matt-pocock-skills`. On a large effort whose path isn't clear
-yet, the first session is `/wayfinder`. In a monorepo, start Claude Code at the repository root —
-the shared settings and their deny list load from the directory a session starts in.
-
-Every few months, or after a model upgrade: **"audit my Claude Code harness"** — the cut matters
-more than the additions.
-
-**Day to day**, the [manual](docs/manual.md) gives what to type: a change that fits one session,
-work that spans sessions, a bug, a high-stakes review, knowledge between sessions, a large
-repository — and the signs that the flow is being followed.
-
-## What lands
-
-- **`CLAUDE.md`** (≤ 120 lines): commands, three-tier boundaries, *How we work*, *Project knowledge*.
-- **`.claude/settings.json`**: a deny list for the boundaries a permission rule can express, with
-  only path forms Claude Code actually matches.
-- **`<component>/CLAUDE.md`** in a multi-component repository, only where a component has its own
-  commands, invariants or contracts — Claude Code loads it when work touches that directory.
-- **Knowledge**: `GLOSSARY.md` (or a `GLOSSARY-MAP.md` per bounded context) and `docs/adr/`,
-  created on the first real entry.
-
-No custom agents, hooks, commands or skills, and nothing copied into `.claude/docs/`.
+- **Once per repository:** run `/setup-matt-pocock-skills` (tracker, labels, where domain docs
+  live).
+- **A large effort whose route isn't clear yet:** make the first session `/wayfinder`.
+- **Always start Claude Code at the repository root:** the shared settings and their deny list
+  load from the directory a session starts in.
+- **Every few months, or after a model upgrade:** say **"audit my Claude Code harness"** — the cut
+  matters more than the additions.
 
 ## How we work — and why
 
@@ -108,7 +200,35 @@ repositories carried no `CLAUDE.md`. Two rigs:
   guidance: "a reviewer that's asked to find problems will always find something"). In the lab a
   spec review found issues in 3 of 18 runs, none that changed hidden acceptance.
 
-Changes between releases, with what to do when upgrading, are in [CHANGELOG.md](CHANGELOG.md).
+## What it deliberately doesn't do
+
+- **No machinery.** No custom agents, hooks or slash commands, and no rulebook copied into
+  `.claude/docs/`.
+- **No enforcement of the process.** *How we work* is a set of instructions. Only what a
+  permission rule can express is enforced. Whether a session follows the block with no prompt
+  typed has not been measured on its own — the manual gives the line to type where a step is
+  skipped.
+- **No journal, and no pinned model or Claude Code version** in your project's files.
+- **Not a replacement for CI or human review.** The harness tells the agent how to work; your
+  checks still decide what merges.
+
+## Updating
+
+The version in `plugins/harness/.claude-plugin/plugin.json` is what Claude Code compares. With
+`autoUpdate` on, a new release arrives in the background of an interactive session and loads in
+the next one. Otherwise run `claude plugin update harness@claude-code-harness`.
+[CHANGELOG.md](CHANGELOG.md) lists every change and what to do when updating.
+
+## Developing the kit
+
+- `AGENTS.md` holds the maintainer rules.
+- `./evals/run.sh mech` runs the mechanical checks: JSON parses, links resolve, budgets, no version
+  pins, no dead permission forms, no history in shipped instructions.
+- `./evals/run.sh sessions` runs three headless sessions on fixtures.
+- `scripts/release.sh <version>` versions and stages a release.
+
+The measurements behind *How we work* come from the maintainer's lab; the README section above
+states their conditions.
 
 ## License
 

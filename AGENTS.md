@@ -23,7 +23,7 @@ anything; it carries what the file tree cannot tell you. Claude Code additionall
 ```bash
 # release: writes the version into plugin.json, stages the shippable surface,
 # prints the commit/tag/push finish. It never commits for you.
-./plugins/harness/scripts/release.sh <version>
+./scripts/release.sh <version>
 
 # manifest validation
 claude plugin validate .

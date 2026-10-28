@@ -20,11 +20,13 @@ large multi-component codebases developed over months.
 | The problem | What the plugin does about it |
 |---|---|
 | Each Claude Code session starts knowing nothing about your project. | A short root `CLAUDE.md` (aimed at 60–90 lines, never over 120): the command that proves the project works, what must never happen, how work is done here, where knowledge lives. Only what a new teammate would have to be told — nothing the model can read from the code. |
-| Harnesses grow until they cost more than they help: copied rulebooks, custom agents, hooks that block mid-write. | No agents, hooks, commands or rulebooks. The audit mode reports what to cut first, and every line it writes is paid for on every turn, so it writes few. |
+| Harnesses grow until they cost more than they help: copied rulebooks, custom agents, hooks that block mid-write. | No agents, hooks or rulebooks — the commands are user-invoked and cost nothing until typed. The audit mode reports what to cut first, and every line it writes is paid for on every turn, so it writes few. |
 | The agent builds the wrong thing, or says "done" without proof. | A *How we work* block: an interview before code, a spec with your interface copied verbatim, the build in the same session, "done" only with the command and its output, review by risk. Each line rests on a measurement — see [How we work — and why](#how-we-work--and-why). |
 | Decisions get lost between sessions on a project that runs for months. | Terms go to a glossary, decisions — including ones stated "for later" — to ADRs, and a session reads the ones that touch an area before changing it. |
 | A large repository: one instruction file can't fit every component. | A `CLAUDE.md` inside each component that has its own commands, invariants or contracts; Claude Code loads it only when work touches that directory. Contracts between components sit behind `ask`. |
 | Permission rules that look right and match nothing. | Only the rule forms Claude Code matches; a check at the end of every run prints any rule that is dead, malformed or ignored. |
+| You open a session and don't know where to start, or how to make the agent work well. | `/harness:start` says where work stands and the one command to type next; the other commands carry the measured prompts, so you never type them by hand. |
+| The project's own procedures get rediscovered in every session. | A task the project solved after a long search becomes a project skill in `.claude/skills/` — `/harness:skill` writes it from that session, `/harness:trajectory` cuts its wasted steps after a real run. |
 | Projects that also use other agents (Codex, others) through `AGENTS.md`. | `AGENTS.md` stays the source of truth; `CLAUDE.md` imports it, because Claude Code reads `AGENTS.md` only while no `CLAUDE.md` is on the path. |
 
 ## How it works
@@ -74,16 +76,9 @@ Code uses it on its own:
 - the process tools from [mattpocock-skills](https://github.com/mattpocock/skills) — `/to-spec`,
   `/to-tickets`, `/implement`, `/wayfinder`, `/retro`, `/triage` — run when you type them.
 
-**3. Day to day,** the [manual](docs/manual.md) gives the lines to type for:
-
-- a change that fits one session;
-- work that spans sessions;
-- a bug;
-- a high-stakes review;
-- knowledge between sessions;
-- a large repository.
-
-It also lists the signs that the flow is being followed.
+**3. Day to day, you type commands.** Every session starts with `/harness:start`; the rest of the
+flow is a handful of commands that carry its prompts — see [Commands](#commands) and the
+[manual](docs/manual.md).
 
 ## What lands in your repository
 
@@ -100,8 +95,9 @@ It also lists the signs that the flow is being followed.
 .claude-plugin/marketplace.json   the marketplace catalog: one plugin
 plugins/harness/                  the plugin — the only thing that ships into Claude Code
   .claude-plugin/plugin.json      name, description, version (the update key)
-  SKILL.md                        the skill: the run described above
-  templates/                      CLAUDE.md · component-CLAUDE.md · settings.json
+  skills/harness/SKILL.md         the setup skill: the run described above
+  skills/harness/templates/       CLAUDE.md · component-CLAUDE.md · settings.json
+  skills/<command>/SKILL.md       the commands: start, task, bugfix, tests, build, check, wrap, skill, trajectory
 docs/manual.md                    the day-to-day flow, for people
 evals/                            the kit's own regression suite: mechanical checks + sessions on fixtures
 scripts/release.sh                the release ritual (maintainers)
@@ -160,6 +156,24 @@ The same phrase works in every state; the skill picks the path from what it read
 - **Every few months, or after a model upgrade:** say **"audit my Claude Code harness"** — the cut
   matters more than the additions.
 
+## Commands
+
+The plugin's commands carry the way of working, so you work on the task instead of on the agent.
+They are user-invoked: none of them costs context until you type it.
+
+| Situation | Type |
+|---|---|
+| Any session, first thing — or whenever unsure | `/harness:start` — where work stands and the one command to type next |
+| A new change | `/harness:task <what you want>` — interview, spec, build in the same session |
+| A bug | `/harness:bugfix <the bug>` — a failing test first, then the fix |
+| A raw idea to discuss or challenge first | `/grill-with-docs <the idea>` (mattpocock-skills), then `/harness:task` |
+| A risky change is built | `/harness:check` — a fresh read-only reviewer against the spec, then the fixes (ordinary change: `/code-review`) |
+| End of the session | `/harness:wrap` — decisions into ADRs, terms into the glossary, evidence, commit |
+| Work too big for one session | `/harness:task` → `/to-spec` → `/to-tickets` → `/harness:wrap`; per ticket `/harness:tests <ticket>`, then `/harness:build <ticket>` in a fresh session |
+| A task finally solved after a long search, or one that keeps coming back | `/harness:skill <what it does>` — a project skill from what the session learned; `/harness:trajectory` after its next run, to cut the wasted steps |
+
+The [manual](docs/manual.md) walks through each of them.
+
 ## How we work — and why
 
 The *How we work* block every project gets, with what each line rests on. Measured in the
@@ -202,8 +216,9 @@ repositories carried no `CLAUDE.md`. Two rigs:
 
 ## What it deliberately doesn't do
 
-- **No machinery.** No custom agents, hooks or slash commands, and no rulebook copied into
-  `.claude/docs/`.
+- **No machinery.** No custom agents or hooks, and no rulebook copied into `.claude/docs/`. The
+  commands are user-invoked and cost nothing until typed; project skills grow later, from tasks the
+  project solved.
 - **No enforcement of the process.** *How we work* is a set of instructions. Only what a
   permission rule can express is enforced. Whether a session follows the block with no prompt
   typed has not been measured on its own — the manual gives the line to type where a step is

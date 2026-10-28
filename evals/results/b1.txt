@@ -1,36 +1,26 @@
-loopline: its classic.SessionStart hook was skipped. "cc-plugin-sec-default" runs first and sent the event on past it.
-Ignoring 6 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/tmp/tmp.j4llxYGwYz/ws"].hasTrustDialogAccepted: true in /home/nikita/.claude/.claude.json.
-I've set up the Claude Code harness and committed it to `master` as `b0a8735`. The commit message records what was detected, what landed, what I left out and the open questions.
+Ignoring 4 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/tmp/tmp.cuUkR8Dsww/ws"].hasTrustDialogAccepted: true in /home/nikita/.claude/.claude.json.
+I set up the Claude Code harness and committed it as `566df4c` on `master`. `make test` passes (5 tests), the settings file loads without errors, and a fresh Claude session correctly named the check command and the "never" rules from the new files.
 
-**What I found:** an existing project with no harness except `web/AGENTS.md`. It has three parts that build and test separately: `services/api` and `services/worker` (Python/pytest) and `web` (Node). `make test` passed all 5 tests, and I checked that running a single test works in each part.
+The repo already had code and an `AGENTS.md` under `web/`, but no `CLAUDE.md` or `.claude/` folder. It has three parts (api, worker, web) that build and test separately.
 
-**What landed:**
-- **`CLAUDE.md` (root, 52 lines):** the check command (`make test`) and the rules Claude must follow:
-  - money is always integer cents, never floats;
-  - the ledger is only written through `worker.ledger.post()`;
-  - a change to an order field updates the shared schema and both sides together.
+**What I added:**
+- **`CLAUDE.md`** (53 lines): what the project is, the commands (`make test` plus how to run a single test), the rules, how we work, and where knowledge lives. The "never" rules are: only `worker.ledger.post()` writes to the ledger, settlement retries always have a limit, customers never see a raw worker status, and money is integer cents. Decisions keep going into your existing `docs/decisions.md` rather than a new folder.
+- **`services/api/CLAUDE.md` and `services/worker/CLAUDE.md`**: each part's own commands, its rules, and the order schema in `contracts/` that both sides share.
+- **`web/CLAUDE.md`**: contains only `@AGENTS.md`, so your existing `AGENTS.md` stays the single source.
+- **`.claude/settings.json`**: Claude must ask before editing anything under `contracts/` and before push, rebase or amend. Force-push, `git reset --hard` and edits inside `.git` are blocked.
 
-  It also has the working style, and it names `docs/decisions.md` (the project's existing decision log) as the place for new decisions.
-- **`services/api/CLAUDE.md` and `services/worker/CLAUDE.md`:** each one's test commands and its own rules (writing the same order twice must have no effect; a settlement is tried 3 times, then parked for a human).
-- **`web/CLAUDE.md`:** only `@AGENTS.md`, so `web/AGENTS.md` stays the single source.
-- **`.claude/settings.json`:**
-  - allowed: read-only git commands and the test commands;
-  - ask first: edits to `contracts/**` and `docker-compose.yml`, and git push, rebase or amend;
-  - blocked: `.env`, `secrets/**`, `.git/**`, force-push and `reset --hard`.
-- **Left out on purpose:** `GLOSSARY.md` (no term is used inconsistently yet), a separate ADR folder (`docs/decisions.md` already does that job), and any custom agents, hooks, commands or skills.
+**Left out on purpose:** a glossary (no term is used inconsistently), a new decisions folder, secrets or `.env` rules (none exist), and any custom agents, hooks or skills.
 
-**Verification:** asked headless, Claude answered "what proves this works?" and "what must you never do?" from these files. One warning remains: the workspace isn't trusted yet, so the `allow` rules are ignored until you accept the trust prompt. The block rules still apply.
-
-**Open questions (also in the commit message):**
-1. Is there anything else that must never happen, beyond the two README rules?
-2. Which paths are sensitive? There's no `.env` or `secrets/` folder, so those block rules are only precautions. Where do prod config, migrations and ledger storage live?
-3. **This contradicts the README:** it says both api and worker check orders against `contracts/order.schema.json`, but the worker doesn't check them at all, and the api only checks some of the schema's rules. Is that intended or a gap? I wrote this into `services/worker/CLAUDE.md` so Claude doesn't assume the check exists.
-4. `web` turns worker statuses into customer labels with nothing shared defining those statuses. Should there be a contract?
-5. No lint, format or typecheck is configured. Do you want one?
-6. There's no `.gitignore`, so test runs leave untracked `__pycache__` folders. I deleted the ones my runs created.
+**Open questions** (also listed in the commit message):
+1. Is there anything that must never happen beyond the rules already in the README?
+2. Are there sensitive paths, such as prod config, secrets or migrations? If `.env` files will appear, are they dev-only or production?
+3. **Possible gap:** the README says both api and worker check orders against `contracts/order.schema.json`, but no worker code or test does. I noted this in `services/worker/CLAUDE.md`. Is that intended?
+4. Is a linter, formatter or type checker planned? None is configured.
+5. There's no `.gitignore`, so running the tests leaves `__pycache__/` folders as untracked files. I deleted them but didn't add one.
 
 **Your next steps:**
-- Start Claude Code at the repo root, or the root settings won't load, and accept the trust prompt once.
-- `mattpocock-skills` is already installed. Choose its update mode, add `"deny": ["Skill(mattpocock-skills:tdd)"]` to your **user** settings, then run `/setup-matt-pocock-skills`.
-- Answer the open questions; 3 is the one that matters most.
-- Every 3–6 months, or after a model upgrade, ask "audit my Claude Code harness".
+- Always start Claude Code from the repository root, otherwise the root `.claude/settings.json` isn't loaded.
+- Run Claude Code here once interactively and accept the trust prompt. Until then, the allowed commands in the settings file are ignored.
+- `mattpocock-skills` is already installed. Choose how it updates, block its `/tdd` skill in your *user* settings with `"deny": ["Skill(mattpocock-skills:tdd)"]`, then run `/setup-matt-pocock-skills`.
+- Start each session with `/harness:start`.
+- Every 3–6 months, or after a model upgrade, ask to "audit my Claude Code harness".

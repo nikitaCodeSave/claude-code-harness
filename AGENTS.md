@@ -9,7 +9,11 @@ anything; it carries what the file tree cannot tell you. Claude Code additionall
 
 - `.claude-plugin/marketplace.json` (repo root) is the **marketplace catalog**. Each plugin's own
   manifest is `plugins/<name>/.claude-plugin/plugin.json`.
-- There is **one plugin**: `plugins/harness/` (the kit — one skill, `SKILL.md`, plus `templates/`).
+- There is **one plugin**: `plugins/harness/`. Everything in it is a skill under `skills/`: the
+  setup skill with its templates (`skills/harness/SKILL.md`, `skills/harness/templates/`) and the
+  user-invoked commands of the flow (`skills/<command>/SKILL.md`, each with
+  `disable-model-invocation: true`, so they cost no context until typed). Never put a `SKILL.md` at
+  the plugin root: once `skills/` exists, Claude Code no longer loads it (M8 checks this).
 - `.claude/` at the repo root is this repository's **own** dev harness. It is not part of the
   plugin and never ships.
 - `~/.claude/skills/harness` on the maintainer's machine is a **symlink to
@@ -51,7 +55,7 @@ verdict.
   Record what changed and why in the commit message, and anything consumers receive in
   `CHANGELOG.md`; there is no journal beyond these.
 - **Ask first**: changing what the plugin ships (adding an agent, a command, a hook). The kit's own
-  position is that it ships a skill and templates only; adding machinery needs a reason that
+  position is that it ships one setup skill, user-invoked commands and templates only; adding machinery needs a reason that
   survives the question "does a built-in already do this?"
 - **Never**: edit `.claude/devlog/` (a closed journal) or `.claude/audits/` — frozen provenance. Never put a `version`
   field in the marketplace entry — `plugin.json` is authoritative and the release script fails the

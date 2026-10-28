@@ -1,31 +1,31 @@
-loopline: its classic.SessionStart hook was skipped. "cc-plugin-sec-default" runs first and sent the event on past it.
-Ignoring 3 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/tmp/tmp.8j3ABiVcPk/ws"].hasTrustDialogAccepted: true in /home/nikita/.claude/.claude.json.
-I've set up the Claude Code harness and committed it to `master` as `13fdc52`. The repo was empty, so I treated it as a new project with three planned parts (HTTP API, worker, web frontend) that will run for months.
+Ignoring 3 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/tmp/tmp.loETZ2W8po/ws"].hasTrustDialogAccepted: true in /home/nikita/.claude/.claude.json.
+The Claude Code harness is set up and committed on `master` as `43d0f47`. I treated this as a new project with three planned parts (HTTP API, background worker, web frontend) that will be worked on for months.
 
 **What I added:**
-- **`CLAUDE.md`** (55 lines): what the project is, commands (marked TBD until the stack exists), rules for what's allowed, asked about first or never done, the working process, and where terms and decisions get written down. Every component will share one whole-repo check.
+- **`CLAUDE.md`** (55 lines): what the project is, how work should be done, and where decisions and terms get written down. Its rules:
+  - **Never:** commit secrets or put production credentials in `.env`, force-push or hard-reset, edit `.git/`.
+  - **Ask first:** database migrations, new dependencies, contract/schema files, CI and deployment config.
+  - **Contracts:** the links between API and worker, and between API and frontend, each need a check that both sides run. Changing one needs a decision record first.
+
+  The command that proves the project works is marked `TBD` until the stack is chosen. I didn't invent one.
 - **`.claude/settings.json`**:
-  - **Blocked:** reading or editing `secrets/` and `.env.production`, force-push, `git reset --hard`, and editing `.git/`.
-  - **Asks first:** push, rebase, amend, and editing migration files.
+  - **Blocked:** anything under `secrets/`, `.env.prod*` files, edits to `.git/`, force-push and hard reset.
+  - **Asks first:** push, rebase, amending a commit, files under `migrations/` and `.github/`.
 
-**What I left out on purpose:** per-component `CLAUDE.md` files and folders, because none of the components exist yet. I also didn't create empty `GLOSSARY.md` or ADR files; each gets created when there's a first real term or decision to record.
+**Checks:** the settings file loads with no broken rules. Asked "what proves this project works?", a fresh session said there's no such command yet. Asked "what must you never do here?", it listed the Never rules.
 
-**Checks:**
-- Asked "what proves this works?" and "what must you never do?" in fresh sessions, Claude answered both from `CLAUDE.md`. It answered in Russian, apparently because of your global settings.
-- The permission rules aren't fully active yet: this folder isn't marked as trusted, so the three "allow" rules are skipped. That clears once you open Claude Code here and accept the trust prompt.
-- There's no project check command to run yet.
+**Left out for now:** no folders for the three parts, since none exist yet. Each gets its own `CLAUDE.md` once it appears and has its own commands or rules. The glossary and the decision log (`docs/adr/`) get created with the first real term or decision.
 
-**Open questions** (also recorded in the commit message):
-1. Project name, purpose, users, and what "done" means.
-2. What must never happen in this system, even when it's inconvenient?
-3. Any sensitive paths besides `secrets/` and `.env.production` (prod config, infra, vendored code)?
-4. Stack: the Python and TypeScript frameworks, database, job queue, package managers, monorepo tool, and how the worker gets jobs from the API.
-5. The one command that proves the whole repo works, once the stack exists.
-6. Which issue tracker to use (GitHub, GitLab or local files).
+**Open questions:** these are recorded in the commit message.
+1. What the project is for, who uses it, and what "done" means.
+2. The stack: API and frontend frameworks, worker/queue, database, package managers, folder layout.
+3. What must never happen in this system, even when inconvenient.
+4. Where secrets, production config and migrations will live, and whether `.env` holds only development credentials.
+5. The one command that proves the project works.
+6. Where the contracts will live, so those files can be set to ask first.
+7. Which issue tracker to use (GitHub, GitLab or local files).
 
 **Your next steps:**
-1. Always start Claude Code at the repo root, or the blocked-actions list won't load. Accept the trust prompt the first time.
-2. `mattpocock-skills` is already installed. Turn on its auto-update in `/plugin` → Marketplaces. Add `"deny": ["Skill(mattpocock-skills:tdd)"]` to your **user** settings, not the project ones. Then run `/setup-matt-pocock-skills`.
-3. Answer the open questions in your first session; the stack choices become the first ADRs. If the overall direction still feels unclear, start with `/wayfinder`.
-4. When each component lands, fill in the Commands section and give that component its own `CLAUDE.md` if it has its own commands or rules.
-5. Every 3–6 months, or after a model upgrade, say "audit my Claude Code harness".
+- Start Claude Code once at the repository root and accept the trust dialog. Until you do, it ignores the project's allow rules, and a session started inside a subfolder won't load the deny list.
+- `mattpocock-skills` is already installed. Choose whether it updates automatically, block its `/tdd` skill in your **user** settings with `"deny": ["Skill(mattpocock-skills:tdd)"]`, then run `/setup-matt-pocock-skills`.
+- For the first session, run `/wayfinder`: the stack choices are still undecided and should become the first decision records. After that, start each session with `/harness:start` and use `/harness:task` for features.

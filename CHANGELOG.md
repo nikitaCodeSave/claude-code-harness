@@ -8,6 +8,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [3.1.0] — 2026-10-29
+
+The flow becomes a set of commands. Each session starts with `/harness:start`, which says where
+work stands and the one command to type next; the other commands carry the measured prompts, so
+nothing long is typed by hand.
+
+### Added
+- **Nine user-invoked commands** in `plugins/harness/skills/`, each with
+  `disable-model-invocation: true`, so none costs context until typed (checked: a session's model
+  does not see them):
+  - `/harness:start` — reads the repository and routes, including to Pocock's skills;
+  - `/harness:task` — interview, spec, build in the same session; the measured prompt;
+  - `/harness:bugfix` — a failing test first, then the fix;
+  - `/harness:tests` — acceptance tests for a ticket or spec, in their own session;
+  - `/harness:build` — the build against those tests, in a fresh session, showing they stayed
+    untouched;
+  - `/harness:check` — a fresh read-only reviewer (a `Plan` subagent) against the spec, then the
+    fixes, at most three rounds; the measured review and fix prompts;
+  - `/harness:wrap` — decisions into ADRs, terms into the glossary, evidence, commit;
+  - `/harness:skill` — a project skill in `.claude/skills/` written from a session that solved a
+    task;
+  - `/harness:trajectory` — tighten a project skill from the tool calls of its last run.
+- **The manual is reorganised around the commands** (both languages). It covers:
+  - a "Your sequence" table first;
+  - a section on discussing a raw idea with Pocock's `/grill-with-docs` / `/grill-me` before
+    `/harness:task`;
+  - a section on growing project skills, with optional helpers (`skill-conductor`,
+    `developing-ai-agents`, `writing-for-agents`, `skill-creator`).
+- **Mechanical check M8**: every command is user-invoked, and every `/harness:<name>` the docs
+  mention exists. Proven to fail on both.
+
+### Changed
+- **Layout: every skill lives under `plugins/harness/skills/`.** The setup skill and its templates
+  moved to `skills/harness/SKILL.md` and `skills/harness/templates/`. Once a plugin has a `skills/`
+  directory, Claude Code stops loading a `SKILL.md` at the plugin root — the setup skill went
+  "Unknown skill" in the first build of this release, and the session eval caught it (scenario B
+  improvised a harness without the skill). M8 now fails on a root `SKILL.md` and on a model-invoked
+  setup skill turned user-only. Invocation is unchanged: `harness:harness` and the trigger phrases.
+- `SKILL.md` §8 hands the operator the commands; its "Do not" keeps skills out of setup and says
+  project skills grow later from solved tasks.
+- README (both languages): a *Commands* section, two rows in *Why use it*, the layout and *What it
+  deliberately doesn't do* updated.
+
+### Not measured
+- Whether the commands change outcomes against `CLAUDE.md` alone. They package measured prompts;
+  the grilling-first route, `/harness:check`'s subagent in place of a separate session and the
+  project-skill procedure are not measured on their own. Smoke runs:
+  - `/harness:start` routed a half-built spec correctly;
+  - `/harness:task` interviewed and wrote nothing before the answers;
+  - `/harness:check` sent the review to a `Plan` subagent with the measured prompt, found and fixed
+    a real gap over two rounds.
+
 ## [3.0.4] — 2026-10-28
 
 ### Added

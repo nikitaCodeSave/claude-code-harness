@@ -229,13 +229,22 @@ keep. End with the operator's next steps:
 - Start Claude Code at the repository root (§6).
 - Install `mattpocock-skills` if missing, choose its update mode, deny `/tdd` in user settings
   (§5), then run `/setup-matt-pocock-skills`.
-- New: the first feature — or `/wayfinder` if the way is unclear. Existing: work as usual.
+- Every session starts with `/harness:start`: it says where work stands and the one command to
+  type next. The flow's commands — `/harness:task`, `/harness:bugfix`, `/harness:tests`,
+  `/harness:build`, `/harness:check`, `/harness:wrap` — carry its prompts, so nothing long is typed
+  by hand.
+- New: the first feature with `/harness:task`, or `/wayfinder` if the way is unclear. Existing:
+  work as usual, through the same commands.
+- The project's own harness grows from solved work: once a task that took a long search finally
+  works, or a task keeps coming back, `/harness:skill` turns it into a project skill, and
+  `/harness:trajectory` tightens it after a real run.
 - Every 3–6 months or after a model upgrade: say "audit my Claude Code harness" — the cut
   matters more than the additions.
 
 ## Do not
 
-Create custom subagents, hooks, commands or skills at setup · write module maps, directory trees
+Create custom subagents, hooks, commands or skills at setup — project skills grow later, from
+tasks the project actually solved · write module maps, directory trees
 or architecture overviews · copy rulebooks into `.claude/docs/` · copy an existing decision log
 into a second place · add a journal the project does not keep · use
 `--dangerously-skip-permissions` · pin a model or Claude Code version in a project file · propose

@@ -1,4 +1,12 @@
-# Report — kit v2 (2026-10-28)
+# Report — kit 3.1.0 (2026-10-29)
+
+**16/16** — A 5/5, B 8/8, C 3/3. The hand-over now tells the operator to start each session with
+`/harness:start`. The first build of this release had the setup skill at the plugin root next to a
+new `skills/` directory; Claude Code then no longer loaded it, and scenario B improvised a harness
+with a hook and no deny list (B1, B3, B7 failed). Moving every skill under `skills/` fixed it; M8
+now guards the layout.
+
+## Earlier — kit v2 (2026-10-28)
 
 **Final run, after the refute-review fixes: 16/16** — A 5/5, B 8/8, C 3/3. B now adopts the existing
 `docs/decisions.md` as the decision home instead of copying it, and bridges the nested `web/AGENTS.md`

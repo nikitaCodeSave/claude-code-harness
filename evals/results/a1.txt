@@ -1,31 +1,30 @@
-Ignoring 3 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/tmp/tmp.loETZ2W8po/ws"].hasTrustDialogAccepted: true in /home/nikita/.claude/.claude.json.
-The Claude Code harness is set up and committed on `master` as `43d0f47`. I treated this as a new project with three planned parts (HTTP API, background worker, web frontend) that will be worked on for months.
+Ignoring 3 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/tmp/tmp.5R44T0gypI/ws"].hasTrustDialogAccepted: true in /home/nikita/.claude/.claude.json.
+I've set up the harness and committed it on `master` (`1148241`). I treated this as a new project with no code yet, planned as three components (API, worker, frontend) and worked on over months.
 
-**What I added:**
-- **`CLAUDE.md`** (55 lines): what the project is, how work should be done, and where decisions and terms get written down. Its rules:
-  - **Never:** commit secrets or put production credentials in `.env`, force-push or hard-reset, edit `.git/`.
-  - **Ask first:** database migrations, new dependencies, contract/schema files, CI and deployment config.
-  - **Contracts:** the links between API and worker, and between API and frontend, each need a check that both sides run. Changing one needs a decision record first.
+**What I added**
+- **`CLAUDE.md`** (69 lines): what the project is, rules for what to always do, ask about first and never do, how work is done, and where specs, decisions and terms are kept. Its commands are marked `TBD` until the stack exists rather than made up. It also lists the first decisions that will each need an ADR (a short decision record): repo tooling, API framework, worker queue, frontend framework, database and migrations, and the format of the interfaces between components.
+- **`.claude/settings.json`:**
+  - **Blocked:** reading or editing `secrets/`, editing `.git`, force-push and `git reset --hard`.
+  - **Asks first:** push, rebase, amending commits, adding dependencies (`uv`, `pip`, `npm`, `pnpm`), editing `**/migrations/**` and CI workflows.
+  - **Auto memory is off.**
+- **`.gitignore`:** `.env*` (except `.env.example`), `CLAUDE.local.md` and `.claude/settings.local.json`.
 
-  The command that proves the project works is marked `TBD` until the stack is chosen. I didn't invent one.
-- **`.claude/settings.json`**:
-  - **Blocked:** anything under `secrets/`, `.env.prod*` files, edits to `.git/`, force-push and hard reset.
-  - **Asks first:** push, rebase, amending a commit, files under `migrations/` and `.github/`.
+I left out per-component `CLAUDE.md` files because no component folders exist yet, and the glossary and ADRs because no terms or decisions exist yet.
 
-**Checks:** the settings file loads with no broken rules. Asked "what proves this project works?", a fresh session said there's no such command yet. Asked "what must you never do here?", it listed the Never rules.
+**Checks:** the settings file loaded with no bad rules. The only warning was that this folder hasn't been marked trusted yet. Asked "what must you never do here?", a headless session listed the blocked actions correctly. I didn't ask the other check ("what proves the project works?") because that command is still `TBD`.
 
-**Left out for now:** no folders for the three parts, since none exist yet. Each gets its own `CLAUDE.md` once it appears and has its own commands or rules. The glossary and the decision log (`docs/adr/`) get created with the first real term or decision.
+**Open questions**, also in the commit message:
+1. What the system is for, who uses it, and the project name.
+2. What must never happen in the system, even when it's inconvenient.
+3. Which paths are sensitive besides `secrets/` (production config, vendored code). I assumed changes to migrations should ask first.
+4. The one command that proves the whole project works.
+5. Stack choices: repo tooling, API framework, worker queue and broker, frontend framework, database and migration tool, interface format between components.
+6. Which tracker to use: GitHub, GitLab or local `.scratch/`.
+7. Whether all three components share one set of domain terms or each needs its own glossary.
 
-**Open questions:** these are recorded in the commit message.
-1. What the project is for, who uses it, and what "done" means.
-2. The stack: API and frontend frameworks, worker/queue, database, package managers, folder layout.
-3. What must never happen in this system, even when inconvenient.
-4. Where secrets, production config and migrations will live, and whether `.env` holds only development credentials.
-5. The one command that proves the project works.
-6. Where the contracts will live, so those files can be set to ask first.
-7. Which issue tracker to use (GitHub, GitLab or local files).
-
-**Your next steps:**
-- Start Claude Code once at the repository root and accept the trust dialog. Until you do, it ignores the project's allow rules, and a session started inside a subfolder won't load the deny list.
-- `mattpocock-skills` is already installed. Choose whether it updates automatically, block its `/tdd` skill in your **user** settings with `"deny": ["Skill(mattpocock-skills:tdd)"]`, then run `/setup-matt-pocock-skills`.
-- For the first session, run `/wayfinder`: the stack choices are still undecided and should become the first decision records. After that, start each session with `/harness:start` and use `/harness:task` for features.
+**Your next steps**
+- Start Claude Code from the repo root, and accept the trust prompt once.
+- Run `/setup-matt-pocock-skills` to pick the tracker and the docs layout (the plugin is already installed). Optionally turn on auto-update for it, and block `/tdd` in your user settings.
+- Each session, start with `/harness:start`. For the first feature use `/harness:task`, or `/wayfinder` since the stack is still undecided.
+- Add each component's `CLAUDE.md` and the real commands as the components are created.
+- Audit the harness every 3–6 months, or after a model upgrade.

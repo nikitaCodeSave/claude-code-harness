@@ -16,8 +16,8 @@ a short list of things and nothing else:
    `mattpocock-skills` plugin.
 
 No custom agents, hooks, commands or skills; no rulebooks copied into the project. The *How we
-work* lines rest on measurements or first-party sources (README, *How we work — and why*); the
-multi-component layout follows
+work* lines each have a named basis — a measurement, a first-party source, published research or
+established practice (README, *How we work — and why*); the multi-component layout follows
 Claude Code's own loading rules and is not benchmarked.
 
 Templates: `templates/CLAUDE.md`, `templates/component-CLAUDE.md`, `templates/settings.json`.
@@ -69,6 +69,7 @@ A headless run with no one to ask records the questions as open in its output an
 | `.claude/rules/<topic>.md` | only for a domain prohibition no type or test can express, that §1 actually found | ≤ 30 lines each |
 | tracker + domain-docs config | `/setup-matt-pocock-skills` (§5) | — |
 | `GLOSSARY.md`, ADRs | created on the first real term or decision, never empty | — |
+| `.out-of-scope/<slug>.md`, `docs/research/<slug>.md` | created when first needed; their lifecycle, and that of specs and ADRs, is in *Project knowledge* | — |
 
 **`AGENTS.md`.** Claude Code reads `AGENTS.md` only while no `CLAUDE.md` exists in the working
 directory or above it — so the root `CLAUDE.md` this skill writes switches off every `AGENTS.md`
@@ -76,6 +77,15 @@ below it. Keep `AGENTS.md` as the source of truth: start the root `CLAUDE.md` wi
 give every nested `AGENTS.md` a sibling `CLAUDE.md` containing `@AGENTS.md`, and put only
 Claude-specific lines in the `CLAUDE.md` files. Never paraphrase it into a second copy — two
 copies drift.
+
+**Auto memory is off.** It is on by default, and Claude writes it itself, outside review and
+outside the repository — a second, unreviewed store of project facts that keeps what the project
+has since revised. The settings template sets `"autoMemoryEnabled": false` for the project; what
+later work must know lives in `CLAUDE.md`, ADRs, the glossary and specs. Paths B and C: before it
+goes off, open `/memory` with the operator, move the project facts later work needs into ADRs or
+`CLAUDE.md`, and personal notes about this project into a gitignored `CLAUDE.local.md`. A teammate can turn it
+back on for themselves in `.claude/settings.local.json`; the `/memory` toggle writes user
+settings, which the project file outranks.
 
 **Every line must be something a new teammate would have to be told.** Directory trees, module
 maps, dependency lists and architecture overviews are derivable from the repo; instruction files
@@ -101,13 +111,16 @@ gotchas and prohibitions stay. `/init` can draft; your job is the cut.
 2. Run each fast, local, side-effect-free test command once and record the exact invocation that
    works. Suites that need services, credentials or network, or that change shared state, are not
    run: name them in *Commands* with what they need (or "CI-only").
-3. Write `CLAUDE.md`, `settings.json`, component files (§4).
+3. Write `CLAUDE.md`, `settings.json`, component files (§4) — auto memory goes off only after its
+   project facts are moved (§2).
 4. Knowledge, **only from what is not derivable**:
    - The project already keeps decisions (`docs/adr/`, `docs/decisions*`, MADR, an RFC folder) →
      that is the decision home; point *Project knowledge* at it. Do not copy it into a second place.
    - Decisions with reasons live only in issues, commit messages or a README → an ADR citing its
      source.
    - A term the code uses inconsistently → `GLOSSARY.md`.
+   - Finished specs, research notes or an archive folder already in the repository → list them in
+     the report; removing any of them is the operator's call.
    Do not migrate a wiki; do not summarize the code.
 5. Set up `mattpocock-skills` (§5).
 
@@ -122,9 +135,12 @@ gotchas and prohibitions stay. `/init` can draft; your job is the cut.
    `CLAUDE.md` · `CLAUDE.md` over budget or carrying derivable content · stale model or version
    pins · a paraphrased or switched-off `AGENTS.md` (§2) · missing or dead permission rules (§6) ·
    rulebooks copied into `.claude/docs/` (`workflow.md`, `testing.md`, `docs-discipline.md`) — the
-   *How we work* block replaces them · missing knowledge rules · no tracker.
+   *How we work* block replaces them · missing knowledge rules · no tracker · sediment: finished
+   specs left in place, ADRs a newer one contradicts without saying so, glossary terms of dropped
+   work, research notes whose decision is recorded, archive folders · auto memory on.
 3. Apply the approved items, then fill the gaps as in path B. Deleting accumulated data or an
-   actively used skill is confirm-before-acting.
+   actively used skill is confirm-before-acting. A finished spec, research note or glossary term
+   goes only after the line-by-line pass of `/harness:wrap` step 4: each line first gets its home.
 
 ## 4. Multi-component layout
 
@@ -227,6 +243,8 @@ deliberately left out, which questions are open. Do not introduce a journal the 
 keep. End with the operator's next steps:
 
 - Start Claude Code at the repository root (§6).
+- Auto memory is off in this project (§2): teammates' memory notes for it stop loading, and
+  `.claude/settings.local.json` turns it back on for one person.
 - Install `mattpocock-skills` if missing, choose its update mode, deny `/tdd` in user settings
   (§5), then run `/setup-matt-pocock-skills`.
 - Every session starts with `/harness:start`: it says where work stands and the one command to

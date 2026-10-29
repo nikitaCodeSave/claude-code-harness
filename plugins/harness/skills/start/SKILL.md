@@ -30,6 +30,8 @@ Route by what you found:
 - A change finished in this repo but not reviewed → `/code-review`, or `/harness:check` when it
   touches security, migrations, parsers, invariants, or anything expensive if wrong.
 - Finished and reviewed, not committed → `/harness:wrap`.
+- A spec whose criteria all pass and whose review (if it needs one) is done, still in place, or work
+  I've explicitly dropped → `/harness:wrap`: it proposes the closures and acts once I confirm.
 - A spec left half-built by an earlier session → `/harness:tests <spec>` now, then
   `/harness:build <spec>` in a fresh session.
 - Open tickets → the first unblocked one: without acceptance tests → `/harness:tests <ticket>`;
@@ -48,7 +50,8 @@ The commands, for reference:
 - `/harness:tests <ticket or spec>` — acceptance tests first, in their own session.
 - `/harness:build <ticket or spec>` — build against those tests, in a fresh session.
 - `/harness:check` — an independent review against the spec, then the fixes.
-- `/harness:wrap` — end of session: decisions, terms, evidence, commit.
+- `/harness:wrap` — end of session: decisions, terms, evidence, finished or dropped work closed,
+  commit.
 - `/harness:skill <what it does>` — turn a solved task into a project skill.
 - `/harness:trajectory` — tighten a project skill from the tool calls of its last run.
 - From mattpocock-skills: `/grill-with-docs`, `/grill-me`, `/to-spec`, `/to-tickets`, `/wayfinder`,

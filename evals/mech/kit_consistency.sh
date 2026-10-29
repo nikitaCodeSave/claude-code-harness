@@ -96,4 +96,33 @@ named=$(grep -rhoE '/harness:[a-z-]+' README.md README.ru.md docs/ plugins/harne
 missing=$(for n in $named; do [ -f "plugins/harness/skills/$n/SKILL.md" ] || echo "/harness:$n"; done)
 [ -n "$missing" ] && echo "$missing" | sed 's/^/    /'
 say "no mentioned command is missing" $([ -z "$missing" ]; echo $?)
+echo "M9 — finished, dropped and changed work leaves no stale files, guarded; auto memory is off"
+echo "     (a presence-and-order check of the guard phrases, not a reading of the rules)"
+say "settings template sets autoMemoryEnabled: false" $([ "$(jq '.autoMemoryEnabled' plugins/harness/skills/harness/templates/settings.json)" = false ]; echo $?)
+flat() { tr '\n' ' ' < "$1" | tr -s ' '; }   # rules wrap across lines; match them as prose
+homes='a test, an ADR, the glossary or the commit message'
+pk=$(sed -n '/^## Project knowledge/,$p' plugins/harness/skills/harness/templates/CLAUDE.md | tr '\n' ' ' | tr -s ' ')
+for k in 'without my confirmation' 'removed or closed' 'acts only after I confirm' 'commits the work first' \
+         'superseded by NNNN' '| never: a changed decision is a new ADR' 'skipping those marked deprecated or superseded' 'finished and reviewed' \
+         "once every line of its spec lives in $homes" 'closed there' 'only when I say to drop it' \
+         'code built only for it are removed' 'when I reverse the rejection' 'docs/research/' 'no archive folders'; do
+  say "template Project knowledge: '$k'" $(printf '%s' "$pk" | grep -qF -- "$k"; echo $?)
+done
+w=$(flat plugins/harness/skills/wrap/SKILL.md)
+for k in "propose them, don't act yet" 'once its review (if it needs one) is done' 'line by line' "$homes" \
+         'not deleted' 'explicitly told you to drop' '"later" is not "drop"' 'any code built only for it' \
+         'wontfix' 'deprecated' 'superseded by NNNN' 'After I confirm' 'commit the work, then carry out the closures' \
+         'commit the removals on their own'; do
+  say "/harness:wrap: '$k'" $(printf '%s' "$w" | grep -qF -- "$k"; echo $?)
+done
+order=$(python3 - <<'PY'
+t=open('plugins/harness/skills/wrap/SKILL.md').read().lower()
+s4=t.find("propose them, don't act yet"); conf=t.find('after i confirm'); act=t.find('carry out the closures')
+print(0 if -1 not in (s4,conf,act) and s4 < conf < act and t.count('carry out') == 1 else 1)
+PY
+)
+say "/harness:wrap acts on closures only after the confirmation" "$order"
+s=$(flat plugins/harness/skills/start/SKILL.md)
+say "/harness:start routes only reviewed or explicitly dropped work to /harness:wrap" \
+  $(printf '%s' "$s" | grep -qF "explicitly dropped" && printf '%s' "$s" | grep -qF "review (if it needs one) is done"; echo $?)
 exit $fail

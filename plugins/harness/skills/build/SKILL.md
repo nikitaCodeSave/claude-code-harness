@@ -11,4 +11,4 @@ work around it. Done means they and the existing suite pass; report the command 
 
 At the end, show the tests were left untouched: run `git diff --stat <the commit that added them>
 -- <their directory>` and show that it prints nothing. Commit the build. If $ARGUMENTS is a ticket,
-remind me to close it — an open ticket keeps the tickets it blocks waiting.
+remind me that `/harness:wrap` closes it — an open ticket keeps the tickets it blocks waiting.

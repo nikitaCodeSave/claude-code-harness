@@ -71,9 +71,9 @@ verdict.
   it to a Claude Code release or a model; the mechanical suite fails on a pin. Version-specific
   knowledge about Claude Code lives in the maintainer's lab (`native-capabilities.md`), not here.
 - **Templates ship into other people's repositories.** Every line there is paid for on every turn
-  of every session in those projects; a line stays only if it rests on a measurement or a
-  first-party source, and the reason is recorded in the README's *How we work — and why* or the
-  CHANGELOG.
+  of every session in those projects; a line stays only if it has a named basis — a measurement,
+  a first-party source, published research or an established practice — recorded in the README's
+  *How we work — and why* or the CHANGELOG. Where the lab has not measured it, say so.
 - **Language split is deliberate**: everything that ships to users is English; the maintainer's
   dev harness under `.claude/` is Russian.
 - **Single-incident does not become an invariant.** A new rule needs multi-source evidence or

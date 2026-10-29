@@ -1,0 +1,183 @@
+{
+  "role": "fresh-context refuter (release 3.2.0 of the harness plugin)",
+  "scope": "git diff HEAD at d42c387a36a598918add1a6d26aecf8c218a8b84 (uncommitted): plugins/harness/skills/harness/templates/CLAUDE.md, templates/settings.json, skills wrap/start/build/harness SKILL.md, README.md, README.ru.md, docs/manual.md, docs/manual.ru.md, CHANGELOG.md, AGENTS.md, evals/mech/kit_consistency.sh; evals/results/*.txt ignored. Cross-read: skills check/tests/task, mattpocock-skills local copy ~/.local/share/mattpocock-skills @4588b32, code.claude.com memory + settings + settings-reference, Nygard 2011. ./evals/run.sh mech run (PASS) plus mutations on a /tmp copy.",
+  "date": "2026-10-29",
+  "default_posture": "refuted unless proven",
+  "overall_verdict": "red: the always-loaded template's Project knowledge table orders spec/code removal and tracker closure with none of the guards (confirm, review done, commit first) that live only in /harness:wrap; /harness:build says wrap closes a ticket that wrap never closes; M9 stays green with wrap's review gate deleted",
+  "prior_issues": [
+    {
+      "id": 1,
+      "resolved": false,
+      "evidence": "Fixed inside wrap: wrap/SKILL.md:17 '**Closures — propose them, don't act yet.**' and :32-33 'After I confirm: commit the work, then carry out the closures and commit the removals on their own, so git keeps what was removed.' Still reachable through the template, which every session loads: templates/CLAUDE.md:52 'finished: once every line of its spec lives in a test, an ADR or the glossary, the spec file goes ... Dropped — only when I say to drop it ...: the same, plus its tickets closed `wontfix` with the reason and its acceptance tests and code removed'. That cell has no confirm step, no commit-first step and no pointer to /harness:wrap. /harness:task (task/SKILL.md:10-13) writes specs/<slug>.md and builds without committing, so a session that follows the table after the build deletes a spec git never saw. See N1."
+    },
+    {
+      "id": 2,
+      "resolved": true,
+      "evidence": "wrap/SKILL.md:23-25 'propose removing its spec and ticket files, its acceptance tests and any code built only for it'; templates/CLAUDE.md:52 'its acceptance tests and code removed'. Residual: the template omits wrap's 'only for it' (N10)."
+    },
+    {
+      "id": 3,
+      "resolved": true,
+      "evidence": "wrap/SKILL.md:23 'Work I explicitly told you to drop — \"later\" is not \"drop\"'; templates/CLAUDE.md:52 'Dropped — only when I say to drop it, not \"later\"'; :54 '.out-of-scope/<concept>.md | a request I rejected that later work must not re-propose, and why'. This matches mattpocock triage/OUT-OF-SCOPE.md:3 'persistent records of rejected feature requests' and :68 '...those aren't real rejections, they're deferrals'. Residual on the removal point: N4."
+    },
+    {
+      "id": 4,
+      "resolved": true,
+      "evidence": "templates/CLAUDE.md:52 'a spec or ticket in a tracker is closed there'; wrap/SKILL.md:21-22 'closing its tickets in a tracker (`.scratch/` included) — closed there, not deleted.' Under no reading is a GitHub issue deleted. Residual: wrap's finished bullet says 'removing the spec file' and never says to close a spec kept in a tracker (N6)."
+    },
+    {
+      "id": 5,
+      "resolved": true,
+      "evidence": "wrap/SKILL.md:21-22 '(`.scratch/` included) — closed there, not deleted', and the line-by-line pass (:18-20) now comes before any removal, including for dropped work (:23 'the same pass'). Residual: a .scratch spec.md and dropped .scratch ticket files can still be read as 'spec and ticket files' to remove (N6)."
+    },
+    {
+      "id": 6,
+      "resolved": true,
+      "evidence": "templates/CLAUDE.md:56-57 'read the glossary entries and the ADRs that touch it, skipping those marked deprecated or superseded'. An ADR without a status is read. Same in manual.md:254-255 and manual.ru.md."
+    },
+    {
+      "id": 7,
+      "resolved": true,
+      "evidence": "start/SKILL.md:33-34 'A spec whose criteria all pass and whose review (if it needs one) is done, still in place, or work I've explicitly dropped → `/harness:wrap`'; wrap/SKILL.md:18 'once its review (if it needs one) is done'. Start's routing is fixed. The same harm, a spec removed before /harness:check reads it, is still reachable through templates/CLAUDE.md:52, which has no review gate (N1). M9 does not guard wrap's review gate (prior 11)."
+    },
+    {
+      "id": 8,
+      "resolved": true,
+      "evidence": "README.md:225-227 'Nygard's ADR format keeps a reversed decision and marks it superseded, and mattpocock-skills use the same statuses (optional there, required here)'; CHANGELOG.md:43 'Nygard's ADR statuses, also used by mattpocock-skills'. Both are accurate: mattpocock domain-modeling/ADR-FORMAT.md:21 'Status frontmatter (`proposed | accepted | deprecated | superseded by ADR-NNNN`)' under 'Optional sections'. Minor: the kit's set is a subset (no `proposed`) and mattpocock writes `ADR-NNNN`, so 'the same statuses' is loose but not false."
+    },
+    {
+      "id": 9,
+      "resolved": true,
+      "evidence": "manual.ru.md:337-338 'а каждое ADR, заменённое более новым, говорит об этом в своём статусе' matches manual.md 'every ADR a newer one replaced says so in its status'. README.ru 'заменённое ADR получает статус `superseded by NNNN`' matches the EN."
+    },
+    {
+      "id": 10,
+      "resolved": true,
+      "evidence": "harness/SKILL.md:85-88 'Paths B and C: before it goes off, open `/memory` with the operator, move the project facts later work needs into ADRs or `CLAUDE.md`, and personal preferences into their user `CLAUDE.md`. A teammate can still turn it on for themselves in `.claude/settings.local.json`.' Residuals (N7): this step sits only in §2 prose, while path B step 3 (SKILL.md:114) writes settings.json; personal project-specific notes are sent to the global user CLAUDE.md rather than CLAUDE.local.md; teammates' memories are hidden when they pull, and the hand-over (§8) says nothing about it."
+    },
+    {
+      "id": 11,
+      "resolved": false,
+      "evidence": "kit_consistency.sh:110-112: the wrap key list does not include wrap's review gate ('once its review (if it needs one) is done'), 'only for it', or the order of confirm and act. On a /tmp copy I deleted ', once its review (if it needs one) is done', changed 'any code built only for it' to 'its code', and rewrote step 6 to 'Carry out the closures first. After I confirm: commit the work and commit the removals' → M9: 0 FAIL, exit 0. The template's own removal row has no guard at all, so M9 cannot see that gap. CHANGELOG.md:40-41 ('carry these rules with their guards') overstates what M9 checks."
+    }
+  ],
+  "new_findings": [
+    {
+      "id": "N1",
+      "severity": "high",
+      "file_line": "plugins/harness/skills/harness/templates/CLAUDE.md:52",
+      "problem": "The always-loaded Project knowledge table states as fact when the spec file 'goes' and when dropped work's 'acceptance tests and code [are] removed' and its tickets 'closed `wontfix`'. It states this without the guards that exist only in /harness:wrap: propose first and act after confirmation (wrap:17,32), review done (wrap:18), commit before removing (wrap:32-33). The template never mentions /harness:wrap.",
+      "scenario": "(a) `/harness:task X`: the session writes specs/x.md, builds, and tests pass. Following CLAUDE.md, it moves the spec's lines into tests and an ADR and deletes specs/x.md in the same turn. /harness:task never commits, so the spec is unrecoverable, and /harness:check (check:10 'Find the spec this change implements') and the high-stakes review in How we work (template:38-40) have nothing to review against. (b) The operator says 'drop this' mid-session with half-built code uncommitted. The table says its tests and code are removed and its GitHub tickets closed wontfix. The session deletes uncommitted code and closes public issues with no confirmation.",
+      "fix": "In the 'When it goes' cell for the spec, state that `/harness:wrap` proposes the removal after review, commits first and acts only once I confirm, e.g. 'finished and reviewed: `/harness:wrap` proposes ... and removes it only once I confirm'. Then add an M9 key for that guard in the template."
+    },
+    {
+      "id": "N2",
+      "severity": "medium",
+      "file_line": "plugins/harness/skills/build/SKILL.md:14; plugins/harness/skills/wrap/SKILL.md:18-22; docs/manual.md:173-174; docs/manual.ru.md:171",
+      "problem": "build now says 'remind me that `/harness:wrap` closes it', but wrap closes tickets only as part of 'A spec whose criteria all pass'. It has no step for one finished ticket while the spec still has open tickets. The manual (EN and RU) still says the operator closes it ('Close the ticket afterwards' / 'Затем закройте тикет').",
+      "scenario": "The ticket flow, per manual.md:185 ('/harness:check when the ticket is risky, then /harness:wrap'): ticket 01 is built and the operator runs /harness:wrap, trusting build's reminder. Wrap does nothing for the ticket, because the spec is unfinished. The ticket stays open in GitHub or .scratch ('A ticket is unblocked when every file it lists is `resolved`', mattpocock issue-tracker-local.md:27), so ticket 02 stays blocked. This is exactly the failure build warns about.",
+      "fix": "Add a wrap closure bullet for a finished ticket ('a ticket whose criteria pass: propose closing it in the tracker'). Alternatively revert build to 'remind me to close it'. Make the manual agree in both languages."
+    },
+    {
+      "id": "N3",
+      "severity": "medium",
+      "file_line": "plugins/harness/skills/wrap/SKILL.md:23; templates/CLAUDE.md:50,52; plugins/harness/skills/harness/SKILL.md:136",
+      "problem": "For dropped work, wrap runs 'the same pass': every line of the dropped spec must live in 'a test, an ADR or the glossary; write what is missing'. The session therefore writes tests that are then removed, ADRs that are then set to deprecated, and glossary terms that stay. The template's glossary row says terms never go ('—'). Yet the setup audit (path C) flags 'glossary terms of dropped work' as sediment. The kit's own flow produces the sediment its audit reports, and the template forbids removing it.",
+      "scenario": "The operator drops feature 'Refund holds'. Wrap's pass adds 'Refund hold' to GLOSSARY.md (to give the spec's line a home), removes the code, and leaves the term. A later session reads the glossary, treats Refund hold as a live domain concept and reuses or re-proposes it. The next 'audit my harness' flags it.",
+      "fix": "For dropped work, keep only what outlives it: decisions that later work must follow (ADR) and the rejection (.out-of-scope). Remove glossary terms and write no tests for it. Give the glossary row a 'When it goes' entry for terms used only by dropped work."
+    },
+    {
+      "id": "N4",
+      "severity": "low",
+      "file_line": "templates/CLAUDE.md:54",
+      "problem": "`.out-of-scope/<concept>.md` has 'When it goes: —' (never). The source the README cites for this store deletes the file when the rejection is reversed: mattpocock triage/OUT-OF-SCOPE.md:99-103 'If the maintainer changes their mind about a previously rejected concept: Delete the `.out-of-scope/` file'. No kit step removes it either.",
+      "scenario": "The operator later accepts a previously rejected request. The template says the file stays, so it keeps telling sessions 'must not re-propose'. Mattpocock /triage reads `.out-of-scope/*.md` on every triage (triage SKILL.md:70) and keeps surfacing a rejection that is no longer true, contradicting the template's own 'Files describe the present'.",
+      "fix": "'When it goes: when I reverse the rejection'."
+    },
+    {
+      "id": "N5",
+      "severity": "low",
+      "file_line": "templates/CLAUDE.md:51-53; wrap/SKILL.md:28",
+      "problem": "Accepted ADRs may take only a status edit ('setting the old one's status is the only edit an accepted ADR takes'). Meanwhile specs and docs/research notes, which ADRs typically cite as their source, are removed, and research notes are removed with no line-by-line pass. The result is dead links in records the template forbids repairing. The kit's own AGENTS.md allows the one repair 'a link whose target moved' for frozen files; the template gives no such allowance.",
+      "scenario": "ADR 0007 cites docs/research/queue-choice.md for its evidence. Wrap removes the note 'once its decision is recorded'. The ADR now points nowhere and the template forbids fixing it. The cited sources (mattpocock research SKILL.md:11 'citing each claim's source') are gone from the tree.",
+      "fix": "Either allow a link repair to point at the removing commit, or require the ADR to carry the citations it relies on before the note goes (the same pass as for specs)."
+    },
+    {
+      "id": "N6",
+      "severity": "low",
+      "file_line": "wrap/SKILL.md:20-24 vs templates/CLAUDE.md:52",
+      "problem": "In a project with a local `.scratch/` tracker, the spec is `.scratch/<slug>/spec.md` (mattpocock issue-tracker-local.md:8). The template says 'a spec ... in a tracker is closed there', but wrap's finished bullet says 'propose removing the spec file', and its dropped bullet says 'removing its spec and ticket files' next to 'closing its tracker tickets'. Both can be read as deleting .scratch files that the wayfinder map and sibling tickets link to.",
+      "scenario": "Wrap proposes deleting `.scratch/billing/spec.md` (finished) or `.scratch/billing/issues/*.md` (dropped). The operator confirms, and map.md's Decisions-so-far links, and tickets that reference the spec, now dangle.",
+      "fix": "In wrap, limit file removal to `specs/<slug>.md` and `specs/<slug>/`, and say that a spec or ticket kept in any tracker, `.scratch/` included, is closed there."
+    },
+    {
+      "id": "N7",
+      "severity": "low",
+      "file_line": "plugins/harness/skills/harness/SKILL.md:85-88, 114, 235-254",
+      "problem": "Three gaps in the auto memory migration. (1) Personal preferences go to 'their user CLAUDE.md', which applies in every project. First-party docs give per-project personal preferences a different home: './CLAUDE.local.md | Personal project-specific preferences'. (2) The migration exists only in §2 prose; path B's numbered steps write settings.json at step 3 without it. Settings reload live, so memory goes off at that point; nothing is deleted. (3) Teammates' own memories are hidden as soon as they pull ('When `false`, Claude doesn't read from or write to the auto memory directory'), and the §8 hand-over does not say so. The obvious way to re-enable, the /memory toggle, writes user settings, which the project file outranks, so it silently does nothing.",
+      "scenario": "A teammate's memory notes for this repo stop loading after pulling. They flip /memory, nothing changes, and nobody told them about settings.local.json.",
+      "fix": "Send personal project-specific notes to CLAUDE.local.md. Put the migration into path B and C steps before settings.json is written. Add to §8: 'auto memory is off here; to keep yours, move it or set `autoMemoryEnabled: true` in `.claude/settings.local.json` (the /memory toggle writes user settings and won't override the project)'."
+    },
+    {
+      "id": "N8",
+      "severity": "low",
+      "file_line": "templates/CLAUDE.md:45-46; harness/SKILL.md:107-122",
+      "problem": "'Files describe the present; history is git, so no archive folders' ships into path B projects (existing, no harness) with no step to reconcile an existing archive directory. Only path C audits archive folders, and only under approval. A project whose archive is frozen provenance (this lab's `.claude/docs/archive/` is 'Never edit') gets an instruction that reads as 'remove it'.",
+      "scenario": "A later session tidying docs reads 'no archive folders' and proposes or performs deleting docs/archive/.",
+      "fix": "Phrase it as 'don't create archive folders', and have path B report an existing one instead of leaving the contradiction."
+    },
+    {
+      "id": "N9",
+      "severity": "low",
+      "file_line": "wrap/SKILL.md:19-20; templates/CLAUDE.md:51-52",
+      "problem": "'Every line must live somewhere else — a test, an ADR or the glossary' leaves no home for spec lines that are neither checks, terms, nor decisions later work must follow (motivation, user-story narrative). The ADR row limits ADRs to 'decisions that are hard to reverse or that later work must follow', and the kit's own convention puts 'what changed and why' in the commit message, which the pass does not accept.",
+      "scenario": "Wrap either writes ADRs for non-decisions, inflating the store that every later session reads, or never finds a home for the line and never proposes the removal.",
+      "fix": "Add 'or is not needed by later work (it goes into the commit message)'."
+    },
+    {
+      "id": "N10",
+      "severity": "low",
+      "file_line": "templates/CLAUDE.md:52 vs wrap/SKILL.md:24",
+      "problem": "The template says dropped work has its 'acceptance tests and code removed'. Wrap narrows this to 'any code built only for it'. The always-loaded copy is the wider one.",
+      "scenario": "Dropped work included a refactor that other code now depends on. A session following the template removes it.",
+      "fix": "Use 'code built only for it' in the template and add it as an M9 key."
+    },
+    {
+      "id": "N11",
+      "severity": "low",
+      "file_line": "plugins/harness/skills/harness/SKILL.md:18-20 vs README.md:25",
+      "problem": "The diff changes SKILL.md to say 'The *How we work* lines rest on measurements, first-party sources or established practice'. The How we work block did not change, and README.md:25 still says of it 'Each line rests on a measurement'. The established-practice lines added in this release are in *Project knowledge*. SKILL.md also lists three bases where README and AGENTS.md list four (it omits published research).",
+      "scenario": "Two shipped documents disagree about what the How we work block rests on.",
+      "fix": "Revert the SKILL.md sentence for How we work, and add a separate clause saying the Project knowledge lines rest on established practice."
+    }
+  ],
+  "runtime_claim": {
+    "verdict": "verified. Project `.claude/settings.json` with `\"autoMemoryEnabled\": false` turns auto memory off for that project, and `.claude/settings.local.json` outranks it for one person. Caveats the kit omits: the /memory toggle writes user settings, which the project file outranks, so it cannot re-enable memory here; `CLAUDE_CODE_DISABLE_AUTO_MEMORY` overrides the key in either direction; cloud sessions do not read settings.local.json.",
+    "quotes": [
+      "memory: \"Auto memory is on by default in local sessions.\"",
+      "memory: \"To turn it off for a single project, set `autoMemoryEnabled` in that project's settings: { \\\"autoMemoryEnabled\\\": false }\"",
+      "memory: \"To toggle it, open `/memory` in a session and use the auto memory toggle, which saves `autoMemoryEnabled` to your user settings at `~/.claude/settings.json`.\"",
+      "memory table: \"Who writes it | You | Claude\"; storage \"~/.claude/projects/<project>/memory/\" and \"Auto memory is machine-local.\"",
+      "settings-reference autoMemoryEnabled: \"When `false`, Claude doesn't read from or write to the auto memory directory. You can also toggle it with `/memory` during a session, which writes this key to your user settings.\" · \"Scope: Any file\" (\"`Any file` means all four\": User, Project, Local, Managed) · \"Default: true\" · \"Per-session overrides: CLAUDE_CODE_DISABLE_AUTO_MEMORY takes precedence over this key for one session, in either direction\"",
+      "settings precedence: \"Settings precedence, highest first: managed settings, command line, project local, shared project, user. A key set at a higher level overrides the same key set lower down.\"",
+      "settings: \"Commit `.claude/settings.json` so everyone who clones the repository gets the same permissions, hooks, and plugins. Each teammate can still override it for themselves in their own `.claude/settings.local.json`\"",
+      "settings (cloud): \"User and project local settings (`~/.claude/settings.json` and `.claude/settings.local.json`): not read.\"",
+      "memory: \"./CLAUDE.local.md | Personal project-specific preferences; add to .gitignore\" (relevant to N7)"
+    ]
+  },
+  "grounds": {
+    "verdict": "mostly accurate, with one conflict with the kit's own rule and two stretches",
+    "notes": [
+      "Nygard (cognitect 2011): \"If a decision is reversed, we will keep the old one around, but mark it as superseded.\" Statuses are proposed / accepted / deprecated / superseded, and a later ADR may mark an earlier one deprecated or superseded. README.md:225-226 and CHANGELOG.md:43 state this accurately. The kit drops `proposed` and uses `deprecated` for dropped work with no replacement, a reasonable extension. Nygard does not state the kit's 'only edit an accepted ADR takes'; that rule is the kit's own.",
+      "mattpocock ADR format (domain-modeling/ADR-FORMAT.md:21): Status is optional frontmatter `proposed | accepted | deprecated | superseded by ADR-NNNN`. 'Same statuses (optional there, required here)' is fair; the kit's set is a subset. The template requires a status on every ADR, but mattpocock /grill-with-docs (which /harness:start routes to) writes most ADRs without one ('Most ADRs won't need them').",
+      "Lazy creation: ADR-FORMAT.md:5 'Create the `docs/adr/` directory lazily' and domain-modeling SKILL.md:40 'Create files lazily: only when you have something to write'. Accurate for the glossary and ADRs. Mattpocock does not cover `.out-of-scope/` or research notes in those words.",
+      "`.out-of-scope/`: OUT-OF-SCOPE.md:3 'persistent records of rejected feature requests'. Accurate. The kit diverges on removal (N4).",
+      "Writing-guide quote (productivity/writing-for-agents/SKILL.md:80): 'the default fate is **sediment**: stale layers that settle because adding feels safe and removing feels risky'. The quote is exact, but it concerns pruning lines inside agent-facing documents, not deleting finished project specs. Mattpocock's own practice for specs and tickets is to close them and keep them (local tracker `Status:` line, wayfinder `Status: resolved`; to-tickets 'Do NOT close or modify any parent issue'). The removal of finished specs and research notes therefore rests on the kit's own reasoning ('in a large project leftovers are read as live'), which the README marks as unmeasured. That honesty is right, but 'established practice' does not cover the removal itself.",
+      "Conflict with the kit's rule: README.md:230-232 grounds the line-by-line pass on 'one observation in the maintainer's lab'. AGENTS.md says 'Single-incident does not become an invariant ... the kit rejects rules grounded in one observation, including its own'. A single observation is also none of the four bases the new AGENTS.md:73-76 / README.md:16-17 rule names. Either name another basis (e.g. the writing guide's single-source-of-truth rule) or present the pass as a guard on a removal and keep it out of the rule's scope explicitly.",
+      "Auto memory grounds: first-party claims verified (runtime_claim). 'mattpocock-skills keep a project's language and decisions in reviewed, versioned files instead' is true for the glossary and ADRs, but 'instead' suggests mattpocock positions them against auto memory. Mattpocock never mentions auto memory (grep of the local copy: no hits).",
+      "`_Avoid_` (template:50, wrap:14) comes from mattpocock GLOSSARY-FORMAT.md:27, but neither README nor CHANGELOG names it as the basis, contrary to the new rule.",
+      "The new AGENTS.md rule matches README.md:16-17 (four bases). SKILL.md:18-20 lists three and applies them to the wrong block (N11).",
+      "EN/RU: README, README.ru, manual and manual.ru agree on every changed line. No divergence found. Only the RU and EN manuals both contradict build/SKILL.md on who closes a ticket (N2)."
+    ]
+  }
+}

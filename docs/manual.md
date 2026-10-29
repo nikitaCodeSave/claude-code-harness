@@ -122,8 +122,9 @@ it is not done — ask: `Show the command you ran and its output.`
   measured review ran in a separate session; the command uses a fresh subagent for the same
   reason — a reviewer who hasn't seen the reasoning.
 
-**7. `/harness:wrap`.** Decisions into ADRs, new terms into the glossary, the check's output, what is
-left, and a commit that says what changed and why.
+**7. `/harness:wrap`.** Decisions into ADRs, new terms into the glossary, the check's output,
+finished or dropped work closed, what is left, and a commit that says what changed and why —
+including every file it deletes.
 
 ## A raw idea — discuss it first
 
@@ -169,8 +170,8 @@ forgotten it.
   each must fail on its own assertion, not on an import error, which also catches a criterion that
   is already true at the base commit. The command commits them and gives you the commit id.
 - `/harness:build <ticket>` in a fresh session. It builds against those tests without editing them,
-  shows with `git diff` that they stayed untouched, and commits. Close the ticket afterwards — an
-  open ticket keeps the tickets it blocks waiting.
+  shows with `git diff` that they stayed untouched, and commits. Close the ticket afterwards —
+  `/harness:wrap` proposes it — because an open ticket keeps the tickets it blocks waiting.
 
   For a hard guarantee that the tests can't be edited, start that session with:
 
@@ -250,10 +251,22 @@ decisions, not with the first conversation. The harness keeps them in versioned 
 - **Decisions** that later work must follow, including ones you mention "for later" → `docs/adr/`,
   or the decision log the project already keeps, written in the session where they were made.
 - **Procedures** the project has solved → project skills in `.claude/skills/`.
-- **Before changing an area**, the session reads the glossary entries and ADRs that touch it.
+- **Before changing an area**, the session reads the glossary entries and the ADRs that touch it,
+  skipping those marked deprecated or superseded.
 - **Work in flight** lives in the open spec or the tracker. Nothing else.
+- **A changed decision** → a new ADR; the old one's status becomes `superseded by NNNN`. That status
+  line is the only edit an accepted ADR takes.
+- **Finished or dropped work leaves no files.** A finished, reviewed spec file goes once every line
+  lives in a test, an ADR, the glossary or the commit message; a spec in a tracker is closed there. Work you explicitly drop goes
+  too — spec, tickets (`wontfix`), acceptance tests and code; a request you rejected for good goes to
+  `.out-of-scope/`. A research note in `docs/research/` lasts until its decision is recorded.
+  `/harness:wrap` proposes each removal and acts after you confirm, committing the work first. History
+  is git — no archive folders.
+- **No auto memory.** The settings template turns it off: memory Claude writes itself, outside
+  review, keeps facts the project has revised.
 
-`/harness:wrap` checks the first two at the end of every session.
+`/harness:wrap` writes the terms and decisions and closes finished or dropped work at the end of every
+session.
 
 What was measured: three features in new sessions, with an owner who never repeated earlier
 decisions.
@@ -310,6 +323,7 @@ growing — were not modelled.
 | Review until the reviewer is happy | A reviewer asked to find problems always finds something. Correctness only, three rounds. |
 | Write project skills up front, or add custom agents, hooks or rulebooks | A skill grows from a task the project solved; everything else is paid on every turn. |
 | Start a session journal the project doesn't keep | It duplicates the spec, the ADRs and git. |
+| Keep finished specs or an archive folder "for reference" | Sessions read them as live requirements; git keeps the history. |
 
 ## It's working if
 
@@ -319,6 +333,7 @@ growing — were not modelled.
 - Every "done" carries a command and its output.
 - When you state a decision once, an ADR appears in that session, and a later session cites it
   without being told.
+- `specs/` holds only open work, and every ADR a newer one replaced says so in its status.
 - Tasks that recur are project skills, and their runs get shorter.
 - `CLAUDE.md` gets shorter over time, not longer.
 

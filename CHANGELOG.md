@@ -8,9 +8,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
-## [Unreleased]
+## [3.2.0] — 2026-10-29
+
+Project files get a lifecycle. *Project knowledge* becomes a table of where each file lives, what it
+holds and when it goes, so finished, dropped and changed work stops leaving files that later sessions
+read as live; auto memory is off in the project, and the rule for what a template line rests on
+names published research and established practice alongside measurements.
+
+### Added
+- **The lifecycle of project files.** *Project knowledge* in the root template is a table — where
+  each file lives, what it holds, when it goes. Files describe the present and history is git, so no
+  archive folders, and nothing is removed or closed without the operator's confirmation:
+  `/harness:wrap` proposes it, acts only after confirmation and commits the work first. A finished,
+  reviewed spec file goes once every line lives in a test, an ADR, the glossary or the commit
+  message, with ticket files under `specs/<slug>/`; a spec or ticket in a tracker is closed there.
+  Work the operator explicitly drops — "later" is not "drop" — goes too: what later work must
+  follow goes to an ADR, then the spec, its acceptance tests, code built only for it and glossary
+  terms only it used are removed and its tickets closed `wontfix`. A rejected request later work
+  must not re-propose goes to `.out-of-scope/<concept>.md`, removed if the rejection is reversed; a
+  research note in `docs/research/<slug>.md` lasts until its decision is recorded. Every ADR
+  carries a status (`accepted`, `deprecated`, `superseded by NNNN`), setting it is the only edit an
+  accepted ADR takes, sessions skip ADRs marked deprecated or superseded, and an ADR cites a spec
+  or research note it rests on by path. A term replaced by a better name keeps the old
+  one under `_Avoid_`.
+- `/harness:wrap` proposes the closures — a finished ticket once its acceptance tests pass and its
+  review is done, a spec after a line-by-line pass so each claim keeps a home — and acts only after confirmation,
+  committing the work before the removals so git keeps them. `/harness:start` routes a passing,
+  reviewed spec, or explicitly dropped work, to it; `/harness:build` points ticket closing at it.
+- The settings template sets `"autoMemoryEnabled": false`: auto memory is on by default and written
+  by Claude outside review and outside the repository; what later work needs lives in versioned
+  files. On paths B and C the setup skill first moves the operator's project facts into ADRs or
+  `CLAUDE.md` and personal notes into a gitignored `CLAUDE.local.md`; the hand-over says that
+  `.claude/settings.local.json` turns it back on for one person (the `/memory` toggle writes user
+  settings, which the project file outranks).
+- The setup skill's audit of an existing harness reports sediment — finished specs left in place,
+  ADRs a newer one contradicts without saying so, glossary terms of dropped work, research notes
+  whose decision is recorded, archive folders — and auto memory left on. Path B lists finished
+  specs, research notes and archive folders it finds; removing them is the operator's call, and on
+  path C each goes only after the same line-by-line pass.
+- Mechanical check M9: the template, `/harness:wrap` and `/harness:start` carry these rules and the
+  phrases of their guards, `/harness:wrap` names the confirmation before the step that carries out
+  the closures, and the settings template turns auto memory off. It is a tripwire on the guard
+  phrases and their order, not a reading of the rules: a reworded guard can pass it, which is what
+  review is for.
+
+The grounds: once its criteria are tests, a finished spec restates its own oracle and drifts from
+the code unnoticed — the maintainer's documentation rule puts the oracle before prose. Nygard's ADR
+format keeps a reversed decision and marks it superseded; mattpocock-skills offer the same statuses
+as optional frontmatter, create these files lazily and keep rejected requests in `.out-of-scope/`.
+The lab has not measured the effect on sessions; *How we work — and why* gives the grounds.
 
 ### Changed
+- **What a line rests on.** A template line stays if it has a named basis — a measurement, a
+  first-party source, published research or an established practice — recorded in *How we work —
+  and why* or here; where the lab has not measured it, the README says so (README, `AGENTS.md`).
 - README and manual (both languages): the *How we work* block is measured on its own. On the
   three lab tasks with a busy owner, the kit's `CLAUDE.md` and a plain request gave an interview, a
   spec and a reported test command in 9 of 9 runs and full acceptance in 9 of 9; `/harness:task`

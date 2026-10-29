@@ -13,7 +13,8 @@ It works for a new repository, an existing one, and one that already has a harne
 large multi-component codebases developed over months.
 
 > One opinion drives it: **under a capable model, the least harness that works wins.** A line
-> stays only if a measurement or a first-party source backs it; everything else is cut.
+> stays only if it has a named basis — a measurement, a first-party source, published research or
+> an established practice; everything else is cut.
 
 ## Why use it
 
@@ -21,7 +22,7 @@ large multi-component codebases developed over months.
 |---|---|
 | Each Claude Code session starts knowing nothing about your project. | A short root `CLAUDE.md` (aimed at 60–90 lines, never over 120): the command that proves the project works, what must never happen, how work is done here, where knowledge lives. Only what a new teammate would have to be told — nothing the model can read from the code. |
 | Harnesses grow until they cost more than they help: copied rulebooks, custom agents, hooks that block mid-write. | No agents, hooks or rulebooks — the commands are user-invoked and cost nothing until typed. The audit mode reports what to cut first, and every line it writes is paid for on every turn, so it writes few. |
-| The agent builds the wrong thing, or says "done" without proof. | A *How we work* block: an interview before code, a spec with your interface copied verbatim, the build in the same session, "done" only with the command and its output, review by risk. Each line rests on a measurement — see [How we work — and why](#how-we-work--and-why). |
+| The agent builds the wrong thing, or says "done" without proof. | A *How we work* block: an interview before code, a spec with your interface copied verbatim, the build in the same session, "done" only with the command and its output, review by risk. Each line has a named basis — see [How we work — and why](#how-we-work--and-why). |
 | Decisions get lost between sessions on a project that runs for months. | Terms go to a glossary, decisions — including ones stated "for later" — to ADRs, and a session reads the ones that touch an area before changing it. |
 | A large repository: one instruction file can't fit every component. | A `CLAUDE.md` inside each component that has its own commands, invariants or contracts; Claude Code loads it only when work touches that directory. Contracts between components sit behind `ask`. |
 | Permission rules that look right and match nothing. | Only the rule forms Claude Code matches; a check at the end of every run prints any rule that is dead, malformed or ignored. |
@@ -85,9 +86,10 @@ flow is a handful of commands that carry its prompts — see [Commands](#command
 | File | What it holds |
 |---|---|
 | `CLAUDE.md` (≤ 120 lines) | Purpose · *Commands* (the whole-repo check) · *Boundaries* (always / ask first / never) · *How we work* · *Project knowledge*. Starts with `@AGENTS.md` where the project keeps one. |
-| `.claude/settings.json` | `deny` for secrets, `.git/`, force-push and hard reset; `ask` for push, rebase and amend; read-only git commands allowed. Tuned to what the project has. |
+| `.claude/settings.json` | `deny` for secrets, `.git/`, force-push and hard reset; `ask` for push, rebase and amend; read-only git commands allowed; auto memory off. Tuned to what the project has. |
 | `<component>/CLAUDE.md` (≤ 60 lines) | Only in a multi-component repository, and only where a component has its own commands, invariants or contracts. |
 | `GLOSSARY.md`, `docs/adr/` | Created on the first real term or decision, never empty. In a project that already keeps decisions, that log stays the home. |
+| `.out-of-scope/`, `docs/research/` | Created when first needed: a "no" later work must remember, and research for a decision still open. |
 
 ## Repository layout
 
@@ -215,6 +217,26 @@ repositories carried no `CLAUDE.md`. Two rigs:
   about +17% cost. In one smoke run outside the planned design, a weaker model kept 8 of 19 checks
   without the rule and 18 of 19 with it. The rule is insurance against one model's habit, not a
   measured gain on the frontier model.
+- **Finished and dropped work leaves no files; a changed decision is marked.** A finished,
+  reviewed spec file goes once every line lives in a test, an ADR, the glossary or the commit message (a spec in a
+  tracker is closed there); work you explicitly drop goes too, with its tests, code and tickets; a
+  replaced ADR gets the status `superseded by NNNN`, and sessions skip ADRs marked deprecated or
+  superseded. Nothing is removed without your confirmation: `/harness:wrap` proposes each removal
+  and commits the work first, so git keeps it. Grounds: once its criteria are tests, a finished
+  spec restates its own oracle and drifts from the code unnoticed — the maintainer's documentation
+  rule puts the oracle before prose, after one live project where 55% of commits touched only
+  Markdown to keep prose in step with code. Nygard's ADR format keeps a reversed decision and marks
+  it superseded; mattpocock-skills offer the same statuses, plus `proposed`, as optional
+  frontmatter, create these files only when there is something to write, and keep rejected
+  requests in `.out-of-scope/`, deleting the file when a rejection is reversed; `_Avoid_` is their
+  glossary format. Their writing guide
+  names the same dynamic for agent instructions: stale layers settle because adding feels safe and
+  removing feels risky. The lab has not measured the effect on sessions.
+- **Auto memory off in the project.** First-party: it is on by default, Claude writes it itself,
+  and a project setting turns it off. Memory written outside review and outside the repository keeps
+  facts the project has revised; mattpocock-skills keep a project's language and decisions in
+  reviewed, versioned files instead — the glossary and ADRs. The lab has not measured the effect. On an existing project, its project facts move into ADRs or `CLAUDE.md`
+  first; a teammate can turn it back on for themselves in `.claude/settings.local.json`.
 - **Review by risk**, against the spec, correctness only, at most three rounds (first-party
   guidance: "a reviewer that's asked to find problems will always find something"). In the lab a
   spec review found issues in 3 of 18 runs, none that changed hidden acceptance.

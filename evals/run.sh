@@ -26,8 +26,10 @@ session() { # id fixture permission-mode prompt
   echo "$w" > "$R/results/$id.ws"
 }
 
+total=0; fails=0
 check() { # id label cond
-  if eval "$3"; then echo "  PASS $1 $2"; else echo "  FAIL $1 $2"; fi
+  total=$((total + 1))
+  if eval "$3"; then echo "  PASS $1 $2"; else echo "  FAIL $1 $2"; fails=$((fails + 1)); fi
 }
 
 run_sessions() {
@@ -35,6 +37,7 @@ run_sessions() {
   echo "== sessions (~10 min): ${ONLY} =="
   # a scenario left out of KIT_SESSIONS is neither run nor checked: its .ws is missing or stale
   ran() { [[ " $ONLY " == *" $1 "* ]]; }
+  ran a1 || ran b1 || ran c1 || { echo "sessions: KIT_SESSIONS names none of a1 b1 c1"; return 2; }
   ran a1 && session a1 greenfield bypassPermissions "set up Claude Code harness in this project. It will be a large project built over several months: an HTTP API, a background worker and a web frontend, Python and TypeScript. Nothing exists yet. I will not be around to answer questions: record them as open and proceed." &
   ran b1 && session b1 monorepo bypassPermissions "set up Claude Code harness in this project. I will not be around to answer questions: record them as open and proceed." &
   ran c1 && session c1 s2-httpping plan "audit my Claude Code harness" &
@@ -68,6 +71,9 @@ run_sessions() {
     check C2 "dead Glob(./**) rule reported" "grep -q 'Glob(./\*\*)' $R/results/c1.txt"
     check C3 "nothing edited" "[ -z \"\$(cd \$(cat $R/results/c1.ws) && git status --porcelain)\" ]"
   fi
+  # the exit code reports the checks, so "exit 0" can't stand in for a run with a FAIL
+  echo "sessions: $([ "$fails" -eq 0 ] && echo PASS || echo FAIL) ($((total - fails))/$total)"
+  [ "$fails" -eq 0 ]
 }
 
 case "$MODE" in

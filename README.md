@@ -170,7 +170,7 @@ They are user-invoked: none of them costs context until you type it.
 | A bug | `/harness:bugfix <the bug>` — a failing test first, then the fix |
 | A raw idea to discuss or challenge first | `/grill-with-docs <the idea>` (mattpocock-skills), then `/harness:task` |
 | A risky change is built | `/harness:check` — a fresh read-only reviewer against the spec, then the fixes (ordinary change: `/code-review`) |
-| End of the session | `/harness:wrap` — decisions into ADRs, terms into the glossary, evidence, commit |
+| End of the session | `/harness:wrap` — decisions and terms not yet written down, evidence, commit |
 | Work too big for one session | `/harness:task` → `/to-spec` → `/to-tickets` → `/harness:wrap`; per ticket `/harness:tests <ticket>`, then `/harness:build <ticket>` in a fresh session |
 | A task finally solved after a long search, or one that keeps coming back | `/harness:skill <what it does>` — a project skill from what the session learned; `/harness:trajectory` after its next run, to cut the wasted steps |
 
@@ -217,6 +217,15 @@ repositories carried no `CLAUDE.md`. Two rigs:
   about +17% cost. In one smoke run outside the planned design, a weaker model kept 8 of 19 checks
   without the rule and 18 of 19 with it. The rule is insurance against one model's habit, not a
   measured gain on the frontier model.
+- **A decision is written when made, with the change that applies it**; the spec carries each
+  decision its interview settled, with why and what it was chosen over, and `/harness:wrap` only
+  catches what was missed. In the measured runs the ADRs were written this way — there was no
+  end-of-session step. Grounds: where ADR practice names a moment, it is before or during the
+  decision (Nygard's and Fowler's `proposed` status, AWS's review before acceptance); spec-driven
+  tools record a task's decisions before code, with the reason and the rejected options (Spec Kit,
+  OpenSpec); mattpocock-skills say "don't batch these up"; Claude Code's docs warn that an
+  instruction given only in conversation may not survive compaction. Whether the moment changes
+  what survives has not been measured.
 - **Finished and dropped work leaves no files; a changed decision is marked.** A finished,
   reviewed spec file goes once every line lives in a test, an ADR, the glossary or the commit message (a spec in a
   tracker is closed there); work you explicitly drop goes too, with its tests, code and tickets; a

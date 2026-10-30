@@ -105,14 +105,15 @@ pk=$(sed -n '/^## Project knowledge/,$p' plugins/harness/skills/harness/template
 for k in 'without my confirmation' 'removed or closed' 'acts only after I confirm' 'commits the work first' \
          'superseded by NNNN' '| never: a changed decision is a new ADR' 'skipping those marked deprecated or superseded' 'finished and reviewed' \
          "once every line of its spec lives in $homes" 'closed there' 'only when I say to drop it' \
-         'code built only for it are removed' 'when I reverse the rejection' 'docs/research/' 'no archive folders'; do
+         'code built only for it are removed' 'when I reverse the rejection' 'docs/research/' 'no archive folders' \
+         'written when made, not at the end of the session' 'committed with the change that applies them'; do
   say "template Project knowledge: '$k'" $(printf '%s' "$pk" | grep -qF -- "$k"; echo $?)
 done
 w=$(flat plugins/harness/skills/wrap/SKILL.md)
 for k in "propose them, don't act yet" 'once its review (if it needs one) is done' 'line by line' "$homes" \
          'not deleted' 'explicitly told you to drop' '"later" is not "drop"' 'any code built only for it' \
          'wontfix' 'deprecated' 'superseded by NNNN' 'After I confirm' 'commit the work, then carry out the closures' \
-         'commit the removals on their own'; do
+         'commit the removals on their own' 'this step only catches the ones that weren'"'"'t'; do
   say "/harness:wrap: '$k'" $(printf '%s' "$w" | grep -qF -- "$k"; echo $?)
 done
 order=$(python3 - <<'PY'

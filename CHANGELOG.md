@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
+## [Unreleased]
+
+### Changed
+- **A decision is written when it is made, not at `/harness:wrap`.** The ADR row of *Project
+  knowledge* said "written in the session where they were made", and among the flow's commands only
+  `/harness:wrap` mentioned ADRs, so a session that settled and built several tasks recorded its
+  decisions at the end — after the code they shaped, in a commit of their own. The row now says
+  written when made, not at the end of the session, and committed with the change that applies
+  them; the spec carries each decision its interview settled, with why and what it was chosen over;
+  `/harness:wrap` step 1 only catches the decisions not yet written and names them. In the measured
+  multi-session runs the ADRs were written this way, with no end-of-session step. `/harness:task`
+  keeps its measured prompt, and the bar for an ADR is unchanged. Grounds are in the README (*How
+  we work — and why*); the moment itself has not been measured.
+
 ## [3.2.0] — 2026-10-29
 
 Project files get a lifecycle. *Project knowledge* becomes a table of where each file lives, what it

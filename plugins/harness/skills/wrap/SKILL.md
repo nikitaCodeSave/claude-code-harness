@@ -1,14 +1,16 @@
 ---
 name: wrap
-description: "End of a session: decisions into ADRs, terms into the glossary, evidence that the work is done, finished or dropped work closed, what is left, and a commit with what and why."
+description: "End of a session: decisions and terms not yet written down, evidence that the work is done, finished or dropped work closed, what is left, and a commit with what and why."
 disable-model-invocation: true
 ---
 
 Wrap up this session's work.
 
-1. **Decisions.** List each decision made in this session that later work must follow, including
-   ones I stated "for later". Write every one not yet in an ADR — in `docs/adr/`, or the decision
-   log `CLAUDE.md` names. A decision that changes an earlier one is a new ADR, and the earlier
+1. **Decisions — catch the ones not yet written.** A decision is written when it is made
+   (*Project knowledge* in `CLAUDE.md`); this step only catches the ones that weren't. List each
+   decision made in this session that later work must follow, including ones I stated "for later".
+   Write every one not yet in an ADR — in `docs/adr/`, or the decision log `CLAUDE.md` names — and
+   name the ones caught only here. A decision that changes an earlier one is a new ADR, and the earlier
    ADR's status becomes `superseded by NNNN`. An ADR that rests on a spec or research note cites it
    by path — git keeps the file after it goes.
 2. **Terms.** Add to `GLOSSARY.md` any domain term used or settled in this session that is missing;

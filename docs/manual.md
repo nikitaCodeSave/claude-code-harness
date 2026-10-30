@@ -122,8 +122,8 @@ it is not done — ask: `Show the command you ran and its output.`
   measured review ran in a separate session; the command uses a fresh subagent for the same
   reason — a reviewer who hasn't seen the reasoning.
 
-**7. `/harness:wrap`.** Decisions into ADRs, new terms into the glossary, the check's output,
-finished or dropped work closed, what is left, and a commit that says what changed and why —
+**7. `/harness:wrap`.** Decisions and terms the session has not yet written down, the check's
+output, finished or dropped work closed, what is left, and a commit that says what changed and why —
 including every file it deletes.
 
 ## A raw idea — discuss it first
@@ -160,8 +160,8 @@ really doesn't fit.
 **1. Settle it, then cut it.** `/harness:task` (or a grilling) settles what is wanted; stop before
 the build. With a tracker, `/to-spec` writes the spec into it from the conversation; without one,
 let the session write `specs/<slug>.md`. Then `/to-tickets` in the same context: vertical slices,
-each sized for one fresh session, with blockers declared. Finish with `/harness:wrap`: every
-decision goes into an ADR before you leave. A decision kept anywhere but an ADR — even as an
+each sized for one fresh session, with blockers declared. Each decision goes into an ADR as it
+settles; finish with `/harness:wrap`, which catches any still missing before you leave. A decision kept anywhere but an ADR — even as an
 out-of-scope note in the spec — can be re-asked in a later session and dropped by an owner who has
 forgotten it.
 
@@ -249,7 +249,8 @@ decisions, not with the first conversation. The harness keeps them in versioned 
 
 - **Terms** → `GLOSSARY.md`, or `GLOSSARY-MAP.md` pointing at one glossary per bounded context.
 - **Decisions** that later work must follow, including ones you mention "for later" → `docs/adr/`,
-  or the decision log the project already keeps, written in the session where they were made.
+  or the decision log the project already keeps, written when made and committed with the change
+  that applies them.
 - **Procedures** the project has solved → project skills in `.claude/skills/`.
 - **Before changing an area**, the session reads the glossary entries and the ADRs that touch it,
   skipping those marked deprecated or superseded.
@@ -265,8 +266,8 @@ decisions, not with the first conversation. The harness keeps them in versioned 
 - **No auto memory.** The settings template turns it off: memory Claude writes itself, outside
   review, keeps facts the project has revised.
 
-`/harness:wrap` writes the terms and decisions and closes finished or dropped work at the end of every
-session.
+`/harness:wrap`, at the end of every session, catches terms and decisions not yet written down and
+closes finished or dropped work.
 
 What was measured: three features in new sessions, with an owner who never repeated earlier
 decisions.
@@ -331,8 +332,8 @@ growing — were not modelled.
 - Sessions ask questions before writing code, about your domain rather than the obvious.
 - A spec exists for every non-trivial change, with your interface in it word for word.
 - Every "done" carries a command and its output.
-- When you state a decision once, an ADR appears in that session, and a later session cites it
-  without being told.
+- When you state a decision once, an ADR appears then, not at the end of the session, and a later
+  session cites it without being told.
 - `specs/` holds only open work, and every ADR a newer one replaced says so in its status.
 - Tasks that recur are project skills, and their runs get shorter.
 - `CLAUDE.md` gets shorter over time, not longer.

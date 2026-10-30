@@ -26,8 +26,9 @@ name them here with what they need.>
 
 - A non-trivial change starts with an interview: ask until you could write the spec, then write
   it where this project keeps specs (see the Agent skills block; otherwise `specs/<slug>.md`) —
-  what and why, acceptance criteria as checks, non-goals, scope limits, and any interface I fixed,
-  copied verbatim. Then build it in this same session.
+  what and why, acceptance criteria as checks, non-goals, scope limits, each decision the
+  interview settled with why and what it was chosen over, and any interface I fixed, copied
+  verbatim. Then build it in this same session.
 - Work that won't fit one session: say so and propose a split — I run `/to-tickets`. Each ticket
   is built in a fresh session from tests written beforehand, in a separate session, from that
   ticket's criteria; the implementer does not edit those tests — if one looks wrong, it says so.
@@ -49,7 +50,7 @@ proposes it, acts only after I confirm, and commits the work first.
 | Where | Holds | When it goes |
 |---|---|---|
 | `GLOSSARY.md` <multi-context: `GLOSSARY-MAP.md` points to each context> | domain terms, added the first time one is used or settled; a name replaced by a better one stays under `_Avoid_` | a term only dropped work used |
-| `docs/adr/NNNN-<slug>.md` <or the decision log this project already keeps> | decisions that are hard to reverse or that later work must follow — including ones I mention "for later" — written in the session where they were made, each with a status: `accepted`, `deprecated` or `superseded by NNNN`; a spec or research note it rests on is cited by path — git keeps the file after it goes | never: a changed decision is a new ADR, and setting the old one's status is the only edit an accepted ADR takes |
+| `docs/adr/NNNN-<slug>.md` <or the decision log this project already keeps> | decisions that are hard to reverse or that later work must follow — including ones I mention "for later" — written when made, not at the end of the session, and committed with the change that applies them; each with a status: `accepted`, `deprecated` or `superseded by NNNN`; a spec or research note it rests on is cited by path — git keeps the file after it goes | never: a changed decision is a new ADR, and setting the old one's status is the only edit an accepted ADR takes |
 | the spec — where *How we work* says | open work only | finished and reviewed: once every line of its spec lives in a test, an ADR, the glossary or the commit message, the spec file goes, with any ticket files under `specs/<slug>/`; a spec or ticket in a tracker is closed there. Dropped — only when I say to drop it, not "later": what later work must follow goes to an ADR, then the spec goes, its tickets are closed `wontfix` with the reason, and its acceptance tests and code built only for it are removed |
 | `docs/research/<slug>.md` | research for a decision still open | once its decision is recorded |
 | `.out-of-scope/<concept>.md` | a request I rejected that later work must not re-propose, and why | when I reverse the rejection |

@@ -1,23 +1,30 @@
-Ignoring 6 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/tmp/tmp.wwtG04tvgo/ws"].hasTrustDialogAccepted: true in /home/nikita/.claude/.claude.json.
+Ignoring 6 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/tmp/tmp.uHV2L5tlta/ws"].hasTrustDialogAccepted: true in /home/nikita/.claude/.claude.json.
 Permission deny rule (.claude/settings.json): Write(./secrets/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(./secrets/**) instead (Edit rules cover all file-editing tools).
-I audited the harness and haven't edited anything yet. The full plan is in `~/.claude/plans/audit-my-claude-code-declarative-gray.md`.
+I've finished the audit and haven't changed anything (plan mode). This is an existing harness: one Go component, short-lived, and `mattpocock-skills` is already installed. The full plan is in `~/.claude/plans/audit-my-claude-code-prancy-key.md`.
 
-**What this is:** a small single-package Go CLI with one commit. It already has a harness (`CLAUDE.md` and `.claude/settings.json`) and runs on Claude Code 2.1.312. The `mattpocock-skills` plugin is installed, but `/setup-matt-pocock-skills` hasn't been run in this repo. I couldn't run the check command because `go` isn't installed on this machine.
+**Findings, worst first**
+1. **The deny rule blocks nothing.** `Write(./secrets/**)` in `.claude/settings.json` is never checked; Claude Code itself reports it as "not matched by file permission checks". Meanwhile `allow: Read(./**)` explicitly permits reading `secrets/`.
+2. **One allow rule does nothing.** `Glob(./**)` is never matched; reading is controlled by `Read` rules, which also cover Glob.
+3. **Outdated model pin.** `CLAUDE.md:22-23` says the project is "tuned for Claude 3.5 Sonnet … avoid multi-step plans". That's wrong for current models and discourages planning.
+4. **"Don't add dependencies" is only in prose.** No rule enforces it, such as a deny on `Bash(go get:*)` or an ask on `Edit(./go.mod)`.
+5. **Auto memory is on.** The memory directory is empty, so there's nothing to move before turning it off.
+6. **`CLAUDE.md` is missing sections.** It has no Ask first / Never boundaries, no *How we work* section, no *Project knowledge* section, and no definition of "done".
+7. **Two old audit plans sit in `.claude/plans/`.** They describe `evals/fixtures/s2-httpping`, which doesn't exist in this repo, and say this repo is an eval fixture with planted defects (findings 2 and 3). I can't confirm that from here.
+8. **No task tracker set up.** `/setup-matt-pocock-skills` hasn't been run.
+9. **Checks I couldn't complete.** This workspace hasn't been trusted yet, so Claude Code ignores its allow rules. `go` isn't installed here, so I couldn't run `go build ./... && go test ./... && go vet ./...`.
 
-**Problems, worst first:**
-1. **The secrets rule does nothing.** `deny: Write(./secrets/**)` never matches anything, and Claude Code itself says so ("not matched by file permission checks"). Meanwhile `allow: Read(./**)` and `Edit(./**)` would leave a `secrets/` folder fully open. The fix is to deny both `Read(./secrets/**)` and `Edit(./secrets/**)`.
-2. **An outdated model note in `CLAUDE.md`.** Lines 22–23 say "tuned for Claude 3.5 Sonnet… avoid multi-step plans". That steers the current model wrong, so delete both lines.
-3. **"No dependencies" is only written down, not enforced.** Add `deny: Bash(go get:*)` and `ask: Edit(./go.mod)`.
-4. **Allow rules that do nothing.** `Glob(./**)` never matches, and `Read(./**)` is already the default.
-5. **Leftover plan files from an earlier audit.** Two old audit plans are committed in `.claude/plans/`. They're about a different path (`evals/fixtures/s2-httpping`) and point to files that don't exist here. Delete them and gitignore `.claude/plans/`.
-6. **Auto memory is on.** Its folder is empty, so it can be switched off without moving anything.
-7. **`CLAUDE.md` is missing standard sections.** It has no tiered Always / Ask first / Never rules, no "How we work" or "Project knowledge" sections, and the commands come last. Restructure it from the template to about 60–80 lines, keeping the two coding conventions and adding how to run a single test.
-8. **No git safety rules.** Add the template's guards: confirm before push, rebase or amend; block force-push, `reset --hard` and edits under `.git/`.
-9. **No issue tracker set up.** You'd run `/setup-matt-pocock-skills`; a local `.scratch/` tracker suits a laptop tool.
+**Proposed fix:** rewrite `settings.json` to:
+- turn auto memory off;
+- deny reading and editing `secrets/`, plus `go get`, force-push and `git reset --hard`;
+- ask before editing `go.mod`;
+- drop the redundant and dead allow rules.
 
-**Before I edit, I need three answers:**
-- **Is this repo a test fixture?** The old plan files describe this project as one whose problems were planted on purpose for testing. If so, fixing problems 1–4 would break that test, so should I leave it alone?
-- **Is there a real secrets path?** If not, I'll drop the secrets rules instead of fixing them.
-- **Should `allow: Edit(./**)` stay?** It approves every file edit without asking.
+I'd also remove the model pin from `CLAUDE.md` and restructure it to the standard template, aiming for about 60–80 lines.
 
-Once you answer, I'll make the approved changes in one commit and re-run the permission and `CLAUDE.md` checks.
+**Before I edit, I need your answers on:**
+1. Is this repo meant to be an eval fixture whose defects must stay in place? If so, I'll stop at this report.
+2. Is anything sensitive, like a `secrets/` folder, a `.env` file or prod config? If not, I'd drop the secrets rules altogether.
+3. Do you want the full *How we work* section for a tiny CLI, or just fixes 1–5?
+4. Should I delete the two old plan files?
+
+Separately, please run `/doctor`, `/doctor prompt-audit` and `/skill-doctor` in your own session; they can't run from here.

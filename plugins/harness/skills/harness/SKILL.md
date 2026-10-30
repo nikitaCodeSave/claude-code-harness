@@ -1,6 +1,6 @@
 ---
 name: harness
-description: "Use when setting up, bringing in, or tidying the Claude Code harness of a project — root CLAUDE.md, .claude/settings.json, per-component CLAUDE.md files and the project knowledge layer — for a new project or an existing one, including large multi-component and long-lived codebases. Activates on 'set up Claude Code harness in this project', 'set up Claude Code here', 'bring this project into the harness', 'onboard this repo for Claude Code', 'audit my Claude Code harness'. Skip for questions about building agents in other frameworks."
+description: "Use when setting up, bringing in, auditing or tidying the Claude Code harness of a project — root CLAUDE.md, .claude/settings.json, per-component CLAUDE.md files and the project knowledge layer — for a new project or an existing one, including large multi-component and long-lived codebases. Skip for questions about building agents in other frameworks."
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(ls:*), Bash(find:*), Bash(wc:*), Bash(cat:*), Bash(git log:*), Bash(git status:*), Bash(git rev-parse:*), Bash(git shortlog:*), Bash(claude --version), Bash(claude --print:*), Bash(claude plugin list:*)
 ---
 

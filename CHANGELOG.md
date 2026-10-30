@@ -8,7 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versions up to and including 1.12.2 were released from the maintainer's `dot-claude`
 practice layer, before the kit was extracted into this standalone repository.
 
-## [Unreleased]
+## [3.3.0] — 2026-10-30
+
+A decision is written when it is made, with the change that applies it; `/harness:wrap` only
+catches what was missed. The plugin's descriptions name the flow's commands.
 
 ### Changed
 - **A decision is written when it is made, not at `/harness:wrap`.** The ADR row of *Project
@@ -21,6 +24,17 @@ practice layer, before the kit was extracted into this standalone repository.
   multi-session runs the ADRs were written this way, with no end-of-session step. `/harness:task`
   keeps its measured prompt, and the bar for an ADR is unchanged. Grounds are in the README (*How
   we work — and why*); the moment itself has not been measured.
+- **The setup skill's description drops its list of trigger phrases** and names auditing among the
+  uses it covers. The skill listing shares a budget of about 1% of the context window, and the
+  phrases repeated what "setting up, bringing in, auditing or tidying the Claude Code harness"
+  already says. With the shorter description the session evals still invoke the skill on both
+  "set up Claude Code harness in this project" and "audit my Claude Code harness", and scenarios A
+  and C pass (one run each).
+
+### Fixed
+- **The plugin and marketplace descriptions name the flow's commands.** Since 3.1.0 they said "no
+  agents, commands or hooks" while the plugin ships the user-invoked `/harness:*` commands; they
+  now say one setup skill with three templates, the flow's commands, no agents or hooks.
 
 ## [3.2.0] — 2026-10-29
 

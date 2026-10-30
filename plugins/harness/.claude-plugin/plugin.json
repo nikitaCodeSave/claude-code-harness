@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "harness",
-  "version": "3.2.0",
-  "description": "Sets up and keeps lean the Claude Code harness of a project — root CLAUDE.md, settings.json, per-component CLAUDE.md and the project knowledge layer — for new and existing projects, including large multi-component, long-lived codebases. One skill and three templates; no agents, commands or hooks.",
+  "version": "3.3.0",
+  "description": "Sets up and keeps lean the Claude Code harness of a project — root CLAUDE.md, settings.json, per-component CLAUDE.md and the project knowledge layer — for new and existing projects, including large multi-component, long-lived codebases. One setup skill with three templates, and the flow's user-invoked commands; no agents or hooks.",
   "author": {
     "name": "nikitaCodeSave",
     "email": "nickbalakirev@gmail.com"

@@ -12,7 +12,7 @@
     {
       "name": "harness",
       "source": "./plugins/harness",
-      "description": "Sets up and keeps lean the Claude Code harness of a project — root CLAUDE.md, settings.json, per-component CLAUDE.md and the project knowledge layer — for new and existing projects, including large multi-component, long-lived codebases. One skill and three templates; no agents, commands or hooks.",
+      "description": "Sets up and keeps lean the Claude Code harness of a project — root CLAUDE.md, settings.json, per-component CLAUDE.md and the project knowledge layer — for new and existing projects, including large multi-component, long-lived codebases. One setup skill with three templates, and the flow's user-invoked commands; no agents or hooks.",
       "category": "workflow",
       "keywords": [
         "claude-code",
